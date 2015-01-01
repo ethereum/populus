@@ -1,9 +1,15 @@
 import pytest
 
+from solc import compile_files
+
+
 from populus.migrations.migration import (
     get_migration_classes_for_execution,
 )
 from populus.project import Project
+from populus.compilation import find_project_contracts
+from populus.utils.filesystem import recursive_find_files
+
 
 CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
 CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
@@ -18,11 +24,38 @@ def project(request):
     contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
     mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
     project = Project()
+
+
+    base_tests_dir = os.path.dirname(__file__)
+
+    solidity_source_files = recursive_find_files(base_tests_dir, 'Test*.sol')
+    compiled_contracts = compile_files(solidity_source_files)
+    for contract_name, contract_data in compiled_contracts.items():
+        project.compiled_contracts.setdefault(contract_name, contract_data)
+
+    return project
+
     project.fill_contracts_cache(contracts, mtime)
     request.config.cache.set(CACHE_KEY_CONTRACTS, project.compiled_contracts)
     request.config.cache.set(CACHE_KEY_MTIME, project.get_source_modification_time())
 
     return project
+
+
+@pytest.fixture(scope="session", autouse=True)
+def test_contracts(project):
+    base_tests_dir = os.path.join(project.project_dir, 'tests')
+
+    test_source_files = [
+        os.path.relpath(source_path, project.project_dir)
+        for source_path in recursive_find_files(base_tests_dir, 'Test*.sol')
+    ]
+    all_source_files = test_source_files + list(find_project_contracts(
+        project.project_dir, project.contracts_dir,
+    ))
+    compiled_contracts = compile_files(all_source_files)
+    for contract_name, contract_data in compiled_contracts.items():
+        project.compiled_contracts.setdefault(contract_name, contract_data)
 
 
 @pytest.yield_fixture()

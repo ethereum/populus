@@ -9,7 +9,7 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 
-version = '0.1.1'
+version = '0.1.2'
 
 readme = open(os.path.join(DIR, 'README.md')).read()
 
@@ -33,6 +33,7 @@ setup(
         # Until https://github.com/ConsenSys/eth-testrpc/pull/16 is merged and
         # released.
         # "eth-testrpc>=0.1.15",
+        "pytest==2.7.2",
     ],
     dependency_links=[
         # Until https://github.com/ConsenSys/eth-testrpc/pull/16 is merged and

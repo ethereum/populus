@@ -14,4 +14,6 @@ Ethereum Development Framework
 
 ## Features
 
-TODO
+- compilation (limited to solidity right now).
+- deployment
+- testing (using pytest) (not working quite yet)

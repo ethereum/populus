@@ -187,7 +187,7 @@ def Contract(client, contract_name, contract):
 
         if signature_item['name'] in _dict:
             # TODO: handle namespace conflicts
-            raise ValueError("About to overwrite a function signature for duplicate function name {0}".format(signature_item['name']))
+            raise ValueError("About to overwrite a function signature for duplicate function name {0}".format(signature_item['name']))  # NOQA
 
         if signature_item['type'] == 'function':
             # make sure we're not overwriting a signature

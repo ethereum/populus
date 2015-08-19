@@ -48,7 +48,7 @@ def deploy():
     for name, info in deployed_contracts.items():
         click.echo("{name} @ {addr} via txn:{txn_hash}".format(
             name=name.ljust(name_padding),
-            addr=info.get('addr', '<pending>').ljust(42),
+            addr=(info.get('addr') or '<pending>').ljust(42),
             txn_hash=info['txn'].ljust(66),
         ))
 

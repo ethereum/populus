@@ -31,19 +31,18 @@ def compile():
 
         compiled_sources.update(utils._compile_rich(compiler, source_code))
 
-    click.echo(compiled_sources)
     utils.write_compiled_sources(os.getcwd(), compiled_sources)
 
 
 @main.command()
 def deploy():
     """
-    Deploy contract(s).
+    Deploy contracts.
     """
     contracts = utils.load_contracts(os.getcwd())
     client = Client('127.0.0.1', '8545')
 
-    deployed_contracts = utils.deployed_contracts(client, contracts)
+    deployed_contracts = utils.deploy_contracts(client, contracts)
 
     name_padding = max(len(n) + 1 for n in deployed_contracts.keys())
     for name, info in deployed_contracts.items():
@@ -52,3 +51,12 @@ def deploy():
             addr=info.get('addr', '<pending>').ljust(42),
             txn_hash=info['txn'].ljust(66),
         ))
+
+
+@main.command()
+def test():
+    """
+    Test contracts (wrapper around py-test)
+    """
+    import pytest
+    pytest.main(os.path.join(os.getcwd(), 'tests'))

@@ -28,6 +28,14 @@ populus.contracts module
     :undoc-members:
     :show-inheritance:
 
+populus.plugin module
+---------------------
+
+.. automodule:: populus.plugin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 populus.utils module
 --------------------
 

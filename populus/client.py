@@ -93,8 +93,7 @@ class Client(object):
             get_transaction_params(_from, to, gas, gas_price, value, data),
             block,
         ]
-        response = self.make_rpc_request("eth_call", [params, block])
-        import ipdb; ipdb.set_trace()
+        response = self.make_rpc_request("eth_call", params)
         return response['result']
 
     def send_transaction(self, _from=None, to=None, gas=None, gas_price=None,

@@ -25,13 +25,29 @@ setup(
     include_package_data=True,
     py_modules=['populus'],
     install_requires=[
+        "click>=5.0",
+        # Until https://github.com/ethereum/ethash/issues/72 is resolved
+        # "ethash>=23.1",
+        "ethereum>=0.9.73",
+        "requests>=2.7.0",
+        # Until https://github.com/ConsenSys/eth-testrpc/pull/16 is merged and
+        # released.
+        # "eth-testrpc>=0.1.15",
+    ],
+    dependency_links=[
+        # Until https://github.com/ConsenSys/eth-testrpc/pull/16 is merged and
+        # released.
+        "https://github.com/pipermerriam/eth-testrpc/archive/v0.1.15b.tar.gz",
+        # Until https://github.com/ethereum/ethash/issues/72 is resolved
+        "https://github.com/ethereum/ethash/archive/v23.1.tar.gz",
     ],
     license="MIT",
     zip_safe=False,
     entry_points={
         'console_scripts': ["populus=populus.cli:main"],
+        'pytest11': ['ethereum=populus.plugin'],
     },
-    keywords='ethereum',
+    keywords='ethereum pytest',
     packages=find_packages(exclude=["tests", "tests.*"]),
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

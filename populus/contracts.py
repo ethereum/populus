@@ -1,16 +1,5 @@
 from ethereum import utils as ethereum_utils
-from ethereum.abi import encode_abi
-
-
-class ContractBase(object):
-    def __init__(self, address):
-        self.address = address
-
-    @classmethod
-    def deploy(cls, client, _from=None, gas=None, gas_price=None, value=None):
-        return client.send_transaction(
-            _from, gas, gas_price, value, data=cls.code,
-        )
+from ethereum import abi
 
 
 class BoundFunction(object):
@@ -29,7 +18,7 @@ class BoundFunction(object):
         data = self.function.get_call_data(args)
 
         return self.client.send_transaction(
-            _from=kwargs['from'],
+            _from=kwargs['_from'],
             to=self.address,
             data=data,
         )
@@ -37,7 +26,40 @@ class BoundFunction(object):
     def call(self, *args, **kwargs):
         data = self.function.get_call_data(args)
 
-        return self.client.call(to=self.address, data=data, **kwargs)
+        output = self.client.call(to=self.address, data=data, **kwargs)
+        return self.function.cast_return_data(output)
+
+
+def decode_single(typ, data):
+    base, sub, _ = abi.process_type(typ)
+
+    if sub != '256':
+        raise NotImplementedError('havent gotten to this, {0}'.format((base, sub, _)))
+
+    if base == 'address':
+        raise NotImplementedError('havent gotten to this')
+        # return encode_hex(data[12:])
+    elif base == 'string' or base == 'bytes' or base == 'hash':
+        raise NotImplementedError('havent gotten to this')
+        # return data[:int(sub)] if len(sub) else data
+    elif base == 'uint':
+        return int(data, 16)
+    elif base == 'int':
+        o = int(data, 16)
+        return (o - 2 ** int(sub)) if o >= 2 ** (int(sub) - 1) else o
+    elif base == 'ureal':
+        raise NotImplementedError('havent gotten to this')
+        high, low = [int(x) for x in sub.split('x')]
+        # return big_endian_to_int(data) * 1.0 / 2 ** low
+    elif base == 'real':
+        raise NotImplementedError('havent gotten to this')
+        high, low = [int(x) for x in sub.split('x')]
+        # return (big_endian_to_int(data) * 1.0 / 2 ** low) % 2 ** high
+    elif base == 'bool':
+        raise NotImplementedError('havent gotten to this')
+        # return bool(int(data.encode('hex'), 16))
+    else:
+        raise ValueError("Unknown base: `{0}`".format(base))
 
 
 class Function(object):
@@ -50,7 +72,9 @@ class Function(object):
     def __str__(self):
         signature = "{func_name}({arg_types})".format(
             func_name=self.name,
-            arg_types=', '.join("{0} {1}".format(*i) for i in self.inputs)
+            arg_types=', '.join(
+                "{0} {1}".format(i['type'], i['name']) for i in self.inputs
+            )
         )
         return signature
 
@@ -60,7 +84,16 @@ class Function(object):
         Iterable of the types this function takes.
         """
         if self.inputs:
-            return zip(*self.inputs)[0]
+            return [i['type'] for i in self.inputs]
+        return []
+
+    @property
+    def output_types(self):
+        """
+        Iterable of the types this function takes.
+        """
+        if self.outputs:
+            return [i['type'] for i in self.outputs]
         return []
 
     @property
@@ -74,21 +107,36 @@ class Function(object):
         )
         return ethereum_utils.big_endian_to_int(ethereum_utils.sha3(signature)[:4])
 
+    @property
+    def encoded_abi_function_signature(self):
+        return ethereum_utils.zpad(ethereum_utils.encode_int(self.abi_function_signature), 4)
+
     def abi_args_signature(self, args):
         """
         Given the calling `args` for the function call, abi encode them.
         """
-        return encode_abi(self.input_types, args)
+        return abi.encode_abi(self.input_types, args)
 
     def get_call_data(self, args):
         """
         TODO: this needs tests.
         """
-        prefix = ethereum_utils.zpad(ethereum_utils.encode_int(self.abi_function_signature), 4)
-        suffix = ethereum_utils.encode_hex(self.abi_args_signature(args))
-        return "{0}{1}".format(prefix, suffix)
+        prefix = self.encoded_abi_function_signature
+        suffix = self.abi_args_signature(args)
+        data = "{0}{1}".format(prefix, suffix)
+        return ethereum_utils.encode_hex(data)
+
+    def cast_return_data(self, outputs):
+        if len(self.output_types) != 1:
+            raise ValueError('Dont know how to deal with multiple outputs yet')
+        output_type = self.output_types[0]
+
+        return decode_single(output_type, outputs)
 
     def __get__(self, obj, type=None):
+        if obj is None:
+            # TODO: this is sorta odd behavior.
+            return self
         bound_function = BoundFunction(
             function=self,
             client=obj.client,
@@ -106,23 +154,39 @@ class Event(object):
         assert False, "Not implemented"
 
 
+class ContractBase(object):
+    def __init__(self, address):
+        self.address = address
+
+    def __str__(self):
+        return "{name}({address})".format(name=self.__class__.__name__, address=self.address)
+
+    @classmethod
+    def deploy(cls, _from=None, gas=None, gas_price=None, value=None):
+        return cls.client.send_transaction(
+            _from, gas, gas_price, value, data=cls.code,
+        )
+
+
 def Contract(client, contract_name, contract):
-    abi = contract['info']['abiDefinition']
+    _abi = contract['info']['abiDefinition']
     _dict = {
         'client': client,
         'code': contract['code'],
-        'abi': abi,
+        'source': contract['info']['source'],
+        'abi': _abi,
     }
 
     functions = []
     events = []
 
-    for signature_item in abi:
+    for signature_item in _abi:
         if signature_item['type'] == 'constructor':
             # Constructors don't need to be part of a contract's methods
             continue
 
         if signature_item['name'] in _dict:
+            # TODO: handle namespace conflicts
             raise ValueError("About to overwrite a function signature for duplicate function name {0}".format(signature_item['name']))
 
         if signature_item['type'] == 'function':
@@ -159,4 +223,4 @@ def Contract(client, contract_name, contract):
 
     _dict['__doc__'] = docstring
 
-    return type(contract_name, (ContractBase,), _dict)
+    return type(str(contract_name), (ContractBase,), _dict)

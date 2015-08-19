@@ -9,7 +9,7 @@ def eth_tester():
     return tester
 
 
-@pytest.yield_fixture(scope="session")
+@pytest.yield_fixture()
 def rpc_server():
     from testrpc.__main__ import create_server
     from testrpc.testrpc import evm_reset

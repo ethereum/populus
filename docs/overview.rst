@@ -13,6 +13,19 @@ install ``populus``
 
    $ pip install populus
 
+Populus has two dependencies that cannot be bundled with the package until
+upstream changes are merged into the respective repositories.  You can install
+these dependencies directly with the following commands.
+
+.. code-block:: shell
+
+    $ pip install https://github.com/pipermerriam/eth-testrpc/archive/v0.1.15b.tar.gz
+    $ pip install https://github.com/ethereum/ethash/archive/v23.1.tar.gz
+
+See https://github.com/ConsenSys/eth-testrpc/pull/16 and
+https://github.com/ethereum/ethash/issues/72 for detailed information on the
+upstream changes that these two direct installs address.
+
 
 Project Layout
 --------------

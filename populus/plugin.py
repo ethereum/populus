@@ -50,7 +50,7 @@ def module_rpc_server():
 
 @pytest.fixture(scope="session")
 def rpc_client():
-    from populus.client import Client
+    from eth_rpc_client import Client
     client = Client('127.0.0.1', '8545')
     return client
 

@@ -1,6 +1,7 @@
 import pytest
 
-from populus.client import Client
+from eth_rpc_client import Client
+
 from populus.contracts import Contract
 
 from ethereum.abi import ContractTranslator

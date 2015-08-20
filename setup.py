@@ -33,7 +33,8 @@ setup(
         # Until https://github.com/ConsenSys/eth-testrpc/pull/16 is merged and
         # released.
         # "eth-testrpc>=0.1.15",
-        "pytest==2.7.2",
+        "pytest>=2.7.2",
+        "ethereum-rpc-client>=0.1.0",
     ],
     dependency_links=[
         # Until https://github.com/ConsenSys/eth-testrpc/pull/16 is merged and

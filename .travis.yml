@@ -2,19 +2,17 @@ language: python
 python:
   - "2.7"
 env:
-  global:
-    - PIP_DOWNLOAD_CACHE=$HOME/.pip_cache
   matrix:
     - TOX_ENV=py27
     - TOX_ENV=flake8
 cache:
   directories:
-    - $HOME/.pip-cache/
+    - $HOME/.cache/pip
 install:
-  - 'sudo add-apt-repository ppa:ethereum/ethereum-qt'
-  - 'sudo add-apt-repository ppa:ethereum/ethereum'
-  - 'sudo apt-get update'
-  - 'sudo apt-get install cpp-ethereum'
+  - 'sudo add-apt-repository ppa:ethereum/ethereum-qt -y'
+  - 'sudo add-apt-repository ppa:ethereum/ethereum -y'
+  - 'sudo apt-get update -y'
+  - 'sudo apt-get install cpp-ethereum -y'
   - 'travis_retry pip install setuptools --upgrade'
   - 'travis_retry pip install tox'
 script:

@@ -1,7 +1,13 @@
+0.1.4
+-----
+
+- Fix broken import in `cli` module.
+
 0.1.3
 -----
 
-- Remove the local RPC client in favor of using https://github.com/pipermerriam/ethereum-rpc-client
+- Remove the local RPC client in favor of using
+  https://github.com/pipermerriam/ethereum-rpc-client
 
 0.1.2
 -----

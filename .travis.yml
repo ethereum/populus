@@ -11,8 +11,8 @@ cache:
   directories:
     - $HOME/.pip-cache/
 install:
-  - "travis_retry pip install setuptools --upgrade"
-  - "travis_retry pip install tox"
+  - 'travis_retry pip install setuptools --upgrade'
+  - 'travis_retry pip install tox'
 script:
   - tox -e $TOX_ENV
 after_script:

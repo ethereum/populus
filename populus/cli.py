@@ -3,7 +3,7 @@ import os
 import click
 
 from populus import utils
-from populus.client import Client
+from eth_rpc_client import Client
 
 
 @click.group()

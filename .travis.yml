@@ -11,6 +11,10 @@ cache:
   directories:
     - $HOME/.pip-cache/
 install:
+  - 'sudo add-apt-repository ppa:ethereum/ethereum-qt'
+  - 'sudo add-apt-repository ppa:ethereum/ethereum'
+  - 'sudo apt-get update'
+  - 'sudo apt-get install cpp-ethereum'
   - 'travis_retry pip install setuptools --upgrade'
   - 'travis_retry pip install tox'
 script:

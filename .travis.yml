@@ -1,18 +1,24 @@
 language: python
+sudo: false
 python:
   - "2.7"
 env:
   matrix:
     - TOX_ENV=py27
     - TOX_ENV=flake8
+addons:
+  apt:
+    sources:
+      - deadsnakes
+      - ubuntu-toolchain-r-test
+      - ppa:ethereum/ethereum-qt
+      - ppa:ethereum/ethereum
+    packages:
+      - cpp-ethereum
 cache:
   directories:
     - $HOME/.cache/pip
 install:
-  - 'sudo add-apt-repository ppa:ethereum/ethereum-qt -y'
-  - 'sudo add-apt-repository ppa:ethereum/ethereum -y'
-  - 'sudo apt-get update -y'
-  - 'sudo apt-get install cpp-ethereum -y'
   - 'travis_retry pip install setuptools --upgrade'
   - 'travis_retry pip install tox'
 script:

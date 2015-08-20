@@ -1,10 +1,10 @@
 import os
-from populus.utils import get_contract_files
+from populus.utils import find_project_contracts
 
 
 def test_gets_correct_files():
     project_dir = "tests/utility/projects/test-01/"
-    file_names = get_contract_files(project_dir)
+    file_names = find_project_contracts(project_dir)
 
     should_match = {
         'MutanContract.mu',

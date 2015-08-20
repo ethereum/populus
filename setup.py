@@ -35,6 +35,7 @@ setup(
         # "eth-testrpc>=0.1.15",
         "pytest>=2.7.2",
         "ethereum-rpc-client>=0.1.0",
+        "watchdog==0.8.3",
     ],
     dependency_links=[
         # Until https://github.com/ConsenSys/eth-testrpc/pull/16 is merged and

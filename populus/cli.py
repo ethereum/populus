@@ -3,6 +3,7 @@ import os
 import click
 
 from populus import utils
+from populus.compilation import compile_and_write_contracts
 from eth_rpc_client import Client
 
 
@@ -17,21 +18,8 @@ def compile():
     Compile contracts.
     """
     click.echo('Compiling!')
-    contract_source_paths = utils.get_contract_files(os.getcwd())
-
-    compiled_sources = {}
-
-    for source_path in contract_source_paths:
-        try:
-            compiler = utils.get_compiler_for_file(source_path)
-        except ValueError:
-            raise click.ClickException("No compiler available for {0}".format(source_path))
-        with open(source_path) as source_file:
-            source_code = source_file.read()
-
-        compiled_sources.update(utils._compile_rich(compiler, source_code))
-
-    utils.write_compiled_sources(os.getcwd(), compiled_sources)
+    project_dir = os.getcwd()
+    compiled_sources = compile_and_write_contracts(project_dir)
 
 
 @main.command()
@@ -60,3 +48,49 @@ def test():
     """
     import pytest
     pytest.main(os.path.join(os.getcwd(), 'tests'))
+
+
+import time
+from watchdog.observers.polling import (
+    PollingObserver,
+)
+from watchdog.events import FileSystemEventHandler
+
+
+class ContractChangedEventHandler(FileSystemEventHandler):
+    """
+    > http://pythonhosted.org/watchdog/api.html#watchdog.events.FileSystemEventHandler
+    """
+    def __init__(self, *args, **kwargs):
+        self.project_dir = kwargs.pop('project_dir')
+
+    def on_any_event(self, event):
+        click.echo("============ Detected Change ==============")
+        click.echo("> {0} => {1}".format(event.event_type, event.src_path))
+        click.echo("> recompiling...")
+        compile_and_write_contracts(self.project_dir)
+        click.echo("> watching...")
+
+
+@main.command()
+def watch():
+    project_dir = os.getcwd()
+
+    # Do initial compilation
+    compile_and_write_contracts(project_dir)
+
+    # The path to watch
+    watch_path = utils.get_contracts_dir(project_dir)
+
+    click.echo("============ Watching ==============")
+
+    event_handler = ContractChangedEventHandler(project_dir=project_dir)
+    observer = PollingObserver()
+    observer.schedule(event_handler, watch_path, recursive=True)
+    observer.start()
+    try:
+        while observer.is_alive():
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()

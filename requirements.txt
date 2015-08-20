@@ -6,3 +6,4 @@ https://github.com/ethereum/ethash/archive/v23.1.tar.gz
 https://github.com/pipermerriam/eth-testrpc/archive/v0.1.15b.tar.gz
 pytest>=2.7.2
 requests>=2.7.0
+watchdog==0.8.3

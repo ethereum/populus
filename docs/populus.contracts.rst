@@ -61,6 +61,12 @@ The JSON RPC client this contract will use.
 The contract ABI.
 
 
+``ContractClass.get_balance(block="latest")``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Returns contract balance in wei as an integer.
+
+
 ``populus.contracts.Function(name, inputs, outputs=None, constant=False):``
 ---------------------------------------------------------------------------
 

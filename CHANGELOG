@@ -1,3 +1,12 @@
+0.2.0
+-----
+
+- Update to `pypi` version of `eth-testrpc`
+- Add new watch command which observes the project contracts and recompiles
+  them when they change.
+- Improved shell output for compile command.
+- Re-organized portions of the `utils` module into a new `compilation` module.
+
 0.1.4
 -----
 

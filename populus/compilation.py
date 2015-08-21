@@ -13,7 +13,6 @@ from populus.utils import (
 )
 
 
-
 def find_project_contracts(project_dir):
     contracts_dir = get_contracts_dir(project_dir)
     # TODO: support non-solidity based contract compilation.

@@ -20,10 +20,14 @@ def compile():
     """
     Compile contracts.
     """
-    click.echo("============ Compiling ==============")
     project_dir = os.getcwd()
+
+    click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
-    contract_source_paths, compiled_sources, output_file_path = compile_and_write_contracts(project_dir)
+
+    result = compile_and_write_contracts(project_dir)
+    contract_source_paths, compiled_sources, output_file_path = result
+
     click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
     for path in contract_source_paths:
         click.echo("- {0}".format(os.path.basename(path)))

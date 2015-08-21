@@ -1,7 +1,7 @@
 contract owned {
         address owner;
 
-        function owned() {
+        function Owned() {
                 owner = msg.sender;
         }
 }

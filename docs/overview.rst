@@ -59,14 +59,70 @@ Command Line Options
       compile  Compile contracts.
       deploy   Deploy contracts.
       test     Test contracts (wrapper around py-test)
-      watch    Watch the project contracts directory and...
 
 
-``compile``
-~~~~~~~~~~~
+Compile
+~~~~~~~
 
 Running ``$ populus compile`` will compile all of the contracts found in the
 project.  The compiled projects are stored in ``./build/contracts.json``.
+
+.. code-block:: shell
+
+    $ populus compile
+    ============ Compiling ==============
+    > Loading contracts from: /var/projects/my-project/contracts
+    > Found 2 contract source files
+    - mortal.sol
+    - owned.sol
+
+    > Compiled 3 contracts
+    - Immortal
+    - Mortal
+    - owned
+
+    > Outfile: /var/projects/my-project/build/contracts.json
+
+
+If you only want to build a sub-set of your contracts you can specify paths to source files, or the names of contracts in source files, or a combination of the two separated by a ``:``.
+
+* ``$ populus compile Example`` - compiles all contracts named Example.
+* ``$ populus compile contracts/Example.sol`` - compiles all contracts in the
+  specified file.
+* ``$ populus compile contracts/Example.sol:Example`` - compiles all contracts
+  named Example in in the specified file.
+
+
+Additionally, you can pass in ``--watch`` to have Populus watch your contract
+source files and automatically rebuild them when those files change.
+
+.. code-block:: shell
+
+    $ populus compile --watch
+    ============ Compiling ==============
+    > Loading contracts from: /var/projects/my-project/contracts
+    > Found 2 contract source files
+    - mortal.sol
+    - owned.sol
+
+    > Compiled 3 contracts
+    - Immortal
+    - Mortal
+    - owned
+
+    > Outfile: /var/projects/my-project/build/contracts.json
+    ============ Watching ==============
+    
+    # Then you save a file....
+
+    ============ Detected Change ==============
+    > modified => /var/projects/my-project/contracts/mortal.sol
+    > recompiling...
+    > watching...
+
+
+Output is serialized as ``JSON`` and written to ``build/contracts.json``
+relative to the root of your project.
 
 .. code-block:: javascript
 
@@ -95,8 +151,8 @@ project.  The compiled projects are stored in ``./build/contracts.json``.
     Populus currently only supports compilation of Solidity contracts.
 
 
-deploy``
-~~~~~~~~~~
+Deploy
+~~~~~~
 
 
 Running ``$ populus deploy`` will deploy all compiled contracts found in
@@ -113,8 +169,8 @@ address for the transaction.
     Example    : addr: 0xc305c901078781c232a2a521c2af7980f8385ee9 via txn:0xbba0f1cc96adb3c31a14bd5271d9a8c82b6aa1ddac2c7161bcb52ef6f3b9f813
 
 
-``test``
-~~~~~~~~~~
+Test
+~~~~
 
 
 Running ``$ populus test`` will run all of the tests found in the ``./tests``
@@ -135,23 +191,3 @@ directory of your project using the compiled contracts currently found in the
     tests/test_example.py::test_contract_function_return_values PASSED
 
     ================================ 2 passed in 0.82 seconds =================================
-
-
-``watch``
-~~~~~~~~~~
-
-
-Running ``$ populus watch`` will watch the ``./contracts`` directory of your
-project and recompile all contracts when any of your contracts change.
-
-
-.. code-block:: shell
-
-    ============ Watching ==============
-    
-    # Then you save a file....
-
-    ============ Detected Change ==============
-    > modified => /Users/pipermerriam/Sites/populus/tmp/contracts/Example.sol
-    > recompiling...
-    > watching...

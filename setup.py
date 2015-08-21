@@ -36,9 +36,6 @@ setup(
         "watchdog==0.8.3",
     ],
     dependency_links=[
-        # Until https://github.com/ConsenSys/eth-testrpc/pull/16 is merged and
-        # released.
-        "https://github.com/pipermerriam/eth-testrpc/archive/v0.1.15b.tar.gz",
         # Until https://github.com/ethereum/ethash/issues/72 is resolved
         "https://github.com/ethereum/ethash/archive/v23.1.tar.gz",
     ],

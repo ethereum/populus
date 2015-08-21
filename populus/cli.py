@@ -1,13 +1,38 @@
 import os
+import time
+
+import pytest
 
 import click
+
+from watchdog.observers.polling import (
+    PollingObserver,
+)
+from watchdog.events import FileSystemEventHandler
+
+from eth_rpc_client import Client
 
 from populus import utils
 from populus.compilation import (
     get_contracts_dir,
     compile_and_write_contracts,
 )
-from eth_rpc_client import Client
+
+
+class ContractChangedEventHandler(FileSystemEventHandler):
+    """
+    > http://pythonhosted.org/watchdog/api.html#watchdog.events.FileSystemEventHandler
+    """
+    def __init__(self, *args, **kwargs):
+        self.project_dir = kwargs.pop('project_dir')
+        self.contract_filters = kwargs.pop('contract_filters')
+
+    def on_any_event(self, event):
+        click.echo("============ Detected Change ==============")
+        click.echo("> {0} => {1}".format(event.event_type, event.src_path))
+        click.echo("> recompiling...")
+        compile_and_write_contracts(self.project_dir, *self.contract_filters)
+        click.echo("> watching...")
 
 
 @click.group()
@@ -15,17 +40,30 @@ def main():
     pass
 
 
-@main.command()
-def compile():
+@main.command('compile')
+@click.option(
+    '--watch',
+    '-w',
+    is_flag=True,
+    help="Watch contract source files and recompile on changes",
+)
+@click.argument('contracts', nargs=-1)
+def compile_contracts(watch, contracts):
     """
-    Compile contracts.
+    Compile project contracts, storing their output in `./build/contracts.json`
+
+    Call bare to compile all contracts or specify contract names or file paths
+    to restrict to only compiling those contracts.
+
+    Pass in a file path and a contract name separated by a colon(":") to
+    specify only named contracts in the specified file.
     """
     project_dir = os.getcwd()
 
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
 
-    result = compile_and_write_contracts(project_dir)
+    result = compile_and_write_contracts(project_dir, *contracts)
     contract_source_paths, compiled_sources, output_file_path = result
 
     click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
@@ -37,6 +75,26 @@ def compile():
         click.echo("- {0}".format(contract_name))
     click.echo("")
     click.echo("> Outfile: {0}".format(output_file_path))
+
+    if watch:
+        # The path to watch
+        watch_path = utils.get_contracts_dir(project_dir)
+
+        click.echo("============ Watching ==============")
+
+        event_handler = ContractChangedEventHandler(
+            project_dir=project_dir,
+            contract_filters=contracts,
+        )
+        observer = PollingObserver()
+        observer.schedule(event_handler, watch_path, recursive=True)
+        observer.start()
+        try:
+            while observer.is_alive():
+                time.sleep(1)
+        except KeyboardInterrupt:
+            observer.stop()
+        observer.join()
 
 
 @main.command()
@@ -61,57 +119,6 @@ def deploy():
 @main.command()
 def test():
     """
-    Test contracts (wrapper around py-test)
+    Test contracts (wrapper around py.test)
     """
-    import pytest
     pytest.main(os.path.join(os.getcwd(), 'tests'))
-
-
-import time
-from watchdog.observers.polling import (
-    PollingObserver,
-)
-from watchdog.events import FileSystemEventHandler
-
-
-class ContractChangedEventHandler(FileSystemEventHandler):
-    """
-    > http://pythonhosted.org/watchdog/api.html#watchdog.events.FileSystemEventHandler
-    """
-    def __init__(self, *args, **kwargs):
-        self.project_dir = kwargs.pop('project_dir')
-
-    def on_any_event(self, event):
-        click.echo("============ Detected Change ==============")
-        click.echo("> {0} => {1}".format(event.event_type, event.src_path))
-        click.echo("> recompiling...")
-        compile_and_write_contracts(self.project_dir)
-        click.echo("> watching...")
-
-
-@main.command()
-def watch():
-    """
-    Watch the project contracts directory and recompile contracts when they
-    change.
-    """
-    project_dir = os.getcwd()
-
-    # Do initial compilation
-    compile_and_write_contracts(project_dir)
-
-    # The path to watch
-    watch_path = utils.get_contracts_dir(project_dir)
-
-    click.echo("============ Watching ==============")
-
-    event_handler = ContractChangedEventHandler(project_dir=project_dir)
-    observer = PollingObserver()
-    observer.schedule(event_handler, watch_path, recursive=True)
-    observer.start()
-    try:
-        while observer.is_alive():
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()

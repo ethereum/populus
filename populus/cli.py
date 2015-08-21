@@ -16,7 +16,8 @@ def main():
 
 
 @main.command()
-def compile():
+@click.argument('contracts', nargs=-1)
+def compile(contracts):
     """
     Compile contracts.
     """
@@ -25,7 +26,7 @@ def compile():
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
 
-    result = compile_and_write_contracts(project_dir)
+    result = compile_and_write_contracts(project_dir, *contracts)
     contract_source_paths, compiled_sources, output_file_path = result
 
     click.echo("> Found {0} contract source files".format(len(contract_source_paths)))

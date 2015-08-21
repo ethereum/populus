@@ -33,9 +33,6 @@ class BoundFunction(object):
 def decode_single(typ, data):
     base, sub, _ = abi.process_type(typ)
 
-    if sub != '256':
-        raise NotImplementedError('havent gotten to this, {0}'.format((base, sub, _)))
-
     if base == 'address':
         raise NotImplementedError('havent gotten to this')
         # return encode_hex(data[12:])
@@ -56,8 +53,7 @@ def decode_single(typ, data):
         high, low = [int(x) for x in sub.split('x')]
         # return (big_endian_to_int(data) * 1.0 / 2 ** low) % 2 ** high
     elif base == 'bool':
-        raise NotImplementedError('havent gotten to this')
-        # return bool(int(data.encode('hex'), 16))
+        return bool(int(data, 16))
     else:
         raise ValueError("Unknown base: `{0}`".format(base))
 

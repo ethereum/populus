@@ -51,7 +51,7 @@ Command Line Options
 
 .. code-block:: shell
 
-    $ populus
+    $ populus --help
     Usage: populus [OPTIONS] COMMAND [ARGS]...
 
     Options:
@@ -61,6 +61,7 @@ Command Line Options
       compile  Compile contracts.
       deploy   Deploy contracts.
       test     Test contracts (wrapper around py-test)
+      watch    Watch the project contracts directory and...
 
 
 ``compile``
@@ -96,7 +97,7 @@ project.  The compiled projects are stored in ``./build/contracts.json``.
     Populus currently only supports compilation of Solidity contracts.
 
 
-``deploy``
+deploy``
 ~~~~~~~~~~
 
 
@@ -136,3 +137,23 @@ directory of your project using the compiled contracts currently found in the
     tests/test_example.py::test_contract_function_return_values PASSED
 
     ================================ 2 passed in 0.82 seconds =================================
+
+
+``watch``
+~~~~~~~~~~
+
+
+Running ``$ populus watch`` will watch the ``./contracts`` directory of your
+project and recompile all contracts when any of your contracts change.
+
+
+.. code-block:: shell
+
+    ============ Watching ==============
+    
+    # Then you save a file....
+
+    ============ Detected Change ==============
+    > modified => /Users/pipermerriam/Sites/populus/tmp/contracts/Example.sol
+    > recompiling...
+    > watching...

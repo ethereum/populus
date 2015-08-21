@@ -87,6 +87,10 @@ class ContractChangedEventHandler(FileSystemEventHandler):
 
 @main.command()
 def watch():
+    """
+    Watch the project contracts directory and recompile contracts when they
+    change.
+    """
     project_dir = os.getcwd()
 
     # Do initial compilation

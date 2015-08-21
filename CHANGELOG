@@ -1,3 +1,11 @@
+0.3.0
+-----
+
+- Removed `watch` command in favor of passing `--watch` into the `compile`
+  command.
+- Add granular control to the `compile` command so that you can specify
+  specific files, contract names, or a combination of the two.
+
 0.2.0
 -----
 

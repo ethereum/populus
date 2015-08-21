@@ -12,10 +12,10 @@ populus.cli module
     :undoc-members:
     :show-inheritance:
 
-populus.client module
----------------------
+populus.compilation module
+--------------------------
 
-.. automodule:: populus.client
+.. automodule:: populus.compilation
     :members:
     :undoc-members:
     :show-inheritance:

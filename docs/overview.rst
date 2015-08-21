@@ -68,6 +68,10 @@ Command Line Options
 Running ``$ populus compile`` will compile all of the contracts found in the
 project.  The compiled projects are stored in ``./build/contracts.json``.
 
+* ``$ populus compile Example`` - compiles all contracts named Example.
+* ``$ populus compile contracts/Example.sol`` - compiles all contracts in the specified file.
+* ``$ populus compile contracts/Example.sol:Example`` - compiles all contracts named Example in in the specified file.
+
 .. code-block:: javascript
 
     {

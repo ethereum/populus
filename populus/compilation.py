@@ -2,6 +2,7 @@ import itertools
 import glob
 import os
 import json
+import functools
 
 import ethereum
 
@@ -106,7 +107,40 @@ def compile_project_contracts(contracts_dir):
     return compiled_sources
 
 
-def compile_and_write_contracts(project_dir):
+def check_if_matches_filter(file_path_filter, contract_filter, file_path, contract_name):
+    pass
+
+
+def generate_filter(filter_text):
+    """
+    Takes one of the following formats.
+
+    * `ContractName`
+    * `path/to/contractFile.sol`
+    * `path/to/contractFile.sol:ContractName`
+
+    and Returns callables that return `True` if the contract should be included.
+    """
+    if ':' in filter_text:
+        file_path_filter, _, contract_filter = filter_text.partition(':')
+    else:
+        file_path_filter = contract_filter = filter_text
+
+    return functools.partial(check_if_matches_filter, file_path_filter, contract_filter)
+
+
+def get_contract_filters(*contracts):
+    """
+    Generate the filter functions for contract compilation.
+    """
+    if len(contracts) == 0:
+        return [lambda file_path, contract_name: True]
+    else:
+        return [generate_filter(filter_text) for filter_text in contracts]
+
+
+def compile_and_write_contracts(project_dir, *contracts):
+    filters = get_contract_filters(*contracts)
     contract_source_paths = find_project_contracts(project_dir)
 
     compiled_sources = compile_project_contracts(contract_source_paths)

@@ -30,9 +30,7 @@ setup(
         # "ethash>=23.1",
         "ethereum>=0.9.73",
         "requests>=2.7.0",
-        # Until https://github.com/ConsenSys/eth-testrpc/pull/16 is merged and
-        # released.
-        # "eth-testrpc>=0.1.15",
+        "eth-testrpc>=0.1.16",
         "pytest>=2.7.2",
         "ethereum-rpc-client>=0.1.0",
         "watchdog==0.8.3",

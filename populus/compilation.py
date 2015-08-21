@@ -7,7 +7,11 @@ import ethereum
 
 from ethereum._solidity import get_solidity
 
-from populus.utils import get_contracts_dir
+from populus.utils import (
+    get_contracts_dir,
+    get_build_dir,
+)
+
 
 
 def find_project_contracts(project_dir):
@@ -18,20 +22,27 @@ def find_project_contracts(project_dir):
     lll_glob = os.path.join(contracts_dir, "*.lll")
     mutan_glob = os.path.join(contracts_dir, "*.mutan")
 
-    return itertools.chain(
+    return tuple(itertools.chain(
         glob.glob(solidity_glob),
         glob.glob(serpent_glob),
         glob.glob(lll_glob),
         glob.glob(mutan_glob),
-    )
+    ))
 
 
-def write_compiled_sources(destination_dir, compiled_sources):
-    file_path = os.path.join(destination_dir, 'contracts.json')
+def get_compiled_contract_destination_path(project_dir):
+    build_dir = get_build_dir(project_dir)
+    file_path = os.path.join(build_dir, 'contracts.json')
+    return file_path
+
+
+def write_compiled_sources(project_dir, compiled_sources):
+    file_path = get_compiled_contract_destination_path(project_dir)
     with open(file_path, 'w') as outfile:
         outfile.write(
             json.dumps(compiled_sources, sort_keys=True, indent=4, separators=(',', ': '))
         )
+    return file_path
 
 
 def _compile_rich(compiler, code):
@@ -101,5 +112,5 @@ def compile_and_write_contracts(project_dir):
 
     compiled_sources = compile_project_contracts(contract_source_paths)
 
-    write_compiled_sources(os.getcwd(), compiled_sources)
-    return compiled_sources
+    output_file_path = write_compiled_sources(project_dir, compiled_sources)
+    return contract_source_paths, compiled_sources, output_file_path

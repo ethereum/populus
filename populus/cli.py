@@ -3,7 +3,10 @@ import os
 import click
 
 from populus import utils
-from populus.compilation import compile_and_write_contracts
+from populus.compilation import (
+    get_contracts_dir,
+    compile_and_write_contracts,
+)
 from eth_rpc_client import Client
 
 
@@ -17,9 +20,19 @@ def compile():
     """
     Compile contracts.
     """
-    click.echo('Compiling!')
+    click.echo("============ Compiling ==============")
     project_dir = os.getcwd()
-    compiled_sources = compile_and_write_contracts(project_dir)
+    click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
+    contract_source_paths, compiled_sources, output_file_path = compile_and_write_contracts(project_dir)
+    click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
+    for path in contract_source_paths:
+        click.echo("- {0}".format(os.path.basename(path)))
+    click.echo("")
+    click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
+    for contract_name in sorted(compiled_sources.keys()):
+        click.echo("- {0}".format(contract_name))
+    click.echo("")
+    click.echo("> Outfile: {0}".format(output_file_path))
 
 
 @main.command()

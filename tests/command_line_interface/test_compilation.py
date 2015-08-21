@@ -14,4 +14,5 @@ def test_compiling(monkeypatch):
     result = runner.invoke(main, ['compile'])
 
     assert result.exit_code == 0, result.output
-    assert result.output == 'Compiling!\n'
+    assert 'owned.sol' in result.output
+    assert 'tests/command_line_interface/projects/test-01' in result.output

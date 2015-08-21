@@ -1,5 +1,6 @@
 import os
-from populus.utils import find_project_contracts
+
+from populus.compilation import find_project_contracts
 
 
 def test_gets_correct_files():

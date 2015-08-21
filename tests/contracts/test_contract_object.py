@@ -109,3 +109,9 @@ def test_contract_function_call_multiply7(math, eth_coinbase):
 def test_contract_function_call_add(math, eth_coinbase):
     ret = math.add.call(25, 35, _from=eth_coinbase)
     assert ret == 60
+
+
+def test_sent_transaction_with_value(math, eth_coinbase, rpc_client):
+    assert math.get_balance() == 0
+    txn_hash = math.add.sendTransaction(35, 45, _from=eth_coinbase, value=1000)
+    assert math.get_balance() == 1000

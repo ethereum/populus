@@ -18,9 +18,9 @@ class BoundFunction(object):
         data = self.function.get_call_data(args)
 
         return self.client.send_transaction(
-            _from=kwargs['_from'],
             to=self.address,
             data=data,
+            **kwargs
         )
 
     def call(self, *args, **kwargs):
@@ -162,6 +162,9 @@ class ContractBase(object):
         return cls.client.send_transaction(
             _from, gas, gas_price, value, data=cls.code,
         )
+
+    def get_balance(self, block="latest"):
+        return self.client.get_balance(self.address, block=block)
 
 
 def Contract(client, contract_name, contract):

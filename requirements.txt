@@ -1,5 +1,5 @@
 click>=5.0
-ethereum-rpc-client==0.1.0
+ethereum-rpc-client==0.1.2
 ethereum>=0.9.73
 https://github.com/ethereum/ethash/archive/v23.1.tar.gz
 eth-testrpc>=0.1.16

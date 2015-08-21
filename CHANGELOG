@@ -1,3 +1,8 @@
+0.3.2
+-----
+
+- Enable decoding of `bytes` types returned by contract function calls.
+
 0.3.1
 -----
 

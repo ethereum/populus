@@ -1,3 +1,8 @@
+0.3.4
+-----
+
+- Fix bug where null bytes were excluded from the returned bytes.
+
 0.3.3
 -----
 

@@ -37,8 +37,8 @@ def decode_single(typ, data):
         raise NotImplementedError('havent gotten to this')
         # return encode_hex(data[12:])
     elif base == 'string' or base == 'bytes' or base == 'hash':
-        raise NotImplementedError('havent gotten to this')
-        # return data[:int(sub)] if len(sub) else data
+        bytes = ethereum_utils.int_to_32bytearray(int(data, 16))
+        return ''.join(chr(b) for b in bytes if b)
     elif base == 'uint':
         return int(data, 16)
     elif base == 'int':

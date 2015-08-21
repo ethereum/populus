@@ -10,7 +10,8 @@ Contents:
 .. toctree::
 
    overview
-   populus.plugins
+   populus.testing
+   populus.testing-fixtures
    populus.contracts
 
    :maxdepth: 2

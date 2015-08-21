@@ -13,17 +13,15 @@ install ``populus``
 
    $ pip install populus
 
-Populus has two dependencies that cannot be bundled with the package until
-upstream changes are merged into the respective repositories.  You can install
-these dependencies directly with the following commands.
+Populus has one dependency that cannot be bundled with the package until
+upstream changes are merged into the respective repository.  You can install
+this dependencies directly with the following commands.
 
 .. code-block:: shell
 
-    $ pip install https://github.com/pipermerriam/eth-testrpc/archive/v0.1.15b.tar.gz
     $ pip install https://github.com/ethereum/ethash/archive/v23.1.tar.gz
 
-See https://github.com/ConsenSys/eth-testrpc/pull/16 and
-https://github.com/ethereum/ethash/issues/72 for detailed information on the
+See https://github.com/ethereum/ethash/issues/72 for detailed information on the
 upstream changes that these two direct installs address.
 
 
@@ -51,7 +49,7 @@ Command Line Options
 
 .. code-block:: shell
 
-    $ populus
+    $ populus --help
     Usage: populus [OPTIONS] COMMAND [ARGS]...
 
     Options:
@@ -61,6 +59,7 @@ Command Line Options
       compile  Compile contracts.
       deploy   Deploy contracts.
       test     Test contracts (wrapper around py-test)
+      watch    Watch the project contracts directory and...
 
 
 ``compile``
@@ -96,7 +95,7 @@ project.  The compiled projects are stored in ``./build/contracts.json``.
     Populus currently only supports compilation of Solidity contracts.
 
 
-``deploy``
+deploy``
 ~~~~~~~~~~
 
 
@@ -136,3 +135,23 @@ directory of your project using the compiled contracts currently found in the
     tests/test_example.py::test_contract_function_return_values PASSED
 
     ================================ 2 passed in 0.82 seconds =================================
+
+
+``watch``
+~~~~~~~~~~
+
+
+Running ``$ populus watch`` will watch the ``./contracts`` directory of your
+project and recompile all contracts when any of your contracts change.
+
+
+.. code-block:: shell
+
+    ============ Watching ==============
+    
+    # Then you save a file....
+
+    ============ Detected Change ==============
+    > modified => /Users/pipermerriam/Sites/populus/tmp/contracts/Example.sol
+    > recompiling...
+    > watching...

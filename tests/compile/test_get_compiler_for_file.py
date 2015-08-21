@@ -1,5 +1,5 @@
 import pytest
-from populus.utils import get_compiler_for_file
+from populus.compilation import get_compiler_for_file
 
 from ethereum._solidity import get_solidity
 

@@ -1,91 +1,30 @@
 import os
-import glob
-import itertools
 import json
-
-import ethereum
-from ethereum._solidity import get_solidity
 
 
 CONTRACTS_DIR = "./contracts/"
 
 
-def _compile_rich(compiler, code):
-    """
-    Shim for the `compile_rich` functionality from `pyethereum` which is not
-    currently available on pypi as of 2015-08-18
-    """
-    return {
-        contract_name: {
-            'code': "0x" + contract.get('binary'),
-            'info': {
-                'abiDefinition': contract.get('json-abi'),
-                'compilerVersion': ethereum.__version__,
-                'developerDoc': contract.get('natspec-dev'),
-                'language': 'Solidity',
-                'languageVersion': '0',
-                'source': code,
-                'userDoc': contract.get('natspec-user')
-            },
-        }
-        for contract_name, contract
-        in compiler.combined(code)
-    }
-
-
-def get_compiler_for_file(file_path):
-    _, _, ext = file_path.rpartition('.')
-
-    if ext == 'sol':
-        compiler = get_solidity()
-        if compiler is None:
-            raise ValueError("No solidity compiler")
-        return compiler
-    elif ext == 'lll':
-        raise ValueError("Compilation of LLL contracts is not yet supported")
-    elif ext == 'mu':
-        raise ValueError("Compilation of LLL contracts is not yet supported")
-    elif ext == 'se':
-        raise ValueError("Compilation of LLL contracts is not yet supported")
-
-    raise ValueError("Unknown contract extension {0}".format(ext))
-
-
-def get_contract_files(project_dir):
-    # TODO: support non-solidity based contract compilation.
-    solidity_glob = os.path.join(project_dir, CONTRACTS_DIR, "*.sol")
-    serpent_glob = os.path.join(project_dir, CONTRACTS_DIR, "*.se")
-    lll_glob = os.path.join(project_dir, CONTRACTS_DIR, "*.lll")
-    mutan_glob = os.path.join(project_dir, CONTRACTS_DIR, "*.mutan")
-
-    return itertools.chain(
-        glob.glob(solidity_glob),
-        glob.glob(serpent_glob),
-        glob.glob(lll_glob),
-        glob.glob(mutan_glob),
-    )
+def get_contracts_dir(project_dir):
+    contracts_dir = os.path.join(project_dir, CONTRACTS_DIR)
+    return os.path.abspath(contracts_dir)
 
 
 BUILD_DIR = "./build/"
 
 
-def _ensure_build_dir(project_dir):
+def ensure_path_exists(dir_path):
     """
-    Make sure the build directory is present in the project.
+    Make sure that a path exists
     """
+    if not os.path.exists(dir_path):
+        os.mkdir(dir_path)
+
+
+def get_build_dir(project_dir):
     build_dir_path = os.path.join(project_dir, BUILD_DIR)
-    if not os.path.exists(build_dir_path):
-        os.mkdir(build_dir_path)
-
-
-def write_compiled_sources(project_dir, compiled_sources):
-    _ensure_build_dir(project_dir)
-
-    outfile_path = os.path.join(project_dir, BUILD_DIR, 'contracts.json')
-    with open(outfile_path, 'w') as outfile:
-        outfile.write(
-            json.dumps(compiled_sources, sort_keys=True, indent=4, separators=(',', ': '))
-        )
+    ensure_path_exists(build_dir_path)
+    return build_dir_path
 
 
 def load_contracts(project_dir):

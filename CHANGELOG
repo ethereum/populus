@@ -1,3 +1,8 @@
+0.3.1
+-----
+
+- Enable decoding of `boolean` values returned by contract function calls.
+
 0.3.0
 -----
 

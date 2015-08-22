@@ -160,10 +160,10 @@ class ContractBase(object):
         return "{name}({address})".format(name=self.__class__.__name__, address=self.address)
 
     @classmethod
-    def deploy(cls, _from=None, gas=None, gas_price=None, value=None, args=None):
+    def deploy(cls, _from=None, gas=None, gas_price=None, value=None, constructor_args=None):
         data = cls.code
-        if args:
-            data += ethereum_utils.encode_hex(cls.constructor.abi_args_signature(args))
+        if constructor_args:
+            data += ethereum_utils.encode_hex(cls.constructor.abi_args_signature(constructor_args))
 
         return cls.client.send_transaction(
             _from, gas, gas_price, value, data=data,

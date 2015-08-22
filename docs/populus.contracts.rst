@@ -31,10 +31,12 @@ Instantiate an instance of your contract with the ``hex`` encoded address of
 where it is deployed.
 
 
-``ContractClass.deploy(_from=None, gas=None, gas_price=None, value=None)``
+``ContractClass.deploy(_from=None, gas=None, gas_price=None, value=None, args=None)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``classmethod`` for deploying the contract. Returns the transaction hash.
+``classmethod`` for deploying the contract. Returns the transaction hash.  If
+the contract constructor takes arguments, they should be passed in as the
+``constructor_args`` argument.
 
 
 ``ContractClass.code``

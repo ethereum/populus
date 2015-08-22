@@ -54,7 +54,7 @@ def Math(rpc_client):
 
 
 def test_constructor_with_args(rpc_server, rpc_client, Math, eth_coinbase):
-    deploy_txn_hash = Math.deploy(_from=eth_coinbase, args=("John",))
+    deploy_txn_hash = Math.deploy(_from=eth_coinbase, constructor_args=("John",))
     receipt = rpc_client.get_transaction_receipt(deploy_txn_hash)
     assert receipt
     assert receipt['contractAddress']

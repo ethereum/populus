@@ -34,8 +34,7 @@ def decode_single(typ, data):
     base, sub, _ = abi.process_type(typ)
 
     if base == 'address':
-        raise NotImplementedError('havent gotten to this')
-        # return encode_hex(data[12:])
+        return '0x' + data[-40:]
     elif base == 'string' or base == 'bytes' or base == 'hash':
         bytes = ethereum_utils.int_to_32bytearray(int(data, 16))
         while bytes and bytes[-1] == 0:

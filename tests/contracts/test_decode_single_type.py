@@ -64,3 +64,29 @@ def test_decode_bool(input, expected):
 def test_decode_bytes32(input, expected):
     output = decode_single('bytes32', input)
     assert output == expected
+
+
+@pytest.mark.parametrize(
+    'input,expected',
+    (
+        (
+            '0x000000000000000000000000c305c901078781c232a2a521c2af7980f8385ee9',
+            '0xc305c901078781c232a2a521c2af7980f8385ee9',
+        ),
+        (
+            '0x0000000000000000000000000005c901078781c232a2a521c2af7980f8385ee9',
+            '0x0005c901078781c232a2a521c2af7980f8385ee9',
+        ),
+        (
+            '0x000000000000000000000000c305c901078781c232a2a521c2af7980f8385000',
+            '0xc305c901078781c232a2a521c2af7980f8385000',
+        ),
+        (
+            '0x0000000000000000000000000005c901078781c232a2a521c2af7980f8385000',
+            '0x0005c901078781c232a2a521c2af7980f8385000',
+        ),
+    )
+)
+def test_decode_address(input, expected):
+    output = decode_single('address', input)
+    assert output == expected

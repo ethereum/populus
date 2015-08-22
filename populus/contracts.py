@@ -163,8 +163,7 @@ class ContractBase(object):
     def deploy(cls, _from=None, gas=None, gas_price=None, value=None, args=None):
         data = cls.code
         if args:
-            data += cls.constructor.get_call_data(args)
-            import ipdb; ipdb.set_trace()
+            data += ethereum_utils.encode_hex(cls.constructor.abi_args_signature(args))
 
         return cls.client.send_transaction(
             _from, gas, gas_price, value, data=data,

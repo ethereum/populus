@@ -134,7 +134,6 @@ class Function(object):
 
     def __get__(self, obj, type=None):
         if obj is None:
-            # TODO: this is sorta odd behavior.
             return self
         bound_function = BoundFunction(
             function=self,
@@ -161,9 +160,13 @@ class ContractBase(object):
         return "{name}({address})".format(name=self.__class__.__name__, address=self.address)
 
     @classmethod
-    def deploy(cls, _from=None, gas=None, gas_price=None, value=None):
+    def deploy(cls, _from=None, gas=None, gas_price=None, value=None, constructor_args=None):
+        data = cls.code
+        if constructor_args:
+            data += ethereum_utils.encode_hex(cls.constructor.abi_args_signature(constructor_args))
+
         return cls.client.send_transaction(
-            _from, gas, gas_price, value, data=cls.code,
+            _from, gas, gas_price, value, data=data,
         )
 
     def get_balance(self, block="latest"):
@@ -185,6 +188,11 @@ def Contract(client, contract_name, contract):
     for signature_item in _abi:
         if signature_item['type'] == 'constructor':
             # Constructors don't need to be part of a contract's methods
+            if signature_item.get('inputs'):
+                _dict['constructor'] = Function(
+                    name='constructor',
+                    inputs=signature_item['inputs'],
+                )
             continue
 
         if signature_item['name'] in _dict:

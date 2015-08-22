@@ -1,5 +1,8 @@
 import os
 import time
+import contextlib
+import sys
+import io
 
 import pytest
 
@@ -9,6 +12,8 @@ from watchdog.observers.polling import (
     PollingObserver,
 )
 from watchdog.events import FileSystemEventHandler
+
+from ethereum._solidity import CompileError
 
 from eth_rpc_client import Client
 
@@ -40,6 +45,18 @@ def main():
     pass
 
 
+@contextlib.contextmanager
+def intercepted_stdout():
+    sys.stdout = io.BytesIO()
+    sys.stderr = io.BytesIO()
+
+    try:
+        yield sys.stdout
+    finally:
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
+
+
 @main.command('compile')
 @click.option(
     '--watch',
@@ -63,18 +80,24 @@ def compile_contracts(watch, contracts):
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
 
-    result = compile_and_write_contracts(project_dir, *contracts)
-    contract_source_paths, compiled_sources, output_file_path = result
-
-    click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
-    for path in contract_source_paths:
-        click.echo("- {0}".format(os.path.basename(path)))
-    click.echo("")
-    click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
-    for contract_name in sorted(compiled_sources.keys()):
-        click.echo("- {0}".format(contract_name))
-    click.echo("")
-    click.echo("> Outfile: {0}".format(output_file_path))
+    with intercepted_stdout() as stdout:
+        try:
+            result = compile_and_write_contracts(project_dir, *contracts)
+        except CompileError:
+            import ipdb; ipdb.set_trace()
+            click.echo("============ Compile Error ==============")
+            click.echo(stdout.getvalue())
+        else:
+            contract_source_paths, compiled_sources, output_file_path = result
+            click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
+            for path in contract_source_paths:
+                click.echo("- {0}".format(os.path.basename(path)))
+            click.echo("")
+            click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
+            for contract_name in sorted(compiled_sources.keys()):
+                click.echo("- {0}".format(contract_name))
+            click.echo("")
+            click.echo("> Outfile: {0}".format(output_file_path))
 
     if watch:
         # The path to watch

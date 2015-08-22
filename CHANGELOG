@@ -1,3 +1,9 @@
+0.3.5
+-----
+
+- Add support for contract constructors which take arguments via the new
+  `constructor_args` parameter to the `Contract.deploy` method.
+
 0.3.4
 -----
 

@@ -1,8 +1,8 @@
 import os
 import time
 import contextlib
-import io
 import sys
+import io
 
 import pytest
 
@@ -47,16 +47,14 @@ def main():
 
 @contextlib.contextmanager
 def intercepted_stdout():
-    import ipdb; ipdb.set_trace()
-    default_stdout = sys.stdout
-    sys.stdout = io.StringIO()
+    sys.stdout = io.BytesIO()
+    sys.stderr = io.BytesIO()
 
     try:
         yield sys.stdout
-    except:
-        import ipdb; ipdb.set_trace()
-        sys.stdout = default_stdout
-        raise
+    finally:
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
 
 
 @main.command('compile')
@@ -85,21 +83,21 @@ def compile_contracts(watch, contracts):
     with intercepted_stdout() as stdout:
         try:
             result = compile_and_write_contracts(project_dir, *contracts)
-        except Exception:
+        except CompileError:
             import ipdb; ipdb.set_trace()
-
-    assert False
-    contract_source_paths, compiled_sources, output_file_path = result
-
-    click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
-    for path in contract_source_paths:
-        click.echo("- {0}".format(os.path.basename(path)))
-    click.echo("")
-    click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
-    for contract_name in sorted(compiled_sources.keys()):
-        click.echo("- {0}".format(contract_name))
-    click.echo("")
-    click.echo("> Outfile: {0}".format(output_file_path))
+            click.echo("============ Compile Error ==============")
+            click.echo(stdout.getvalue())
+        else:
+            contract_source_paths, compiled_sources, output_file_path = result
+            click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
+            for path in contract_source_paths:
+                click.echo("- {0}".format(os.path.basename(path)))
+            click.echo("")
+            click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
+            for contract_name in sorted(compiled_sources.keys()):
+                click.echo("- {0}".format(contract_name))
+            click.echo("")
+            click.echo("> Outfile: {0}".format(output_file_path))
 
     if watch:
         # The path to watch

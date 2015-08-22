@@ -1,5 +1,8 @@
 import os
 import time
+import contextlib
+import io
+import sys
 
 import pytest
 
@@ -9,6 +12,8 @@ from watchdog.observers.polling import (
     PollingObserver,
 )
 from watchdog.events import FileSystemEventHandler
+
+from ethereum._solidity import CompileError
 
 from eth_rpc_client import Client
 
@@ -40,6 +45,20 @@ def main():
     pass
 
 
+@contextlib.contextmanager
+def intercepted_stdout():
+    import ipdb; ipdb.set_trace()
+    default_stdout = sys.stdout
+    sys.stdout = io.StringIO()
+
+    try:
+        yield sys.stdout
+    except:
+        import ipdb; ipdb.set_trace()
+        sys.stdout = default_stdout
+        raise
+
+
 @main.command('compile')
 @click.option(
     '--watch',
@@ -63,7 +82,13 @@ def compile_contracts(watch, contracts):
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
 
-    result = compile_and_write_contracts(project_dir, *contracts)
+    with intercepted_stdout() as stdout:
+        try:
+            result = compile_and_write_contracts(project_dir, *contracts)
+        except Exception:
+            import ipdb; ipdb.set_trace()
+
+    assert False
     contract_source_paths, compiled_sources, output_file_path = result
 
     click.echo("> Found {0} contract source files".format(len(contract_source_paths)))

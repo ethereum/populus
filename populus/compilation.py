@@ -4,14 +4,11 @@ import os
 import json
 import functools
 
-import ethereum
-
-from ethereum._solidity import get_solidity
-
 from populus.utils import (
     get_contracts_dir,
     get_build_dir,
 )
+from populus.solidity import solc
 
 
 def find_project_contracts(project_dir):
@@ -45,37 +42,11 @@ def write_compiled_sources(project_dir, compiled_sources):
     return file_path
 
 
-def _compile_rich(compiler, code):
-    """
-    Shim for the `compile_rich` functionality from `pyethereum` which is not
-    currently available on pypi as of 2015-08-18
-    """
-    return {
-        contract_name: {
-            'code': "0x" + contract.get('binary'),
-            'info': {
-                'abiDefinition': contract.get('json-abi'),
-                'compilerVersion': ethereum.__version__,
-                'developerDoc': contract.get('natspec-dev'),
-                'language': 'Solidity',
-                'languageVersion': '0',
-                'source': code,
-                'userDoc': contract.get('natspec-user')
-            },
-        }
-        for contract_name, contract
-        in compiler.combined(code)
-    }
-
-
 def get_compiler_for_file(file_path):
     _, _, ext = file_path.rpartition('.')
 
     if ext == 'sol':
-        compiler = get_solidity()
-        if compiler is None:
-            raise ValueError("No solidity compiler")
-        return compiler
+        return solc
     elif ext == 'lll':
         raise ValueError("Compilation of LLL contracts is not yet supported")
     elif ext == 'mu':
@@ -93,7 +64,7 @@ def compile_source_file(source_path):
         source_code = source_file.read()
 
     # TODO: solidity specific
-    compiled_source = _compile_rich(compiler, source_code)
+    compiled_source = compiler(source_code)
     return compiled_source
 
 

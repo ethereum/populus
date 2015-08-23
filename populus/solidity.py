@@ -41,7 +41,9 @@ def solc_version():
     return version
 
 
-def solc(source=None, input_files=None, add_std=True, combined_json='json-abi,binary,sol-abi,natspec-dev,natspec-user', raw=False, rich=True):
+def solc(source=None, input_files=None, add_std=True,
+         combined_json='json-abi,binary,sol-abi,natspec-dev,natspec-user',
+         raw=False, rich=True):
 
     if source and input_files:
         raise ValueError("`source` and `input_files` are mutually exclusive")

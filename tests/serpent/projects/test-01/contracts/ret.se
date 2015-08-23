@@ -1,0 +1,5 @@
+extern mul2.se: [double:i:i]
+
+MUL2 = create('mul2.se')
+def returnten():
+    return(MUL2.double(5))

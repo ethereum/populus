@@ -3,6 +3,12 @@ import pytest
 from populus.solidity import (
     solc,
     version_regex,
+    is_solc_available,
+)
+
+skip_if_no_sol_compiler = pytest.mark.skipif(
+    is_solc_available() is None,
+    reason="'solc' compiler not available",
 )
 
 
@@ -23,21 +29,25 @@ def test_one_of_source_or_input_files_required():
         solc()
 
 
+@skip_if_no_sol_compiler
 def test_raw_source_compilation():
     code = solc(source=contract_source, raw=True)
     assert code == contract_compiled_raw
 
 
+@skip_if_no_sol_compiler
 def test_raw_file_compilation():
     code = solc(input_files=["tests/solidity/projects/test-01/contracts/Example.sol"], raw=True)
     assert code == contract_compiled_raw
 
 
+@skip_if_no_sol_compiler
 def test_json_source_compilation_not_rich():
     code = solc(source=contract_source, rich=False)
     assert code == contract_compiled_json
 
 
+@skip_if_no_sol_compiler
 def test_json_source_compilation():
     code = solc(source=contract_source, rich=False)
     assert code == contract_compiled_json

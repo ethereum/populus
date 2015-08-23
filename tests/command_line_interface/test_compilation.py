@@ -2,12 +2,11 @@ import pytest
 import click
 from click.testing import CliRunner
 
-from ethereum._solidity import get_solidity
-
 from populus.cli import main
+from populus.solidity import is_solc_available
 
 skip_if_no_sol_compiler = pytest.mark.skipif(
-    get_solidity() is None,
+    is_solc_available() is None,
     reason="'solc' compiler not available",
 )
 

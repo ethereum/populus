@@ -7,7 +7,7 @@ from populus.solidity import (
 )
 
 skip_if_no_sol_compiler = pytest.mark.skipif(
-    is_solc_available() is None,
+    not is_solc_available(),
     reason="'solc' compiler not available",
 )
 

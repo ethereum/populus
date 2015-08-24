@@ -1,53 +1,81 @@
 import os
+import shutil
+
 from flask import Flask
+
+from populus.utils import (
+    get_build_dir,
+    ensure_path_exists,
+)
 
 
 app = Flask(__name__)
 
 
 def get_html_document(project_dir, path):
+
+
+@app.route('/')
+def index():
+    project_dir = os.getcwd()
     html_root = os.path.join(project_dir, './html')
-    document_path = os.path.join(html_root, path)
+    document_path = os.path.join(html_root, 'index.html')
     with open(document_path) as document_file:
         document = document_file.read()
     return document
 
 
-@app.route('/')
-def index():
-    return get_html_document(os.getcwd(), 'index.html')
+js_contracts_template = """
+contracts = contracts || {{}};
+
+function() {
+    var contractData = {contract_data};
+    var contractNames = Object.keys(contractData);
+    for (var i=0; i < contractNames.length; i++) {{
+        contractName = contractNames[i];
+        contracts[contractName] = web3.eth.contract(contractData[contractName].info.abiDefinition);
+    }}
+}();
+"""
+
+
+def compile_js_contracts(project_dir):
+    build_dir = get_build_dir(project_dir)
+
+    contracts_json_path = os.path.join(build_dir, 'contracts.json')
+    with open(contracts_json_path) as contracts_json_file:
+        contracts_json = contracts_json_file.read()
+
+    js_contracts = js_contracts_template.format(contract_data=contracts_json)
+
+    dest_path = os.path.join(build_dir, 'contracts.js')
+
+    with open(dest_path, 'w') as js_contracts_file:
+        js_contracts_file.write(js_contracts)
+
+    return dest_path
 
 
 POPULUS_ASSET_PATH = os.path.join(os.path.dirname(__file__), 'assets')
 
 
-def get_static_asset(project_dir, path):
-    asset_root = os.path.join(project_dir, './assets')
-    project_asset_path = os.path.join(asset_root, path)
+def collect_static_assets(project_dir):
+    # TODO: should probably reset the build assets dir each time..
+    project_assets_path = os.path.join(project_dir, 'assets')
 
-    if os.path.exists(project_asset_path):
-        path_to_load = project_asset_path
-    else:
-        path_to_load = os.path.join(POPULUS_ASSET_PATH, path)
+    build_dir = get_build_dir(project_dir)
+    build_assets_path = os.path.join(build_dir, 'assets')
+    build_js_assets_path = os.path.join(build_assets_path, 'js')
+    ensure_path_exists(build_assets_path)
 
-    with open(path_to_load) as asset_file:
-        asset = asset_file.read()
-    return asset
+    # Put the contracts json in place.
+    contracts_js_path = os.path.join(get_build_dir(project_dir), 'contracts.js')
+    shutil.copy(contracts_js_path, build_js_assets_path)
 
+    search_paths = (
+        POPULUS_ASSET_PATH,
+        project_assets_path,
+    )
 
-@app.route('/static-2/<path:asset_path>')
-def static2(asset_path):
-    return get_static_asset(os.getcwd(), asset_path)
-
-
-from populus.utils import get_build_dir
-
-
-@app.route('/static-3/contracts.js')
-def contracts():
-    build_dir = get_build_dir(os.getcwd())
-    contracts_json_path = os.path.join(build_dir, 'contracts.json')
-    with open(contracts_json_path) as contracts_json_file:
-        contracts_json = contracts_json_file.read()
-
-    return "var contract_abis = {0};".format(contracts_json)
+    for base_assets_dir in search_paths:
+        assert False, "TODO: recursively copy all the files and stuff into the build assets dir"

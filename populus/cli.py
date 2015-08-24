@@ -130,9 +130,10 @@ from populus.web import (
 
 
 @main.command()
-def runserver():
+@click.option('--debug/--no-debug', default=True)
+def runserver(debug):
     """
-    Run the server.
+    Run the development server.
     """
-    flask_app.debug = True
+    flask_app.debug = debug
     flask_app.run()

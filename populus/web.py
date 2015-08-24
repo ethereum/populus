@@ -9,6 +9,11 @@ from populus.utils import (
 )
 
 
+def get_build_assets_dir(project_dir):
+    build_dir = get_build_dir(project_dir)
+    return os.path.join(build_dir, 'assets')
+
+
 def index():
     project_dir = os.getcwd()
     html_root = os.path.join(project_dir, './html')

@@ -146,3 +146,32 @@ def runserver(debug):
 def collect_assets():
     compile_js_contracts(os.getcwd())
     collect_static_assets(os.getcwd())
+
+
+@main.group()
+def chain():
+    """
+    Wrapper around `geth`.
+    """
+    pass
+
+
+from populus.geth import (
+    get_geth_data_dir,
+    geth_wrapper,
+)
+
+
+@chain.command('run')
+@click.argument('name', nargs=1, default="default")
+def chain_run(name):
+    click.echo("name was {0}".format(name))
+    data_dir = get_geth_data_dir(name)
+
+    if not os.path.exists(data_dir):
+        if name == 'default':
+            utils.ensure_path_exists(data_dir)
+        elif click.confirm("The chain '{0}' does not exist.  Would you like to create it?".format(name)):
+            utils.ensure_path_exists(data_dir)
+        else:
+            raise click.UsageError("Unknown chain '{0}'".format(name))

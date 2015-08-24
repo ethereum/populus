@@ -125,7 +125,9 @@ def test():
 
 
 from populus.web import (
-    app as flask_app,
+    get_flask_app,
+    collect_static_assets,
+    compile_js_contracts,
 )
 
 
@@ -135,5 +137,12 @@ def runserver(debug):
     """
     Run the development server.
     """
+    flask_app = get_flask_app(os.getcwd())
     flask_app.debug = debug
     flask_app.run()
+
+
+@main.command()
+def collect_assets():
+    compile_js_contracts(os.getcwd())
+    collect_static_assets(os.getcwd())

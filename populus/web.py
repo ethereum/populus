@@ -9,13 +9,6 @@ from populus.utils import (
 )
 
 
-app = Flask(__name__)
-
-
-def get_html_document(project_dir, path):
-
-
-@app.route('/')
 def index():
     project_dir = os.getcwd()
     html_root = os.path.join(project_dir, './html')
@@ -25,17 +18,26 @@ def index():
     return document
 
 
-js_contracts_template = """
-contracts = contracts || {{}};
+def get_flask_app(project_dir):
+    static_folder = os.path.join(project_dir, 'build', 'assets')
+    app = Flask(__name__, static_folder=static_folder, static_url_path='/static')
 
-function() {
+    app.route('/')(index)
+    return app
+
+
+js_contracts_template = """
+var contracts = contracts || {{}};
+
+function makeContracts() {{
     var contractData = {contract_data};
     var contractNames = Object.keys(contractData);
     for (var i=0; i < contractNames.length; i++) {{
         contractName = contractNames[i];
         contracts[contractName] = web3.eth.contract(contractData[contractName].info.abiDefinition);
     }}
-}();
+}};
+makeContracts();
 """
 
 
@@ -61,12 +63,13 @@ POPULUS_ASSET_PATH = os.path.join(os.path.dirname(__file__), 'assets')
 
 def collect_static_assets(project_dir):
     # TODO: should probably reset the build assets dir each time..
-    project_assets_path = os.path.join(project_dir, 'assets')
+    project_assets_path = os.path.abspath(os.path.join(project_dir, 'assets'))
 
     build_dir = get_build_dir(project_dir)
     build_assets_path = os.path.join(build_dir, 'assets')
-    build_js_assets_path = os.path.join(build_assets_path, 'js')
     ensure_path_exists(build_assets_path)
+    build_js_assets_path = os.path.join(build_assets_path, 'js')
+    ensure_path_exists(build_js_assets_path)
 
     # Put the contracts json in place.
     contracts_js_path = os.path.join(get_build_dir(project_dir), 'contracts.js')
@@ -78,4 +81,11 @@ def collect_static_assets(project_dir):
     )
 
     for base_assets_dir in search_paths:
-        assert False, "TODO: recursively copy all the files and stuff into the build assets dir"
+        prefix_length = len(base_assets_dir)
+        for (dirpath, dirnames, filenames) in os.walk(base_assets_dir):
+            asset_dir = os.path.join(build_assets_path, dirpath[prefix_length + 1:])
+            ensure_path_exists(asset_dir)
+
+            for filename in filenames:
+                asset_path = os.path.abspath(os.path.join(dirpath, filename))
+                shutil.copy(asset_path, asset_dir)

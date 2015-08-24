@@ -1,8 +1,12 @@
 import os
 import re
+import functools
 import subprocess
 
-from populus.utils import ensure_path_exists
+from populus import utils
+
+
+is_geth_available = functools.partial(utils.is_executable_available, 'geth')
 
 
 POPULUS_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -26,20 +30,29 @@ def geth_wrapper(data_dir, cmd="geth", genesis_block=None, extra_args=None):
         command.extend(extra_args)
 
     proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return proc
+    return command, proc
 
 
-def geth_accounts(*args, **kwargs):
+def get_geth_accounts(*args, **kwargs):
+    """
+    Returns all geth accounts as tuple of hex encoded strings
+
+    >>> geth_accounts()
+    ... ('0x...', '0x...')
+    """
     extra_args = kwargs.get('extra_args', [])
-    extra_args.extend('account', 'list')
+    extra_args.extend(('account', 'list'))
 
     kwargs['extra_args'] = extra_args
 
-    proc = geth_wrapper(*args, **kwargs)
-    stdoutdata, stderrdata = p.communicate()
+    command, proc = geth_wrapper(*args, **kwargs)
+    stdoutdata, stderrdata = proc.communicate()
 
     if proc.returncode:
-        raise subprocess.CalledProcessError('Error calling to `geth`:\n{0}'.format(stderrdata))
+        if "no keys in store" in stderrdata:
+            raise ValueError("No accounts")
+        else:
+            raise subprocess.CalledProcessError(1, ' '.join(command))
     accounts = parse_geth_accounts(stdoutdata)
     return accounts
 

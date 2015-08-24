@@ -1,8 +1,10 @@
-import os
 import subprocess
 import itertools
+import functools
 import yaml
 import re
+
+from populus import utils
 
 
 class CompileError(Exception):
@@ -15,24 +17,7 @@ SOLC_BINARY = 'solc'
 version_regex = re.compile('Version: ([0-9]+\.[0-9]+\.[0-9]+(-[a-f0-9]+)?)')
 
 
-def is_solc_available():
-    program = 'solc'
-
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-    fpath = os.path.dirname(program)
-    if fpath:
-        if is_exe(program):
-            return True
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return True
-
-    return False
+is_solc_available = functools.partial(utils.is_executable_available, 'solc')
 
 
 def solc_version():

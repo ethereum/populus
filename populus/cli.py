@@ -122,3 +122,17 @@ def test():
     Test contracts (wrapper around py.test)
     """
     pytest.main(os.path.join(os.getcwd(), 'tests'))
+
+
+from populus.web import (
+    app as flask_app,
+)
+
+
+@main.command()
+def runserver():
+    """
+    Run the server.
+    """
+    flask_app.debug = True
+    flask_app.run()

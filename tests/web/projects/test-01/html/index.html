@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <script src="/static-2/js/web3.js"></script>
+        <script src="/static-3/contracts.js"></script>
+    </head>
+    <body>
+        <div>BORK!</div>
+    </body>
+    <script>
+        web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
+        var Example = web3.eth.contract(contract_abis.Example.info.abiDefinition);
+    </script>
+</html>

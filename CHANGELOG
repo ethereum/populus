@@ -1,3 +1,14 @@
+0.4.0
+-----
+
+- Add blockchain management via `populus chain` commands which wraps `geth`
+  library.
+    - `populus chain run <name>` for running the chain
+    - `populus chain reset <name>` for resetting a chain
+- Add html/css/js development support.
+    - Development webserver via `populus web runserver`
+    - Conversion of compiled contracts to web3 contract objects in javascript.
+
 0.3.7
 -----
 

@@ -17,4 +17,6 @@ Ethereum Development Framework
 
 - compilation (limited to solidity right now).
 - deployment
-- testing (using pytest) (not working quite yet)
+- testing (using pytest)
+- management of test chains
+- html/css/js development server.

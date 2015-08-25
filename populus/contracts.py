@@ -1,3 +1,4 @@
+import binascii
 from ethereum import utils as ethereum_utils
 from ethereum import abi
 
@@ -58,6 +59,11 @@ def decode_single(typ, data):
         return bool(int(data, 16))
     else:
         raise ValueError("Unknown base: `{0}`".format(base))
+
+
+def decode_multi(types, outputs):
+    res = abi.decode_abi(types, binascii.a2b_hex(outputs[2:]))
+    return res
 
 
 class Function(object):
@@ -126,7 +132,7 @@ class Function(object):
 
     def cast_return_data(self, outputs):
         if len(self.output_types) != 1:
-            raise ValueError('Dont know how to deal with multiple outputs yet')
+            return decode_multi(self.output_types, outputs)
         output_type = self.output_types[0]
 
         return decode_single(output_type, outputs)

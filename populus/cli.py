@@ -159,14 +159,15 @@ def chain():
 from populus.geth import (
     get_geth_data_dir,
     geth_wrapper,
+    run_geth_node,
+    ensure_account_exists,
 )
 
 
 @chain.command('run')
 @click.argument('name', nargs=1, default="default")
 def chain_run(name):
-    click.echo("name was {0}".format(name))
-    data_dir = get_geth_data_dir(name)
+    data_dir = get_geth_data_dir(os.getcwd(), name)
 
     if not os.path.exists(data_dir):
         if name == 'default':
@@ -175,3 +176,9 @@ def chain_run(name):
             utils.ensure_path_exists(data_dir)
         else:
             raise click.UsageError("Unknown chain '{0}'".format(name))
+
+    ensure_account_exists(data_dir)
+
+    command, proc = run_geth_node(data_dir, mine=True)
+    import ipdb; ipdb.set_trace()
+    x = 3

@@ -14,7 +14,9 @@ POPULUS_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 def get_blockchains_dir(project_dir):
-    return os.path.abspath(os.path.join(project_dir, 'chains'))
+    blockchains_dir = os.path.abspath(os.path.join(project_dir, 'chains'))
+    utils.ensure_path_exists(blockchains_dir)
+    return blockchains_dir
 
 
 def get_geth_data_dir(project_dir, name):
@@ -22,9 +24,13 @@ def get_geth_data_dir(project_dir, name):
     return os.path.join(blockchains_dir, name)
 
 
+DEFAULT_PW_PATH = os.path.join(POPULUS_DIR, 'default_blockchain_password')
+
+
 def geth_wrapper(data_dir, cmd="geth", genesis_block=None, miner_threads='1',
                  extra_args=None, max_peers='0', network_id='123456',
-                 no_discover=True, mine=False, nice=True):
+                 no_discover=True, mine=False, nice=True, unlock='0',
+                 password=DEFAULT_PW_PATH):
     if nice and is_nice_available():
         command = ['nice', '-n', '20', cmd]
     else:
@@ -39,10 +45,22 @@ def geth_wrapper(data_dir, cmd="geth", genesis_block=None, miner_threads='1',
         '--networkid', network_id,
     ))
 
+    if unlock is not None:
+        command.extend((
+            '--unlock', unlock,
+        ))
+
+    if password is not None:
+        command.extend((
+            '--password', password,
+        ))
+
     if no_discover:
         command.append('--nodiscover')
 
     if mine:
+        if unlock is None:
+            raise ValueError("Cannot mine without an unlocked account")
         command.append('--mine')
 
     if extra_args:
@@ -71,6 +89,25 @@ def get_geth_accounts(data_dir, **kwargs):
     return accounts
 
 
+def create_geth_account(data_dir, **kwargs):
+    command, proc = geth_wrapper(data_dir, extra_args=['account', 'new'], **kwargs)
+    stdoutdata, stderrdata = proc.communicate()
+
+    if proc.returncode:
+        raise subprocess.CalledProcessError(1, ' '.join(command))
+
+    match = account_regex.search(stdoutdata)
+    if not match:
+        raise ValueError("No address found in output: '{0}'".format(stdoutdata))
+
+    return '0x' + match.groups()[0]
+
+
+def ensure_account_exists(data_dir):
+    if not get_geth_accounts(data_dir):
+        create_geth_account(data_dir)
+
+
 account_regex = re.compile('\{([a-f0-9]{40})\}')
 
 
@@ -91,5 +128,5 @@ def run_geth_node(data_dir, rpc_server=True, rpc_addr=None, rpc_port=None, **kwa
     if rpc_port is not None:
         extra_args.extend(('--rpcport', rpc_port))
 
-    _, proc = geth_wrapper(data_dir, extra_args=extra_args, **kwargs)
-    return proc
+    command, proc = geth_wrapper(data_dir, extra_args=extra_args, **kwargs)
+    return command, proc

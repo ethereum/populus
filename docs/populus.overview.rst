@@ -243,6 +243,8 @@ Runserver
 
 Use ``$ populus web runserver`` to run the development server.
 
+.. note:: This feature is extremely new and under active development.  Your contracts, while available as web3 contracts, are not automatically deployed.  Next steps in developing this will include running one of the test chains in the background and having your contracts auto-deployed to that chain.
+
 
 Static assets
 """""""""""""

@@ -144,5 +144,13 @@ def run_geth_node(data_dir, rpc_server=True, rpc_addr=None, rpc_port=None, **kwa
 
 def reset_chain(data_dir):
     blockchain_dir = os.path.join(data_dir, 'chaindata')
-    if os.path.exists(blockchain_dir):
-        shutil.rmtree(blockchain_dir)
+    utils.remove_dir_if_exists(blockchain_dir)
+
+    dapp_dir = os.path.join(data_dir, 'dapp')
+    utils.remove_dir_if_exists(dapp_dir)
+
+    nodekey_path = os.path.join(data_dir, 'nodekey')
+    utils.remove_file_if_exists(nodekey_path)
+
+    geth_ipc_path = os.path.join(data_dir, 'geth_ipc')
+    utils.remove_file_if_exists(geth_ipc_path)

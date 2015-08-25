@@ -1,4 +1,5 @@
 import os
+import shutil
 import json
 import socket
 
@@ -20,6 +21,16 @@ def ensure_path_exists(dir_path):
     """
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
+
+
+def remove_file_if_exists(path):
+    if os.path.isfile(path):
+        os.remove(path)
+
+
+def remove_dir_if_exists(path):
+    if os.path.isdir(path):
+        shutil.rmtree(path)
 
 
 def get_build_dir(project_dir):

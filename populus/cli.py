@@ -1,14 +1,11 @@
 import os
 import time
+import signal
+import multiprocessing
 
 import pytest
 
 import click
-
-from watchdog.observers.polling import (
-    PollingObserver,
-)
-from watchdog.events import FileSystemEventHandler
 
 from eth_rpc_client import Client
 
@@ -17,22 +14,25 @@ from populus.compilation import (
     get_contracts_dir,
     compile_and_write_contracts,
 )
-
-
-class ContractChangedEventHandler(FileSystemEventHandler):
-    """
-    > http://pythonhosted.org/watchdog/api.html#watchdog.events.FileSystemEventHandler
-    """
-    def __init__(self, *args, **kwargs):
-        self.project_dir = kwargs.pop('project_dir')
-        self.contract_filters = kwargs.pop('contract_filters')
-
-    def on_any_event(self, event):
-        click.echo("============ Detected Change ==============")
-        click.echo("> {0} => {1}".format(event.event_type, event.src_path))
-        click.echo("> recompiling...")
-        compile_and_write_contracts(self.project_dir, *self.contract_filters)
-        click.echo("> watching...")
+from populus.observers import (
+    get_contracts_observer,
+    get_contracts_code_observer,
+    get_static_assets_observer,
+)
+from populus.web import (
+    get_flask_app,
+    collect_static_assets,
+    compile_js_contracts,
+    get_html_dir,
+    write_default_index_html_document,
+    get_static_assets_dir,
+)
+from populus.geth import (
+    get_geth_data_dir,
+    run_geth_node,
+    ensure_account_exists,
+    reset_chain,
+)
 
 
 @click.group()
@@ -47,8 +47,8 @@ def main():
     is_flag=True,
     help="Watch contract source files and recompile on changes",
 )
-@click.argument('contracts', nargs=-1)
-def compile_contracts(watch, contracts):
+@click.argument('filters', nargs=-1)
+def compile_contracts(watch, filters):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -63,7 +63,7 @@ def compile_contracts(watch, contracts):
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
 
-    result = compile_and_write_contracts(project_dir, *contracts)
+    result = compile_and_write_contracts(project_dir, *filters)
     contract_source_paths, compiled_sources, output_file_path = result
 
     click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
@@ -78,16 +78,9 @@ def compile_contracts(watch, contracts):
 
     if watch:
         # The path to watch
-        watch_path = utils.get_contracts_dir(project_dir)
-
         click.echo("============ Watching ==============")
 
-        event_handler = ContractChangedEventHandler(
-            project_dir=project_dir,
-            contract_filters=contracts,
-        )
-        observer = PollingObserver()
-        observer.schedule(event_handler, watch_path, recursive=True)
+        observer = get_contracts_observer(project_dir, filters)
         observer.start()
         try:
             while observer.is_alive():
@@ -122,3 +115,184 @@ def test():
     Test contracts (wrapper around py.test)
     """
     pytest.main(os.path.join(os.getcwd(), 'tests'))
+
+
+@main.group()
+def web():
+    """
+    HTML/CSS/JS tooling.
+    """
+    pass
+
+
+@web.command('init')
+def web_init():
+    project_dir = os.getcwd()
+    html_dir = get_html_dir(project_dir)
+    if utils.ensure_path_exists(html_dir):
+        click.echo("Created Directory: ./{0}".format(os.path.relpath(html_dir)))
+
+    html_index_path = os.path.join(html_dir, 'index.html')
+    if not os.path.exists(html_index_path):
+        write_default_index_html_document(html_index_path)
+        click.echo("Created HTML Index File: ./{0}".format(os.path.relpath(html_index_path)))
+
+    static_assets_dir = get_static_assets_dir(project_dir)
+    if utils.ensure_path_exists(static_assets_dir):
+        click.echo("Created Directory: ./{0}".format(os.path.relpath(static_assets_dir)))
+
+
+@web.command('runserver')
+@click.option('--debug/--no-debug', default=True)
+def web_runserver(debug):
+    """
+    Run the development server.
+    """
+    project_dir = os.getcwd()
+    # Do initial setup
+    click.echo("Compiling contracts...")
+    compile_and_write_contracts(project_dir)
+    click.echo("Compiling contracts.js...")
+    compile_js_contracts(project_dir)
+    click.echo("Collectind static assets...")
+    collect_static_assets(project_dir)
+
+    all_threads = []
+
+    # Contract Builder Thread
+    contracts_observer_thread = get_contracts_observer(project_dir)
+    contracts_observer_thread.daemon = True
+
+    # Contract JS Builder Thread
+    contracts_code_observer_thread = get_contracts_code_observer(project_dir)
+    contracts_code_observer_thread.daemon = True
+
+    # Assets Collector Thread
+    static_assets_observer_thread = get_static_assets_observer(project_dir)
+    static_assets_observer_thread.daemon = True
+
+    # Webserver Thread
+    flask_app = get_flask_app(project_dir)
+    webserver_thread = multiprocessing.Process(
+        target=flask_app.run,
+        kwargs={'use_reloader': False, 'debug': debug},
+    )
+    webserver_thread.daemon = True
+
+    # Start all the threads
+    contracts_observer_thread.start()
+    contracts_code_observer_thread.start()
+    static_assets_observer_thread.start()
+    webserver_thread.start()
+
+    try:
+        all_threads = (
+            contracts_observer_thread,
+            contracts_code_observer_thread,
+            static_assets_observer_thread,
+            webserver_thread,
+        )
+        while any(t.is_alive() for t in all_threads):
+            if not all(t.is_alive() for t in all_threads):
+                raise click.Abort("Some threads died!")
+            time.sleep(1)
+    except KeyboardInterrupt:
+        for t in all_threads:
+            if hasattr(t, 'stop'):
+                t.stop()
+            elif hasattr(t, 'terminate'):
+                t.terminate()
+            else:
+                raise ValueError("wat")
+        for t in all_threads:
+            t.join()
+
+
+@web.command('collect')
+def web_collect():
+    """
+    Compile the contracts.js file and collect static assets.
+    """
+    compile_js_contracts(os.getcwd())
+    collect_static_assets(os.getcwd())
+
+
+@main.group()
+def chain():
+    """
+    Wrapper around `geth`.
+    """
+    pass
+
+
+@chain.command('reset')
+@click.argument('name', nargs=1, default="default")
+@click.option('--confirm/--no-confirm', default=True)
+def chain_reset(name, confirm):
+    """
+    Reset a test chain
+    """
+    data_dir = get_geth_data_dir(os.getcwd(), name)
+    if confirm and not click.confirm("Are you sure you want to reset blockchain '{0}': {1}".format(name, data_dir)):  # NOQA
+        raise click.Abort()
+    reset_chain(data_dir)
+
+
+@chain.command('run')
+@click.argument('name', nargs=1, default="default")
+@click.option('--mine/--no-mine', default=True)
+def chain_run(name, mine):
+    """
+    Run a geth node.
+    """
+    data_dir = get_geth_data_dir(os.getcwd(), name)
+
+    if not os.path.exists(data_dir):
+        if name == 'default':
+            utils.ensure_path_exists(data_dir)
+        elif click.confirm("The chain '{0}' does not exist.  Would you like to create it?".format(name)):  # NOQA
+            utils.ensure_path_exists(data_dir)
+        else:
+            raise click.UsageError("Unknown chain '{0}'".format(name))
+
+    ensure_account_exists(data_dir)
+
+    command, proc = run_geth_node(data_dir, mine=mine)
+
+    click.echo("Running: '{0}'".format(' '.join(command)))
+
+    try:
+        while True:
+            out_line = proc.get_stdout_nowait()
+            if out_line:
+                click.echo(out_line, nl=False)
+
+            err_line = proc.get_stderr_nowait()
+            if err_line:
+                click.echo(err_line, nl=False)
+
+            if err_line is None and out_line is None:
+                time.sleep(0.2)
+    except KeyboardInterrupt:
+        try:
+            proc.send_signal(signal.SIGINT)
+            # Give the subprocess a SIGINT and give it a few seconds to
+            # cleanup.
+            utils.wait_for_popen(proc)
+            while not proc.stdout_queue.empty() or not proc.stderr_queue.empty():
+                out_line = proc.get_stdout_nowait()
+                if out_line:
+                    click.echo(out_line, nl=False)
+
+                err_line = proc.get_stderr_nowait()
+                if err_line:
+                    click.echo(err_line, nl=False)
+        except:
+            # Try a harder termination.
+            proc.terminate()
+            utils.wait_for_popen(proc, 2)
+    if proc.poll() is None:
+        # Force it to kill if it hasn't exited already.
+        proc.kill()
+    if proc.returncode:
+        raise click.ClickException("Error shutting down geth process.")

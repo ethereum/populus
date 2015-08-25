@@ -1,5 +1,8 @@
 import os
+import shutil
 import json
+import socket
+import time
 
 
 CONTRACTS_DIR = "./contracts/"
@@ -19,6 +22,22 @@ def ensure_path_exists(dir_path):
     """
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
+        return True
+    return False
+
+
+def remove_file_if_exists(path):
+    if os.path.isfile(path):
+        os.remove(path)
+        return True
+    return False
+
+
+def remove_dir_if_exists(path):
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+        return True
+    return False
 
 
 def get_build_dir(project_dir):
@@ -55,3 +74,36 @@ def deploy_contracts(client, contracts):
         }
 
     return deployed_contracts
+
+
+def is_executable_available(program):
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath = os.path.dirname(program)
+    if fpath:
+        if is_exe(program):
+            return True
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return True
+
+    return False
+
+
+def get_open_port():
+    sock = socket.socket()
+    sock.bind(('', 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return str(port)
+
+
+def wait_for_popen(proc, max_wait=5):
+    wait_till = time.time() + 5
+    while time.time() < wait_till:
+        if proc.poll() is not None:
+            break

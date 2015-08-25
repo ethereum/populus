@@ -40,11 +40,14 @@ def geth_wrapper(data_dir, cmd="geth", genesis_block=None, miner_threads='1',
     if genesis_block is None:
         genesis_block = os.path.join(POPULUS_DIR, 'genesis-test.json')
     command.extend((
+        '--genesis', genesis_block,
         '--datadir', data_dir,
-        '--minerthreads', miner_threads,
         '--maxpeers', max_peers,
         '--networkid', network_id,
     ))
+
+    if miner_threads is not None:
+        command.extend(('--minerthreads', miner_threads))
 
     if unlock is not None:
         command.extend((

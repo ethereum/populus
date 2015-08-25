@@ -192,6 +192,8 @@ def chain_run(name, mine):
 
     command, proc = run_geth_node(data_dir, mine=mine)
 
+    click.echo("Running: '{0}'".format(' '.join(command)))
+
     stdout_queue = Queue()
     stdout_thread = Thread(target=enqueue_output, args=(proc.stdout, stdout_queue))
     stdout_thread.daemon = True
@@ -207,14 +209,18 @@ def chain_run(name, mine):
             try:
                 out_line = stdout_queue.get_nowait()
             except Empty:
-                time.sleep(0.2)
+                out_line = ''
             else:
-                click.echo(out_line)
+                click.echo(out_line, nl=False)
+
             try:
                 err_line = stderr_queue.get_nowait()
             except Empty:
-                time.sleep(0.2)
+                err_line = None
             else:
-                click.echo(err_line)
+                click.echo(err_line, nl=False)
+
+            if err_line is None and out_line is None:
+                time.sleep(0.2)
     except KeyboardInterrupt:
         proc.terminate()

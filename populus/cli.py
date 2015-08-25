@@ -1,5 +1,6 @@
 import os
 import time
+import signal
 
 import pytest
 
@@ -23,6 +24,7 @@ from populus.geth import (
     geth_wrapper,
     run_geth_node,
     ensure_account_exists,
+    reset_chain,
 )
 
 
@@ -163,16 +165,26 @@ def chain():
     pass
 
 
-def enqueue_output(stream, queue):
-    for line in iter(stream.readline, b''):
-        queue.put(line)
-    stream.close()
+@chain.command('reset')
+@click.argument('name', nargs=1, default="default")
+@click.option('--confirm/--no-confirm', default=True)
+def chain_reset(name, confirm):
+    """
+    Reset a test chain
+    """
+    data_dir = get_geth_data_dir(os.getcwd(), name)
+    if confirm and not click.confirm("Are you sure you want to reset blockchain '{0}': {1}".format(name, data_dir)):
+        raise click.Abort()
+    reset_chain(data_dir)
 
 
 @chain.command('run')
 @click.argument('name', nargs=1, default="default")
 @click.option('--mine/--no-mine', default=True)
 def chain_run(name, mine):
+    """
+    Run a geth node.
+    """
     data_dir = get_geth_data_dir(os.getcwd(), name)
 
     if not os.path.exists(data_dir):
@@ -202,4 +214,25 @@ def chain_run(name, mine):
             if err_line is None and out_line is None:
                 time.sleep(0.2)
     except KeyboardInterrupt:
-        proc.terminate()
+        try:
+            proc.send_signal(signal.SIGINT)
+            # Give the subprocess a SIGINT and give it a few seconds to
+            # cleanup.
+            utils.wait_for_popen(proc)
+            while not proc.stdout_queue.empty() or not proc.stderr_queue.empty():
+                out_line = proc.get_stdout_nowait()
+                if out_line:
+                    click.echo(out_line, nl=False)
+
+                err_line = proc.get_stderr_nowait()
+                if err_line:
+                    click.echo(err_line, nl=False)
+        except:
+            # Try a harder termination.
+            proc.terminate()
+            utils.wait_for_popen(proc, 2)
+    if proc.poll() is None:
+        # Force it to kill if it hasn't exited already.
+        proc.kill()
+    if proc.returncode:
+        raise click.ClickException("Error shutting down geth process.")

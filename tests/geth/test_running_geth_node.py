@@ -1,5 +1,6 @@
 import os
 import time
+import signal
 
 import pytest
 
@@ -8,6 +9,7 @@ from eth_rpc_client import Client
 from populus.utils import (
     get_open_port,
     ensure_path_exists,
+    wait_for_popen,
 )
 from populus.geth import (
     run_geth_node,
@@ -30,6 +32,8 @@ def project_test04(monkeypatch):
     ensure_path_exists(data_dir)
     reset_chain(data_dir)
 
+    ensure_account_exists(data_dir)
+
     return project_dir
 
 
@@ -40,35 +44,28 @@ def open_port():
 
 def test_running_node(project_test04, open_port):
     data_dir = get_geth_data_dir(project_test04, 'default')
-    ensure_account_exists(data_dir)
 
     command, proc = run_geth_node(data_dir, rpc_port=open_port, mine=False)
     time.sleep(2)
     rpc_client = Client('127.0.0.1', port=open_port)
     coinbase = rpc_client.get_coinbase()
-    proc.terminate()
-    assert coinbase == get_geth_accounts(project_test04)[0]
+    proc.send_signal(signal.SIGINT)
+    wait_for_popen(proc)
+    assert coinbase == get_geth_accounts(data_dir)[0]
 
 
 def test_running_node_and_mining(project_test04, open_port):
     data_dir = get_geth_data_dir(project_test04, 'default')
-    ensure_account_exists(data_dir)
 
     command, proc = run_geth_node(data_dir, rpc_port=open_port, mine=True)
     time.sleep(2)
     rpc_client = Client('127.0.0.1', port=open_port)
-    try:
-        block_num = rpc_client.get_block_number()
-    except Exception as arst:
-        proc.terminate()
-        time.sleep(1)
-        arst, tsra = proc.communicate()
-        import ipdb; ipdb.set_trace()
-        raise
-    time.sleep(5)
+    block_num = rpc_client.get_block_number()
     start = time.time()
     while time.time() < start + 5:
         time.sleep(0.2)
         if rpc_client.get_block_number() > block_num:
             break
     assert block_num < rpc_client.get_block_number()
+    proc.send_signal(signal.SIGINT)
+    wait_for_popen(proc)

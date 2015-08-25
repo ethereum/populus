@@ -2,6 +2,7 @@ import os
 import shutil
 import json
 import socket
+import time
 
 
 CONTRACTS_DIR = "./contracts/"
@@ -93,3 +94,10 @@ def get_open_port():
     port = sock.getsockname()[1]
     sock.close()
     return str(port)
+
+
+def wait_for_popen(proc, max_wait=5):
+    wait_till = time.time() + 5
+    while time.time() < wait_till:
+        if proc.poll() is not None:
+            break

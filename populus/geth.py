@@ -36,6 +36,8 @@ def enqueue_stream(stream, queue):
 
 
 class PopenWrapper(subprocess.Popen):
+    _locked = False
+
     def __init__(self, args, bufsize=1, stdin=subprocess.PIPE,
                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs):
         super(PopenWrapper, self).__init__(args, bufsize=bufsize, stdin=stdin,
@@ -70,27 +72,16 @@ class PopenWrapper(subprocess.Popen):
             return None
 
     def communicate(self, *args, **kwargs):
-        stdoutdata, stderrdata = super(PopenWrapper, self).communicate(*args, **kwargs)
-        while True:
-            outline = self.get_stdout_nowait()
-            if outline is None:
-                break
-            stdoutdata += outline
-        while True:
-            err_line = self.get_stderr_nowait()
-            if err_line is None:
-                break
-            stderrdata += err_line
-        return stdoutdata, stderrdata
+        raise ValueError("Cannot communicate with a PopenWrapper")
 
 
 DEFAULT_PW_PATH = os.path.join(POPULUS_DIR, 'default_blockchain_password')
 
 
-def geth_wrapper(data_dir, cmd="geth", genesis_block=None, miner_threads='1',
-                 extra_args=None, max_peers='0', network_id='123456',
-                 no_discover=True, mine=False, nice=True, unlock='0',
-                 password=DEFAULT_PW_PATH):
+def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
+                 genesis_block=None, miner_threads='1', extra_args=None,
+                 max_peers='0', network_id='123456', no_discover=True,
+                 mine=False, nice=True, unlock='0', password=DEFAULT_PW_PATH):
     if nice and is_nice_available():
         command = ['nice', '-n', '20', cmd]
     else:
@@ -129,7 +120,7 @@ def geth_wrapper(data_dir, cmd="geth", genesis_block=None, miner_threads='1',
     if extra_args:
         command.extend(extra_args)
 
-    proc = PopenWrapper(
+    proc = popen_class(
         command,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
@@ -173,8 +164,10 @@ def create_geth_account(data_dir, **kwargs):
 
 
 def ensure_account_exists(data_dir):
-    if not get_geth_accounts(data_dir):
-        create_geth_account(data_dir)
+    accounts = get_geth_accounts(data_dir)
+    if not accounts:
+        return create_geth_account(data_dir)
+    return accounts[0]
 
 
 account_regex = re.compile('\{([a-f0-9]{40})\}')
@@ -197,7 +190,8 @@ def run_geth_node(data_dir, rpc_server=True, rpc_addr=None, rpc_port=None, **kwa
     if rpc_port is not None:
         extra_args.extend(('--rpcport', rpc_port))
 
-    command, proc = geth_wrapper(data_dir, extra_args=extra_args, **kwargs)
+    command, proc = geth_wrapper(data_dir, popen_class=PopenWrapper,
+                                 extra_args=extra_args, **kwargs)
     return command, proc
 
 
@@ -211,5 +205,5 @@ def reset_chain(data_dir):
     nodekey_path = os.path.join(data_dir, 'nodekey')
     utils.remove_file_if_exists(nodekey_path)
 
-    geth_ipc_path = os.path.join(data_dir, 'geth_ipc')
+    geth_ipc_path = os.path.join(data_dir, 'geth.ipc')
     utils.remove_file_if_exists(geth_ipc_path)

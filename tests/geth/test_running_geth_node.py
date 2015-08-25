@@ -5,9 +5,15 @@ import pytest
 
 from eth_rpc_client import Client
 
+from populus.utils import (
+    get_open_port,
+    ensure_path_exists,
+)
 from populus.geth import (
     run_geth_node,
     get_geth_data_dir,
+    reset_chain,
+    ensure_account_exists,
 )
 
 
@@ -18,25 +24,44 @@ PROJECTS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'project
 def project_test04(monkeypatch):
     project_dir = os.path.join(PROJECTS_DIR, 'test-04')
     monkeypatch.chdir(project_dir)
+
+    data_dir = get_geth_data_dir(project_dir, 'default')
+    ensure_path_exists(data_dir)
+    reset_chain(data_dir)
+
     return project_dir
 
 
-def test_running_node(project_test04):
+@pytest.fixture
+def open_port():
+    return get_open_port()
+
+
+def test_running_node(project_test04, open_port):
     data_dir = get_geth_data_dir(project_test04, 'default')
 
-    proc = run_geth_node(data_dir, rpc_port="8547")
-    rpc_client = Client('127.0.0.1', port="8547")
+    command, proc = run_geth_node(data_dir, rpc_port=open_port)
+    rpc_client = Client('127.0.0.1', port=open_port)
     coinbase = rpc_client.get_coinbase()
     proc.terminate()
     assert coinbase == '0xae71658b3ab452f7e4f03bda6f777b860b2e2ff2'
 
 
-def test_running_node_and_mining(project_test04):
+def test_running_node_and_mining(project_test04, open_port):
     data_dir = get_geth_data_dir(project_test04, 'default')
+    ensure_account_exists(data_dir)
 
-    proc = run_geth_node(data_dir, rpc_port="8547", mine=True)
-    rpc_client = Client('127.0.0.1', port="8547")
-    block_num = rpc_client.get_block_number()
+    command, proc = run_geth_node(data_dir, rpc_port=open_port, mine=True)
+    time.sleep(2)
+    rpc_client = Client('127.0.0.1', port=open_port)
+    try:
+        block_num = rpc_client.get_block_number()
+    except Exception as arst:
+        proc.terminate()
+        time.sleep(1)
+        arst, tsra = proc.communicate()
+        import ipdb; ipdb.set_trace()
+        raise
     time.sleep(5)
     start = time.time()
     while time.time() < start + 5:

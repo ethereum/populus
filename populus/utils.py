@@ -1,5 +1,6 @@
 import os
 import json
+import socket
 
 
 CONTRACTS_DIR = "./contracts/"
@@ -73,3 +74,11 @@ def is_executable_available(program):
                 return True
 
     return False
+
+
+def get_open_port():
+    sock = socket.socket()
+    sock.bind(('', 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return str(port)

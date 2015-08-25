@@ -163,10 +163,21 @@ from populus.geth import (
     ensure_account_exists,
 )
 
+from threading  import Thread
+
+from Queue import Queue, Empty
+
+
+def enqueue_output(stream, queue):
+    for line in iter(stream.readline, b''):
+        queue.put(line)
+    stream.close()
+
 
 @chain.command('run')
 @click.argument('name', nargs=1, default="default")
-def chain_run(name):
+@click.option('--mine/--no-mine', default=True)
+def chain_run(name, mine):
     data_dir = get_geth_data_dir(os.getcwd(), name)
 
     if not os.path.exists(data_dir):
@@ -179,6 +190,31 @@ def chain_run(name):
 
     ensure_account_exists(data_dir)
 
-    command, proc = run_geth_node(data_dir, mine=True)
-    import ipdb; ipdb.set_trace()
-    x = 3
+    command, proc = run_geth_node(data_dir, mine=mine)
+
+    stdout_queue = Queue()
+    stdout_thread = Thread(target=enqueue_output, args=(proc.stdout, stdout_queue))
+    stdout_thread.daemon = True
+    stdout_thread.start()
+
+    stderr_queue = Queue()
+    stderr_thread = Thread(target=enqueue_output, args=(proc.stderr, stderr_queue))
+    stderr_thread.daemon = True
+    stderr_thread.start()
+
+    try:
+        while True:
+            try:
+                out_line = stdout_queue.get_nowait()
+            except Empty:
+                time.sleep(0.2)
+            else:
+                click.echo(out_line)
+            try:
+                err_line = stderr_queue.get_nowait()
+            except Empty:
+                time.sleep(0.2)
+            else:
+                click.echo(err_line)
+    except KeyboardInterrupt:
+        proc.terminate()

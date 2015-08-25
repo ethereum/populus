@@ -1,4 +1,5 @@
 import os
+import shutil
 import re
 import functools
 import subprocess
@@ -66,7 +67,13 @@ def geth_wrapper(data_dir, cmd="geth", genesis_block=None, miner_threads='1',
     if extra_args:
         command.extend(extra_args)
 
-    proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(
+        command,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        bufsize=1,
+    )
     return command, proc
 
 
@@ -130,3 +137,9 @@ def run_geth_node(data_dir, rpc_server=True, rpc_addr=None, rpc_port=None, **kwa
 
     command, proc = geth_wrapper(data_dir, extra_args=extra_args, **kwargs)
     return command, proc
+
+
+def reset_chain(data_dir):
+    blockchain_dir = os.path.join(data_dir, 'chaindata')
+    if os.path.exists(blockchain_dir):
+        shutil.rmtree(blockchain_dir)

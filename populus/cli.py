@@ -18,6 +18,13 @@ from populus.compilation import (
     compile_and_write_contracts,
 )
 
+from populus.geth import (
+    get_geth_data_dir,
+    geth_wrapper,
+    run_geth_node,
+    ensure_account_exists,
+)
+
 
 class ContractChangedEventHandler(FileSystemEventHandler):
     """
@@ -156,18 +163,6 @@ def chain():
     pass
 
 
-from populus.geth import (
-    get_geth_data_dir,
-    geth_wrapper,
-    run_geth_node,
-    ensure_account_exists,
-)
-
-from threading  import Thread
-
-from Queue import Queue, Empty
-
-
 def enqueue_output(stream, queue):
     for line in iter(stream.readline, b''):
         queue.put(line)
@@ -194,30 +189,14 @@ def chain_run(name, mine):
 
     click.echo("Running: '{0}'".format(' '.join(command)))
 
-    stdout_queue = Queue()
-    stdout_thread = Thread(target=enqueue_output, args=(proc.stdout, stdout_queue))
-    stdout_thread.daemon = True
-    stdout_thread.start()
-
-    stderr_queue = Queue()
-    stderr_thread = Thread(target=enqueue_output, args=(proc.stderr, stderr_queue))
-    stderr_thread.daemon = True
-    stderr_thread.start()
-
     try:
         while True:
-            try:
-                out_line = stdout_queue.get_nowait()
-            except Empty:
-                out_line = ''
-            else:
+            out_line = proc.get_stdout_nowait()
+            if out_line:
                 click.echo(out_line, nl=False)
 
-            try:
-                err_line = stderr_queue.get_nowait()
-            except Empty:
-                err_line = None
-            else:
+            err_line = proc.get_stderr_nowait()
+            if err_line:
                 click.echo(err_line, nl=False)
 
             if err_line is None and out_line is None:

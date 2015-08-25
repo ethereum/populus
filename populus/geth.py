@@ -1,8 +1,9 @@
 import os
-import shutil
 import re
 import functools
 import subprocess
+from threading  import Thread
+from Queue import Queue, Empty
 
 from populus import utils
 
@@ -23,6 +24,64 @@ def get_blockchains_dir(project_dir):
 def get_geth_data_dir(project_dir, name):
     blockchains_dir = get_blockchains_dir(project_dir)
     return os.path.join(blockchains_dir, name)
+
+
+def enqueue_stream(stream, queue):
+    """
+    Synchronously reads the output from a stream (stdout, stderr) and puts it
+    onto the queue to be read.
+    """
+    for line in iter(stream.readline, b''):
+        queue.put(line)
+
+
+class PopenWrapper(subprocess.Popen):
+    def __init__(self, args, bufsize=1, stdin=subprocess.PIPE,
+                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs):
+        super(PopenWrapper, self).__init__(args, bufsize=bufsize, stdin=stdin,
+                                           stdout=stdout, stderr=stderr,
+                                           **kwargs)
+        self.stdout_queue = Queue()
+        self.stdout_thread = Thread(
+            target=enqueue_stream,
+            args=(self.stdout, self.stdout_queue),
+        )
+        self.stdout_thread.daemon = True
+        self.stdout_thread.start()
+
+        self.stderr_queue = Queue()
+        self.stderr_thread = Thread(
+            target=enqueue_stream,
+            args=(self.stderr, self.stderr_queue),
+        )
+        self.stderr_thread.daemon = True
+        self.stderr_thread.start()
+
+    def get_stdout_nowait(self):
+        try:
+            return self.stdout_queue.get_nowait()
+        except Empty:
+            return None
+
+    def get_stderr_nowait(self):
+        try:
+            return self.stderr_queue.get_nowait()
+        except Empty:
+            return None
+
+    def communicate(self, *args, **kwargs):
+        stdoutdata, stderrdata = super(PopenWrapper, self).communicate(*args, **kwargs)
+        while True:
+            outline = self.get_stdout_nowait()
+            if outline is None:
+                break
+            stdoutdata += outline
+        while True:
+            err_line = self.get_stderr_nowait()
+            if err_line is None:
+                break
+            stderrdata += err_line
+        return stdoutdata, stderrdata
 
 
 DEFAULT_PW_PATH = os.path.join(POPULUS_DIR, 'default_blockchain_password')
@@ -70,7 +129,7 @@ def geth_wrapper(data_dir, cmd="geth", genesis_block=None, miner_threads='1',
     if extra_args:
         command.extend(extra_args)
 
-    proc = subprocess.Popen(
+    proc = PopenWrapper(
         command,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,

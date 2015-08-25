@@ -50,5 +50,5 @@ def test_multiple_accounts(project_test02):
 
 def test_no_accounts(project_test03):
     chain_dir = get_geth_data_dir(project_test03, 'default')
-    with pytest.raises(ValueError):
-        get_geth_accounts(data_dir=chain_dir)
+    accounts = get_geth_accounts(data_dir=chain_dir)
+    assert accounts == tuple()

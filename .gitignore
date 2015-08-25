@@ -40,3 +40,9 @@ output/*/index.html
 
 # Sphinx
 docs/_build
+
+# Blockchain
+**/chains/*/nodes/*
+**/chains/*/nodekey
+**/chains/*/dapp/*
+**/chains/*/chaindata/*

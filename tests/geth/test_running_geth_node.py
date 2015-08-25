@@ -12,6 +12,7 @@ from populus.utils import (
     wait_for_popen,
 )
 from populus.geth import (
+    is_geth_available,
     run_geth_node,
     get_geth_data_dir,
     get_geth_accounts,
@@ -21,6 +22,12 @@ from populus.geth import (
 
 
 PROJECTS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'projects')
+
+
+skip_if_no_geth = pytest.mark.skipif(
+    not is_geth_available(),
+    reason="'geth' not available",
+)
 
 
 @pytest.fixture
@@ -42,7 +49,8 @@ def open_port():
     return get_open_port()
 
 
-def test_running_node(project_test04, open_port):
+@skip_if_no_geth
+def test_running_node_without_mining(project_test04, open_port):
     data_dir = get_geth_data_dir(project_test04, 'default')
 
     command, proc = run_geth_node(data_dir, rpc_port=open_port, mine=False)
@@ -54,6 +62,7 @@ def test_running_node(project_test04, open_port):
     assert coinbase == get_geth_accounts(data_dir)[0]
 
 
+@skip_if_no_geth
 def test_running_node_and_mining(project_test04, open_port):
     data_dir = get_geth_data_dir(project_test04, 'default')
 
@@ -62,7 +71,7 @@ def test_running_node_and_mining(project_test04, open_port):
     rpc_client = Client('127.0.0.1', port=open_port)
     block_num = rpc_client.get_block_number()
     start = time.time()
-    while time.time() < start + 5:
+    while time.time() < start + 10:
         time.sleep(0.2)
         if rpc_client.get_block_number() > block_num:
             break

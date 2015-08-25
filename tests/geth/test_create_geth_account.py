@@ -4,6 +4,7 @@ import shutil
 import pytest
 
 from populus.geth import (
+    is_geth_available,
     create_geth_account,
     get_geth_accounts,
     get_geth_data_dir,
@@ -11,6 +12,12 @@ from populus.geth import (
 
 
 PROJECTS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'projects')
+
+
+skip_if_no_geth = pytest.mark.skipif(
+    not is_geth_available(),
+    reason="'geth' not available",
+)
 
 
 @pytest.fixture
@@ -23,6 +30,7 @@ def project_test05(monkeypatch):
     return project_dir
 
 
+@skip_if_no_geth
 def test_create_get_account(project_test05):
     data_dir = get_geth_data_dir(project_test05, 'default')
     os.mkdir(data_dir)

@@ -9,7 +9,7 @@ Contents:
 
 .. toctree::
 
-   overview
+   populus.overview
    populus.testing
    populus.testing-fixtures
    populus.contracts

@@ -3,12 +3,19 @@ import os
 import pytest
 
 from populus.geth import (
+    is_geth_available,
     get_geth_accounts,
     get_geth_data_dir,
 )
 
 
 PROJECTS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'projects')
+
+
+skip_if_no_geth = pytest.mark.skipif(
+    not is_geth_available(),
+    reason="'geth' not available",
+)
 
 
 @pytest.fixture
@@ -32,12 +39,14 @@ def project_test03(monkeypatch):
     return project_dir
 
 
+@skip_if_no_geth
 def test_single_account(project_test01):
     chain_dir = get_geth_data_dir(project_test01, 'default')
     accounts = get_geth_accounts(data_dir=chain_dir)
     assert accounts == ('0xae71658b3ab452f7e4f03bda6f777b860b2e2ff2',)
 
 
+@skip_if_no_geth
 def test_multiple_accounts(project_test02):
     chain_dir = get_geth_data_dir(project_test02, 'default')
     accounts = get_geth_accounts(data_dir=chain_dir)
@@ -48,6 +57,7 @@ def test_multiple_accounts(project_test02):
     )
 
 
+@skip_if_no_geth
 def test_no_accounts(project_test03):
     chain_dir = get_geth_data_dir(project_test03, 'default')
     accounts = get_geth_accounts(data_dir=chain_dir)

@@ -191,3 +191,85 @@ directory of your project using the compiled contracts currently found in the
     tests/test_example.py::test_contract_function_return_values PASSED
 
     ================================ 2 passed in 0.82 seconds =================================
+
+
+Chain
+~~~~~
+
+Populus provides a wrapper around ``geth`` to facilitate management of
+ephemeral test chains.  These commands are accessed through ``$ populus chain``
+
+The blockchains that populus manages for you are stored in ``./chains`` in the
+projec root.  All ``chain`` commands will operate on the 'default' chain.  You
+can specify alternate chains by adding a name to the end of the command.
+
+Each blockchain will have one account generated for it.
+
+* ``$ populus chain run`` - Run a geth node backed by the 'default' test chain.
+* ``$ populus chain run test1`` - Run a geth node backed by the 'test1' test
+  chain which will be stored at ``./chains/test1/`` relative to your project
+  root.
+* ``$ populus chain reset`` - Reset the 'default' chain (truncates the
+  blockchain, preserves accounts)
+* ``$ populus chain reset test01`` - Reset the 'test1' chain (truncates the
+  blockchain, preserves accounts)
+
+
+Web
+~~~
+
+Populus provides utilies for running a development webserver for DApp
+development.  These commands are accessed via ``$ populus web``
+
+Initialization
+^^^^^^^^^^^^^^
+
+You can initialize the html/css/js portions of your project with ``$populus web init``.
+
+This will create ``html`` and ``assets`` directories in your project root. As
+well as an ``./html/index.html`` document.
+
+
+.. code-block:: shell
+    ├── project root
+    │   ├── html
+    │   │   └── index.html
+    │   └── assets
+    │       └── ....
+
+
+Runserver
+^^^^^^^^^
+
+Use ``$ populus web runserver`` to run the development server.
+
+
+Static assets
+"""""""""""""
+
+The development server is a simple flask application that serves your
+``./html/index.html`` document as well as providing access to the static assets
+in the ``./assets/`` directory.  All of the assets in that directory can be
+accessed in your html document prefixed with the url ``/static/``.  For
+example, the css file ``./assets/css/base.css`` would be accessible with the
+url ``/static/css/base.css``.
+
+The ``runserver`` command also watches for changes to your contracts and
+assets, recompiling, or recollecting assets as necessary.
+
+web3.js
+"""""""
+
+Populus includes a vendored version of ``web3.js``.  If you would like to
+provide your own, simply place it at ``./assets/js/web3.js`` and your version
+will be used instead.
+
+
+javascript contracts
+""""""""""""""""""""
+
+All of your contracts are accessible via the ``contracts`` object which is
+available in the global javascript scope.  This is provided by a generated
+``js/contracts.js`` file.
+
+.. warning:: if you place a file at ``./assets/js/contracts.js`` then you will have overridden the generated javascript file that provides access to your contracts.

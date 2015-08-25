@@ -33,7 +33,8 @@ setup(
         "eth-testrpc>=0.1.16",
         "pytest>=2.7.2",
         "ethereum-rpc-client>=0.1.2",
-        "watchdog==0.8.3",
+        "watchdog>=0.8.3",
+        "Flask>=0.10.1",
     ],
     dependency_links=[
         # Until https://github.com/ethereum/ethash/issues/72 is resolved

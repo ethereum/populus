@@ -5,5 +5,5 @@ https://github.com/ethereum/ethash/archive/v23.1.tar.gz
 eth-testrpc>=0.1.16
 pytest>=2.7.2
 requests>=2.7.0
-watchdog==0.8.3
-Flask==0.10.1
+watchdog>=0.8.3
+Flask>=0.10.1

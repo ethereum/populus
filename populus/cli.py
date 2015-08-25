@@ -233,7 +233,7 @@ def chain_reset(name, confirm):
     Reset a test chain
     """
     data_dir = get_geth_data_dir(os.getcwd(), name)
-    if confirm and not click.confirm("Are you sure you want to reset blockchain '{0}': {1}".format(name, data_dir)):
+    if confirm and not click.confirm("Are you sure you want to reset blockchain '{0}': {1}".format(name, data_dir)):  # NOQA
         raise click.Abort()
     reset_chain(data_dir)
 
@@ -250,7 +250,7 @@ def chain_run(name, mine):
     if not os.path.exists(data_dir):
         if name == 'default':
             utils.ensure_path_exists(data_dir)
-        elif click.confirm("The chain '{0}' does not exist.  Would you like to create it?".format(name)):
+        elif click.confirm("The chain '{0}' does not exist.  Would you like to create it?".format(name)):  # NOQA
             utils.ensure_path_exists(data_dir)
         else:
             raise click.UsageError("Unknown chain '{0}'".format(name))

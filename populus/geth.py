@@ -2,7 +2,7 @@ import os
 import re
 import functools
 import subprocess
-from threading  import Thread
+from threading import Thread
 from Queue import Queue, Empty
 
 from populus import utils

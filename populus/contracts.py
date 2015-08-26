@@ -66,6 +66,20 @@ def decode_multi(types, outputs):
     return res
 
 
+def strip_0x_prefix(value):
+    if value.startswith('0x'):
+        return value[2:]
+    return value
+
+
+def clean_args(*args):
+    for _type, arg in args:
+        if _type == 'address':
+            yield strip_0x_prefix(arg)
+        else:
+            yield arg
+
+
 class Function(object):
     def __init__(self, name, inputs=None, outputs=None, constant=False):
         self.name = name
@@ -119,7 +133,10 @@ class Function(object):
         """
         Given the calling `args` for the function call, abi encode them.
         """
-        return abi.encode_abi(self.input_types, args)
+        if len(self.input_types) != len(args):
+            raise ValueError("Expected {0} arguments, only got {1}".format(len(self.input_types), len(args)))  # NOQA
+        scrubbed_args = tuple(clean_args(*zip(self.input_types, args)))
+        return abi.encode_abi(self.input_types, scrubbed_args)
 
     def get_call_data(self, args):
         """

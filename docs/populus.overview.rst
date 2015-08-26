@@ -35,13 +35,17 @@ By default populus expects a project to be layed out as follows.
     ├── project root
     │   ├── build
     │   │   └── contracts.json
-    │   └── contracts
-    │       ├── MyContract.sol
-    |       ├── ....
-    │   └── tests
-    │       ├── test_my_contract.py
-    │       ├── test_some_other_tests.py
-    |       ├── ....
+    │   ├── contracts
+    │   |   ├── MyContract.sol
+    |   |   ├── ....
+    │   ├── tests
+    │   |   ├── test_my_contract.py
+    │   |   ├── test_some_other_tests.py
+    |   |   ├── ....
+    │   ├── html
+    │   │   └── index.html
+    │   └── assets
+    │       └── ....
 
 
 Command Line Options
@@ -56,10 +60,25 @@ Command Line Options
       --help  Show this message and exit.
 
     Commands:
-      compile  Compile contracts.
+      chain    Wrapper around `geth`.
+      compile  Compile project contracts, storing their...
       deploy   Deploy contracts.
-      test     Test contracts (wrapper around py-test)
+      init     Generate project layout with an example...
+      test     Test contracts (wrapper around py.test)
+      web      HTML/CSS/JS tooling.
 
+
+Initialize
+~~~~~~~~~~
+
+Running ``$ populus init`` will initialize the current directory with the
+default project layout that populus uses.
+
+* ``./contracts/``
+* ``./contracts/Example.sol``
+* ``./tests/test_examply.py``
+* ``./html/index.html``
+* ``./assets/``
 
 Compile
 ~~~~~~~

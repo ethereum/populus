@@ -224,10 +224,6 @@ class ContractBase(object):
 
         return data
 
-    @classmethod
-    def at(cls, address, rpc_client):
-        return cls(address, rpc_client)
-
     #
     #  Instance Methods
     #

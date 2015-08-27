@@ -43,3 +43,29 @@ compiled contracts in your project.
 
 Deployed instances your contracts.  These contracts are deployed onto a
 ``testrpc`` server.
+
+
+``geth_node`` - A running ``geth`` node.
+----------------------------------------
+
+This is a module level fixture that has a geth node running against the test
+chain at ``./chains/default-test/``.
+
+This fixture can be configured by setting the following variables at the top
+level of the module in which you are using this fixture.
+
+* ``geth_project_dir`` - The path that should be considered the root of your
+  project.  Default: ``os.getcwd()``.
+* ``geth_chain_name`` - The name of the test chain that should be used.
+  Default: ``default-test``
+* ``geth_reset_chain`` - Boolean for whether the chain should be reset before
+  starting the ``geth`` node.  Default ``True``
+
+.. warning:: This fixture is really slow.  It can take multiple seconds to initialize and cleanup.
+
+
+``geth_coinbase`` - The coinbase of the running geth node.
+----------------------------------------------------------
+
+This is a convenience fixture that returns the coinbase of the testing geth
+node.

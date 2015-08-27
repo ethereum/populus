@@ -6,10 +6,9 @@ import signal
 import pytest
 
 
-@pytest.fixture(scope="session")
-def eth_coinbase():
-    from ethereum import tester
-    return tester.encode_hex(tester.accounts[0])
+@pytest.fixture(scope="module")
+def eth_coinbase(rpc_client):
+    return rpc_client.get_coinbase()
 
 
 @pytest.yield_fixture(scope="module")
@@ -98,15 +97,17 @@ def rpc_server():
     server.server_close()
 
 
-@pytest.fixture(scope="session")
-def rpc_client():
+@pytest.fixture(scope="module")
+def rpc_client(request):
     from eth_rpc_client import Client
-    client = Client('127.0.0.1', '8545')
+    rpc_hostname = getattr(request.module, 'rpc_server_host', '127.0.0.1')
+    rpc_port = getattr(request.module, 'rpc_server_port', '8545')
+    client = Client(rpc_hostname, rpc_port)
     return client
 
 
 @pytest.fixture(scope="module")
-def contracts(request, rpc_client):
+def contracts(request):
     from populus.utils import load_contracts
     from populus.contracts import Contract
 
@@ -115,7 +116,7 @@ def contracts(request, rpc_client):
     contracts = load_contracts(project_dir)
 
     contract_classes = {
-        name: Contract(rpc_client, name, contract) for name, contract in contracts.items()
+        name: Contract(contract_meta, name) for name, contract_meta in contracts.items()
     }
 
     _dict = {
@@ -147,7 +148,7 @@ def module_rpc_server():
 
 
 @pytest.fixture(scope="module")
-def deployed_contracts(request, eth_coinbase, rpc_client, module_rpc_server, contracts):
+def deployed_contracts(request, rpc_client, contracts):
     _dict = {}
 
     for contract_name, contract_class in contracts:

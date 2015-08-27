@@ -2,6 +2,7 @@ import time
 import binascii
 import copy
 import hashlib
+import itertools
 
 from ethereum import utils as ethereum_utils
 from ethereum import abi
@@ -140,18 +141,19 @@ class Function(object):
 
         return decode_single(output_type, outputs)
 
-    def bind(self, contract):
+    def _bind(self, contract):
         self._contract = contract
 
     @property
     def contract(self):
         if self._contract is None:
             raise AttributeError("Function not bound to a contract")
+        return self._contract
 
     def __get__(self, obj, type=None):
         if obj is None:
             return self
-        else self._contract is None:
+        else:
             return obj._meta.functions[self.name]
 
     def __call__(self, *args, **kwargs):
@@ -170,7 +172,7 @@ class Function(object):
 
     def call(self, *args, **kwargs):
         raw = kwargs.pop('raw', False)
-        data = self.function.get_call_data(args)
+        data = self.get_call_data(args)
 
         output = self.contract._meta.rpc_client.call(
             to=self.contract._meta.address,
@@ -203,12 +205,11 @@ class Event(object):
 
 class ContractBase(object):
     def __init__(self, address, rpc_client):
-        functions = {fn.name: fn for fn in copy.copy(self._config._functions)}
-        events = {e.name: e for e in copy.copy(self._config._events)}
-        constructor = copy.copy(self._config._constructor)
-        for obj in itertools.chain(functions.values(), events.values(), (constructor,)):
-            obj.bind(self)
-        self._meta = ContractMeta(address, rpc_client, functions, events, constructor)
+        functions = {fn.name: fn for fn in (copy.copy(f) for f in self._config._functions)}
+        events = {ev.name: ev for ev in (copy.copy(e) for e in self._config._events)}
+        for obj in itertools.chain(functions.values(), events.values()):
+            obj._bind(self)
+        self._meta = ContractMeta(address, rpc_client, functions, events)
 
     def __str__(self):
         return "{name}({address})".format(name=self.__class__.__name__, address=self.address)
@@ -217,7 +218,9 @@ class ContractBase(object):
     def get_deploy_data(cls, *args):
         data = cls._config.code
         if args:
-            data += ethereum_utils.encode_hex(cls.constructor.abi_args_signature(args))
+            if cls._config.constructor is None:
+                raise ValueError("This contract does not appear to have a constructor")
+            data += ethereum_utils.encode_hex(cls._config.constructor.abi_args_signature(args))
 
         return data
 
@@ -229,19 +232,18 @@ class ContractBase(object):
     #  Instance Methods
     #
     def get_balance(self, block="latest"):
-        return self.client.get_balance(self.address, block=block)
+        return self._meta.rpc_client.get_balance(self._meta.address, block=block)
 
 
 class ContractMeta(object):
     """
     Instance level contract data.
     """
-    def __init__(self, address, rpc_client=None, functions, events, constructor):
+    def __init__(self, address, rpc_client, functions, events):
         self.address = address
         self.rpc_client = rpc_client
         self.functions = functions
         self.events = events
-        self.constructor = constructor
 
 
 class Config(object):
@@ -254,7 +256,7 @@ class Config(object):
         self.abi = abi
         self._functions = functions
         self._events = events
-        self._constructor = constructor
+        self.constructor = constructor
 
 
 def Contract(contract_meta, contract_name=None):

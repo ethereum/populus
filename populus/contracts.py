@@ -1,37 +1,11 @@
+import time
 import binascii
+import copy
+import hashlib
+import itertools
+
 from ethereum import utils as ethereum_utils
 from ethereum import abi
-
-
-class BoundFunction(object):
-    def __init__(self, function, client, address):
-        self.function = function
-        self.client = client
-        self.address = address
-
-    def __str__(self):
-        return str(self.function)
-
-    def __call__(self, *args, **kwargs):
-        return self.sendTransaction(*args, **kwargs)
-
-    def sendTransaction(self, *args, **kwargs):
-        data = self.function.get_call_data(args)
-
-        return self.client.send_transaction(
-            to=self.address,
-            data=data,
-            **kwargs
-        )
-
-    def call(self, *args, **kwargs):
-        raw = kwargs.pop('raw', False)
-        data = self.function.get_call_data(args)
-
-        output = self.client.call(to=self.address, data=data, **kwargs)
-        if raw:
-            return output
-        return self.function.cast_return_data(output)
 
 
 def decode_single(typ, data):
@@ -89,6 +63,8 @@ def clean_args(*args):
 
 
 class Function(object):
+    _contract = None
+
     def __init__(self, name, inputs=None, outputs=None, constant=False):
         self.name = name
         self.inputs = inputs
@@ -103,6 +79,9 @@ class Function(object):
             )
         )
         return signature
+
+    def __copy__(self):
+        return self.__class__(self.name, self.inputs, self.outputs, self.constant)
 
     @property
     def input_types(self):
@@ -162,16 +141,47 @@ class Function(object):
 
         return decode_single(output_type, outputs)
 
+    def _bind(self, contract):
+        self._contract = contract
+
+    @property
+    def contract(self):
+        if self._contract is None:
+            raise AttributeError("Function not bound to a contract")
+        return self._contract
+
     def __get__(self, obj, type=None):
         if obj is None:
             return self
-        bound_function = BoundFunction(
-            function=self,
-            client=obj.client,
-            address=obj.address,
+        else:
+            return obj._meta.functions[self.name]
+
+    def __call__(self, *args, **kwargs):
+        if self.constant:
+            return self.call(*args, **kwargs)
+        return self.sendTransaction(*args, **kwargs)
+
+    def sendTransaction(self, *args, **kwargs):
+        data = self.get_call_data(args)
+
+        return self.contract._meta.rpc_client.send_transaction(
+            to=self.contract._meta.address,
+            data=data,
+            **kwargs
         )
 
-        return bound_function
+    def call(self, *args, **kwargs):
+        raw = kwargs.pop('raw', False)
+        data = self.get_call_data(args)
+
+        output = self.contract._meta.rpc_client.call(
+            to=self.contract._meta.address,
+            data=data,
+            **kwargs
+        )
+        if raw:
+            return output
+        return self.cast_return_data(output)
 
 
 class Event(object):
@@ -194,43 +204,76 @@ class Event(object):
 
 
 class ContractBase(object):
-    def __init__(self, address):
-        self.address = address
+    def __init__(self, address, rpc_client):
+        functions = {fn.name: fn for fn in (copy.copy(f) for f in self._config._functions)}
+        events = {ev.name: ev for ev in (copy.copy(e) for e in self._config._events)}
+        for obj in itertools.chain(functions.values(), events.values()):
+            obj._bind(self)
+        self._meta = ContractMeta(address, rpc_client, functions, events)
 
     def __str__(self):
         return "{name}({address})".format(name=self.__class__.__name__, address=self.address)
 
     @classmethod
-    def deploy(cls, _from=None, gas=None, gas_price=None, value=None, constructor_args=None):
-        data = cls.code
-        if constructor_args:
-            data += ethereum_utils.encode_hex(cls.constructor.abi_args_signature(constructor_args))
+    def get_deploy_data(cls, *args):
+        data = cls._config.code
+        if args:
+            if cls._config.constructor is None:
+                raise ValueError("This contract does not appear to have a constructor")
+            data += ethereum_utils.encode_hex(cls._config.constructor.abi_args_signature(args))
 
-        return cls.client.send_transaction(
-            _from, gas, gas_price, value, data=data,
-        )
+        return data
 
+    #
+    #  Instance Methods
+    #
     def get_balance(self, block="latest"):
-        return self.client.get_balance(self.address, block=block)
+        return self._meta.rpc_client.get_balance(self._meta.address, block=block)
 
 
-def Contract(client, contract_name, contract):
-    _abi = contract['info']['abiDefinition']
-    _dict = {
-        'client': client,
-        'code': contract['code'],
-        'source': contract['info']['source'],
-        'abi': _abi,
-    }
+class ContractMeta(object):
+    """
+    Instance level contract data.
+    """
+    def __init__(self, address, rpc_client, functions, events):
+        self.address = address
+        self.rpc_client = rpc_client
+        self.functions = functions
+        self.events = events
+
+
+class Config(object):
+    """
+    Contract (class) level contract data.
+    """
+    def __init__(self, code, source, abi, functions, events, constructor):
+        self.code = code
+        self.source = source
+        self.abi = abi
+        self._functions = functions
+        self._events = events
+        self.constructor = constructor
+
+
+def Contract(contract_meta, contract_name=None):
+    _abi = contract_meta['info']['abiDefinition']
+    code = contract_meta['code']
+    source = contract_meta['info']['source']
+
+    if contract_name is None:
+        contract_name = "Unknown-{0}".format(hashlib.md5(code).hexdigest())
 
     functions = []
     events = []
+    constructor = None
+
+    _dict = {}
 
     for signature_item in _abi:
         if signature_item['type'] == 'constructor':
             # Constructors don't need to be part of a contract's methods
             if signature_item.get('inputs'):
-                _dict['constructor'] = Function(
+                constructor = Function(
                     name='constructor',
                     inputs=signature_item['inputs'],
                 )
@@ -276,5 +319,29 @@ def Contract(client, contract_name, contract):
     )
 
     _dict['__doc__'] = docstring
+    _dict['_config'] = Config(code, source, _abi, functions, events, constructor)
 
     return type(str(contract_name), (ContractBase,), _dict)
+
+
+def deploy_contract(rpc_client, contract_class, constructor_args=None, **kwargs):
+    if 'data' in kwargs:
+        raise ValueError("Cannot supply `data` for contract deployment")
+
+    if constructor_args is None:
+        constructor_args = []
+
+    kwargs['data'] = contract_class.get_deploy_data(*constructor_args)
+    txn_hash = rpc_client.send_transaction(**kwargs)
+    return txn_hash
+
+
+def get_contract_address_from_txn(rpc_client, txn_hash, max_wait=0):
+    start = time.time()
+    txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
+    while txn_receipt is None and time.time() < start + 0:
+        txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
+
+    if txn_receipt is None:
+        raise ValueError("Transaction not found: '{0}'".format(txn_hash))
+    return txn_receipt['contractAddress']

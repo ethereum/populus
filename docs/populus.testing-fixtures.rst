@@ -3,7 +3,7 @@ pytest fixtures provided by Populus
 
 The following fixtures are available for your tests.
 
-``eth_coinbase`` - The ``coinbase`` account from ``ethereum.tester``
+``test_coinbase`` - The ``coinbase`` account from ``ethereum.tester``
 --------------------------------------------------------------------
 
 The ``hex`` encoded ``coinbase`` from the ``ethereum.tester`` module
@@ -18,11 +18,22 @@ reset at the end of each test run.
 
 The test server is from the ``eth-testrpc`` library.
 
+The server can be configured to run on a different host or port by setting the
+following variables at the top level of your module.
+
+* ``rpc_host`` - default: ``'127.0.0.1'```
+* ``rpc_port`` - default: ``'8545'```
+
 
 ``rpc_client`` - A client for interacting with a ``JSON-RPC`` server
 --------------------------------------------------------------------
 
-A python client for the ``JSON-RPC`` server
+A python client for the ``JSON-RPC`` server.  The hostname and port can be
+configuered by setting the following variable at the top level of your python
+module.
+
+* ``rpc_host`` - default: ``'127.0.0.1'```
+* ``rpc_port`` - default: ``'8545'```
 
 
 ``contracts`` - The compiled project contract classes
@@ -41,8 +52,11 @@ compiled contracts in your project.
 ``deployed_contracts`` - Deployed instances of your compiled contracts
 ----------------------------------------------------------------------
 
-Deployed instances your contracts.  These contracts are deployed onto a
-``testrpc`` server.
+Deployed instances your contracts.
+
+To use this fixture, you must also have a valid JSON RPC server running.  This
+can be accomplished by including either of ``rpc_server`` or ``geth_node``
+fixtures in your test case.
 
 
 ``geth_node`` - A running ``geth`` node.
@@ -60,6 +74,8 @@ level of the module in which you are using this fixture.
   Default: ``default-test``
 * ``geth_reset_chain`` - Boolean for whether the chain should be reset before
   starting the ``geth`` node.  Default ``True``
+* ``rpc_host`` - Value to be used for ``--rpcaddr`` default: ``'127.0.0.1'```
+* ``rpc_port`` - Value to be used for ``--rpcport`` default: ``'8545'```
 
 .. warning:: This fixture is really slow.  It can take multiple seconds to initialize and cleanup.
 

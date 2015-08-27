@@ -38,7 +38,7 @@ def enqueue_stream(stream, queue):
 class PopenWrapper(subprocess.Popen):
     _locked = False
 
-    def __init__(self, args, bufsize=1, stdin=subprocess.PIPE,
+    def __init__(self, args, bufsize='1', stdin=subprocess.PIPE,
                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs):
         super(PopenWrapper, self).__init__(args, bufsize=bufsize, stdin=stdin,
                                            stdout=stdout, stderr=stderr,
@@ -178,20 +178,21 @@ def parse_geth_accounts(raw_accounts_output):
     return tuple('0x' + account for account in accounts)
 
 
-def run_geth_node(data_dir, rpc_server=True, rpc_addr=None, rpc_port=None, **kwargs):
+def run_geth_node(data_dir, rpc_server=True, rpc_addr=None, rpc_port=None,
+                  mine=True, **kwargs):
     extra_args = []
 
     if rpc_server:
         extra_args.append('--rpc')
 
-    if rpc_addr is not None:
-        extra_args.extend(('--rpcaddr', rpc_addr))
+        if rpc_addr is not None:
+            extra_args.extend(('--rpcaddr', rpc_addr))
 
-    if rpc_port is not None:
-        extra_args.extend(('--rpcport', rpc_port))
+        if rpc_port is not None:
+            extra_args.extend(('--rpcport', rpc_port))
 
     command, proc = geth_wrapper(data_dir, popen_class=PopenWrapper,
-                                 extra_args=extra_args, **kwargs)
+                                 extra_args=extra_args, mine=mine, **kwargs)
     return command, proc
 
 

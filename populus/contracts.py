@@ -25,9 +25,12 @@ class BoundFunction(object):
         )
 
     def call(self, *args, **kwargs):
+        raw = kwargs.pop('raw', False)
         data = self.function.get_call_data(args)
 
         output = self.client.call(to=self.address, data=data, **kwargs)
+        if raw:
+            return output
         return self.function.cast_return_data(output)
 
 
@@ -37,11 +40,16 @@ def decode_single(typ, data):
     if base == 'address':
         return '0x' + data[-40:]
     elif base == 'string' or base == 'bytes' or base == 'hash':
-        bytes = ethereum_utils.int_to_32bytearray(int(data, 16))
-        while bytes and bytes[-1] == 0:
-            bytes.pop()
-        if bytes:
-            return ''.join(chr(b) for b in bytes)
+        if sub:
+            bytes = ethereum_utils.int_to_32bytearray(int(data, 16))
+            while bytes and bytes[-1] == 0:
+                bytes.pop()
+            if bytes:
+                return ''.join(chr(b) for b in bytes)
+        else:
+            num_bytes = int(data[64 + 2:128 + 2], 16)
+            bytes_as_hex = data[2 + 128:2 + 128 + (2 * num_bytes)]
+            return ethereum_utils.decode_hex(bytes_as_hex)
     elif base == 'uint':
         return int(data, 16)
     elif base == 'int':
@@ -167,11 +175,22 @@ class Function(object):
 
 
 class Event(object):
+    """
+    {
+        'inputs': [
+            {'indexed': False, 'type': 'bytes32', 'name': 'dataHash'},
+            {'indexed': False, 'type': 'bytes', 'name': 'data'},
+        ],
+        'type': 'event',
+        'name': 'DataRegistered',
+        'anonymous': False,
+    }
+    """
     def __init__(self, name, inputs):
-        assert False, "Not implemented"
+        pass
 
     def __call__(self, *args):
-        assert False, "Not implemented"
+        pass
 
 
 class ContractBase(object):
@@ -233,7 +252,10 @@ def Contract(client, contract_name, contract):
             _dict[signature_item['name']] = func
             functions.append(func)
         elif signature_item['type'] == 'event':
-            event = Event(**signature_item)
+            event = Event(
+                name=signature_item['name'],
+                inputs=signature_item['inputs'],
+            )
             _dict[signature_item['name']] = event
             events.append(event)
         else:

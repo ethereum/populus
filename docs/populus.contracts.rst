@@ -103,10 +103,12 @@ This is aliased to simply calling the ``Function`` instance on the contract.
     ... u'0xe3362ce30b39be0499b8676bb54f8e773fae8b4425c7b9ad4c636a8c06fdf1be'
 
 
-``Function.call(*args, _from=None, gas=None, gas_price=None, value=None)``
+``Function.call(*args, _from=None, gas=None, gas_price=None, value=None, raw=False)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Call the function and get the typed return value.  Does not send a transaction.
+When called with ``raw=True`` the return value will be the raw bytes of the
+return value.
 
 .. code-block:: python
 

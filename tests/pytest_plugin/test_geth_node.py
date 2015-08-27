@@ -28,11 +28,10 @@ def project_test01_dir(monkeypatch):
 
 
 @skip_if_no_geth
-def test_geth_node_as_fixture(geth_coinbase, geth_node, project_test01_dir):
-    rpc_client = Client('127.0.0.1', geth_node.rpc_port)
+def test_geth_node_as_fixture(geth_coinbase, geth_node, project_test01_dir, rpc_client):
     block_number = rpc_client.get_block_number()
     start = time.time()
-    while time.time() < start + 5:
+    while time.time() < start + 10:
         if rpc_client.get_block_number() > block_number:
             break
         else:

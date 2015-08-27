@@ -55,8 +55,8 @@ def math_contract_meta():
     return contract
 
 
-@pytest.fixture
-def Math(math_contract_meta, rpc_client):
+@pytest.fixture(scope="session")
+def Math(math_contract_meta):
     from populus.contracts import Contract
     Math = Contract(math_contract_meta, 'Math')
     return Math
@@ -105,8 +105,8 @@ def named_contract_meta():
     return contract
 
 
-@pytest.fixture
-def Named(named_contract_meta, rpc_client):
+@pytest.fixture(scope="session")
+def Named(named_contract_meta):
     from populus.contracts import Contract
     Named = Contract(named_contract_meta, 'Named')
     return Named

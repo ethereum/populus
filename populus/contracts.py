@@ -164,6 +164,9 @@ class Function(object):
     def sendTransaction(self, *args, **kwargs):
         data = self.get_call_data(args)
 
+        if 'gas' not in kwargs:
+            kwargs['gas'] = get_max_gas(self.contract._meta.rpc_client)
+
         return self.contract._meta.rpc_client.send_transaction(
             to=self.contract._meta.address,
             data=data,
@@ -345,3 +348,10 @@ def get_contract_address_from_txn(rpc_client, txn_hash, max_wait=0):
     if txn_receipt is None:
         raise ValueError("Transaction not found: '{0}'".format(txn_hash))
     return txn_receipt['contractAddress']
+
+
+def get_max_gas(rpc_client, scale=0.95):
+    latest_block = rpc_client.get_block_by_number('latest')
+    max_gas_hex = latest_block['gasLimit']
+    max_gas = int(max_gas_hex, 16)
+    return int(max_gas * scale)

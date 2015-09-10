@@ -84,6 +84,13 @@ def deployed_contracts(request, rpc_client, contracts):
 
     wait_for_block(rpc_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
 
+    deploy_max_first_block_wait = getattr(request.module, 'deploy_max_first_block_wait', 0)
+    start = time.time()
+    while rpc_client.get_block_number() < 1:
+        if time.time() - start > deploy_max_first_block_wait:
+            break
+        time.sleep(1)
+
     for contract_name, contract_class in contracts:
         txn_hash = deploy_contract(rpc_client, contract_class, _from=deploy_address, gas=deploy_gas_limit)
         contract_addr = get_contract_address_from_txn(
@@ -122,10 +129,12 @@ def geth_node(request):
     rpc_port = getattr(request.module, 'rpc_port', '8545')
     rpc_host = getattr(request.module, 'rpc_host', '127.0.0.1')
 
+    geth_max_wait = getattr(request.module, 'geth_max_wait', 5)
+
     command, proc = run_geth_node(data_dir, rpc_addr=rpc_host, rpc_port=rpc_port)
 
     start = time.time()
-    while time.time() < start + 5:
+    while time.time() < start + geth_max_wait:
         output = []
         line = proc.get_output_nowait()
         if line:

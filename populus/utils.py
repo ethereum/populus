@@ -97,7 +97,7 @@ def is_executable_available(program):
 
 def get_open_port():
     sock = socket.socket()
-    sock.bind(('', 0))
+    sock.bind(('127.0.0.1', 0))
     port = sock.getsockname()[1]
     sock.close()
     return str(port)
@@ -105,20 +105,19 @@ def get_open_port():
 
 def wait_for_popen(proc, max_wait=5):
     wait_till = time.time() + 5
-    while time.time() < wait_till:
-        if proc.poll() is not None:
-            break
+    while proc.poll() is None and time.time() < wait_till:
+        time.sleep(0.1)
 
 
 def kill_proc(proc):
     try:
-        if proc.poll():
+        if proc.poll() is None:
             proc.send_signal(signal.SIGINT)
             wait_for_popen(proc, 5)
-        if proc.poll():
+        if proc.poll() is None:
             proc.terminate()
             wait_for_popen(proc, 2)
-        if proc.poll():
+        if proc.poll() is None:
             proc.kill()
             wait_for_popen(proc, 1)
     except KeyboardInterrupt:

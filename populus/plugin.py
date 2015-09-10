@@ -69,6 +69,7 @@ def deployed_contracts(request, rpc_client, contracts):
     from populus.contracts import (
         deploy_contract,
         get_contract_address_from_txn,
+        get_max_gas,
     )
     from populus.utils import (
         wait_for_block,
@@ -76,13 +77,14 @@ def deployed_contracts(request, rpc_client, contracts):
 
     _dict = {}
 
-    deploy_address = getattr(request.module, 'deploy_address', rpc_client.get_coinbase())
-    deploy_max_wait = getattr(request.module, 'deploy_max_wait', 0)
-    deploy_gas_limit = getattr(request.module, 'deploy_gas_limit', 13421772800 - 1)
     deploy_wait_for_block = getattr(request.module, 'deploy_wait_for_block', 0)
     deploy_wait_for_block_max_wait = getattr(request.module, 'deploy_wait_for_block_max_wait', 30)
 
     wait_for_block(rpc_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
+
+    deploy_address = getattr(request.module, 'deploy_address', rpc_client.get_coinbase())
+    deploy_max_wait = getattr(request.module, 'deploy_max_wait', 0)
+    deploy_gas_limit = getattr(request.module, 'deploy_gas_limit', get_max_gas(rpc_client))
 
     for contract_name, contract_class in contracts:
         txn_hash = deploy_contract(

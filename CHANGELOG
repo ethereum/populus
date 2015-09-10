@@ -1,3 +1,13 @@
+0.5.0
+-----
+
+- Significant refactor to the `Contract` and related `Function` and `Event`
+  objects used to interact with contracts.
+- Major improvements to robustness of `geth_node` fixture.
+- `deployed_contracts` testing fixture no longer provides it's own rpc server.
+  Now you must either provide you own, or use the `geth_node` or `rpc_server`
+  alongside it in tests.
+
 0.4.3
 -----
 

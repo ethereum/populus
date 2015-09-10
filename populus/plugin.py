@@ -129,10 +129,12 @@ def geth_node(request):
     rpc_port = getattr(request.module, 'rpc_port', '8545')
     rpc_host = getattr(request.module, 'rpc_host', '127.0.0.1')
 
+    geth_max_wait = getattr(request.module, 'geth_max_wait', 5)
+
     command, proc = run_geth_node(data_dir, rpc_addr=rpc_host, rpc_port=rpc_port)
 
     start = time.time()
-    while time.time() < start + 5:
+    while time.time() < start + geth_max_wait:
         output = []
         line = proc.get_output_nowait()
         if line:

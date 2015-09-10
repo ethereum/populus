@@ -85,7 +85,12 @@ def deployed_contracts(request, rpc_client, contracts):
     wait_for_block(rpc_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
 
     for contract_name, contract_class in contracts:
-        txn_hash = deploy_contract(rpc_client, contract_class, _from=deploy_address, gas=deploy_gas_limit)
+        txn_hash = deploy_contract(
+            rpc_client,
+            contract_class,
+            _from=deploy_address,
+            gas=deploy_gas_limit,
+        )
         contract_addr = get_contract_address_from_txn(
             rpc_client,
             txn_hash,

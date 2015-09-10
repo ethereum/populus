@@ -1,9 +1,11 @@
 import os
+import copy
 import re
 import functools
 import subprocess
 from threading import Thread
 from Queue import Queue, Empty
+import json
 
 from populus import utils
 
@@ -71,6 +73,17 @@ class PopenWrapper(subprocess.Popen):
         except Empty:
             return None
 
+    _output_generator = None
+
+    def get_output_nowait(self):
+        if self._output_generator is None:
+            def output_generator():
+                while True:
+                    yield self.get_stdout_nowait()
+                    yield self.get_stderr_nowait()
+            self._output_generator = output_generator()
+        return self._output_generator.next()
+
     def communicate(self, *args, **kwargs):
         raise ValueError("Cannot communicate with a PopenWrapper")
 
@@ -81,19 +94,27 @@ DEFAULT_PW_PATH = os.path.join(POPULUS_DIR, 'default_blockchain_password')
 def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
                  genesis_block=None, miner_threads='1', extra_args=None,
                  max_peers='0', network_id='123456', no_discover=True,
-                 mine=False, nice=True, unlock='0', password=DEFAULT_PW_PATH):
+                 mine=False, nice=True, unlock='0', password=DEFAULT_PW_PATH,
+                 port=None):
     if nice and is_nice_available():
         command = ['nice', '-n', '20', cmd]
     else:
         command = [cmd]
 
     if genesis_block is None:
-        genesis_block = os.path.join(POPULUS_DIR, 'genesis-test.json')
+        genesis_block = get_genesis_block_path(data_dir)
+        if not os.path.exists(genesis_block):
+            genesis_block = os.path.join(POPULUS_DIR, 'genesis-test.json')
+
+    if port is None:
+        port = utils.get_open_port()
+
     command.extend((
         '--genesis', genesis_block,
         '--datadir', data_dir,
         '--maxpeers', max_peers,
         '--networkid', network_id,
+        '--port', port,
     ))
 
     if miner_threads is not None:
@@ -163,11 +184,38 @@ def create_geth_account(data_dir, **kwargs):
     return '0x' + match.groups()[0]
 
 
+default_genesis_data = {
+    "nonce": "0xdeadbeefdeadbeef",
+    "timestamp": "0x0",
+    "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "extraData": "0x686f727365",
+    "gasLimit": "0x80000000000",
+    "difficulty": "0x400",
+    "mixhash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "coinbase": "0x3333333333333333333333333333333333333333",
+    "alloc": {}
+}
+
+
+def get_genesis_block_path(data_dir):
+    return os.path.join(data_dir, 'genesis-block.json')
+
+
 def ensure_account_exists(data_dir):
     accounts = get_geth_accounts(data_dir)
     if not accounts:
-        return create_geth_account(data_dir)
-    return accounts[0]
+        account = create_geth_account(data_dir)
+        genesis_block_path = get_genesis_block_path(data_dir)
+        if not os.path.exists(genesis_block_path):
+            genesis_data = copy.deepcopy(default_genesis_data)
+            genesis_data['alloc'][account] = {
+                "balance": "1000000000000000000000000000",  # 1,000,000,000 ether
+            }
+            with open(genesis_block_path, 'w') as genesis_block_file:
+                genesis_block_file.write(json.dumps(genesis_data))
+    else:
+        account = accounts[0]
+    return account
 
 
 account_regex = re.compile('\{([a-f0-9]{40})\}')

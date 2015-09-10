@@ -1,7 +1,6 @@
 import os
 import time
 import threading
-import signal
 
 import pytest
 
@@ -71,13 +70,27 @@ def deployed_contracts(request, rpc_client, contracts):
         deploy_contract,
         get_contract_address_from_txn,
     )
+    from populus.utils import (
+        wait_for_block,
+    )
+
     _dict = {}
 
     deploy_address = getattr(request.module, 'deploy_address', rpc_client.get_coinbase())
+    deploy_max_wait = getattr(request.module, 'deploy_max_wait', 0)
+    deploy_gas_limit = getattr(request.module, 'deploy_gas_limit', 13421772800 - 1)
+    deploy_wait_for_block = getattr(request.module, 'deploy_wait_for_block', 0)
+    deploy_wait_for_block_max_wait = getattr(request.module, 'deploy_wait_for_block_max_wait', 30)
+
+    wait_for_block(rpc_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
 
     for contract_name, contract_class in contracts:
-        txn_hash = deploy_contract(rpc_client, contract_class, _from=deploy_address)
-        contract_addr = get_contract_address_from_txn(rpc_client, txn_hash)
+        txn_hash = deploy_contract(rpc_client, contract_class, _from=deploy_address, gas=deploy_gas_limit)
+        contract_addr = get_contract_address_from_txn(
+            rpc_client,
+            txn_hash,
+            max_wait=deploy_max_wait,
+        )
         _dict[contract_name] = contract_class(contract_addr, rpc_client)
 
     return type('deployed_contracts', (object,), _dict)
@@ -93,7 +106,7 @@ def geth_node(request):
     )
     from populus.utils import (
         ensure_path_exists,
-        wait_for_popen,
+        kill_proc,
     )
 
     project_dir = getattr(request.module, 'geth_project_dir', os.getcwd())
@@ -113,22 +126,30 @@ def geth_node(request):
 
     start = time.time()
     while time.time() < start + 5:
-        line = proc.get_stderr_nowait()
-        if line and 'Starting mining operation' in line:
+        output = []
+        line = proc.get_output_nowait()
+        if line:
+            output.append(line)
+
+        if line is None:
+            continue
+        if 'Starting mining operation' in line:
             break
+        elif "Still generating DAG" in line:
+            print(line[line.index("Still generating DAG"):])
+        elif line.startswith('Fatal:'):
+            kill_proc(proc)
+            raise ValueError(
+                "Geth Errored while starting\nerror: {0}\n\nFull Output{1}".format(
+                    line, ''.join(output),
+                )
+            )
     else:
-        raise ValueError("Geth process never started")
+        kill_proc(proc)
+        raise ValueError("Geth process never started\n\n{0}".format(''.join(output)))
 
     yield proc
-    if proc.poll():
-        proc.send_signal(signal.SIGINT)
-        wait_for_popen(proc, 5)
-    if proc.poll():
-        proc.terminate()
-        wait_for_popen(proc, 2)
-    if proc.poll():
-        proc.kill()
-        wait_for_popen(proc, 1)
+    kill_proc(proc)
 
 
 @pytest.fixture(scope='module')

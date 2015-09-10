@@ -3,6 +3,7 @@ import shutil
 import json
 import socket
 import time
+import signal
 
 
 CONTRACTS_DIR = "./contracts/"
@@ -107,3 +108,40 @@ def wait_for_popen(proc, max_wait=5):
     while time.time() < wait_till:
         if proc.poll() is not None:
             break
+
+
+def kill_proc(proc):
+    try:
+        if proc.poll():
+            proc.send_signal(signal.SIGINT)
+            wait_for_popen(proc, 5)
+        if proc.poll():
+            proc.terminate()
+            wait_for_popen(proc, 2)
+        if proc.poll():
+            proc.kill()
+            wait_for_popen(proc, 1)
+    except KeyboardInterrupt:
+        proc.kill()
+
+
+def wait_for_transaction(rpc_client, txn_hash, max_wait=60):
+    start = time.time()
+    while time.time() < start + max_wait:
+        txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
+        if txn_receipt is not None:
+            break
+        time.sleep(1)
+    else:
+        raise ValueError("Could not get transaction receipt")
+    return txn_receipt
+
+
+def wait_for_block(rpc_client, block_number, max_wait=60):
+    start = time.time()
+    while time.time() < start + max_wait:
+        if rpc_client.get_block_number() >= block_number:
+            break
+        time.sleep(1)
+    else:
+        raise ValueError("Did not reach block")

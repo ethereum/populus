@@ -7,6 +7,8 @@ import itertools
 from ethereum import utils as ethereum_utils
 from ethereum import abi
 
+from populus.utils import wait_for_transaction
+
 
 def decode_single(typ, data):
     base, sub, _ = abi.process_type(typ)
@@ -340,13 +342,8 @@ def deploy_contract(rpc_client, contract_class, constructor_args=None, **kwargs)
 
 
 def get_contract_address_from_txn(rpc_client, txn_hash, max_wait=0):
-    start = time.time()
-    txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
-    while txn_receipt is None and time.time() < start + 0:
-        txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
+    txn_receipt = wait_for_transaction(rpc_client, txn_hash, max_wait)
 
-    if txn_receipt is None:
-        raise ValueError("Transaction not found: '{0}'".format(txn_hash))
     return txn_receipt['contractAddress']
 
 

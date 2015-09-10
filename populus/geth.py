@@ -25,7 +25,9 @@ def get_blockchains_dir(project_dir):
 
 def get_geth_data_dir(project_dir, name):
     blockchains_dir = get_blockchains_dir(project_dir)
-    return os.path.join(blockchains_dir, name)
+    data_dir = os.path.join(blockchains_dir, name)
+    utils.ensure_path_exists(data_dir)
+    return data_dir
 
 
 def enqueue_stream(stream, queue):

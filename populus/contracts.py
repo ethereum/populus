@@ -1,4 +1,3 @@
-import time
 import binascii
 import copy
 import hashlib
@@ -6,6 +5,8 @@ import itertools
 
 from ethereum import utils as ethereum_utils
 from ethereum import abi
+
+from populus.utils import wait_for_transaction
 
 
 def decode_single(typ, data):
@@ -62,9 +63,20 @@ def clean_args(*args):
             yield arg
 
 
-class Function(object):
+class ContractBound(object):
     _contract = None
 
+    def _bind(self, contract):
+        self._contract = contract
+
+    @property
+    def contract(self):
+        if self._contract is None:
+            raise AttributeError("Function not bound to a contract")
+        return self._contract
+
+
+class Function(ContractBound):
     def __init__(self, name, inputs=None, outputs=None, constant=False):
         self.name = name
         self.inputs = inputs
@@ -141,15 +153,6 @@ class Function(object):
 
         return decode_single(output_type, outputs)
 
-    def _bind(self, contract):
-        self._contract = contract
-
-    @property
-    def contract(self):
-        if self._contract is None:
-            raise AttributeError("Function not bound to a contract")
-        return self._contract
-
     def __get__(self, obj, type=None):
         if obj is None:
             return self
@@ -163,6 +166,9 @@ class Function(object):
 
     def sendTransaction(self, *args, **kwargs):
         data = self.get_call_data(args)
+
+        if 'gas' not in kwargs:
+            kwargs['gas'] = get_max_gas(self.contract._meta.rpc_client)
 
         return self.contract._meta.rpc_client.send_transaction(
             to=self.contract._meta.address,
@@ -184,7 +190,7 @@ class Function(object):
         return self.cast_return_data(output)
 
 
-class Event(object):
+class Event(ContractBound):
     """
     {
         'inputs': [
@@ -196,11 +202,16 @@ class Event(object):
         'anonymous': False,
     }
     """
-    def __init__(self, name, inputs):
-        pass
+    def __init__(self, name, inputs, anonymous):
+        self.name = name
+        self.inputs = inputs
+        self.anonymous = anonymous
 
     def __call__(self, *args):
         pass
+
+    def __copy__(self):
+        return self.__class__(self.name, self.inputs, self.anonymous)
 
 
 class ContractBase(object):
@@ -298,6 +309,7 @@ def Contract(contract_meta, contract_name=None):
             event = Event(
                 name=signature_item['name'],
                 inputs=signature_item['inputs'],
+                anonymous=signature_item['anonymous'],
             )
             _dict[signature_item['name']] = event
             events.append(event)
@@ -337,11 +349,13 @@ def deploy_contract(rpc_client, contract_class, constructor_args=None, **kwargs)
 
 
 def get_contract_address_from_txn(rpc_client, txn_hash, max_wait=0):
-    start = time.time()
-    txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
-    while txn_receipt is None and time.time() < start + 0:
-        txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
+    txn_receipt = wait_for_transaction(rpc_client, txn_hash, max_wait)
 
-    if txn_receipt is None:
-        raise ValueError("Transaction not found: '{0}'".format(txn_hash))
     return txn_receipt['contractAddress']
+
+
+def get_max_gas(rpc_client, scale=0.95):
+    latest_block = rpc_client.get_block_by_number('latest')
+    max_gas_hex = latest_block['gasLimit']
+    max_gas = int(max_gas_hex, 16)
+    return int(max_gas * scale)

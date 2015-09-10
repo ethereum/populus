@@ -32,7 +32,7 @@ setup(
         "requests>=2.7.0",
         "eth-testrpc>=0.1.16",
         "pytest>=2.7.2",
-        "ethereum-rpc-client>=0.2.0",
+        "ethereum-rpc-client>=0.2.2",
         "watchdog>=0.8.3",
         "Flask>=0.10.1",
     ],

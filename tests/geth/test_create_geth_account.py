@@ -31,9 +31,8 @@ def project_test05(monkeypatch):
 
 
 @skip_if_no_geth
-def test_create_get_account(project_test05):
+def test_create_geth_account(project_test05):
     data_dir = get_geth_data_dir(project_test05, 'default')
-    os.mkdir(data_dir)
 
     assert not get_geth_accounts(data_dir)
 

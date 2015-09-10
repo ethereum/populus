@@ -3,6 +3,7 @@ import shutil
 import json
 import socket
 import time
+import signal
 
 
 CONTRACTS_DIR = "./contracts/"
@@ -96,7 +97,7 @@ def is_executable_available(program):
 
 def get_open_port():
     sock = socket.socket()
-    sock.bind(('', 0))
+    sock.bind(('127.0.0.1', 0))
     port = sock.getsockname()[1]
     sock.close()
     return str(port)
@@ -104,6 +105,42 @@ def get_open_port():
 
 def wait_for_popen(proc, max_wait=5):
     wait_till = time.time() + 5
-    while time.time() < wait_till:
-        if proc.poll() is not None:
+    while proc.poll() is None and time.time() < wait_till:
+        time.sleep(0.1)
+
+
+def kill_proc(proc):
+    try:
+        if proc.poll() is None:
+            proc.send_signal(signal.SIGINT)
+            wait_for_popen(proc, 5)
+        if proc.poll() is None:
+            proc.terminate()
+            wait_for_popen(proc, 2)
+        if proc.poll() is None:
+            proc.kill()
+            wait_for_popen(proc, 1)
+    except KeyboardInterrupt:
+        proc.kill()
+
+
+def wait_for_transaction(rpc_client, txn_hash, max_wait=60):
+    start = time.time()
+    while True:
+        txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
+        if txn_receipt is not None:
             break
+        elif time.time() > start + max_wait:
+            raise ValueError("Could not get transaction receipt")
+        time.sleep(1)
+    return txn_receipt
+
+
+def wait_for_block(rpc_client, block_number, max_wait=60):
+    start = time.time()
+    while time.time() < start + max_wait:
+        if rpc_client.get_block_number() >= block_number:
+            break
+        time.sleep(1)
+    else:
+        raise ValueError("Did not reach block")

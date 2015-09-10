@@ -64,9 +64,20 @@ def clean_args(*args):
             yield arg
 
 
-class Function(object):
+class ContractBound(object):
     _contract = None
 
+    def _bind(self, contract):
+        self._contract = contract
+
+    @property
+    def contract(self):
+        if self._contract is None:
+            raise AttributeError("Function not bound to a contract")
+        return self._contract
+
+
+class Function(ContractBound):
     def __init__(self, name, inputs=None, outputs=None, constant=False):
         self.name = name
         self.inputs = inputs
@@ -143,15 +154,6 @@ class Function(object):
 
         return decode_single(output_type, outputs)
 
-    def _bind(self, contract):
-        self._contract = contract
-
-    @property
-    def contract(self):
-        if self._contract is None:
-            raise AttributeError("Function not bound to a contract")
-        return self._contract
-
     def __get__(self, obj, type=None):
         if obj is None:
             return self
@@ -189,7 +191,7 @@ class Function(object):
         return self.cast_return_data(output)
 
 
-class Event(object):
+class Event(ContractBound):
     """
     {
         'inputs': [
@@ -201,11 +203,16 @@ class Event(object):
         'anonymous': False,
     }
     """
-    def __init__(self, name, inputs):
-        pass
+    def __init__(self, name, inputs, anonymous):
+        self.name = name
+        self.inputs = inputs
+        self.anonymous = anonymous
 
     def __call__(self, *args):
         pass
+
+    def __copy__(self):
+        return self.__class__(self.name, self.inputs, self.anonymous)
 
 
 class ContractBase(object):
@@ -303,6 +310,7 @@ def Contract(contract_meta, contract_name=None):
             event = Event(
                 name=signature_item['name'],
                 inputs=signature_item['inputs'],
+                anonymous=signature_item['anonymous'],
             )
             _dict[signature_item['name']] = event
             events.append(event)

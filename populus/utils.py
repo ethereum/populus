@@ -126,13 +126,13 @@ def kill_proc(proc):
 
 def wait_for_transaction(rpc_client, txn_hash, max_wait=60):
     start = time.time()
-    while time.time() < start + max_wait:
+    while True:
         txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
         if txn_receipt is not None:
             break
+        elif time.time() > start + max_wait:
+            raise ValueError("Could not get transaction receipt")
         time.sleep(1)
-    else:
-        raise ValueError("Could not get transaction receipt")
     return txn_receipt
 
 

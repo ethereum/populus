@@ -108,6 +108,7 @@ def geth_node(request):
     from populus.geth import (
         run_geth_node,
         get_geth_data_dir,
+        get_geth_logfile_path,
         ensure_account_exists,
         reset_chain,
     )
@@ -120,6 +121,9 @@ def geth_node(request):
     chain_name = getattr(request.module, 'geth_chain_name', 'default-test')
     data_dir = get_geth_data_dir(project_dir, chain_name)
 
+    logfile_name_fmt = "geth-{0}-{{0}}.log".format(request.module.__name__)
+    logfile_path = get_geth_logfile_path(data_dir, logfile_name_fmt)
+
     ensure_path_exists(data_dir)
     ensure_account_exists(data_dir)
 
@@ -131,7 +135,9 @@ def geth_node(request):
 
     geth_max_wait = getattr(request.module, 'geth_max_wait', 5)
 
-    command, proc = run_geth_node(data_dir, rpc_addr=rpc_host, rpc_port=rpc_port)
+    command, proc = run_geth_node(data_dir, rpc_addr=rpc_host,
+                                  rpc_port=rpc_port, logfile=logfile_path,
+                                  verbosity="6")
 
     start = time.time()
     while time.time() < start + geth_max_wait:

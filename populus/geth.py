@@ -1,11 +1,12 @@
-import os
-import copy
-import re
-import functools
-import subprocess
-from threading import Thread
 from Queue import Queue, Empty
+from threading import Thread
+import copy
+import datetime
+import functools
 import json
+import os
+import re
+import subprocess
 
 from populus import utils
 
@@ -25,18 +26,36 @@ def get_blockchains_dir(project_dir):
 
 def get_geth_data_dir(project_dir, name):
     blockchains_dir = get_blockchains_dir(project_dir)
-    data_dir = os.path.join(blockchains_dir, name)
+    data_dir = os.path.abspath(os.path.join(blockchains_dir, name))
     utils.ensure_path_exists(data_dir)
     return data_dir
 
 
-def enqueue_stream(stream, queue):
+def get_geth_logfile_path(data_dir, logfile_name_fmt="geth-{0}.log"):
+    logfile_name = logfile_name_fmt.format(
+        datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
+    )
+    log_dir = os.path.join(data_dir, 'logs')
+    utils.ensure_path_exists(log_dir)
+    logfile_path = os.path.abspath(os.path.join(log_dir, logfile_name))
+    return logfile_path
+
+
+def enqueue_stream(stream, queue, logfile=None):
     """
     Synchronously reads the output from a stream (stdout, stderr) and puts it
     onto the queue to be read.
     """
     for line in iter(stream.readline, b''):
         queue.put(line)
+        if logfile:
+            logfile.write(line)
+            logfile.flush()
+    if logfile:
+        try:
+            logfile.close()
+        except ValueError:
+            pass
 
 
 class PopenWrapper(subprocess.Popen):
@@ -47,10 +66,15 @@ class PopenWrapper(subprocess.Popen):
         super(PopenWrapper, self).__init__(args, bufsize=bufsize, stdin=stdin,
                                            stdout=stdout, stderr=stderr,
                                            **kwargs)
+        if "--logfile" in args:
+            logfile_path = args[args.index("--logfile") + 1]
+            logfile = open(logfile_path, 'a')
+        else:
+            logfile = None
         self.stdout_queue = Queue()
         self.stdout_thread = Thread(
             target=enqueue_stream,
-            args=(self.stdout, self.stdout_queue),
+            args=(self.stdout, self.stdout_queue, logfile),
         )
         self.stdout_thread.daemon = True
         self.stdout_thread.start()
@@ -58,7 +82,7 @@ class PopenWrapper(subprocess.Popen):
         self.stderr_queue = Queue()
         self.stderr_thread = Thread(
             target=enqueue_stream,
-            args=(self.stderr, self.stderr_queue),
+            args=(self.stderr, self.stderr_queue, logfile),
         )
         self.stderr_thread.daemon = True
         self.stderr_thread.start()
@@ -97,7 +121,7 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
                  genesis_block=None, miner_threads='1', extra_args=None,
                  max_peers='0', network_id='123456', no_discover=True,
                  mine=False, nice=True, unlock='0', password=DEFAULT_PW_PATH,
-                 port=None):
+                 port=None, verbosity=None, logfile=None):
     if nice and is_nice_available():
         command = ['nice', '-n', '20', cmd]
     else:
@@ -121,6 +145,16 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
 
     if miner_threads is not None:
         command.extend(('--minerthreads', miner_threads))
+
+    if logfile is not None:
+        command.extend((
+            '--logfile', logfile,
+        ))
+
+    if verbosity is not None:
+        command.extend((
+            '--verbosity', verbosity,
+        ))
 
     if unlock is not None:
         command.extend((

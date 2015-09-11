@@ -29,6 +29,7 @@ from populus.web import (
 )
 from populus.geth import (
     get_geth_data_dir,
+    get_geth_logfile_path,
     run_geth_node,
     ensure_account_exists,
     reset_chain,
@@ -279,18 +280,11 @@ def chain_run(name, mine):
     Run a geth node.
     """
     data_dir = get_geth_data_dir(os.getcwd(), name)
-
-    if not os.path.exists(data_dir):
-        if name == 'default':
-            utils.ensure_path_exists(data_dir)
-        elif click.confirm("The chain '{0}' does not exist.  Would you like to create it?".format(name)):  # NOQA
-            utils.ensure_path_exists(data_dir)
-        else:
-            raise click.UsageError("Unknown chain '{0}'".format(name))
+    logfile_path = get_geth_logfile_path(data_dir)
 
     ensure_account_exists(data_dir)
 
-    command, proc = run_geth_node(data_dir, mine=mine)
+    command, proc = run_geth_node(data_dir, mine=mine, logfile=logfile_path)
 
     click.echo("Running: '{0}'".format(' '.join(command)))
 

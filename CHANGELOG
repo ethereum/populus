@@ -7,6 +7,8 @@
 - `deployed_contracts` testing fixture no longer provides it's own rpc server.
   Now you must either provide you own, or use the `geth_node` or `rpc_server`
   alongside it in tests.
+- `geth_node` fixture now writes to a logfile located in
+  `./chains/<chain-name>/logs/` for both cli and test case runs.
 
 0.4.3
 -----

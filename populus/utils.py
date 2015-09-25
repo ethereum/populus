@@ -144,3 +144,9 @@ def wait_for_block(rpc_client, block_number, max_wait=60):
         time.sleep(1)
     else:
         raise ValueError("Did not reach block")
+
+
+def get_contract_address_from_txn(rpc_client, txn_hash, max_wait=0):
+    txn_receipt = wait_for_transaction(rpc_client, txn_hash, max_wait)
+
+    return txn_receipt['contractAddress']

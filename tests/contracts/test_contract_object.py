@@ -1,14 +1,16 @@
 import pytest
 
+from ethereum.abi import ContractTranslator
+from ethereum import utils as ethereum_utils
+
 from eth_rpc_client import Client
 
 from populus.contracts import (
     deploy_contract,
+)
+from populus.utils import (
     get_contract_address_from_txn,
 )
-
-from ethereum.abi import ContractTranslator
-from ethereum import utils as ethereum_utils
 
 
 @pytest.fixture()

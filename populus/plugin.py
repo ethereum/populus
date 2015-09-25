@@ -68,11 +68,11 @@ def contracts(request):
 def deployed_contracts(request, rpc_client, contracts):
     from populus.contracts import (
         deploy_contract,
-        get_contract_address_from_txn,
         get_max_gas,
     )
     from populus.utils import (
         wait_for_block,
+        get_contract_address_from_txn,
     )
 
     _dict = {}

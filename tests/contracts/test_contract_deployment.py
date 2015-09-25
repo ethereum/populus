@@ -1,5 +1,7 @@
 from populus.contracts import (
     deploy_contract,
+)
+from populus.utils import (
     get_contract_address_from_txn,
 )
 

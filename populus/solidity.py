@@ -48,8 +48,6 @@ def solc(source=None, input_files=None, add_std=True,
     if optimize:
         command.append('--optimize')
 
-    print command
-
     p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
     if source:

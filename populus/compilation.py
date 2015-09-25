@@ -57,22 +57,22 @@ def get_compiler_for_file(file_path):
     raise ValueError("Unknown contract extension {0}".format(ext))
 
 
-def compile_source_file(source_path):
+def compile_source_file(source_path, **compiler_kwargs):
     compiler = get_compiler_for_file(source_path)
 
     with open(source_path) as source_file:
         source_code = source_file.read()
 
     # TODO: solidity specific
-    compiled_source = compiler(source_code)
+    compiled_source = compiler(source_code, **compiler_kwargs)
     return compiled_source
 
 
-def compile_project_contracts(contracts_dir, filters=None):
+def compile_project_contracts(contracts_dir, filters=None, **compiler_kwargs):
     compiled_sources = {}
 
     for source_path in contracts_dir:
-        compiled_source = compile_source_file(source_path)
+        compiled_source = compile_source_file(source_path, **compiler_kwargs)
 
         if filters:
             for contract_name, contract_data in compiled_source.items():
@@ -129,11 +129,11 @@ def get_contract_filters(*contracts):
     return [generate_filter(filter_text) for filter_text in contracts]
 
 
-def compile_and_write_contracts(project_dir, *contracts):
+def compile_and_write_contracts(project_dir, *contracts, **compiler_kwargs):
     filters = get_contract_filters(*contracts)
     contract_source_paths = find_project_contracts(project_dir)
 
-    compiled_sources = compile_project_contracts(contract_source_paths, filters)
+    compiled_sources = compile_project_contracts(contract_source_paths, filters, **compiler_kwargs)
 
     output_file_path = write_compiled_sources(project_dir, compiled_sources)
     return contract_source_paths, compiled_sources, output_file_path

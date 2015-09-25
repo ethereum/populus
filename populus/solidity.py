@@ -27,8 +27,8 @@ def solc_version():
 
 
 def solc(source=None, input_files=None, add_std=True,
-         combined_json='json-abi,binary,sol-abi,natspec-dev,natspec-user',
-         raw=False, rich=True):
+         combined_json='abi,bin,devdoc,userdoc',
+         raw=False, rich=True, optimize=False):
 
     if source and input_files:
         raise ValueError("`source` and `input_files` are mutually exclusive")
@@ -37,13 +37,16 @@ def solc(source=None, input_files=None, add_std=True,
 
     command = ['solc']
     if add_std:
-        command.append('--add-std=1')
+        command.append('--add-std')
 
     if combined_json:
         command.extend(('--combined-json', combined_json))
 
     if input_files:
         command.extend(itertools.chain(*zip(itertools.repeat('--input-file'), input_files)))
+
+    if optimize:
+        command.append('--optimize')
 
     p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
@@ -61,10 +64,9 @@ def solc(source=None, input_files=None, add_std=True,
     contracts = yaml.safe_load(stdoutdata)['contracts']
 
     for contract_name, data in contracts.items():
-        data['json-abi'] = yaml.safe_load(data['json-abi'])
-        data['sol-abi'] = yaml.safe_load(data['sol-abi'])
-        data['natspec-dev'] = yaml.safe_load(data['natspec-dev'])
-        data['natspec-user'] = yaml.safe_load(data['natspec-user'])
+        data['abi'] = yaml.safe_load(data['abi'])
+        data['devdoc'] = yaml.safe_load(data['devdoc'])
+        data['userdoc'] = yaml.safe_load(data['userdoc'])
 
     sorted_contracts = sorted(contracts.items(), key=lambda c: c[0])
 
@@ -75,15 +77,15 @@ def solc(source=None, input_files=None, add_std=True,
 
     return {
         contract_name: {
-            'code': "0x" + contract.get('binary'),
+            'code': "0x" + contract['bin'],
             'info': {
-                'abiDefinition': contract.get('json-abi'),
+                'abiDefinition': contract.get('abi'),
                 'compilerVersion': compiler_version,
-                'developerDoc': contract.get('natspec-dev'),
+                'developerDoc': contract.get('devdoc'),
                 'language': 'Solidity',
                 'languageVersion': '0',
                 'source': source,  # what to do for files?
-                'userDoc': contract.get('natspec-user')
+                'userDoc': contract.get('userdoc')
             },
         }
         for contract_name, contract

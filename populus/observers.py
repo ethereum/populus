@@ -34,7 +34,11 @@ class ContractSourceChangedEventHandler(FileSystemEventHandler):
         click.echo("============ Detected Change ==============")
         click.echo("> {0} => {1}".format(event.event_type, event.src_path))
         click.echo("> recompiling...")
-        compile_and_write_contracts(self.project_dir, *self.contract_filters, **self.compiler_kwargs)
+        compile_and_write_contracts(
+            self.project_dir,
+            *self.contract_filters,
+            **self.compiler_kwargs
+        )
         click.echo("> watching...")
 
 

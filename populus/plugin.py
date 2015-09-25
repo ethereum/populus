@@ -102,7 +102,11 @@ def deployed_contracts(request, rpc_client, contracts):
     )
 
     for contract_name, contract_class in contracts:
-        deploy_gas_limit = getattr(request.module, 'deploy_gas_limit', int(os.environ.get('DEPLOY_GAS_LIMIT', get_max_gas(rpc_client))))
+        deploy_gas_limit = getattr(
+            request.module,
+            'deploy_gas_limit',
+            int(os.environ.get('DEPLOY_GAS_LIMIT', get_max_gas(rpc_client))),
+        )
         txn_hash = deploy_contract(
             rpc_client,
             contract_class,

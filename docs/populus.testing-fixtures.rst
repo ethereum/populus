@@ -49,6 +49,21 @@ compiled contracts in your project.
     changes to take effect in your tests.
 
 
+``deploy_client`` - Deployed instances of your compiled contracts
+----------------------------------------------------------------------
+
+This designates the client that will be used to interface with the ethereum
+blockchain to deploy the contracts in the ``deployed_contracts`` fixture.  It
+can be configured to use one of two clients.
+
+* set ``deploy_client_type == "ethtester"`` in your tests module to directly
+  interface with the ``ethereum.tester`` module.
+* set ``deploy_client_type == "rpc"`` in your tests module to use the rpc
+  client which interacts with a JSON-RPC server.
+
+The default value for this is ``ethtester``.
+
+
 ``deployed_contracts`` - Deployed instances of your compiled contracts
 ----------------------------------------------------------------------
 

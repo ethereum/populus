@@ -77,8 +77,14 @@ def init():
     is_flag=True,
     help="Watch contract source files and recompile on changes",
 )
+@click.option(
+    '--optimize',
+    '-o',
+    is_flag=True,
+    help="Enable compile time optimization",
+)
 @click.argument('filters', nargs=-1)
-def compile_contracts(watch, filters):
+def compile_contracts(watch, optimize, filters):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -93,7 +99,7 @@ def compile_contracts(watch, filters):
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
 
-    result = compile_and_write_contracts(project_dir, *filters)
+    result = compile_and_write_contracts(project_dir, *filters, optimize=optimize)
     contract_source_paths, compiled_sources, output_file_path = result
 
     click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
@@ -110,7 +116,7 @@ def compile_contracts(watch, filters):
         # The path to watch
         click.echo("============ Watching ==============")
 
-        observer = get_contracts_observer(project_dir, filters)
+        observer = get_contracts_observer(project_dir, filters, {'optimize': optimize})
         observer.start()
         try:
             while observer.is_alive():

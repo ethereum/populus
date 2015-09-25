@@ -28,23 +28,27 @@ class ContractSourceChangedEventHandler(FileSystemEventHandler):
     def __init__(self, *args, **kwargs):
         self.project_dir = kwargs.pop('project_dir')
         self.contract_filters = kwargs.pop('contract_filters')
+        self.compiler_kwargs = kwargs.pop('compiler_kwargs')
 
     def on_any_event(self, event):
         click.echo("============ Detected Change ==============")
         click.echo("> {0} => {1}".format(event.event_type, event.src_path))
         click.echo("> recompiling...")
-        compile_and_write_contracts(self.project_dir, *self.contract_filters)
+        compile_and_write_contracts(self.project_dir, *self.contract_filters, **self.compiler_kwargs)
         click.echo("> watching...")
 
 
-def get_contracts_observer(project_dir, contract_filters=None):
+def get_contracts_observer(project_dir, contract_filters=None, compiler_kwargs=None):
     if contract_filters is None:
         contract_filters = []
+    if compiler_kwargs is None:
+        compiler_kwargs = {}
     watch_path = utils.get_contracts_dir(project_dir)
 
     event_handler = ContractSourceChangedEventHandler(
         project_dir=project_dir,
         contract_filters=contract_filters,
+        compiler_kwargs=compiler_kwargs,
     )
     observer = PollingObserver()
     observer.schedule(event_handler, watch_path, recursive=True)

@@ -4,9 +4,10 @@ import os
 project_dir = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'projects', 'test-02',
 )
+deploy_client_type = 'ethtester'
 
 
-def test_deployed_contracts_fixture(rpc_server, deployed_contracts):
+def test_deployed_contracts_fixture(deployed_contracts):
     math = deployed_contracts.Math
     assert math.add.call(11, 12) == 23
     assert math.multiply7.call(11) == 77

@@ -13,8 +13,8 @@ skip_if_no_sol_compiler = pytest.mark.skipif(
 
 
 contract_source = "contract Example { function Example() {}}"
-contract_compiled_raw = '{"contracts":{"Example":{"binary":"60606040525b5b600a8060136000396000f30060606040526008565b00","json-abi":"[{\\"inputs\\":[],\\"type\\":\\"constructor\\"}]\\n","natspec-dev":"{\\n   \\"methods\\" : {}\\n}\\n","natspec-user":"{\\n   \\"methods\\" : {}\\n}\\n","sol-abi":"contract Example{function Example();}"}}}\n\n'  # NOQA
-contract_compiled_json = [('Example', {'natspec-user': {'methods': {}}, 'binary': '60606040525b5b600a8060136000396000f30060606040526008565b00', 'json-abi': [{'inputs': [], 'type': 'constructor'}], 'sol-abi': 'contract Example{function Example();}', 'natspec-dev': {'methods': {}}})]
+contract_compiled_raw = '{"contracts":{"Example":{"abi":"[{\\"inputs\\":[],\\"type\\":\\"constructor\\"}]\\n","bin":"60606040525b5b600a8060126000396000f360606040526008565b00","devdoc":"{\\n   \\"methods\\" : {}\\n}\\n","userdoc":"{\\n   \\"methods\\" : {}\\n}\\n"}},"version":"0.1.3-1736fe80/RelWithDebInfo-Darwin/unknown/JIT linked to libethereum-0.9.92-dcf2fd11/RelWithDebInfo-Darwin/unknown/JIT"}\n\n'  # NOQA
+contract_compiled_json = [('Example', {'bin': '60606040525b5b600a8060126000396000f360606040526008565b00', 'abi': [{'inputs': [], 'type': 'constructor'}], 'userdoc': {'methods': {}}, 'devdoc': {'methods': {}}})]  # NOQA
 contract_compiled_json_rich = {'Example': {'natspec-user': {'methods': {}}, 'binary': '60606040525b5b600a8060136000396000f30060606040526008565b00', 'json-abi': [{'inputs': [], 'type': 'constructor'}], 'sol-abi': 'contract Example{function Example();}', 'natspec-dev': {'methods': {}}}}
 
 

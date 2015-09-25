@@ -77,16 +77,32 @@ def deployed_contracts(request, rpc_client, contracts):
 
     _dict = {}
 
-    deploy_wait_for_block = getattr(request.module, 'deploy_wait_for_block', 0)
-    deploy_wait_for_block_max_wait = getattr(request.module, 'deploy_wait_for_block_max_wait', 30)
+    deploy_wait_for_block = getattr(
+        request.module,
+        'deploy_wait_for_block',
+        int(os.environ.get('DEPLOY_WAIT_FOR_BLOCK', 0)),
+    )
+    deploy_wait_for_block_max_wait = getattr(
+        request.module,
+        'deploy_wait_for_block_max_wait',
+        int(os.environ.get('DEPLOY_WAIT_FOR_BLOCK_MAX_WAIT', 30)),
+    )
 
     wait_for_block(rpc_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
 
-    deploy_address = getattr(request.module, 'deploy_address', rpc_client.get_coinbase())
-    deploy_max_wait = getattr(request.module, 'deploy_max_wait', 0)
-    deploy_gas_limit = getattr(request.module, 'deploy_gas_limit', get_max_gas(rpc_client))
+    deploy_address = getattr(
+        request.module,
+        'deploy_address',
+        os.environ.get('DEPLOY_ADDRESS', rpc_client.get_coinbase()),
+    )
+    deploy_max_wait = getattr(
+        request.module,
+        'deploy_max_wait',
+        int(os.environ.get('DEPLOY_MAX_WAIT', 0)),
+    )
 
     for contract_name, contract_class in contracts:
+        deploy_gas_limit = getattr(request.module, 'deploy_gas_limit', int(os.environ.get('DEPLOY_GAS_LIMIT', get_max_gas(rpc_client))))
         txn_hash = deploy_contract(
             rpc_client,
             contract_class,
@@ -117,8 +133,16 @@ def geth_node(request):
         kill_proc,
     )
 
-    project_dir = getattr(request.module, 'geth_project_dir', os.getcwd())
-    chain_name = getattr(request.module, 'geth_chain_name', 'default-test')
+    project_dir = getattr(
+        request.module,
+        'geth_project_dir',
+        os.environ.get('GETH_PROJECT_DIR', os.getcwd()),
+    )
+    chain_name = getattr(
+        request.module,
+        'geth_chain_name',
+        os.environ.get('GETH_CHAIN_NAME', 'default-test'),
+    )
     data_dir = get_geth_data_dir(project_dir, chain_name)
 
     logfile_name_fmt = "geth-{0}-{{0}}.log".format(request.module.__name__)
@@ -127,13 +151,23 @@ def geth_node(request):
     ensure_path_exists(data_dir)
     ensure_account_exists(data_dir)
 
-    if getattr(request.module, 'geth_reset_chain', True):
+    should_reset_chain = getattr(
+        request.module,
+        'geth_reset_chain',
+        os.environ.get('GETH_RESET_CHAIN', True),
+    )
+
+    if should_reset_chain:
         reset_chain(data_dir)
 
     rpc_port = getattr(request.module, 'rpc_port', '8545')
     rpc_host = getattr(request.module, 'rpc_host', '127.0.0.1')
 
-    geth_max_wait = getattr(request.module, 'geth_max_wait', 5)
+    geth_max_wait = getattr(
+        request.module,
+        'geth_max_wait',
+        int(os.environ.get('GETH_MAX_WAIT', 5)),
+    )
 
     command, proc = run_geth_node(data_dir, rpc_addr=rpc_host,
                                   rpc_port=rpc_port, logfile=logfile_path,

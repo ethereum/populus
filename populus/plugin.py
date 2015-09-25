@@ -5,6 +5,19 @@ import threading
 import pytest
 
 
+def _get_request_value(request, name, default):
+    """
+    Utility function that tries to get the property `name` off of
+    `request.module` and then falls back to looking it up in an environment
+    variable, and then the provided default.
+    """
+    return getattr(
+        request.module,
+        name,
+        os.environ.get(name.upper(), default),
+    )
+
+
 @pytest.fixture(scope="session")
 def test_coinbase():
     from ethereum import tester
@@ -64,8 +77,43 @@ def contracts(request):
     return type('contracts', (object,), _dict)()
 
 
+@pytest.fixture()
+def ethtester_client():
+    from populus.ethtester_client import EthTesterClient
+    return EthTesterClient()
+
+
 @pytest.fixture(scope="module")
-def deployed_contracts(request, rpc_client, contracts):
+def deploy_client(request):
+    client = _get_request_value(request, 'deploy_client_type', 'ethtester')
+
+    if client == 'ethtester':
+        from populus.ethtester_client import EthTesterClient
+        client = EthTesterClient()
+    elif client == 'rpc':
+        from eth_rpc_client import Client
+        rpc_host = _get_request_value(
+            request,
+            'deploy_client_rpc_host',
+            _get_request_value(request, 'rpc_server_host', '127.0.0.1'),
+        )
+        rpc_port = _get_request_value(
+            request,
+            'deploy_client_rpc_port',
+            _get_request_value(request, 'rpc_server_port', 8545),
+        )
+        client = Client(rpc_host, rpc_port)
+    else:
+        raise ValueError(
+            "Unsupported client type '{0}'.  Supported values are 'tester' and "
+            "'rpc'"
+        )
+
+    return client
+
+
+@pytest.fixture(scope="module")
+def deployed_contracts(request, deploy_client, contracts):
     from populus.contracts import (
         deploy_contract,
         get_max_gas,

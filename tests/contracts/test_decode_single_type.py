@@ -1,6 +1,6 @@
 import pytest
 
-from populus.contracts import decode_single
+from populus.contracts.utils import decode_single
 
 
 @pytest.mark.parametrize(

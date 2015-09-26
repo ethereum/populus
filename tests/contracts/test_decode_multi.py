@@ -1,6 +1,6 @@
 import pytest
 
-from populus.contracts import decode_multi
+from populus.contracts.utils import decode_multi
 
 
 @pytest.mark.parametrize(

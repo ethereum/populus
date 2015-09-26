@@ -5,6 +5,19 @@ import threading
 import pytest
 
 
+def _get_request_value(request, name, default):
+    """
+    Utility function that tries to get the property `name` off of
+    `request.module` and then falls back to looking it up in an environment
+    variable, and then the provided default.
+    """
+    return getattr(
+        request.module,
+        name,
+        os.environ.get(name.upper(), default),
+    )
+
+
 @pytest.fixture(scope="session")
 def test_coinbase():
     from ethereum import tester
@@ -64,15 +77,50 @@ def contracts(request):
     return type('contracts', (object,), _dict)()
 
 
+@pytest.fixture()
+def ethtester_client():
+    from populus.ethtester_client import EthTesterClient
+    return EthTesterClient()
+
+
 @pytest.fixture(scope="module")
-def deployed_contracts(request, rpc_client, contracts):
+def deploy_client(request):
+    client_type = _get_request_value(request, 'deploy_client_type', 'ethtester')
+
+    if client_type == 'ethtester':
+        from populus.ethtester_client import EthTesterClient
+        client = EthTesterClient()
+    elif client_type == 'rpc':
+        from eth_rpc_client import Client
+        rpc_host = _get_request_value(
+            request,
+            'deploy_client_rpc_host',
+            _get_request_value(request, 'rpc_server_host', '127.0.0.1'),
+        )
+        rpc_port = _get_request_value(
+            request,
+            'deploy_client_rpc_port',
+            _get_request_value(request, 'rpc_server_port', 8545),
+        )
+        client = Client(rpc_host, rpc_port)
+    else:
+        raise ValueError(
+            "Unsupported client type '{0}'.  Supported values are 'tester' and "
+            "'rpc'"
+        )
+
+    return client
+
+
+@pytest.fixture(scope="module")
+def deployed_contracts(request, deploy_client, contracts):
     from populus.contracts import (
         deploy_contract,
-        get_contract_address_from_txn,
         get_max_gas,
     )
     from populus.utils import (
         wait_for_block,
+        get_contract_address_from_txn,
     )
 
     _dict = {}
@@ -88,12 +136,12 @@ def deployed_contracts(request, rpc_client, contracts):
         int(os.environ.get('DEPLOY_WAIT_FOR_BLOCK_MAX_WAIT', 30)),
     )
 
-    wait_for_block(rpc_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
+    wait_for_block(deploy_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
 
     deploy_address = getattr(
         request.module,
         'deploy_address',
-        os.environ.get('DEPLOY_ADDRESS', rpc_client.get_coinbase()),
+        os.environ.get('DEPLOY_ADDRESS', deploy_client.get_coinbase()),
     )
     deploy_max_wait = getattr(
         request.module,
@@ -105,20 +153,20 @@ def deployed_contracts(request, rpc_client, contracts):
         deploy_gas_limit = getattr(
             request.module,
             'deploy_gas_limit',
-            int(os.environ.get('DEPLOY_GAS_LIMIT', get_max_gas(rpc_client))),
+            int(os.environ.get('DEPLOY_GAS_LIMIT', get_max_gas(deploy_client))),
         )
         txn_hash = deploy_contract(
-            rpc_client,
+            deploy_client,
             contract_class,
             _from=deploy_address,
             gas=deploy_gas_limit,
         )
         contract_addr = get_contract_address_from_txn(
-            rpc_client,
+            deploy_client,
             txn_hash,
             max_wait=deploy_max_wait,
         )
-        _dict[contract_name] = contract_class(contract_addr, rpc_client)
+        _dict[contract_name] = contract_class(contract_addr, deploy_client)
 
     return type('deployed_contracts', (object,), _dict)
 

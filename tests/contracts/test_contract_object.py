@@ -1,25 +1,35 @@
 import pytest
 
+from ethereum.abi import ContractTranslator
+from ethereum import utils as ethereum_utils
+
 from eth_rpc_client import Client
 
 from populus.contracts import (
     deploy_contract,
+)
+from populus.utils import (
     get_contract_address_from_txn,
 )
 
-from ethereum.abi import ContractTranslator
-from ethereum import utils as ethereum_utils
+
+@pytest.fixture(autouse=True)
+def _rpc_server(rpc_server):
+    return rpc_server
 
 
 @pytest.fixture()
-def deployed_math(Math, rpc_server, rpc_client):
+def deployed_math(Math, rpc_server, blockchain_client):
     deploy_txn_hash = deploy_contract(
-        rpc_client,
+        blockchain_client,
         Math,
     )
-    contract_addr = get_contract_address_from_txn(rpc_client, deploy_txn_hash)
+    contract_addr = get_contract_address_from_txn(
+        blockchain_client,
+        deploy_txn_hash,
+    )
     assert contract_addr
-    math = Math(contract_addr, rpc_client)
+    math = Math(contract_addr, blockchain_client)
     return math
 
 
@@ -56,8 +66,7 @@ def test_contract_function_call_add(deployed_math):
     assert ret == 60
 
 
-def test_sent_transaction_with_value(deployed_math, rpc_client):
+def test_sent_transaction_with_value(deployed_math, blockchain_client):
     assert deployed_math.get_balance() == 0
-    txn_hash = deployed_math.add.sendTransaction(35, 45, value=1000)
-    txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
+    deployed_math.add.sendTransaction(35, 45, value=1000)
     assert deployed_math.get_balance() == 1000

@@ -11,8 +11,9 @@ contract LogsEvents {
                 DoubleIndex(key_a, key_b, val_a, val_b);
         }
 
-        //event Anonymous(bytes32 indexed key_a, bytes32 indexed key_b, bytes32 val_a, uint val_b);
-        //function logAnonymous(bytes32 key_a, bytes32 key_b, bytes32 val_a, uint val_b) public {
-        //        Anonymous(key_a, key_b, val_a, val_b);
-        //}
+        event Anonymous(bytes32 indexed key_a, bytes32 indexed key_b, bytes32 val_a, uint val_b) anonymous;
+
+        function logAnonymous(bytes32 key_a, bytes32 key_b, bytes32 val_a, uint val_b) public {
+                Anonymous(key_a, key_b, val_a, val_b);
+        }
 }

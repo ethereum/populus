@@ -1,6 +1,9 @@
 
 
-single_index_args = ('test-key', 'test-val_a', 12345)
+single_index_data = {
+    'val_a': 'test-val_a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    'val_b': 12345,
+}
 single_index_entry = {
     'data': '0x746573742d76616c5f61000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003039',
     'blockHash': '0x8ee4122228d99b29bd837e372c15f7fce8d4fc6f92d95a237e7ef04f44aba0e4',
@@ -16,7 +19,13 @@ single_index_entry = {
     'blockNumber': '0x0',
 }
 
-double_index_args = ('test-key-a', 'test-key-b', 'test-val_a', 12345)
+double_index_data = {
+    'val_a': 'test-val_a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    'val_b': 12345,
+}
+double_index_topics = {
+    # HTF does this work?
+}
 double_index_log_entry = {
     'data': '0x746573742d76616c5f61000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003039',
     'blockHash': '0x72ce3ebf50d4da33a796c289b1423b4d17454d7d966041017ee640a09cb539ed',
@@ -34,6 +43,11 @@ double_index_log_entry = {
 }
 
 
-def test_log_data_parsing(LogsEvents):
+def test_log_data_parsing_a(LogsEvents):
     data = LogsEvents.DoubleIndex.get_log_data(double_index_log_entry)
-    assert set(data) == set(['test-val_a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', 12345])
+    assert data == single_index_data
+
+
+def test_log_data_parsing_b(LogsEvents):
+    data = LogsEvents.SingleIndex.get_log_data(double_index_log_entry)
+    assert data == double_index_data

@@ -19,7 +19,7 @@ def _rpc_server(rpc_server):
 
 
 @pytest.fixture()
-def deployed_math(Math, rpc_server, blockchain_client):
+def deployed_math(Math, blockchain_client):
     deploy_txn_hash = deploy_contract(
         blockchain_client,
         Math,
@@ -34,20 +34,20 @@ def deployed_math(Math, rpc_server, blockchain_client):
 
 
 def test_contract_return13_function_signature(deployed_math):
-    assert deployed_math.return13.abi_function_signature == 371289913
-    assert deployed_math.return13.encoded_abi_function_signature == '\x16!o9'
+    assert deployed_math.return13.abi_signature == 371289913
+    assert deployed_math.return13.encoded_abi_signature == '\x16!o9'
     assert deployed_math.return13.get_call_data([]) == '16216f39'
 
 
 def test_contract_add_function_signature(deployed_math):
-    assert deployed_math.add.abi_function_signature == 2784215611
-    assert deployed_math.add.encoded_abi_function_signature == '\xa5\xf3\xc2;'
+    assert deployed_math.add.abi_signature == 2784215611
+    assert deployed_math.add.encoded_abi_signature == '\xa5\xf3\xc2;'
     assert deployed_math.add.get_call_data((3, 4)) == 'a5f3c23b00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004'
 
 
 def test_contract_multiply7_function_signature(deployed_math):
-    assert deployed_math.multiply7.abi_function_signature == 3707058097
-    assert deployed_math.multiply7.encoded_abi_function_signature == '\xdc\xf57\xb1'
+    assert deployed_math.multiply7.abi_signature == 3707058097
+    assert deployed_math.multiply7.encoded_abi_signature == '\xdc\xf57\xb1'
     assert deployed_math.multiply7.get_call_data((3,)) == 'dcf537b10000000000000000000000000000000000000000000000000000000000000003'
 
 

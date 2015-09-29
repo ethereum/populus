@@ -9,7 +9,7 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 
-version = '0.5.0'
+version = '0.5.1-rc1'
 
 readme = open(os.path.join(DIR, 'README.md')).read()
 
@@ -31,7 +31,7 @@ setup(
         "ethereum>=0.9.73",
         "requests>=2.7.0",
         "eth-testrpc>=0.1.16",
-        "pytest>=2.7.2",
+        "pytest>=2.6.2",
         "ethereum-rpc-client>=0.2.2",
         "watchdog>=0.8.3",
         "Flask>=0.10.1",

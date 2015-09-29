@@ -110,3 +110,76 @@ def Named(named_contract_meta):
     from populus.contracts import Contract
     Named = Contract(named_contract_meta, 'Named')
     return Named
+
+
+@pytest.fixture(scope="session")
+def logs_events_contract_meta():
+    contract = {
+        'code': '0x6060604052610116806100126000396000f360606040526000357c0100000000000000000000000000000000000000000000000000000000900480631d3778b41461004457806378549c581461006357610042565b005b6100616004803590602001803590602001803590602001506100d0565b005b610086600480359060200180359060200180359060200180359060200150610088565b005b82847f968e08311bcc13cd5d4feae6a3c87bedb195ab51905c8ec75a10580b5b5854c78484604051808381526020018281526020019250505060405180910390a35b50505050565b827fe5091e521791fb0fb6be999dcb6d5031d9f0a8032185b13790f8d2f95e163b1f8383604051808381526020018281526020019250505060405180910390a25b50505056',
+        'info': {
+            'abiDefinition': [
+                {
+                    'constant': False,
+                    'inputs': [
+                        {'name': 'key', 'type': 'bytes32'},
+                        {'name': 'val_a', 'type': 'bytes32'},
+                        {'name': 'val_b', 'type': 'uint256'},
+                    ],
+                    'name': 'logSingleIndex',
+                    'outputs': [],
+                    'type': 'function'
+                },
+                {
+                    'constant': False,
+                    'inputs': [
+                        {'name': 'key_a', 'type': 'bytes32'},
+                        {'name': 'key_b', 'type': 'bytes32'},
+                        {'name': 'val_a', 'type': 'bytes32'},
+                        {'name': 'val_b', 'type': 'uint256'},
+                    ],
+                    'name': 'logDoubleIndex',
+                    'outputs': [],
+                    'type': 'function'
+                },
+                {
+                    'anonymous': False,
+                    'inputs': [
+                        {'indexed': True, 'name': 'key', 'type': 'bytes32'},
+                        {'indexed': False, 'name': 'val_a', 'type': 'bytes32'},
+                        {'indexed': False, 'name': 'val_b', 'type': 'uint256'},
+                    ],
+                    'name': 'SingleIndex',
+                    'type': 'event'
+                },
+                {
+                    'anonymous': False,
+                    'inputs': [
+                        {'indexed': True, 'name': 'key_a', 'type': 'bytes32'},
+                        {'indexed': True, 'name': 'key_b', 'type': 'bytes32'},
+                        {'indexed': False, 'name': 'val_a', 'type': 'bytes32'},
+                        {'indexed': False, 'name': 'val_b', 'type': 'uint256'},
+                    ],
+                    'name': 'DoubleIndex',
+                    'type': 'event'
+                },
+            ],
+            'compilerVersion': '0.1.3-1736fe80',
+            'developerDoc': {
+                'methods': {},
+            },
+            'language': 'Solidity',
+            'languageVersion': '0',
+            'source': 'contract LogsEvents {\n        event SingleIndex(bytes32 indexed key, bytes32 val_a, uint val_b);\n\n        function logSingleIndex(bytes32 key, bytes32 val_a, uint val_b) public {\n                SingleIndex(key, val_a, val_b);\n        }\n\n        event DoubleIndex(bytes32 indexed key_a, bytes32 indexed key_b, bytes32 val_a, uint val_b);\n\n        function logDoubleIndex(bytes32 key_a, bytes32 key_b, bytes32 val_a, uint val_b) public {\n                DoubleIndex(key_a, key_b, val_a, val_b);\n        }\n}\n',
+            'userDoc': {
+                'methods': {},
+            },
+        },
+    }
+    return contract
+
+
+@pytest.fixture(scope="session")
+def LogsEvents(logs_events_contract_meta):
+    from populus.contracts import Contract
+    LogsEvents = Contract(logs_events_contract_meta, 'LogsEvents')
+    return LogsEvents

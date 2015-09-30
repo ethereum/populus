@@ -15,7 +15,7 @@ def _rpc_server(rpc_server):
 
 
 @pytest.fixture()
-def deployed_logs_events(LogsEvents, rpc_server, blockchain_client):
+def deployed_logs_events(LogsEvents, blockchain_client):
     deploy_txn_hash = deploy_contract(
         blockchain_client,
         LogsEvents,

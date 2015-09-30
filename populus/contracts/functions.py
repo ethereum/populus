@@ -80,3 +80,119 @@ class Function(ContractBound):
         if raw:
             return output
         return self.cast_return_data(output)
+
+
+from ethereum.abi import process_type
+
+
+def validate_argument(arg_meta, value):
+    base, sub, arrlist = process_type(arg_meta['type'])
+
+    if base == 'int':
+        if not isinstance(value, int):
+            return False
+        exp = int(sub)
+        lower_bound = (-1 * 2 ** (exp - 1)) + 1
+        upper_bound = (2 ** (exp - 1)) - 1
+        return lower_bound <= value <= upper_bound
+    elif base == 'uint':
+        if not isinstance(value, int):
+            return False
+        exp = int(sub)
+        lower_bound = 0
+        upper_bound = (2 ** exp) - 1
+        return lower_bound <= value <= upper_bound
+    elif base == 'address':
+        if not isinstance(value, basestring):
+            return False
+        _value = value[2:] if value.startswith('0x') else value
+        if set(_value).difference('1234567890abcdef'):
+            return False
+        return len(_value) == 40
+    elif base == 'bytes':
+        if not isinstance(value, basestring):
+            return False
+        max_length = int(sub)
+        return len(value) <= max_length
+    else:
+        raise ValueError("Unsupported base: '{0}'".format(base))
+
+
+class FunctionGroup(object):
+    def __init__(self, functions):
+        self.functions = functions
+
+    def __str__(self):
+        return "\n".join((
+            "{0}: {1}".format(i, f.signature) for i, f in enumerate(self.functions)
+        ))
+
+    @property
+    def name(self):
+        return self.functions[0].name
+
+    def _bind(self, contract):
+        [f._bind(contract) for f in self.functions]
+
+    def __call__(self, *args, **kwargs):
+        function = self.get_function_for_call_signature(args)
+        return function(*args, **kwargs)
+
+    def sendTransaction(self, *args, **kwargs):
+        function = self.get_function_for_call_signature(args)
+        return function.sendTransaction(*args, **kwargs)
+
+    def call(self, *args, **kwargs):
+        function = self.get_function_for_call_signature(args)
+        return function.call(*args, **kwargs)
+
+    def get_function_for_call_signature(self, args):
+        candidates = []
+        for function in self.functions:
+            if len(function.inputs) != len(args):
+                continue
+            is_match = all((
+                validate_argument(arg_meta, arg)
+                for arg_meta, arg
+                in zip(function.inputs, args)
+            ))
+            if not is_match:
+                continue
+            candidates.append(function)
+        if len(candidates) == 1:
+            return candidates[0]
+        elif len(candidates) == 0:
+            raise TypeError("No functions matched the calling signature")
+        else:
+            raise TypeError("More than one function matched.")
+
+    def abi_args_signature(self, args):
+        function = self.get_function_for_call_signature(args)
+        return function.abi_args_signature(args)
+
+    def get_call_data(self, args):
+        function = self.get_function_for_call_signature(args)
+        return function.get_call_data(args)
+
+    @property
+    def input_types(self):
+        raise AttributeError("You must access this function on the correct sub-function")
+
+    @property
+    def signature(self):
+        raise AttributeError("You must access this function on the correct sub-function")
+
+    @property
+    def abi_signature(self):
+        raise AttributeError("You must access this function on the correct sub-function")
+
+    @property
+    def encoded_abi_signature(self):
+        raise AttributeError("You must access this function on the correct sub-function")
+
+    @property
+    def output_types(self):
+        raise AttributeError("You must access this function on the correct sub-function")
+
+    def cast_return_data(self, outputs):
+        raise AttributeError("You must access this function on the correct sub-function")

@@ -89,7 +89,6 @@ def Contract(contract_meta, contract_name=None):
                 )
             continue
 
-
         if signature_item['type'] == 'function':
             # make sure we're not overwriting a signature
 

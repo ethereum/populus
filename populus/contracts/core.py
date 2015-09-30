@@ -1,10 +1,14 @@
 import copy
 import hashlib
+import collections
 import itertools
 
 from ethereum import utils as ethereum_utils
 
-from populus.contracts.functions import Function
+from populus.contracts.functions import (
+    Function,
+    FunctionGroup,
+)
 from populus.contracts.events import Event
 
 
@@ -73,6 +77,7 @@ def Contract(contract_meta, contract_name=None):
     constructor = None
 
     _dict = {}
+    _functions = collections.defaultdict(list)
 
     for signature_item in _abi:
         if signature_item['type'] == 'constructor':
@@ -84,9 +89,6 @@ def Contract(contract_meta, contract_name=None):
                 )
             continue
 
-        if signature_item['name'] in _dict:
-            # TODO: handle namespace conflicts
-            raise ValueError("About to overwrite a function signature for duplicate function name {0}".format(signature_item['name']))  # NOQA
 
         if signature_item['type'] == 'function':
             # make sure we're not overwriting a signature
@@ -97,9 +99,11 @@ def Contract(contract_meta, contract_name=None):
                 outputs=signature_item['outputs'],
                 constant=signature_item['constant'],
             )
-            _dict[signature_item['name']] = func
-            functions.append(func)
+            _functions[signature_item['name']].append(func)
         elif signature_item['type'] == 'event':
+            if signature_item['name'] in _dict:
+                # TODO: handle namespace conflicts
+                raise ValueError("About to overwrite a function signature for duplicate function name {0}".format(signature_item['name']))  # NOQA
             event = Event(
                 name=signature_item['name'],
                 inputs=signature_item['inputs'],
@@ -109,6 +113,16 @@ def Contract(contract_meta, contract_name=None):
             events.append(event)
         else:
             raise ValueError("Unknown signature item '{0}'".format(signature_item))
+
+    # Now process all the functions
+    for fn_name, fn_list in _functions.items():
+        if len(fn_list) == 1:
+            _dict[fn_name] = fn_list[0]
+            functions.append(fn_list[0])
+        else:
+            fn_group = FunctionGroup(fn_list)
+            _dict[fn_name] = fn_group
+            functions.append(fn_group)
 
     docstring = """
     contract {contract_name} {{

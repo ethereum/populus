@@ -1,3 +1,15 @@
+0.5.1
+-----
+
+- Introduce the `ethtester_client` which has the same API as the
+  eth_rpc_client.Client class but interacts directly with the `ethereum.tester`
+  module
+- Add ability to control the manner through which the `deployed_contracts`
+  fixture communicates with the blockchain via the `deploy_client` fixture.
+- Re-organization of the contracts module.
+- Support for multiple contract functions with the same name.
+- Basic support for extracting logs and log data from transactions.
+
 0.5.0
 -----
 

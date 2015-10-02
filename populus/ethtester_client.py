@@ -87,6 +87,7 @@ class EthTesterClient(object):
     """
     def __init__(self):
         self.evm = t.state()
+        self.evm.mine()
 
     def get_coinbase(self):
         return self.evm.block.coinbase

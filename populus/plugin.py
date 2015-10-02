@@ -77,13 +77,13 @@ def populus_config():
 
 
 @pytest.fixture(scope="session")
-def test_coinbase():
+def ethtester_coinbase():
     from ethereum import tester
     return tester.encode_hex(tester.accounts[0])
 
 
 @pytest.yield_fixture()
-def rpc_server(request, populus_config):
+def testrpc_server(request, populus_config):
     from testrpc.__main__ import create_server
     from testrpc.testrpc import evm_reset
 

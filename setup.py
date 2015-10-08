@@ -9,7 +9,8 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 
-version = '0.5.2'
+from populus import __version__ as version
+
 
 readme = open(os.path.join(DIR, 'README.md')).read()
 
@@ -36,6 +37,7 @@ setup(
         "watchdog>=0.8.3",
         "Flask>=0.10.1",
         "toposort>=1.4",
+        "readline>=6.2.0.0",
     ],
     dependency_links=[
         # Until https://github.com/ethereum/ethash/issues/72 is resolved

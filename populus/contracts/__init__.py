@@ -8,4 +8,7 @@ from populus.contracts.functions import (  # NOQA
     FunctionGroup,
 )
 from populus.contracts.events import Event  # NOQA
-from populus.contracts.core import Contract  # NOQA
+from populus.contracts.core import (  # NOQA
+    Contract,
+    package_contracts,
+)

@@ -1,3 +1,14 @@
+0.5.2
+-----
+
+- Rename `rpc_server` fixture to `testrpc_server`
+- Introduce `populus_config` module level fixture which holds all of the
+  default values for other populus module level fixtures that are configurable.
+- Add new configuration options for `deployed_contracts` fixture to allow
+  declaration of which contracts are deployed, dependency ordering and
+  constructor args.
+- Improve overall documentation around fixtures.
+
 0.5.1
 -----
 

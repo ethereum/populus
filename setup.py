@@ -36,9 +36,6 @@ setup(
         "watchdog>=0.8.3",
         "Flask>=0.10.1",
         "toposort>=1.4",
-        # Logging Bug
-        "rlp==0.3.9",
-        "bitcoin==1.1.36",
     ],
     dependency_links=[
         # Until https://github.com/ethereum/ethash/issues/72 is resolved

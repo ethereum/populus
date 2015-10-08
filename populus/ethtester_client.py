@@ -121,6 +121,7 @@ class EthTesterClient(object):
 
     def send_transaction(self, *args, **kwargs):
         self._send_transaction(*args, **kwargs)
+        self.evm.mine()
         return self.evm.last_tx.hash
 
     def _get_transaction_by_hash(self, txn_hash):

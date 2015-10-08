@@ -7,7 +7,7 @@ project_dir = os.path.join(
 deploy_client_type = 'rpc'
 
 
-def test_deployed_contracts_fixture_with_ethtester(rpc_server, deployed_contracts):
+def test_deployed_contracts_fixture_with_ethtester(testrpc_server, deployed_contracts):
     math = deployed_contracts.Math
     assert math.add.call(11, 12) == 23
     assert math.multiply7.call(11) == 77

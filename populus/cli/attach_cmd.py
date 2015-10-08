@@ -25,13 +25,13 @@ from .main import main
 @main.command()
 def attach():
     """
-    Enter an interactive python shell with contracts and blockchain client
+    Enter a python shell with contracts and blockchain client
     available.
     """
     project_dir = os.path.abspath(os.getcwd())
     contracts_meta = utils.load_contracts(project_dir)
 
-    vars = {
+    context = {
         'contracts': package_contracts(contracts_meta),
         'client': Client('127.0.0.1', '8545'),
     }
@@ -56,13 +56,13 @@ def attach():
         populus_version=populus.__version__,
         project_dir=project_dir,
         client_type="json-rpc",
-        contracts = click.wrap_text(
+        contracts=click.wrap_text(
             contract_names, initial_indent='', subsequent_indent=' ' * 4,
         ),
-    )
+    ).strip()
 
     if is_ipython:
-        shell = InteractiveConsole(user_ns=vars)
+        shell = InteractiveConsole(user_ns=context)
     else:
-        shell = InteractiveConsole(vars)
+        shell = InteractiveConsole(context)
     shell.interact(banner)

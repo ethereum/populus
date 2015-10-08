@@ -116,23 +116,12 @@ def rpc_client(request, populus_config):
 @pytest.fixture(scope="module")
 def contracts(request, populus_config):
     from populus.utils import load_contracts
-    from populus.contracts import Contract
+    from populus.contracts import package_contracts
 
     project_dir = populus_config.get_value(request, "project_dir")
 
     contracts = load_contracts(project_dir)
-
-    contract_classes = {
-        name: Contract(contract_meta, name) for name, contract_meta in contracts.items()
-    }
-
-    _dict = {
-        '__iter__': lambda s: iter(contract_classes.items()),
-        '__getitem__': lambda s, k: contract_classes.__getitem__[k],
-    }
-    _dict.update(contract_classes)
-
-    return type('contracts', (object,), _dict)()
+    return package_contracts(contracts)
 
 
 @pytest.fixture()

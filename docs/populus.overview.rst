@@ -60,11 +60,11 @@ Command Line Options
       --help  Show this message and exit.
 
     Commands:
+      attach   Enter a python shell with contracts and...
       chain    Wrapper around `geth`.
       compile  Compile project contracts, storing their...
       deploy   Deploy contracts.
       init     Generate project layout with an example...
-      test     Test contracts (wrapper around py.test)
       web      HTML/CSS/JS tooling.
 
 
@@ -79,6 +79,28 @@ default project layout that populus uses.
 * ``./tests/test_examply.py``
 * ``./html/index.html``
 * ``./assets/``
+
+
+Attach
+~~~~~~
+
+Running ``$ populus attach`` with place you in an interactive python shell with
+your contract classes and an RPC client available in the local namespace.
+
+
+.. code-block:: shell
+
+    Python: 2.7.10 (default, Jul 13 2015, 12:05:58)
+
+    Populus: v0.5.2
+
+    Project Path: /path/to/my-project/
+
+    contracts  -> Contract classes
+    client     -> Blockchain client (json-rpc)
+
+    Contracts: Example, AnotherExample
+
 
 Compile
 ~~~~~~~
@@ -186,30 +208,6 @@ address for the transaction.
 
     $ populus deploy
     Example    : addr: 0xc305c901078781c232a2a521c2af7980f8385ee9 via txn:0xbba0f1cc96adb3c31a14bd5271d9a8c82b6aa1ddac2c7161bcb52ef6f3b9f813
-
-
-Test
-~~~~
-
-
-Running ``$ populus test`` will run all of the tests found in the ``./tests``
-directory of your project using the compiled contracts currently found in the
-``./build`` directory of your project.
-
-
-.. code-block:: shell
-
-    $ populus test
-    =================================== test session starts ===================================
-    platform darwin -- Python 2.7.10 -- py-1.4.30 -- pytest-2.7.2 -- /usr/bin/python
-    rootdir: /path/to/my-project, inifile: pytest.ini
-    plugins: populus, capturelog, timeout
-    collected 2 items
-
-    tests/test_example.py::test_contracts_has_correct_functions PASSED
-    tests/test_example.py::test_contract_function_return_values PASSED
-
-    ================================ 2 passed in 0.82 seconds =================================
 
 
 Chain

@@ -141,3 +141,17 @@ def Contract(contract_meta, contract_name=None):
     _dict['_config'] = Config(code, source, _abi, functions, events, constructor)
 
     return type(str(contract_name), (ContractBase,), _dict)
+
+
+def package_contracts(contracts):
+    contract_classes = {
+        name: Contract(contract_meta, name) for name, contract_meta in contracts.items()
+    }
+
+    _dict = {
+        '__iter__': lambda s: iter(contract_classes.items()),
+        '__getitem__': lambda s, k: contract_classes.__getitem__[k],
+    }
+    _dict.update(contract_classes)
+
+    return type('contracts', (object,), _dict)()

@@ -14,7 +14,36 @@ environment variables.
 
 It has the following properties.
 
-* TODO:
+* ``rpc_server_port = 8545``
+* ``rpc_server_host = '127.0.0.1'``
+* ``rpc_client_port = '8545'``
+* ``rpc_client_host = '127.0.0.1'``
+* ``deploy_client_type = 'ethtester'``
+* ``deploy_client_rpc_port = '8545'``
+* ``deploy_client_rpc_host = '127.0.0.1'``
+* ``deploy_wait_for_block = 0``
+* ``deploy_wait_for_block_max_wait = 70``
+* ``deploy_address = None``
+* ``deploy_max_wait = 70``
+* ``deploy_contracts = set()``
+* ``deploy_dependencies = {}``
+* ``deploy_constructor_args = {}``
+* ``deploy_gas_limit = None``
+* ``geth_chain_name = 'default-test'``
+* ``geth_reset_chain = True``
+* ``geth_rpc_port = '8545'``
+* ``geth_rpc_host = '127.0.0.1'``
+* ``geth_max_wait = 5``
+
+In addition it has the following two special properties that evaluate to the
+current working directory of the python process.
+
+* ``geth_project_dir``
+* ``project_dir``
+
+
+Details for what each of these properties configures can be found in their
+individual fixture documentation.
 
 EthTester Coinbase
 ------------------
@@ -131,7 +160,38 @@ contracts are deployed.
 Configuration
 ^^^^^^^^^^^^^
 
-TODO
+The following values can be set as either module level variables or as
+environment variables in their uppercase form to configure the deployment of
+contracts.
+
+* ``deploy_wait_for_block`` Deployment of contracts will not proceed until the
+  specified block number has been seen.  Typically, setting this to ``1`` when
+  using a ``geth`` based client is a good idea.  (default ``0``)
+* ``deploy_wait_for_block_max_wait`` Specifies the maximum amount of time that
+  populus will wait for the block number specified by
+  ``deploy_wait_for_block``. (default ``70``)
+* ``deploy_address`` Specifies the ethereum address that will be used for the
+  deployment.  This defaults to the coinbase if unset or falsy.  (default ``None``)
+* ``deploy_max_wait`` Specifies the maximum amount of time in seconds that
+  populus will wait for the deploying transaction before considering it an
+  error. (default ``70``)
+* ``deploy_contracts`` If set, only the contracts who's names are contained in
+  the value will be deployed. (default ``set()``)
+* ``deploy_dependencies`` If any of you contracts must be deployed before
+  another, they should be specified with this value.  The keys of the
+  dictionary should be the contract which depends on some other(s).  The value
+  for each key should be an iterable of the contract names it dependss on.
+  (default ``{}``)
+* ``deploy_constructor_args`` If any of your contracts need to have arguments
+  passed into their constructors, they can be specified with this setting.  The
+  keys of this dictionary should be the name for the contract.  The value can
+  either be an iterable of constructor args or a callable that takes a single
+  argument and returns an iterable of constructor args. The callable will be
+  passed a dictionary containing all of the contracts that have alread been
+  deployed. (default ``{}``)
+* ``deploy_gas_limit`` Specifies the gas value for deploy transactions.  If
+  unset or falsy, then a value approximating 90% of the block gas limit will be
+  used. (default ``None``)
 
 
 Geth Node

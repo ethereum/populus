@@ -50,9 +50,9 @@ class PopulusConfig(object):
 
     # Deployed Contracts
     deploy_wait_for_block = 0
-    deploy_wait_for_block_max_wait = 30
+    deploy_wait_for_block_max_wait = 70
     deploy_address = None
-    deploy_max_wait = 0
+    deploy_max_wait = 70
     deploy_contracts = set()
     deploy_dependencies = {}
     deploy_constructor_args = {}

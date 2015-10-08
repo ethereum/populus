@@ -14,8 +14,8 @@ from populus.utils import (
 
 
 @pytest.fixture(autouse=True)
-def _rpc_server(rpc_server):
-    return rpc_server
+def _rpc_server(testrpc_server):
+    return testrpc_server
 
 
 @pytest.fixture()

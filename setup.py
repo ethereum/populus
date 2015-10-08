@@ -9,7 +9,7 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 
-version = '0.5.1'
+version = '0.5.2-rc1'
 
 readme = open(os.path.join(DIR, 'README.md')).read()
 
@@ -35,9 +35,7 @@ setup(
         "ethereum-rpc-client>=0.2.2",
         "watchdog>=0.8.3",
         "Flask>=0.10.1",
-        # Logging Bug
-        "rlp==0.3.9",
-        "bitcoin==1.1.36",
+        "toposort>=1.4",
     ],
     dependency_links=[
         # Until https://github.com/ethereum/ethash/issues/72 is resolved

@@ -132,7 +132,7 @@ def wait_for_transaction(rpc_client, txn_hash, max_wait=60):
             break
         elif time.time() > start + max_wait:
             raise ValueError("Could not get transaction receipt")
-        time.sleep(1)
+        time.sleep(2)
     return txn_receipt
 
 
@@ -141,7 +141,7 @@ def wait_for_block(rpc_client, block_number, max_wait=60):
     while time.time() < start + max_wait:
         if rpc_client.get_block_number() >= block_number:
             break
-        time.sleep(1)
+        time.sleep(2)
     else:
         raise ValueError("Did not reach block")
 

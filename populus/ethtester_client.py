@@ -87,6 +87,7 @@ class EthTesterClient(object):
     """
     def __init__(self):
         self.evm = t.state()
+        self.evm.mine()
 
     def get_coinbase(self):
         return self.evm.block.coinbase
@@ -120,6 +121,7 @@ class EthTesterClient(object):
 
     def send_transaction(self, *args, **kwargs):
         self._send_transaction(*args, **kwargs)
+        self.evm.mine()
         return self.evm.last_tx.hash
 
     def _get_transaction_by_hash(self, txn_hash):

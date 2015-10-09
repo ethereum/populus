@@ -18,6 +18,7 @@ skip_if_no_geth = pytest.mark.skipif(
 BASE_DIR= os.path.abspath(os.path.dirname(__file__))
 
 geth_project_dir = os.path.join(BASE_DIR, 'projects', 'test-01')
+geth_chain_name = "default"
 
 
 @pytest.fixture(autouse=True)
@@ -29,4 +30,5 @@ def project_test01_dir(monkeypatch):
 @skip_if_no_geth
 def test_geth_coinbase(geth_coinbase, project_test01_dir):
     data_dir = get_geth_data_dir(project_test01_dir, 'default')
-    geth_coinbase = ensure_account_exists(data_dir)
+    actual_coinbase = ensure_account_exists(data_dir)
+    assert geth_coinbase == actual_coinbase

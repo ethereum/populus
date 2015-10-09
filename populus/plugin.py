@@ -156,10 +156,13 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
     from populus.contracts import (
         deploy_contract,
         get_max_gas,
+        get_linker_dependencies,
+        link_contract_dependency,
     )
     from populus.utils import (
         wait_for_block,
         get_contract_address_from_txn,
+        merge_dependencies,
     )
 
     _deployed_contracts = {}
@@ -182,11 +185,16 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
     deploy_contracts = set(populus_config.get_value(
         request, 'deploy_contracts',
     ))
-    deploy_dependencies = populus_config.get_value(
+    declared_dependencies = populus_config.get_value(
         request, 'deploy_dependencies',
     )
     deploy_constructor_args = populus_config.get_value(
         request, 'deploy_constructor_args',
+    )
+
+    linker_dependencies = get_linker_dependencies(contracts)
+    deploy_dependencies = merge_dependencies(
+        declared_dependencies, linker_dependencies,
     )
 
     if deploy_dependencies:
@@ -210,6 +218,11 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
             request,
             'deploy_gas_limit',
         ) or get_max_gas(deploy_client))
+
+        if contract_name in linker_dependencies:
+            for dependency_name in linker_dependencies[contract_name]:
+                deployed_contract = _deployed_contracts[dependency_name]
+                link_contract_dependency(contract_class, deployed_contract)
 
         txn_hash = deploy_contract(
             deploy_client,

@@ -55,13 +55,15 @@ class Config(object):
     """
     Contract (class) level contract data.
     """
-    def __init__(self, code, source, abi, functions, events, constructor):
+    def __init__(self, code, source, abi, functions, events, constructor,
+                 contract_name=None):
         self.code = code
         self.source = source
         self.abi = abi
         self._functions = functions
         self._events = events
         self.constructor = constructor
+        self.name = contract_name
 
 
 def Contract(contract_meta, contract_name=None):
@@ -138,7 +140,9 @@ def Contract(contract_meta, contract_name=None):
     )
 
     _dict['__doc__'] = docstring
-    _dict['_config'] = Config(code, source, _abi, functions, events, constructor)
+    _dict['_config'] = Config(
+        code, source, _abi, functions, events, constructor, contract_name,
+    )
 
     return type(str(contract_name), (ContractBase,), _dict)
 

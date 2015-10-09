@@ -2,6 +2,9 @@
 from populus.contracts.utils import (  # NOQA
     get_max_gas,
     deploy_contract,
+    get_linker_dependencies,
+    link_contract_dependency,
+    strip_0x_prefix,
 )
 from populus.contracts.functions import (  # NOQA
     Function,

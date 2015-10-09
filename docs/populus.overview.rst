@@ -90,6 +90,7 @@ your contract classes and an RPC client available in the local namespace.
 
 .. code-block:: shell
 
+    $ populus attach
     Python: 2.7.10 (default, Jul 13 2015, 12:05:58)
 
     Populus: v0.5.2
@@ -100,6 +101,8 @@ your contract classes and an RPC client available in the local namespace.
     client     -> Blockchain client (json-rpc)
 
     Contracts: Example, AnotherExample
+
+    ... > 
 
 
 Compile

@@ -1,6 +1,8 @@
+import binascii
+import re
+
 from ethereum import utils as ethereum_utils
 from ethereum import abi
-import binascii
 
 
 def decode_single(typ, data):
@@ -77,3 +79,32 @@ def deploy_contract(rpc_client, contract_class, constructor_args=None, **kwargs)
     kwargs['data'] = contract_class.get_deploy_data(*constructor_args)
     txn_hash = rpc_client.send_transaction(**kwargs)
     return txn_hash
+
+
+DEPENDENCY_RE = re.compile((
+    r''
+    '__'  # Prefixed by double underscore
+    '(?P<name>[A-Za-z0-9]+)'  # capture the name of the dependency
+    '_{1,37}'  # and then enough underscores to finish out the 40 chars.
+))
+
+
+def get_linker_dependencies(contracts):
+    dependencies = {
+        contract_name: set(DEPENDENCY_RE.findall(contract_meta._config.code))
+        for contract_name, contract_meta
+        in contracts
+        if '__' in contract_meta._config.code
+    }
+    return dependencies
+
+
+def link_contract_dependency(contract, deployed_contract):
+    location_re = re.compile(
+        deployed_contract._config.name.ljust(38, "_").rjust(40, "_"),
+    )
+    contract._config.code = location_re.sub(
+        strip_0x_prefix(deployed_contract._meta.address),
+        contract._config.code,
+    )
+    return contract

@@ -1,0 +1,121 @@
+{
+    "AccountingLib": {
+        "code": "0x60606040526101ff806100126000396000f365010523865e395060606040526000357c0100000000000000000000000000000000000000000000000000000000900480634b260a311461005a578063538b9e491461008f578063dae1104a146100a757610055565b610007565b610079600480803590602001909190803590602001909190505061010a565b6040518082815260200191505060405180910390f35b6100a560048080359060200190919050506100c8565b005b6100c6600480803590602001909190803590602001909190505061014b565b005b348160000160005060003373ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828282505401925050819055505b50565b60008260000160005060008373ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600050549050610145565b92915050565b8160000160005060003373ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060005054811115610189576101fb565b808260000160005060003373ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828282505403925050819055503373ffffffffffffffffffffffffffffffffffffffff16600082604051809050600060405180830381858888f19350505050505b505056",
+        "info": {
+            "abiDefinition": [
+                {
+                    "constant": true,
+                    "inputs": [
+                        {
+                            "name": "self",
+                            "type": "AccountingLib.Ledger storage"
+                        },
+                        {
+                            "name": "addr",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "balance",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "self",
+                            "type": "AccountingLib.Ledger storage"
+                        }
+                    ],
+                    "name": "deposit",
+                    "outputs": [],
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "self",
+                            "type": "AccountingLib.Ledger storage"
+                        },
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "withdraw",
+                    "outputs": [],
+                    "type": "function"
+                }
+            ],
+            "compilerVersion": "0.1.5-23865e39",
+            "developerDoc": {
+                "methods": {}
+            },
+            "language": "Solidity",
+            "languageVersion": "0",
+            "source": "library AccountingLib {\n        struct Ledger {\n                mapping (address => uint) balances;\n        }\n\n        function deposit(Ledger storage self) public {\n                // check we haven't already registered\n                self.balances[msg.sender] += msg.value;\n        }\n\n        function balance(Ledger storage self, address addr) constant returns (uint) {\n                return self.balances[addr];\n        }\n\n        function withdraw(Ledger storage self, uint value) public {\n                if (value > self.balances[msg.sender]) {\n                        // insufficient balance.\n                        return;\n                }\n                self.balances[msg.sender] -= value;\n                msg.sender.send(value);\n        }\n}\n\n\ncontract PiggyBank {\n        AccountingLib.Ledger accounts;\n\n        function deposit() public {\n                AccountingLib.deposit(accounts);\n        }\n\n        function checkBalance(address acct) constant returns (uint) {\n                return AccountingLib.balance(accounts, acct);\n        }\n\n        function withdraw(uint value) {\n                AccountingLib.withdraw(accounts, value);\n        }\n}\n",
+            "userDoc": {
+                "methods": {}
+            }
+        }
+    },
+    "PiggyBank": {
+        "code": "0x606060405261021f806100126000396000f360606040526000357c0100000000000000000000000000000000000000000000000000000000900480632e1a7d4d1461004f5780635f51522614610067578063d0e30db0146100935761004d565b005b61006560048080359060200190919050506101a9565b005b61007d600480803590602001909190505061010f565b6040518082815260200191505060405180910390f35b6100a060048050506100a2565b005b73__AccountingLib_________________________63538b9e496000600050604051827c01000000000000000000000000000000000000000000000000000000000281526004018082815260200191505060006040518083038160008760325a03f215610002575050505b565b600073__AccountingLib_________________________634b260a31600060005084604051837c0100000000000000000000000000000000000000000000000000000000028152600401808381526020018273ffffffffffffffffffffffffffffffffffffffff1681526020019250505060206040518083038160008760325a03f215610002575050506040515190506101a4565b919050565b73__AccountingLib_________________________63dae1104a600060005083604051837c0100000000000000000000000000000000000000000000000000000000028152600401808381526020018281526020019250505060006040518083038160008760325a03f215610002575050505b5056",
+        "info": {
+            "abiDefinition": [
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "withdraw",
+                    "outputs": [],
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [
+                        {
+                            "name": "acct",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "checkBalance",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [],
+                    "name": "deposit",
+                    "outputs": [],
+                    "type": "function"
+                }
+            ],
+            "compilerVersion": "0.1.5-23865e39",
+            "developerDoc": {
+                "methods": {}
+            },
+            "language": "Solidity",
+            "languageVersion": "0",
+            "source": "library AccountingLib {\n        struct Ledger {\n                mapping (address => uint) balances;\n        }\n\n        function deposit(Ledger storage self) public {\n                // check we haven't already registered\n                self.balances[msg.sender] += msg.value;\n        }\n\n        function balance(Ledger storage self, address addr) constant returns (uint) {\n                return self.balances[addr];\n        }\n\n        function withdraw(Ledger storage self, uint value) public {\n                if (value > self.balances[msg.sender]) {\n                        // insufficient balance.\n                        return;\n                }\n                self.balances[msg.sender] -= value;\n                msg.sender.send(value);\n        }\n}\n\n\ncontract PiggyBank {\n        AccountingLib.Ledger accounts;\n\n        function deposit() public {\n                AccountingLib.deposit(accounts);\n        }\n\n        function checkBalance(address acct) constant returns (uint) {\n                return AccountingLib.balance(accounts, acct);\n        }\n\n        function withdraw(uint value) {\n                AccountingLib.withdraw(accounts, value);\n        }\n}\n",
+            "userDoc": {
+                "methods": {}
+            }
+        }
+    }
+}

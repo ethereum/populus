@@ -4,6 +4,9 @@ import json
 import socket
 import time
 import signal
+import operator
+import functools
+import itertools
 
 
 CONTRACTS_DIR = "./contracts/"
@@ -150,3 +153,18 @@ def get_contract_address_from_txn(rpc_client, txn_hash, max_wait=0):
     txn_receipt = wait_for_transaction(rpc_client, txn_hash, max_wait)
 
     return txn_receipt['contractAddress']
+
+
+def merge_dependencies(*dependencies):
+    """
+    Takes dictionaries of key => set(...) and merges them all into a single
+    dictionary where each key is the union of all of the sets for that key
+    across all dictionaries.
+    """
+    return {
+        k: set(functools.reduce(
+            operator.or_,
+            (d.get(k, set()) for d in dependencies)
+        ))
+        for k in itertools.chain.from_iterable((d.keys() for d in dependencies))
+    }

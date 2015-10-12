@@ -1,0 +1,4 @@
+contract B {
+    function B() {
+    }
+}

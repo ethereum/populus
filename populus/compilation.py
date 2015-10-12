@@ -27,6 +27,20 @@ def find_project_contracts(project_dir):
     ))
 
 
+def get_project_libraries_dir(project_dir):
+    """
+    TODO: this currently only supports solidity contracts.
+    """
+    return os.path.abspath(os.path.join(project_dir, 'libraries'))
+
+
+def find_project_libraries(project_dir):
+    libraries_dir = get_project_libraries_dir(project_dir)
+    solidity_glob = os.path.join(libraries_dir, "*.sol")
+
+    return tuple(os.path.relpath(p) for p in glob.glob(solidity_glob))
+
+
 def get_compiled_contract_destination_path(project_dir):
     build_dir = get_build_dir(project_dir)
     file_path = os.path.join(build_dir, 'contracts.json')
@@ -50,29 +64,34 @@ def get_compiler_for_file(file_path):
     elif ext == 'lll':
         raise ValueError("Compilation of LLL contracts is not yet supported")
     elif ext == 'mu':
-        raise ValueError("Compilation of LLL contracts is not yet supported")
+        raise ValueError("Compilation of mutan contracts is not yet supported")
     elif ext == 'se':
-        raise ValueError("Compilation of LLL contracts is not yet supported")
+        raise ValueError("Compilation of serpent contracts is not yet supported")
 
     raise ValueError("Unknown contract extension {0}".format(ext))
 
 
-def compile_source_file(source_path, **compiler_kwargs):
+def compile_source_file(source_path, library_paths, **compiler_kwargs):
     compiler = get_compiler_for_file(source_path)
 
-    with open(source_path) as source_file:
-        source_code = source_file.read()
+    input_files = (source_path,) + library_paths
 
-    # TODO: solidity specific
-    compiled_source = compiler(source_code, **compiler_kwargs)
+    compiled_source = compiler(
+        input_files=input_files,
+        **compiler_kwargs
+    )
     return compiled_source
 
 
-def compile_project_contracts(contracts_dir, filters=None, **compiler_kwargs):
+def compile_project_contracts(contract_source_paths, library_paths, filters=None, **compiler_kwargs):
     compiled_sources = {}
 
-    for source_path in contracts_dir:
-        compiled_source = compile_source_file(source_path, **compiler_kwargs)
+    for source_path in contract_source_paths:
+        compiled_source = compile_source_file(
+            source_path,
+            library_paths=library_paths,
+            **compiler_kwargs
+        )
 
         if filters:
             for contract_name, contract_data in compiled_source.items():
@@ -132,8 +151,14 @@ def get_contract_filters(*contracts):
 def compile_and_write_contracts(project_dir, *contracts, **compiler_kwargs):
     filters = get_contract_filters(*contracts)
     contract_source_paths = find_project_contracts(project_dir)
+    libraries_source_paths = find_project_libraries(project_dir)
 
-    compiled_sources = compile_project_contracts(contract_source_paths, filters, **compiler_kwargs)
+    compiled_sources = compile_project_contracts(
+        contract_source_paths,
+        libraries_source_paths,
+        filters,
+        **compiler_kwargs
+    )
 
     output_file_path = write_compiled_sources(project_dir, compiled_sources)
     return contract_source_paths, compiled_sources, output_file_path

@@ -161,11 +161,13 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
     )
     from populus.utils import (
         wait_for_block,
+        wait_for_transaction,
         get_contract_address_from_txn,
         merge_dependencies,
     )
 
     _deployed_contracts = {}
+    _receipts = {}
 
     deploy_wait_for_block = int(populus_config.get_value(
         request, 'deploy_wait_for_block',
@@ -173,9 +175,6 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
     deploy_wait_for_block_max_wait = int(populus_config.get_value(
         request, 'deploy_wait_for_block_max_wait',
     ))
-
-    wait_for_block(deploy_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
-
     deploy_address = populus_config.get_value(
         request, 'deploy_address',
     ) or deploy_client.get_coinbase()
@@ -192,11 +191,24 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
         request, 'deploy_constructor_args',
     )
 
+    # Potentiall wait until we've reached a specific block.
+    wait_for_block(deploy_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
+
+    # Extract and dependencies that exist due to library linking.
     linker_dependencies = get_linker_dependencies(contracts)
     deploy_dependencies = merge_dependencies(
         declared_dependencies, linker_dependencies,
     )
 
+    # If a subset of contracts have been specified to be deployed, compute
+    # their dependencies as well.
+    contracts_to_deploy = set(itertools.chain.from_iterable(
+        get_dependencies(contract_name, deploy_dependencies)
+        for contract_name in deploy_contracts
+    ))
+
+    # If there are any dependencies either explicit or from libraries, sort the
+    # contracts by their dependencies.
     if deploy_dependencies:
         dependencies = copy.copy(deploy_dependencies)
         for contract_name, _ in contracts:
@@ -206,8 +218,9 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
         contracts = sorted(contracts, key=lambda c: sorted_contract_names.index(c[0]))
 
     for contract_name, contract_class in contracts:
-        # If a subset of contracts have been specified, only deploy those.
-        if deploy_contracts and contract_name not in deploy_contracts:
+        # If a subset of contracts have been specified, only deploy those or
+        # the contracts they depend upon.
+        if contracts_to_deploy and contract_name not in contracts_to_deploy:
             continue
 
         constructor_args = deploy_constructor_args.get(contract_name, None)
@@ -236,7 +249,10 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
             txn_hash,
             max_wait=deploy_max_wait,
         )
+        _receipts[contract_name] = wait_for_transaction(deploy_client, txn_hash)
         _deployed_contracts[contract_name] = contract_class(contract_addr, deploy_client)
+
+    _deployed_contracts['_deploy_receipts'] = _receipts
 
     return type('deployed_contracts', (object,), _deployed_contracts)
 

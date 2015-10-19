@@ -216,6 +216,9 @@ class EthTesterClient(object):
     def get_block_number(self):
         return self.evm.block.number
 
+    def get_gas_price(self):
+        return t.gas_price
+
     def get_balance(self, address, block="latest"):
         _block = self._get_block_by_number(block)
         return _block.get_balance(strip_0x(address))

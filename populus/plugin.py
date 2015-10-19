@@ -2,6 +2,7 @@ import os
 import time
 import threading
 import copy
+import itertools
 
 import toposort
 
@@ -164,6 +165,7 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
         wait_for_transaction,
         get_contract_address_from_txn,
         merge_dependencies,
+        get_dependencies,
     )
 
     _deployed_contracts = {}
@@ -205,7 +207,7 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
     contracts_to_deploy = set(itertools.chain.from_iterable(
         get_dependencies(contract_name, deploy_dependencies)
         for contract_name in deploy_contracts
-    ))
+    )).union(deploy_contracts)
 
     # If there are any dependencies either explicit or from libraries, sort the
     # contracts by their dependencies.

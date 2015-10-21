@@ -80,6 +80,42 @@ def serialize_log(block, txn, txn_index, log, log_index):
     }
 
 
+def serialize_block(block, full_transactions):
+    if full_transactions:
+        transactions = [
+            serialize_txn(block, txn, txn_index)
+            for txn_index, txn in enumerate(block.transaction_list)
+        ]
+    else:
+        transactions = [encode_hex(txn.hash) for txn in block.transaction_list]
+
+    unpadded_logs_bloom = ethereum_utils.int_to_bytes(block.bloom)
+    logs_bloom = "\x00" * (256 - len(unpadded_logs_bloom)) + unpadded_logs_bloom
+
+    return {
+        "number": int_to_hex(block.number),
+        "hash": "0x" + encode_hex(block.hash),
+        "parentHash": "0x" + encode_hex(block.prevhash),
+        "nonce": "0x" + encode_hex(block.nonce),
+        "sha3Uncles": "0x" + encode_hex(block.uncles_hash),
+        # TODO logsBloom / padding
+        "logsBloom": logs_bloom,
+        "transactionsRoot": "0x" + encode_hex(block.tx_list_root),
+        "stateRoot": "0x" + encode_hex(block.state_root),
+        "miner": "0x" + encode_hex(block.coinbase),
+        "difficulty": int_to_hex(block.difficulty),
+        # https://github.com/ethereum/pyethereum/issues/266
+        # "totalDifficulty": int_to_hex(block.chain_difficulty()),
+        "size": int_to_hex(len(ethereum_utils.rlp.encode(block))),
+        "extraData": "0x" + encode_hex(block.extra_data),
+        "gasLimit": int_to_hex(block.gas_limit),
+        "gasUsed": int_to_hex(block.gas_used),
+        "timestamp": int_to_hex(block.timestamp),
+        "transactions": transactions,
+        "uncles": block.uncles
+    }
+
+
 class EthTesterClient(object):
     """
     Stand-in replacement for the rpc client that speaks directly to the
@@ -90,7 +126,7 @@ class EthTesterClient(object):
         self.evm.mine()
 
     def get_coinbase(self):
-        return self.evm.block.coinbase
+        return "0x" + ethereum_utils.encode_hex(self.evm.block.coinbase)
 
     def _send_transaction(self, _from=None, to=None, gas=None, gas_price=None,
                           value=0, data=''):
@@ -152,6 +188,8 @@ class EthTesterClient(object):
         elif block_number == "pending":
             raise ValueError("Fetching 'pending' block is unsupported")
         else:
+            if str(block_number).startswith("0x"):
+                block_number = int(block_number, 16)
             if block_number >= len(self.evm.blocks):
                 raise ValueError("Invalid block number")
             return self.evm.blocks[block_number]
@@ -159,39 +197,21 @@ class EthTesterClient(object):
     def get_block_by_number(self, block_number, full_transactions=True):
         block = self._get_block_by_number(block_number)
 
-        if full_transactions:
-            transactions = [
-                serialize_txn(block, txn, txn_index)
-                for txn_index, txn in enumerate(block.transaction_list)
-            ]
+        return serialize_block(block, full_transactions)
+
+    def _get_block_by_hash(self, block_hash):
+        if len(block_hash) > 32:
+            block_hash = ethereum_utils.decode_hex(strip_0x(block_hash))
+        for block in self.evm.blocks:
+            if block.hash == block_hash:
+                return block
         else:
-            transactions = [encode_hex(txn.hash) for txn in block.transaction_list]
+            raise ValueError("Could not find block for provided hash")
 
-        unpadded_logs_bloom = ethereum_utils.int_to_bytes(block.bloom)
-        logs_bloom = "\x00" * (256 - len(unpadded_logs_bloom)) + unpadded_logs_bloom
+    def get_block_by_hash(self, block_hash, full_transactions=True):
+        block = self._get_block_by_hash(block_hash)
 
-        return {
-            "number": int_to_hex(block.number),
-            "hash": "0x" + encode_hex(block.hash),
-            "parentHash": "0x" + encode_hex(block.prevhash),
-            "nonce": "0x" + encode_hex(block.nonce),
-            "sha3Uncles": "0x" + encode_hex(block.uncles_hash),
-            # TODO logsBloom / padding
-            "logsBloom": logs_bloom,
-            "transactionsRoot": "0x" + encode_hex(block.tx_list_root),
-            "stateRoot": "0x" + encode_hex(block.state_root),
-            "miner": "0x" + encode_hex(block.coinbase),
-            "difficulty": int_to_hex(block.difficulty),
-            # https://github.com/ethereum/pyethereum/issues/266
-            # "totalDifficulty": int_to_hex(block.chain_difficulty()),
-            "size": int_to_hex(len(ethereum_utils.rlp.encode(block))),
-            "extraData": "0x" + encode_hex(block.extra_data),
-            "gasLimit": int_to_hex(block.gas_limit),
-            "gasUsed": int_to_hex(block.gas_used),
-            "timestamp": int_to_hex(block.timestamp),
-            "transactions": transactions,
-            "uncles": block.uncles
-        }
+        return serialize_block(block, full_transactions)
 
     def get_block_number(self):
         return self.evm.block.number
@@ -208,6 +228,9 @@ class EthTesterClient(object):
         snapshot = self.evm.snapshot()
         r = self._send_transaction(*args, **kwargs)
         self.evm.revert(snapshot)
+        # Stop-gap solution for bug with a transaction that immediately follows
+        # a call.
+        self.evm.mine()
         return encode_hex(r)
 
     def get_transaction_by_hash(self, txn_hash):

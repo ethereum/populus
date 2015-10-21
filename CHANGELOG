@@ -1,3 +1,15 @@
+0.5.4
+-----
+
+- Additional support for *library* contracts which will be included in
+  compilation.
+- `deployed_contracts` automatically derives deployment order and dependencies
+  as well as linking library addresses.
+- `deployed_contracts` now comes with the transaction receipts for the
+  deploying transaction attached.
+- Change to use `pyethash` from pypi
+
+
 0.5.3
 -----
 

@@ -83,7 +83,8 @@ def compile_source_file(source_path, library_paths, **compiler_kwargs):
     return compiled_source
 
 
-def compile_project_contracts(contract_source_paths, library_paths, filters=None, **compiler_kwargs):
+def compile_project_contracts(contract_source_paths, library_paths,
+                              filters=None, **compiler_kwargs):
     compiled_sources = {}
 
     for source_path in contract_source_paths:

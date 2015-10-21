@@ -5,6 +5,14 @@ import os
 from populus.compilation import (
     compile_and_write_contracts,
 )
+from populus.solidity import (
+    is_solc_available,
+)
+
+skip_if_no_sol_compiler = pytest.mark.skipif(
+    not is_solc_available(),
+    reason="'solc' compiler not available",
+)
 
 
 BASE_DIR= os.path.abspath(os.path.dirname(__file__))
@@ -18,5 +26,6 @@ def _project_dir(monkeypatch):
     return project_dir
 
 
+@skip_if_no_sol_compiler
 def test_compilation():
     compile_and_write_contracts(project_dir)

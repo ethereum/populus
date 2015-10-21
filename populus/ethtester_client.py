@@ -125,6 +125,10 @@ class EthTesterClient(object):
         self.evm = t.state()
         self.evm.mine()
 
+    def wait_for_block(self, block_number, max_wait=0):
+        while self.evm.block.number < block_number:
+            self.evm.mine()
+
     def get_coinbase(self):
         return "0x" + ethereum_utils.encode_hex(self.evm.block.coinbase)
 
@@ -215,6 +219,9 @@ class EthTesterClient(object):
 
     def get_block_number(self):
         return self.evm.block.number
+
+    def get_gas_price(self):
+        return t.gas_price
 
     def get_balance(self, address, block="latest"):
         _block = self._get_block_by_number(block)

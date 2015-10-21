@@ -17,6 +17,7 @@ from populus.web import (
 )
 from populus.compilation import (
     compile_and_write_contracts,
+    get_project_libraries_dir,
     get_compiled_contract_destination_path,
 )
 
@@ -47,7 +48,8 @@ def get_contracts_observer(project_dir, contract_filters=None, compiler_kwargs=N
         contract_filters = []
     if compiler_kwargs is None:
         compiler_kwargs = {}
-    watch_path = utils.get_contracts_dir(project_dir)
+    contracts_dir = utils.get_contracts_dir(project_dir)
+    libraries_dir = get_project_libraries_dir(project_dir)
 
     event_handler = ContractSourceChangedEventHandler(
         project_dir=project_dir,
@@ -55,7 +57,8 @@ def get_contracts_observer(project_dir, contract_filters=None, compiler_kwargs=N
         compiler_kwargs=compiler_kwargs,
     )
     observer = PollingObserver()
-    observer.schedule(event_handler, watch_path, recursive=True)
+    observer.schedule(event_handler, contracts_dir, recursive=True)
+    observer.schedule(event_handler, libraries_dir, recursive=True)
     return observer
 
 

@@ -168,3 +168,12 @@ def merge_dependencies(*dependencies):
         ))
         for k in itertools.chain.from_iterable((d.keys() for d in dependencies))
     }
+
+
+def get_dependencies(contract_name, dependencies):
+    return set(itertools.chain(
+        dependencies.get(contract_name, set()), *(
+            get_dependencies(dep, dependencies)
+            for dep in dependencies.get(contract_name, set())
+        )
+    ))

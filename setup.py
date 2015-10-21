@@ -27,8 +27,7 @@ setup(
     py_modules=['populus'],
     install_requires=[
         "click>=5.0",
-        # Until https://github.com/ethereum/ethash/issues/72 is resolved
-        # "ethash>=23.1",
+        "pyethash>=0.1.27",
         "ethereum>=0.9.73",
         "requests>=2.7.0",
         "eth-testrpc>=0.1.16",
@@ -38,10 +37,6 @@ setup(
         "Flask>=0.10.1",
         "toposort>=1.4",
         "readline>=6.2.0.0",
-    ],
-    dependency_links=[
-        # Until https://github.com/ethereum/ethash/issues/72 is resolved
-        "https://github.com/ethereum/ethash/archive/v23.1.tar.gz",
     ],
     license="MIT",
     zip_safe=False,

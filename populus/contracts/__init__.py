@@ -1,6 +1,5 @@
 # NOQA
 from populus.contracts.utils import (  # NOQA
-    get_max_gas,
     deploy_contract,
     get_linker_dependencies,
     link_contract_dependency,

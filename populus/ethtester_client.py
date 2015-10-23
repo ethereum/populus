@@ -128,6 +128,13 @@ class EthTesterClient(object):
     def wait_for_block(self, block_number, max_wait=0):
         while self.evm.block.number < block_number:
             self.evm.mine()
+        return self.get_block_by_number(self.evm.block.number)
+
+    def wait_for_transaction(self, txn_hash, max_wait=0):
+        return self.get_transaction_by_hash(txn_hash)
+
+    def get_max_gas(self):
+        return t.gas_limit
 
     def get_coinbase(self):
         return "0x" + ethereum_utils.encode_hex(self.evm.block.coinbase)

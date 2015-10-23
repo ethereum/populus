@@ -62,13 +62,6 @@ def clean_args(*args):
             yield arg
 
 
-def get_max_gas(rpc_client, scale=0.95):
-    latest_block = rpc_client.get_block_by_number('latest')
-    max_gas_hex = latest_block['gasLimit']
-    max_gas = int(max_gas_hex, 16)
-    return int(max_gas * scale)
-
-
 def deploy_contract(rpc_client, contract_class, constructor_args=None, **kwargs):
     if 'data' in kwargs:
         raise ValueError("Cannot supply `data` for contract deployment")

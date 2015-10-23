@@ -1,11 +1,9 @@
-click>=5.0
-ethereum-rpc-client>=0.2.0
-ethereum>=0.9.73
-https://github.com/ethereum/ethash/archive/v23.1.tar.gz
-eth-testrpc>=0.1.16
+click>=5.1
+ethereum-rpc-client>=0.4.0
+ethereum>=1.0.3
+eth-testrpc>=0.1.17
 pytest>=2.7.2
 requests>=2.7.0
 watchdog>=0.8.3
 Flask>=0.10.1
 toposort>=1.4
-readline>=6.2.0.0

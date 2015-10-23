@@ -5,7 +5,6 @@ from populus.contracts import (
 )
 from populus.utils import (
     get_contract_address_from_txn,
-    wait_for_transaction,
 )
 
 

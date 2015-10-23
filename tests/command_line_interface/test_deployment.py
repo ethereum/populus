@@ -5,7 +5,7 @@ from click.testing import CliRunner
 from populus.cli import main
 
 
-def test_deployment(testrpc_server, monkeypatch):
+def test_deployment(monkeypatch):
     monkeypatch.chdir('./tests/command_line_interface/projects/test-02/')
     runner = CliRunner()
     result = runner.invoke(main, ['deploy'])

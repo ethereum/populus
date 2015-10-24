@@ -3,8 +3,18 @@ import click
 from click.testing import CliRunner
 
 from populus.cli import main
+from populus.geth import (
+    is_geth_available,
+)
 
 
+skip_if_no_geth = pytest.mark.skipif(
+    not is_geth_available(),
+    reason="'geth' not available",
+)
+
+
+@skip_if_no_geth
 def test_deployment(monkeypatch):
     monkeypatch.chdir('./tests/command_line_interface/projects/test-02/')
     runner = CliRunner()

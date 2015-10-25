@@ -131,7 +131,7 @@ class EthTesterClient(object):
         return self.get_block_by_number(self.evm.block.number)
 
     def wait_for_transaction(self, txn_hash, max_wait=0):
-        return self.get_transaction_by_hash(txn_hash)
+        return self.get_transaction_receipt(txn_hash)
 
     def get_max_gas(self):
         return t.gas_limit

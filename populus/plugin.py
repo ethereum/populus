@@ -148,6 +148,11 @@ def deploy_client(request, populus_config):
 
 
 @pytest.fixture(scope="module")
+def deploy_coinbase(deploy_client):
+    return deploy_client.get_coinbase()
+
+
+@pytest.fixture(scope="module")
 def deployed_contracts(request, populus_config, deploy_client, contracts):
     from populus.deployment import deploy_contracts
 

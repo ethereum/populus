@@ -13,12 +13,12 @@ from populus.contracts.events import Event
 
 
 class ContractBase(object):
-    def __init__(self, address, rpc_client):
+    def __init__(self, address, blockchain_client):
         functions = {fn.name: fn for fn in (copy.copy(f) for f in self._config._functions)}
         events = {ev.name: ev for ev in (copy.copy(e) for e in self._config._events)}
         for obj in itertools.chain(functions.values(), events.values()):
             obj._bind(self)
-        self._meta = ContractMeta(address, rpc_client, functions, events)
+        self._meta = ContractMeta(address, blockchain_client, functions, events)
 
     def __str__(self):
         return "{name}({address})".format(name=self.__class__.__name__, address=self.address)
@@ -37,16 +37,16 @@ class ContractBase(object):
     #  Instance Methods
     #
     def get_balance(self, block="latest"):
-        return self._meta.rpc_client.get_balance(self._meta.address, block=block)
+        return self._meta.blockchain_client.get_balance(self._meta.address, block=block)
 
 
 class ContractMeta(object):
     """
     Instance level contract data.
     """
-    def __init__(self, address, rpc_client, functions, events):
+    def __init__(self, address, blockchain_client, functions, events):
         self.address = address
-        self.rpc_client = rpc_client
+        self.blockchain_client = blockchain_client
         self.functions = functions
         self.events = events
 
@@ -153,6 +153,7 @@ def package_contracts(contracts):
     }
 
     _dict = {
+        '__len__': lambda s: len(contract_classes),
         '__iter__': lambda s: iter(contract_classes.items()),
         '__getitem__': lambda s, k: contract_classes.__getitem__[k],
     }

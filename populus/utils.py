@@ -61,25 +61,6 @@ def load_contracts(project_dir):
     return contracts
 
 
-def deploy_contracts(client, contracts):
-    _from = client.get_coinbase()
-    deployed_contracts = {}
-
-    for name, contract in contracts.items():
-        txn_hash = client.send_transaction(_from=_from, data=contract['code'])
-        receipt = client.get_transaction_receipt(txn_hash)
-        if receipt is None:
-            contract_addr = None
-        else:
-            contract_addr = receipt['contractAddress']
-        deployed_contracts[name] = {
-            'txn': txn_hash,
-            'addr': contract_addr,
-        }
-
-    return deployed_contracts
-
-
 def is_executable_available(program):
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
@@ -127,30 +108,8 @@ def kill_proc(proc):
         proc.kill()
 
 
-def wait_for_transaction(rpc_client, txn_hash, max_wait=60):
-    start = time.time()
-    while True:
-        txn_receipt = rpc_client.get_transaction_receipt(txn_hash)
-        if txn_receipt is not None:
-            break
-        elif time.time() > start + max_wait:
-            raise ValueError("Could not get transaction receipt")
-        time.sleep(2)
-    return txn_receipt
-
-
-def wait_for_block(rpc_client, block_number, max_wait=60):
-    start = time.time()
-    while time.time() < start + max_wait:
-        if rpc_client.get_block_number() >= block_number:
-            break
-        time.sleep(2)
-    else:
-        raise ValueError("Did not reach block")
-
-
-def get_contract_address_from_txn(rpc_client, txn_hash, max_wait=0):
-    txn_receipt = wait_for_transaction(rpc_client, txn_hash, max_wait)
+def get_contract_address_from_txn(blockchain_client, txn_hash, max_wait=0):
+    txn_receipt = blockchain_client.wait_for_transaction(txn_hash, max_wait)
 
     return txn_receipt['contractAddress']
 

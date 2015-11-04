@@ -43,7 +43,7 @@ class Event(ContractBound):
         )).strip('L')
 
     def get_transaction_logs(self, txn_hash):
-        txn_receipt = self.contract._meta.rpc_client.get_transaction_receipt(txn_hash)
+        txn_receipt = self.contract._meta.blockchain_client.get_transaction_receipt(txn_hash)
         if txn_receipt is None:
             return None
         return [

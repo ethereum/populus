@@ -3,6 +3,7 @@ from threading import Thread
 import copy
 import datetime
 import functools
+import time
 import json
 import os
 import re
@@ -225,7 +226,7 @@ default_genesis_data = {
     "timestamp": "0x0",
     "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "extraData": "0x686f727365",
-    "gasLimit": "0x80000000000000",
+    "gasLimit": "0x3141592",
     "difficulty": "0x400",
     "mixhash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "coinbase": "0x3333333333333333333333333333333333333333",
@@ -292,3 +293,29 @@ def reset_chain(data_dir):
 
     geth_ipc_path = os.path.join(data_dir, 'geth.ipc')
     utils.remove_file_if_exists(geth_ipc_path)
+
+
+def wait_for_geth_to_start(proc, max_wait=10):
+    start = time.time()
+    while time.time() < start + max_wait:
+        output = []
+        line = proc.get_output_nowait()
+        if line:
+            output.append(line)
+
+        if line is None:
+            continue
+        if 'Starting mining operation' in line:
+            break
+        elif "Still generating DAG" in line:
+            print(line[line.index("Still generating DAG"):])
+        elif line.startswith('Fatal:'):
+            utils.kill_proc(proc)
+            raise ValueError(
+                "Geth Errored while starting\nerror: {0}\n\nFull Output{1}".format(
+                    line, ''.join(output),
+                )
+            )
+    else:
+        utils.kill_proc(proc)
+        raise ValueError("Geth process never started\n\n{0}".format(''.join(output)))

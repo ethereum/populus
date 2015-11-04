@@ -62,13 +62,6 @@ def clean_args(*args):
             yield arg
 
 
-def get_max_gas(rpc_client, scale=0.95):
-    latest_block = rpc_client.get_block_by_number('latest')
-    max_gas_hex = latest_block['gasLimit']
-    max_gas = int(max_gas_hex, 16)
-    return int(max_gas * scale)
-
-
 def deploy_contract(rpc_client, contract_class, constructor_args=None, **kwargs):
     if 'data' in kwargs:
         raise ValueError("Cannot supply `data` for contract deployment")
@@ -84,7 +77,7 @@ def deploy_contract(rpc_client, contract_class, constructor_args=None, **kwargs)
 DEPENDENCY_RE = re.compile((
     r''
     '__'  # Prefixed by double underscore
-    '(?P<name>[A-Za-z0-9]+)'  # capture the name of the dependency
+    '(?P<name>[A-Za-z0-9_]{0,36}[A-Za-z0-9])'  # capture the name of the dependency
     '_{1,37}'  # and then enough underscores to finish out the 40 chars.
 ))
 

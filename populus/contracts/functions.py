@@ -4,7 +4,6 @@ from ethereum import abi
 from populus.contracts.common import ContractBound
 from populus.contracts.utils import (
     clean_args,
-    get_max_gas,
 )
 
 
@@ -60,9 +59,9 @@ class Function(ContractBound):
         data = self.get_call_data(args)
 
         if 'gas' not in kwargs:
-            kwargs['gas'] = get_max_gas(self.contract._meta.rpc_client)
+            kwargs['gas'] = self.contract._meta.blockchain_client.get_max_gas()
 
-        return self.contract._meta.rpc_client.send_transaction(
+        return self.contract._meta.blockchain_client.send_transaction(
             to=self.contract._meta.address,
             data=data,
             **kwargs
@@ -72,7 +71,7 @@ class Function(ContractBound):
         raw = kwargs.pop('raw', False)
         data = self.get_call_data(args)
 
-        output = self.contract._meta.rpc_client.call(
+        output = self.contract._meta.blockchain_client.call(
             to=self.contract._meta.address,
             data=data,
             **kwargs
@@ -89,14 +88,14 @@ def validate_argument(arg_meta, value):
     base, sub, arrlist = process_type(arg_meta['type'])
 
     if base == 'int':
-        if not isinstance(value, int):
+        if not isinstance(value, (int, long)):
             return False
         exp = int(sub)
         lower_bound = (-1 * 2 ** (exp - 1)) + 1
         upper_bound = (2 ** (exp - 1)) - 1
         return lower_bound <= value <= upper_bound
     elif base == 'uint':
-        if not isinstance(value, int):
+        if not isinstance(value, (int, long)):
             return False
         exp = int(sub)
         lower_bound = 0

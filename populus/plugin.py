@@ -1,10 +1,5 @@
 import os
-import time
 import threading
-import copy
-import itertools
-
-import toposort
 
 import pytest
 
@@ -153,23 +148,13 @@ def deploy_client(request, populus_config):
 
 
 @pytest.fixture(scope="module")
-def deployed_contracts(request, populus_config, deploy_client, contracts):
-    from populus.contracts import (
-        deploy_contract,
-        get_max_gas,
-        get_linker_dependencies,
-        link_contract_dependency,
-    )
-    from populus.utils import (
-        wait_for_block,
-        wait_for_transaction,
-        get_contract_address_from_txn,
-        merge_dependencies,
-        get_dependencies,
-    )
+def deploy_coinbase(deploy_client):
+    return deploy_client.get_coinbase()
 
-    _deployed_contracts = {}
-    _receipts = {}
+
+@pytest.fixture(scope="module")
+def deployed_contracts(request, populus_config, deploy_client, contracts):
+    from populus.deployment import deploy_contracts
 
     deploy_wait_for_block = int(populus_config.get_value(
         request, 'deploy_wait_for_block',
@@ -183,7 +168,7 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
     deploy_max_wait = int(populus_config.get_value(
         request, 'deploy_max_wait',
     ))
-    deploy_contracts = set(populus_config.get_value(
+    contracts_to_deploy = set(populus_config.get_value(
         request, 'deploy_contracts',
     ))
     declared_dependencies = populus_config.get_value(
@@ -193,70 +178,19 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
         request, 'deploy_constructor_args',
     )
 
-    # Potentiall wait until we've reached a specific block.
-    wait_for_block(deploy_client, deploy_wait_for_block, deploy_wait_for_block_max_wait)
-
-    # Extract and dependencies that exist due to library linking.
-    linker_dependencies = get_linker_dependencies(contracts)
-    deploy_dependencies = merge_dependencies(
-        declared_dependencies, linker_dependencies,
+    _deployed_contracts = deploy_contracts(
+        deploy_client=deploy_client,
+        contracts=contracts,
+        deploy_at_block=deploy_wait_for_block,
+        max_wait_for_deploy=deploy_wait_for_block_max_wait,
+        from_address=deploy_address,
+        max_wait=deploy_max_wait,
+        contracts_to_deploy=contracts_to_deploy,
+        dependencies=declared_dependencies,
+        constructor_args=deploy_constructor_args,
     )
 
-    # If a subset of contracts have been specified to be deployed, compute
-    # their dependencies as well.
-    contracts_to_deploy = set(itertools.chain.from_iterable(
-        get_dependencies(contract_name, deploy_dependencies)
-        for contract_name in deploy_contracts
-    )).union(deploy_contracts)
-
-    # If there are any dependencies either explicit or from libraries, sort the
-    # contracts by their dependencies.
-    if deploy_dependencies:
-        dependencies = copy.copy(deploy_dependencies)
-        for contract_name, _ in contracts:
-            if contract_name not in deploy_dependencies:
-                dependencies[contract_name] = set()
-        sorted_contract_names = toposort.toposort_flatten(dependencies)
-        contracts = sorted(contracts, key=lambda c: sorted_contract_names.index(c[0]))
-
-    for contract_name, contract_class in contracts:
-        # If a subset of contracts have been specified, only deploy those or
-        # the contracts they depend upon.
-        if contracts_to_deploy and contract_name not in contracts_to_deploy:
-            continue
-
-        constructor_args = deploy_constructor_args.get(contract_name, None)
-        if callable(constructor_args):
-            constructor_args = constructor_args(_deployed_contracts)
-
-        deploy_gas_limit = int(populus_config.get_value(
-            request,
-            'deploy_gas_limit',
-        ) or get_max_gas(deploy_client))
-
-        if contract_name in linker_dependencies:
-            for dependency_name in linker_dependencies[contract_name]:
-                deployed_contract = _deployed_contracts[dependency_name]
-                link_contract_dependency(contract_class, deployed_contract)
-
-        txn_hash = deploy_contract(
-            deploy_client,
-            contract_class,
-            constructor_args=constructor_args,
-            _from=deploy_address,
-            gas=deploy_gas_limit,
-        )
-        contract_addr = get_contract_address_from_txn(
-            deploy_client,
-            txn_hash,
-            max_wait=deploy_max_wait,
-        )
-        _receipts[contract_name] = wait_for_transaction(deploy_client, txn_hash)
-        _deployed_contracts[contract_name] = contract_class(contract_addr, deploy_client)
-
-    _deployed_contracts['_deploy_receipts'] = _receipts
-
-    return type('deployed_contracts', (object,), _deployed_contracts)
+    return _deployed_contracts
 
 
 @pytest.yield_fixture(scope="module")
@@ -267,6 +201,7 @@ def geth_node(request, populus_config):
         get_geth_logfile_path,
         ensure_account_exists,
         reset_chain,
+        wait_for_geth_to_start,
     )
     from populus.utils import (
         ensure_path_exists,
@@ -298,29 +233,7 @@ def geth_node(request, populus_config):
                                   rpc_port=rpc_port, logfile=logfile_path,
                                   verbosity="6")
 
-    start = time.time()
-    while time.time() < start + geth_max_wait:
-        output = []
-        line = proc.get_output_nowait()
-        if line:
-            output.append(line)
-
-        if line is None:
-            continue
-        if 'Starting mining operation' in line:
-            break
-        elif "Still generating DAG" in line:
-            print(line[line.index("Still generating DAG"):])
-        elif line.startswith('Fatal:'):
-            kill_proc(proc)
-            raise ValueError(
-                "Geth Errored while starting\nerror: {0}\n\nFull Output{1}".format(
-                    line, ''.join(output),
-                )
-            )
-    else:
-        kill_proc(proc)
-        raise ValueError("Geth process never started\n\n{0}".format(''.join(output)))
+    wait_for_geth_to_start(proc, max_wait=geth_max_wait)
 
     yield proc
     kill_proc(proc)

@@ -146,6 +146,13 @@ To use this fixture configured to use the ``rpc`` client, you must also have a
 valid JSON RPC server running.  This can be accomplished by including either of
 ``rpc_server`` or ``geth_node`` fixtures in your test case.
 
+Deploy Coinbase
+---------------
+
+* ``deploy_coinbase``
+
+The address that was used for contract deployment.
+
 
 Deployed Contracts
 ------------------
@@ -154,8 +161,15 @@ Deployed Contracts
 
 Python object with deployed instances your contracts accessible as properties.
 
-See the ``deploy_client`` fixture for configuration options as to where the
+See the ``deploy_client`` fixture for configuration options as to how the
 contracts are deployed.
+
+.. note::
+
+    Contract source code is automatically linked against any libraries during
+    deployment.  These dependencies are also automatically derived, adding any
+    required libraries to the list of contracts to be deployed.
+
 
 Configuration
 ^^^^^^^^^^^^^

@@ -1,3 +1,22 @@
+0.6.0
+-----
+
+- Improve `populus deploy` command.
+        - Optional dry run to test chain
+        - Prompts user for confirmation on production deployments.
+        - Derives gas needs based on dry-run deployment.
+- Addition of `deploy_coinbase` testing fixture.
+- Renamed `Contract._meta.rpc_client` to be `Contract._meta.blockchain_client`
+  to be more appropriately named since the `EthTesterClient` is not an RPC
+  client.
+- Renamed `rpc_client` argument to `blockchain_client` in all relevant functions.
+- Moved `get_max_gas` function onto blockchain clients.
+- Moved `wait_for_transaction` function onto blockchain clients.
+- Moved `wait_for_block` function onto blockchain clients.
+- Bugfix when decoding large integers.
+- Reduced `gasLimit` on genesis block for test chains to `3141592`.
+- Updated dependencies to newer versions.
+
 0.5.4
 -----
 

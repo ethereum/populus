@@ -52,26 +52,36 @@ def echo_post_deploy_message(deploy_client, deployed_contracts):
     '-d',
     is_flag=True,
     default=None,
-    help="Do a dry run deploy first",
+    help=(
+        "Do a dry run deploy first.  When doing a production deploy, you should "
+        "always do a dry run so that deploy gas prices can be known."
+    ),
 )
 @click.option(
     '--dry-run-chain-name',
     '-n',
     type=click.STRING,
     default="default",
-    help="Do a dry run deploy first",
+    help=(
+        "Specifies the chain name that should be used for the dry run "
+        "deployment.  Defaults to 'default'"
+    ),
 )
 @click.option(
     '--production',
     '-p',
     is_flag=True,
-    help="Deploy to a production chain.  RPC server must be running",
+    help="Deploy to a production chain (RPC server must be run manually)",
 )
-@click.option('--confirm/--no-confirm', default=True)
+@click.option(
+    '--confirm/--no-confirm',
+    default=True,
+    help="Bypass any confirmation prompts",
+)
 @click.argument('contracts_to_deploy', nargs=-1)
 def deploy(dry_run, dry_run_chain_name, production, confirm, contracts_to_deploy):
     """
-    Deploy contracts.
+    Deploys the specified contracts via the RPC client.
     """
     if dry_run is None:
         # If we are doing a production deploy and dry_run was not specified,

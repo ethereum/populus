@@ -38,6 +38,9 @@ By default populus expects a project to be layed out as follows.
     │   ├── contracts
     │   |   ├── MyContract.sol
     |   |   ├── ....
+    │   ├── libraries
+    │   |   ├── MyLibrary.sol
+    |   |   ├── ....
     │   ├── tests
     │   |   ├── test_my_contract.py
     │   |   ├── test_some_other_tests.py
@@ -109,7 +112,18 @@ Compile
 ~~~~~~~
 
 Running ``$ populus compile`` will compile all of the contracts found in the
-project.  The compiled projects are stored in ``./build/contracts.json``.
+``./contracts/`` directory as well as all libraries found in the
+``./libraries/`` directory.  The compiled projects are stored in
+``./build/contracts.json``.
+
+.. note::
+
+    Currently, populus only supports import statemens for solidity files found
+    in the ``./libraries/`` directory.  These should be in the format ``import
+    "libraries/MyLibrary.sol";``.
+
+Basic usage to compile all of the contracts and libraries in your project can
+be done as follows.
 
 .. code-block:: shell
 
@@ -128,7 +142,9 @@ project.  The compiled projects are stored in ``./build/contracts.json``.
     > Outfile: /var/projects/my-project/build/contracts.json
 
 
-If you only want to build a sub-set of your contracts you can specify paths to source files, or the names of contracts in source files, or a combination of the two separated by a ``:``.
+If you only want to build a sub-set of your contracts you can specify paths to
+source files, or the names of contracts in source files, or a combination of
+the two separated by a ``:``.
 
 * ``$ populus compile Example`` - compiles all contracts named Example.
 * ``$ populus compile contracts/Example.sol`` - compiles all contracts in the
@@ -198,19 +214,43 @@ relative to the root of your project.
 Deploy
 ~~~~~~
 
-
-Running ``$ populus deploy`` will deploy all compiled contracts found in
-``./build/contracts.json``.  Deployment requires an Ethereum JSON RPC server to
-be running on ``localhost:8545``.  For testing, you can use the ``eth-testrpc``
-python library.
-
-This deployment uses the account returned by ``eth_coinbase`` as the ``from``
-address for the transaction.
-
 .. code-block:: shell
 
-    $ populus deploy
-    Example    : addr: 0xc305c901078781c232a2a521c2af7980f8385ee9 via txn:0xbba0f1cc96adb3c31a14bd5271d9a8c82b6aa1ddac2c7161bcb52ef6f3b9f813
+    $ populus deploy --help
+    Usage: populus deploy [OPTIONS] [CONTRACTS_TO_DEPLOY]...
+
+      Deploys the specified contracts via the RPC client.
+
+    Options:
+      -d, --dry-run                  Do a dry run deploy first.  When doing a
+                                     production deploy, you should always do a dry
+                                     run so that deploy gas prices can be known.
+      -n, --dry-run-chain-name TEXT  Specifies the chain name that should be used
+                                     for the dry run deployment.  Defaults to
+                                     'default'
+      -p, --production               Deploy to a production chain (RPC server must
+                                     be run manually)
+      --confirm / --no-confirm       Bypass any confirmation prompts
+      --help                         Show this message and exit.
+
+Running ``$ populus deploy`` will deploy all specifed contracts to either the
+default test chain or to a running JSON-RPC server depending on whether
+``--production`` was specified.
+
+If the ``--dry-run`` flag is specified, then the gas value supplied for each
+contract's deployment will be determined based on how much gas was used during
+the dry run deployment.
+
+When using the ``--production`` flag populus will not run the JSON-RPC for you.
+You are expected to have an RPC server running with an unlocked account.  Doing
+a production deploy without ``--dry-run`` is not advisable.  Doing a dry run
+ensures that all of your contracts are deployable as well as allowing the
+production deployment to supply gas values determined from the dry run
+deployments.
+
+.. note::
+    When using libraries, populus will try to link your libraries.  This
+    functionality is experimental and could still have bugs.
 
 
 Chain

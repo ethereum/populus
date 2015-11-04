@@ -170,7 +170,7 @@ def deploy(dry_run, dry_run_chain_name, production, confirm, contracts_to_deploy
             "may fail due to long transaction times.\n\n"
             "Are you sure you would like to proceed?"
         )
-        if not click.confirm(message):
+        if confirm and not click.confirm(message):
             raise click.Abort()
 
     message = (

@@ -77,7 +77,7 @@ def deploy_contract(rpc_client, contract_class, constructor_args=None, **kwargs)
 DEPENDENCY_RE = re.compile((
     r''
     '__'  # Prefixed by double underscore
-    '(?P<name>[A-Za-z0-9]+)'  # capture the name of the dependency
+    '(?P<name>[A-Za-z0-9_]{0,36}[A-Za-z0-9])'  # capture the name of the dependency
     '_{1,37}'  # and then enough underscores to finish out the 40 chars.
 ))
 

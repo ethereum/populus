@@ -1,5 +1,6 @@
 import re
 import click
+import pytest
 from click.testing import CliRunner
 
 from populus.cli import main
@@ -18,11 +19,10 @@ skip_if_no_geth = pytest.mark.skipif(
 def test_deployment(monkeypatch):
     monkeypatch.chdir('./tests/command_line_interface/projects/test-02/')
     runner = CliRunner()
-    result = runner.invoke(main, ['deploy'])
+    result = runner.invoke(main, ['deploy', '--no-confirm', 'owned'])
 
     assert result.exit_code == 0, result.output
 
     # weak assertion but not sure what to do here.
     assert 'owned' in result.output
-    assert re.search(' (0x[0-9a-f]{40}) ', result.output)
-    assert re.search(' (txn:0x[0-9a-f]{64})', result.output)
+    assert re.search('owned \(0x[0-9a-f]{40}\)', result.output)

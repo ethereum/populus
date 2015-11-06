@@ -139,6 +139,10 @@ class EthTesterClient(object):
     def get_coinbase(self):
         return "0x" + ethereum_utils.encode_hex(self.evm.block.coinbase)
 
+    def get_code(self, address, block_number="latest"):
+        block = self._get_block_by_number(block_number)
+        return ethereum_utils.encode_hex(block.get_code(strip_0x(address)))
+
     def _send_transaction(self, _from=None, to=None, gas=None, gas_price=None,
                           value=0, data=''):
         """

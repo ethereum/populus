@@ -65,9 +65,9 @@ class Function(ContractBound):
             # the transaction gets processed, the gas value we send
             # is still less than the gasLimit value when our transaction
             # eventually gets processed.
-            gasLimitFraction = 0.9
+            GAS_LIMIT_FRACTION = 0.9
             kwargs['gas'] = int(
-                gasLimitFraction * self.contract._meta.blockchain_client.get_max_gas()
+                GAS_LIMIT_FRACTION * self.contract._meta.blockchain_client.get_max_gas()
             )
 
         return self.contract._meta.blockchain_client.send_transaction(

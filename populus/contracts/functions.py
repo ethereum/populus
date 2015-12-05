@@ -8,6 +8,7 @@ from populus.contracts.utils import (
 
 GAS_LIMIT_FRACTION = 0.9
 
+
 class Function(ContractBound):
     def __init__(self, name, inputs=None, outputs=None, constant=False):
         self.name = name

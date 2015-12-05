@@ -6,6 +6,7 @@ from populus.contracts.utils import (
     clean_args,
 )
 
+GAS_LIMIT_FRACTION = 0.9
 
 class Function(ContractBound):
     def __init__(self, name, inputs=None, outputs=None, constant=False):
@@ -65,7 +66,6 @@ class Function(ContractBound):
             # the transaction gets processed, the gas value we send
             # is still less than the gasLimit value when our transaction
             # eventually gets processed.
-            GAS_LIMIT_FRACTION = 0.9
             kwargs['gas'] = int(
                 GAS_LIMIT_FRACTION * self.contract._meta.blockchain_client.get_max_gas()
             )

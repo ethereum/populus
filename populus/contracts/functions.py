@@ -6,6 +6,8 @@ from populus.contracts.utils import (
     clean_args,
 )
 
+GAS_LIMIT_FRACTION = 0.9
+
 
 class Function(ContractBound):
     def __init__(self, name, inputs=None, outputs=None, constant=False):
@@ -59,7 +61,15 @@ class Function(ContractBound):
         data = self.get_call_data(args)
 
         if 'gas' not in kwargs:
-            kwargs['gas'] = self.contract._meta.blockchain_client.get_max_gas()
+            # The gasLimit value on the geth chain seems to continuously
+            # decline after every block. We use a value of gas
+            # slightly less than the get_max_gas value so that when
+            # the transaction gets processed, the gas value we send
+            # is still less than the gasLimit value when our transaction
+            # eventually gets processed.
+            kwargs['gas'] = int(
+                GAS_LIMIT_FRACTION * self.contract._meta.blockchain_client.get_max_gas()
+            )
 
         return self.contract._meta.blockchain_client.send_transaction(
             to=self.contract._meta.address,

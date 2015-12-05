@@ -1,3 +1,8 @@
+0.6.1
+-----
+
+- Change the *default* gas for transactions to be a percentage of the max gas.
+
 0.6.0
 -----
 

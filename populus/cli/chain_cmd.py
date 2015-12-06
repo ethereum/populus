@@ -40,7 +40,12 @@ def chain_reset(name, confirm):
 @chain.command('run')
 @click.argument('name', nargs=1, default="default")
 @click.option('--mine/--no-mine', default=True)
-def chain_run(name, mine):
+@click.option(
+    '--verbosity', default=5,
+    help="""
+    Set verbosity of the logging output. Default is 5, Range is 0-6.
+    """)
+def chain_run(name, mine, verbosity):
     """
     Run a geth node.
     """
@@ -49,7 +54,12 @@ def chain_run(name, mine):
 
     ensure_account_exists(data_dir)
 
-    command, proc = run_geth_node(data_dir, mine=mine, logfile=logfile_path)
+    kwargs = {
+        "logfile": logfile_path,
+        "verbosity": "%d" % verbosity
+        }
+
+    command, proc = run_geth_node(data_dir, mine=mine, **kwargs)
 
     click.echo("Running: '{0}'".format(' '.join(command)))
 

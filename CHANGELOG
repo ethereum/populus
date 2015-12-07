@@ -1,3 +1,11 @@
+0.6.2
+-----
+
+- Shorted path to cli tests to stay under 108 character limit for unix sockets.
+- Allow passing `--verbosity` tag into `populus chain run`
+- Expand documentation with example use case for populus deploy/chain/attach
+  commands.
+
 0.6.1
 -----
 

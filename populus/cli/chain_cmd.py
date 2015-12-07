@@ -11,6 +11,7 @@ from populus.geth import (
     run_geth_node,
     ensure_account_exists,
     reset_chain,
+    set_active_data_dir
 )
 
 from .main import main
@@ -45,11 +46,18 @@ def chain_reset(name, confirm):
     help="""
     Set verbosity of the logging output. Default is 5, Range is 0-6.
     """)
-def chain_run(name, mine, verbosity):
+@click.option(
+    '--active/--no-active', default=True,
+    help="""
+    Set whether the chain run will modify the active-chain settings.
+    Default is to modify the active-chain setting.
+    """)
+def chain_run(name, mine, verbosity, active):
     """
     Run a geth node.
     """
-    data_dir = get_geth_data_dir(os.getcwd(), name)
+    project_dir = os.getcwd()
+    data_dir = get_geth_data_dir(project_dir, name)
     logfile_path = get_geth_logfile_path(data_dir)
 
     ensure_account_exists(data_dir)
@@ -62,6 +70,9 @@ def chain_run(name, mine, verbosity):
     command, proc = run_geth_node(data_dir, mine=mine, **kwargs)
 
     click.echo("Running: '{0}'".format(' '.join(command)))
+
+    if active:
+        set_active_data_dir(project_dir, name)
 
     try:
         while True:

@@ -19,6 +19,7 @@ is_nice_available = functools.partial(utils.is_executable_available, 'nice')
 
 POPULUS_DIR = os.path.abspath(os.path.dirname(__file__))
 KNOWN_CONTRACTS_FILE = "known_contracts.json"
+ACTIVE_CHAIN_SYMLINK = ".active-chain"
 
 
 def get_blockchains_dir(project_dir):
@@ -32,6 +33,27 @@ def get_geth_data_dir(project_dir, name):
     data_dir = os.path.abspath(os.path.join(blockchains_dir, name))
     utils.ensure_path_exists(data_dir)
     return data_dir
+
+
+def get_active_data_dir(project_dir):
+    """ Given a project directory, this function creates the
+        file path string for the active chain symlink.
+    """
+    bc_dir = get_blockchains_dir(project_dir)
+    active_dir = os.path.abspath(os.path.join(bc_dir, ACTIVE_CHAIN_SYMLINK))
+    return(active_dir)
+
+
+def set_active_data_dir(project_dir, name):
+    """ Set which ethereum chain directory is the
+        active chain. This basically just creates a new
+        symlink pointed at the active chain.
+    """
+    data_dir = get_geth_data_dir(project_dir, name)
+    active_dir = get_active_data_dir(project_dir)
+    if os.path.islink(active_dir):
+        os.unlink(active_dir)
+    os.symlink(data_dir, active_dir)
 
 
 def get_geth_logfile_path(data_dir, logfile_name_fmt="geth-{0}.log"):

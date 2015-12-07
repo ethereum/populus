@@ -21,15 +21,14 @@ from populus.contracts import (
     package_contracts,
 )
 from populus.geth import (
-    get_geth_data_dir,
+    get_active_data_dir,
     get_known_contracts,
 )
 
 from .main import main
 
 
-def setup_known_instances(context, name):
-    data_dir = get_geth_data_dir(os.getcwd(), name)
+def setup_known_instances(context, data_dir):
     # Attempt to load known contracts.
     knownCts = get_known_contracts(data_dir)
     for name in knownCts.keys():
@@ -65,24 +64,15 @@ def setup_known_instances(context, name):
 
 @main.command()
 @click.option(
-    '--knownfrom',
-    type=str,
-    default=None,
+    '--active/--no-active',
+    default=True,
     help=(
-        "Name of the test chain that we are attaching to. This is an "
-        "optional argument that can be used to help populate the "
-        "user environment with contracts recorded by the `deploy` "
-        "sub-command. This options is primarily intended to be "
-        "used with test chains when using the populus workflow. If "
-        "the passed chain has known contracts, it will "
-        "select all known contracts for each contract type and confirm "
-        "that the were deployed with latest contract code. These valid "
-        "addresses will be sorted by latest time stamp, and then added "
-        "as instances of their particular contract type into a list "
-        "on the member attribute 'known' on that contract class."
+        "This flag indicates whether the attach command will use "
+        "the chain that is referenced from the <proj>/chains/.active-chain "
+        "to load information about known contracts or not."
     ),
 )
-def attach(knownfrom):
+def attach(active):
     """
     Enter a python shell with contracts and blockchain client
     available.
@@ -94,9 +84,9 @@ def attach(knownfrom):
         'contracts': package_contracts(contracts_meta),
         'client': Client('127.0.0.1', '8545'),
     }
-
-    if knownfrom is not None:
-        setup_known_instances(context, knownfrom)
+    if active:
+        data_dir = get_active_data_dir(project_dir)
+        setup_known_instances(context, data_dir)
 
     contract_names = ', '.join(sorted(contracts_meta.keys()))
 

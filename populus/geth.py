@@ -8,6 +8,7 @@ import json
 import os
 import re
 import subprocess
+import hashlib
 
 from populus import utils
 
@@ -17,6 +18,7 @@ is_nice_available = functools.partial(utils.is_executable_available, 'nice')
 
 
 POPULUS_DIR = os.path.abspath(os.path.dirname(__file__))
+KNOWN_CONTRACTS_FILE = "known_contracts.json"
 
 
 def get_blockchains_dir(project_dir):
@@ -293,6 +295,59 @@ def reset_chain(data_dir):
 
     geth_ipc_path = os.path.join(data_dir, 'geth.ipc')
     utils.remove_file_if_exists(geth_ipc_path)
+    # Reset the known contracts so that we don't try to
+    # reference contract addresses that don't exist.
+    known_contracts_path = os.path.join(data_dir, KNOWN_CONTRACTS_FILE)
+    utils.remove_file_if_exists(known_contracts_path)
+
+
+def get_known_contracts(data_dir):
+    """ Retrieve the known contract files from the geth data
+        directory and return as a python dict.
+    """
+    knownCts = {}
+    knownCtsFile = os.path.join(data_dir, KNOWN_CONTRACTS_FILE)
+    try:
+        with open(knownCtsFile, "rb") as f:
+            knownCts = json.load(f)
+    except IOError:
+        # Indicates that we couldn't open the file - it either
+        # doesn't exist or we don't have permissions
+        pass
+    return(knownCts)
+
+
+def add_to_known_contracts(deployed_contracts, data_dir):
+    """ This method updates the known_contracts.json
+        with the results of the deployed contracts.
+        This can be useful when testing and namereg is
+        either not available or not worth the hassel.
+        @param deployed_contracts dict of deployed contract
+            data indexed by the contract name.
+        @param data_dir directory of the ethereum chain
+            data.
+    """
+    knownCts = get_known_contracts(data_dir)
+
+    ts = datetime.datetime.now().isoformat()
+    # Now we will add to our known contracts
+    for name, contract in deployed_contracts:
+        codeHash = hashlib.sha512(contract._config.code).hexdigest()
+        newCt = {
+            "ts": ts,
+            "address": contract._meta.address,
+            "codehash": codeHash,
+        }
+
+        if name not in knownCts:
+            knownCts[name] = []
+
+        knownCts[name].append(newCt)
+
+    # Write out the new known contracts file
+    knownCtsFile = os.path.join(data_dir, KNOWN_CONTRACTS_FILE)
+    with open(knownCtsFile, "wb") as f:
+        json.dump(knownCts, f)
 
 
 def wait_for_geth_to_start(proc, max_wait=10):

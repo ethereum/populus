@@ -13,6 +13,7 @@ from populus.geth import (
     ensure_account_exists,
     run_geth_node,
     wait_for_geth_to_start,
+    add_to_known_contracts,
 )
 from populus.deployment import (
     deploy_contracts,
@@ -78,8 +79,16 @@ def echo_post_deploy_message(deploy_client, deployed_contracts):
     default=True,
     help="Bypass any confirmation prompts",
 )
+@click.option(
+    '--record/--no-record',
+    default=True,
+    help=(
+        "Record the created contracts in the 'known_contracts' lists. "
+        "This only works for non-production chains."
+    ),
+)
 @click.argument('contracts_to_deploy', nargs=-1)
-def deploy(dry_run, dry_run_chain_name, production, confirm, contracts_to_deploy):
+def deploy(dry_run, dry_run_chain_name, production, confirm, record, contracts_to_deploy):
     """
     Deploys the specified contracts via the RPC client.
     """
@@ -214,6 +223,9 @@ def deploy(dry_run, dry_run_chain_name, production, confirm, contracts_to_deploy
     echo_post_deploy_message(client, deployed_contracts)
 
     if not production:
+        if record:
+            add_to_known_contracts(deployed_contracts, data_dir)
+
         deploy_proc.send_signal(signal.SIGINT)
         # Give the subprocess a SIGINT and give it a few seconds to
         # cleanup.

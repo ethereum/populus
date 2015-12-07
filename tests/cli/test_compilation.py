@@ -13,7 +13,7 @@ skip_if_no_sol_compiler = pytest.mark.skipif(
 
 @skip_if_no_sol_compiler
 def test_compiling(monkeypatch):
-    monkeypatch.chdir('./tests/command_line_interface/projects/test-01/')
+    monkeypatch.chdir('./tests/cli/projects/test-01/')
     runner = CliRunner()
     result = runner.invoke(main, ['compile'])
 
@@ -22,12 +22,12 @@ def test_compiling(monkeypatch):
     assert 'mortal.sol' in result.output
     assert 'Mortal' in result.output
     assert 'Immortal' in result.output
-    assert 'tests/command_line_interface/projects/test-01' in result.output
+    assert 'tests/cli/projects/test-01' in result.output
 
 
 @skip_if_no_sol_compiler
 def test_compiling_with_specified_contract(monkeypatch):
-    monkeypatch.chdir('./tests/command_line_interface/projects/test-01/')
+    monkeypatch.chdir('./tests/cli/projects/test-01/')
     runner = CliRunner()
     result = runner.invoke(main, ['compile', 'Mortal'])
 
@@ -36,13 +36,13 @@ def test_compiling_with_specified_contract(monkeypatch):
     assert 'mortal.sol' in result.output
     assert 'Mortal' in result.output
     assert 'Immortal' not in result.output
-    assert 'tests/command_line_interface/projects/test-01' in result.output
+    assert 'tests/cli/projects/test-01' in result.output
 
 
 @skip_if_no_sol_compiler
 @pytest.mark.parametrize('path', ('owned.sol', 'contracts/owned.sol'))
 def test_compiling_with_specified_file(monkeypatch, path):
-    monkeypatch.chdir('./tests/command_line_interface/projects/test-01/')
+    monkeypatch.chdir('./tests/cli/projects/test-01/')
     runner = CliRunner()
     result = runner.invoke(main, ['compile', path])
 
@@ -52,7 +52,7 @@ def test_compiling_with_specified_file(monkeypatch, path):
     assert 'Mortal' not in result.output
     assert 'Immortal' not in result.output
     assert ' owned\n' in result.output
-    assert 'tests/command_line_interface/projects/test-01' in result.output
+    assert 'tests/cli/projects/test-01' in result.output
 
 
 @skip_if_no_sol_compiler
@@ -64,7 +64,7 @@ def test_compiling_with_specified_file(monkeypatch, path):
     ),
 )
 def test_compiling_with_specified_file_and_contract(monkeypatch, path):
-    monkeypatch.chdir('./tests/command_line_interface/projects/test-01/')
+    monkeypatch.chdir('./tests/cli/projects/test-01/')
     runner = CliRunner()
     result = runner.invoke(main, ['compile', path])
 
@@ -74,4 +74,4 @@ def test_compiling_with_specified_file_and_contract(monkeypatch, path):
     assert 'Mortal' not in result.output
     assert 'Immortal' in result.output
     assert ' owned\n' not in result.output
-    assert 'tests/command_line_interface/projects/test-01' in result.output
+    assert 'tests/cli/projects/test-01' in result.output

@@ -17,7 +17,7 @@ skip_if_no_geth = pytest.mark.skipif(
 
 @skip_if_no_geth
 def test_deployment(monkeypatch):
-    monkeypatch.chdir('./tests/command_line_interface/projects/test-02/')
+    monkeypatch.chdir('./tests/cli/projects/test-02/')
     runner = CliRunner()
     result = runner.invoke(main, ['deploy', '--no-confirm', 'owned'])
 

@@ -193,7 +193,7 @@ def attach(active):
 
         contracts  -> Contract classes
         client     -> Blockchain client ({client_type})
-        redeploy   -> Method to reploy project contracts
+        redeploy   -> Method to re-deploy project contracts
                       Example:
                         deployed_cts = redeploy()
                         deployed_cts = redeploy(record = False)

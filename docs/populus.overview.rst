@@ -231,6 +231,9 @@ Deploy
       -p, --production               Deploy to a production chain (RPC server must
                                      be run manually)
       --confirm / --no-confirm       Bypass any confirmation prompts
+			--record / --no-record         Record the created contracts in the
+			                               'known_contracts' lists. This only works for 
+																		 non-production chains. 
       --help                         Show this message and exit.
 
 Running ``$ populus deploy`` will deploy all specifed contracts to either the
@@ -451,8 +454,14 @@ console to the running chain.
 
     contracts  -> Contract classes
     client     -> Blockchain client (json-rpc)
+    redeploy   -> Method to redeploy project contracts
+                  Example:
+                    deployed_cts = redeploy()
+                    deployed_cts = redeploy(record=False)
+                    deployed_cts = redeploy(contracts = ["Example"])
 
     Contracts: Example
+    Check contracts.<type>.known for deployed contracts.
     In [1]: exp = contracts.Example("0xc0e0aa6088b4e9a9e4ef27123e3de9f499cf29ce", client)
 
     In [2]: exp.GetValue()
@@ -545,3 +554,130 @@ You can use the 'client.wait_for_transaction' method to block for a particular t
        u'logs': [],
        u'transactionHash': u'0x36546e13816b3bbd1492c07c12a7718dc820ce58c36648531c37fa7a8ee3ebc2',
        u'transactionIndex': u'0x0'}
+
+Known Contracts
+~~~~~~~~~~~~~~~
+
+To make life a little easier, populus attempts to keep track of all of the known contracts in a particular ethereum test chain. This data is stored in the file "<proj>/chains/default/known_contracts.json". This file tracks the address of all deployed contracts and also stores a hash of the code of that contract when it was deployed. This allows the attach terminal to only show you the known contract instances that match your current compiled contract code. 
+
+To look at the known contract instances in a particular test chain for a contract named "Example", you could look at the 'contracts.Example.known' member variable in the attach interpreter shell.
+
+.. code-block:: shell
+
+		In [1]: contracts.Example.known
+		Out[1]:
+		[<populus.contracts.core.Example at 0x7f45..90>,
+		 <populus.contracts.core.Example at 0x7f45..10>]
+
+		In [2]: contracts.example.known[0].GetValue() 
+		Out[2]: 1
+
+Redeploying Contracts
+~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes it is useful to redeploy contracts while testing without 
+exiting the attach shell. To help with this, there is the 'redeploy' 
+method. The redeploy method is very similar to the "populus deploy"
+command with some minor differences. This command will only deploy 
+to the active test chain that this attach shell is talking to. The 
+redeploy method will also not attempt to dry-run the contracts. 
+The redeploy method will block waiting for all of the contract 
+creation transactions to complete and receive their receipts.
+
+.. code-block:: shell
+
+		In[1]: depcts = redeploy() 
+		========== Deploy Complete ==========
+		Deployed 2 contracts: 
+		- Example 2 (0x55157...67) gas: 216906 / 49829864
+		- Example (0xd977...2a) gas: 162170 / 49732590
+		
+		In[2]: contracts.Example.known[-1].GetValue() 
+		Out[2]: 0
+
+
+The user can use the "populus compile" routine outside of the attach
+shell to make modifications to project contracts and then use "redeploy" 
+to quickly test these changes on a new contract instance. 
+
+Note that the newly created contracts are added to the 'known' list. If 
+the contract's binary changed by recompiling with changes, then the list 
+will now have only one element. 
+
+The 'redeploy' method takes two optional arguments: 
+
+*  'record' - Boolean value indicating whether the created contract
+   instances should be stored in the "known_contracts.json" 
+   file. The default is True
+*  'contracts' - List of strings indicating the names of the contracts 
+   to redeploy. This is useful for only deploying a subset of the
+   projects contracts. The default value is [] which means redeploy 
+   all contracts. 
+
+Changing Active Chains
+~~~~~~~~~~~~~~~~~~~~~~
+
+When you run an attach shell, you will generally want to run the "populus chain run" command first. This sets up the active chain directory before opening the shell. Additionally, you can change which chain is running during a attach shell session by killing the running chain and start a different one in the same project. For example: 
+
+Let's say you start with the default test chain in Terminal #1
+
+.. code-block:: shell
+
+    $> populus chain run
+
+    I1206 17:30:47.452321   39364 database.go:71] Alloted 16MB cache to /home/<user>/test3/chains/default/chaindata
+    I1206 17:30:47.456924   39364 database.go:71] Alloted 16MB cache to /home/<user>/test3/chains/default/dapp
+    I1206 17:30:47.458353   39364 backend.go:159] Protocol Versions: [63 62 61], Network Id: 123456
+
+You then start up the attach shell
+
+.. code-block:: shell
+
+    $> populus attach
+
+    Python: 2.7.6 (default, Jun 22 2015, 17:58:13)
+
+    Populus: v0.6.1
+
+    Project Path: /home/<user>/test3
+
+    contracts  -> Contract classes
+    client     -> Blockchain client (json-rpc)
+    redeploy   -> Method to redeploy project contracts
+                  Example:
+                    deployed_cts = redeploy()
+                    deployed_cts = redeploy(record=False)
+                    deployed_cts = redeploy(contracts = ["Example"])
+
+    Contracts: Example
+    Check contracts.<type>.known for deployed contracts.
+    In[1]: contracts.Example.known[0].GetValue()
+    Out[1]: 0
+
+Now Let's say you want to change over to another test chain to try something without mucking up your default chain state.
+
+.. code-block:: shell
+
+    $> populus chain run newtest
+
+    I1206 17:30:47.452321   39364 database.go:71] Alloted 16MB cache to /home/<user>/test3/chains/newtest/chaindata
+    I1206 17:30:47.456924   39364 database.go:71] Alloted 16MB cache to /home/<user>/test3/chains/newtest/dapp
+    I1206 17:30:47.458353   39364 backend.go:159] Protocol Versions: [63 62 61], Network Id: 123456
+
+
+The attach shell will watch for changes to the active test chain and reinitialize the known contract instances. 
+
+.. code-block:: shell
+
+		In[1]: contracts.Example.known[0].GetValue()
+		Out[1]: 0
+
+		In[2]:
+		=========== Active Directory Changed ===========
+		New Active Dir: /home/<user>/test3/chains/newtest
+
+		In[2]: contracts.example.known
+		Out[2]: []
+
+The 'known' list is empty because no contracts have been deployed on this 
+new test chain. 

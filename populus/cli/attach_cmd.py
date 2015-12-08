@@ -86,7 +86,10 @@ def attach(active):
     }
     if active:
         data_dir = get_active_data_dir(project_dir)
-        setup_known_instances(context, data_dir)
+        if os.path.islink(data_dir):
+            setup_known_instances(context, data_dir)
+        else:
+            click.echo(click.style("No Valid Active Chain Data Directory Found!", fg="red"))
 
     contract_names = ', '.join(sorted(contracts_meta.keys()))
 

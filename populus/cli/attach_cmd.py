@@ -14,6 +14,7 @@ except ImportError:
     is_ipython = False
 
 from eth_rpc_client import Client
+from watchdog.events import FileSystemEventHandler
 
 import populus
 from populus import utils
@@ -30,9 +31,11 @@ from populus.deployment import (
     validate_deployed_contracts,
 )
 from populus.cli.deploy_cmd import (
-    echo_post_deploy_message
+    echo_post_deploy_message,
 )
-
+from populus.observers import (
+    get_active_dir_observer,
+)
 from .main import main
 
 
@@ -79,35 +82,64 @@ def deploy_set(context, client, project_dir, data_dir=None, record=True, contrac
 def setup_known_instances(context, data_dir):
     # Attempt to load known contracts.
     knownCts = get_known_contracts(data_dir)
-    for name in knownCts.keys():
-        addrList = knownCts[name]
-        # Latest Instances contains a list of the deployed contracts
-        # for which the code matches with the current project
-        # context's contract code. We use a sha512 hash to compare
-        # the code of each. The idea here is to catch cases where the
-        # user has updated their code but failed to redeploy, and
-        # cases where new contract methods might attempt to be called
-        # on old contract addresses
-        latestInstances = []
-        ctType = None
-        try:
-            ctType = getattr(context["contracts"], name)
-        except AttributeError:
-            click.echo("Failed to find contract `{0}` in project context: skipping".format(name))
-            continue
-        currCodeHash = hashlib.sha512(ctType._config.code).hexdigest()
-        for data in addrList:
-            if currCodeHash == data["codehash"]:
-                inst = ctType(data["address"], context["client"])
-                ts = datetime.strptime(data["ts"], "%Y-%m-%dT%H:%M:%S.%f")
-                latestInstances.append((ts, inst))
+    for name, ctType in context["contracts"]:
+        if name in knownCts.keys():
+            addrList = knownCts[name]
+            # Latest Instances contains a list of the deployed contracts
+            # for which the code matches with the current project
+            # context's contract code. We use a sha512 hash to compare
+            # the code of each. The idea here is to catch cases where the
+            # user has updated their code but failed to redeploy, and
+            # cases where new contract methods might attempt to be called
+            # on old contract addresses
+            latestInstances = []
+            currCodeHash = hashlib.sha512(ctType._config.code).hexdigest()
+            for data in addrList:
+                if currCodeHash == data["codehash"]:
+                    inst = ctType(data["address"], context["client"])
+                    ts = datetime.strptime(data["ts"], "%Y-%m-%dT%H:%M:%S.%f")
+                    latestInstances.append((ts, inst))
 
-        # Ok - latestInstances has all the instances of this
-        # contract type whose code matches with what we expect
-        # it to be. Now let's sort this list by the time
-        # stamp
-        latestInstances.sort(key=lambda r: r[0])
-        setattr(ctType, "known", [x[1] for x in latestInstances])
+            # Ok - latestInstances has all the instances of this
+            # contract type whose code matches with what we expect
+            # it to be. Now let's sort this list by the time
+            # stamp
+            latestInstances.sort(key=lambda r: r[0])
+            setattr(ctType, "known", [x[1] for x in latestInstances])
+        else:
+            setattr(ctType, "known", [])
+
+
+class ActiveDataDirChangedEventHandler(FileSystemEventHandler):
+    """ Active Test Chain Data Directory Symlink Changed Event Handler
+        This event handler wait for the create event and then updates
+        the known contract instances for that test chain.
+    """
+    def __init__(self, *args, **kwargs):
+        """ User must pass in the attach context and project dir
+        """
+        self.project_dir = kwargs.pop('project_dir')
+        self.context = kwargs.pop('context')
+
+    def on_any_event(self, event):
+        if hasattr(event, "dest_path"):
+            # This indicates that the event was a creation of the
+            # active data symlink and not the delete.
+
+            path = event.src_path
+            activePath = get_active_data_dir(self.project_dir)
+            if os.path.normpath(path) == os.path.normpath(activePath):
+                # This means that a new active chain directory symlink
+                # was created and we can refresh our known contracts
+                newDataPath = os.readlink(activePath)
+                message = (
+                    "\n=========== Active Directory Changed ===========\n"
+                    "New Active Dir: {active_dir}\n"
+                ).format(active_dir=newDataPath)
+                click.echo(click.style(message, fg="yellow"))
+
+                # Update the known
+                setup_known_instances(self.context, activePath)
 
 
 @main.command()
@@ -185,4 +217,15 @@ def attach(active):
         shell = InteractiveConsole(user_ns=context)
     else:
         shell = InteractiveConsole(context)
+
+    # Start the active directory link observer
+    event_handler = ActiveDataDirChangedEventHandler(
+        project_dir=project_dir,
+        context=context,
+    )
+    observer = get_active_dir_observer(project_dir, event_handler)
+
+    observer.start()
     shell.interact(banner)
+    observer.stop()
+    observer.join()

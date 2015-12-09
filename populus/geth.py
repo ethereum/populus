@@ -41,7 +41,7 @@ def get_active_data_dir(project_dir):
     """
     bc_dir = get_blockchains_dir(project_dir)
     active_dir = os.path.abspath(os.path.join(bc_dir, ACTIVE_CHAIN_SYMLINK))
-    return(active_dir)
+    return active_dir
 
 
 def set_active_data_dir(project_dir, name):

@@ -47,13 +47,10 @@ def deploy_set(context, client, project_dir, data_dir=None, record=True, contrac
             will be interrogated to determine the contracts that
             can be deployed
         @param data_dir directory of the test chain if not None
-        @param contracts_by_name if not None, this must be a list
-            of strings indicating the names of the contracts to deploy
+        @param contracts_by_name Optional argument, this must be an
+            iterable of strings indicating the names of the contracts
+            to deploy. An empty list deploys all the contracts.
     """
-
-    if type(contracts_by_name) is not list:
-        raise TypeError("Contracts by name must be a list of strings")
-
     contracts = package_contracts(utils.load_contracts(project_dir))
     deployed_contracts = deploy_contracts(
         deploy_client=client,
@@ -81,10 +78,10 @@ def deploy_set(context, client, project_dir, data_dir=None, record=True, contrac
 
 def setup_known_instances(context, data_dir):
     # Attempt to load known contracts.
-    knownCts = get_known_contracts(data_dir)
-    for name, ctType in context["contracts"]:
-        if name in knownCts.keys():
-            addrList = knownCts[name]
+    known_cts = get_known_contracts(data_dir)
+    for name, ct_type in context["contracts"]:
+        if name in known_cts.keys():
+            addr_list = known_cts[name]
             # Latest Instances contains a list of the deployed contracts
             # for which the code matches with the current project
             # context's contract code. We use a sha512 hash to compare
@@ -92,22 +89,22 @@ def setup_known_instances(context, data_dir):
             # user has updated their code but failed to redeploy, and
             # cases where new contract methods might attempt to be called
             # on old contract addresses
-            latestInstances = []
-            currCodeHash = hashlib.sha512(ctType._config.code).hexdigest()
-            for data in addrList:
-                if currCodeHash == data["codehash"]:
-                    inst = ctType(data["address"], context["client"])
+            latest_instances = []
+            curr_code_hash = hashlib.sha512(ct_type._config.code).hexdigest()
+            for data in addr_list:
+                if curr_code_hash == data["codehash"]:
+                    inst = ct_type(data["address"], context["client"])
                     ts = datetime.strptime(data["ts"], "%Y-%m-%dT%H:%M:%S.%f")
-                    latestInstances.append((ts, inst))
+                    latest_instances.append((ts, inst))
 
-            # Ok - latestInstances has all the instances of this
+            # Ok - latest_instances has all the instances of this
             # contract type whose code matches with what we expect
             # it to be. Now let's sort this list by the time
             # stamp
-            latestInstances.sort(key=lambda r: r[0])
-            setattr(ctType, "known", [x[1] for x in latestInstances])
+            latest_instances.sort(key=lambda r: r[0])
+            setattr(ct_type, "known", [x[1] for x in latest_instances])
         else:
-            setattr(ctType, "known", [])
+            setattr(ct_type, "known", [])
 
 
 class ActiveDataDirChangedEventHandler(FileSystemEventHandler):

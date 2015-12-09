@@ -1,3 +1,11 @@
+0.6.3
+-----
+
+- Shorted path to cli tests to stay under 108 character limit for unix sockets.
+- Adds tracking of contract addresses deployed to test chains.
+- New `redeploy` feature available within `populus attach` as well as
+  notification that your contracts have changed and may require redeployment.
+
 0.6.2
 -----
 

@@ -20,6 +20,20 @@ from populus.compilation import (
     get_project_libraries_dir,
     get_compiled_contract_destination_path,
 )
+from populus.geth import (
+    get_blockchains_dir,
+)
+
+
+def get_active_dir_observer(project_dir, event_handler):
+    """ Setup a polling observer on the project's
+        blockchains directory. This directory contains the
+        .active-chain symlink which is watched for.
+    """
+    bchain = get_blockchains_dir(project_dir)
+    observer = PollingObserver()
+    observer.schedule(event_handler, bchain, recursive=False)
+    return observer
 
 
 class ContractSourceChangedEventHandler(FileSystemEventHandler):

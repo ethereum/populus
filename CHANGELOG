@@ -1,6 +1,14 @@
 0.6.3
 -----
 
+- Bugfix for Event.get_log_data
+- Add `get_code` and `get_accounts` methods to EthTesterClient
+- Add `0x` prefixing to addresses returned by functions with multiple return
+  values.
+
+0.6.3
+-----
+
 - Shorted path to cli tests to stay under 108 character limit for unix sockets.
 - Adds tracking of contract addresses deployed to test chains.
 - New `redeploy` feature available within `populus attach` as well as

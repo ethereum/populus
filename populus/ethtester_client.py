@@ -139,6 +139,16 @@ class EthTesterClient(object):
     def get_coinbase(self):
         return "0x" + ethereum_utils.encode_hex(self.evm.block.coinbase)
 
+    def get_accounts(self):
+        return [
+            "0x" + ethereum_utils.encode_hex(addr)
+            for addr in t.accounts
+        ]
+
+    def get_code(self, address, block_number="latest"):
+        block = self._get_block_by_number(block_number)
+        return ethereum_utils.encode_hex(block.get_code(strip_0x(address)))
+
     def _send_transaction(self, _from=None, to=None, gas=None, gas_price=None,
                           value=0, data=''):
         """
@@ -250,13 +260,3 @@ class EthTesterClient(object):
     def get_transaction_by_hash(self, txn_hash):
         block, txn, txn_index = self._get_transaction_by_hash(txn_hash)
         return serialize_txn(block, txn, txn_index)
-
-    """
-    Unimplemented methods
-
-    def get_gas_price(self):
-    def get_code(self, address, block="latest"):
-    def get_transaction_by_hash(self, txn_hash):
-    def get_block_by_hash(self, block_hash, full_transactions=True):
-    def get_accounts(self):
-    """

@@ -255,6 +255,10 @@ class EthTesterClient(object):
         block, txn, txn_index = self._get_transaction_by_hash(txn_hash)
         return serialize_txn(block, txn, txn_index)
 
+    def get_code(self, address, block="latest"):
+        block = self._get_block_by_number(block)
+        return "0x" + ethereum_utils.encode_hex(strip_0x(address))
+
     """
     Unimplemented methods
 

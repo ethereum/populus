@@ -52,6 +52,8 @@ class Event(ContractBound):
 
     def get_log_data(self, log_entry):
         values = self.cast_return_data(log_entry['data'])
+        if isinstance(values, basestring):
+            values = [values]
         return {
             output['name']: value for output, value in zip(self.outputs, values)
         }

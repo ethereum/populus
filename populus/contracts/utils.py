@@ -46,7 +46,7 @@ def decode_multi(types, outputs):
         binascii.a2b_hex(strip_0x_prefix(outputs)),
     )
     processed_res = [
-        "0x" + v if t == "address" else v
+        "0x" + strip_0x_prefix(v) if t == "address" else v
         for t, v in zip(types, res)
     ]
     return processed_res

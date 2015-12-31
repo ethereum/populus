@@ -34,6 +34,9 @@ class PopulusConfig(object):
     rpc_client_port = '8545'
     rpc_client_host = '127.0.0.1'
 
+    # RPC Client
+    ipc_path = None
+
     # Contract source
     @property
     def project_dir(self):
@@ -110,6 +113,20 @@ def rpc_client(request, populus_config):
 
 
 @pytest.fixture(scope="module")
+def ipc_client(request, populus_config):
+    from eth_ipc_client import Client
+    ipc_path = populus_config.get_value(request, 'ipc_path')
+    if ipc_path is None:
+        from populus.geth import get_geth_data_dir
+        geth_project_dir = populus_config.get_value(request, 'geth_project_dir')
+        geth_chain_name = populus_config.get_value(request, 'geth_chain_name')
+        geth_data_dir = get_geth_data_dir(geth_project_dir, geth_chain_name)
+        ipc_path = os.path.join(geth_data_dir, 'geth.ipc')
+    client = Client(ipc_path)
+    return client
+
+
+@pytest.fixture(scope="module")
 def contracts(request, populus_config):
     from populus.utils import load_contracts
     from populus.contracts import package_contracts
@@ -138,10 +155,20 @@ def deploy_client(request, populus_config):
         rpc_host = populus_config.get_value(request, 'deploy_client_rpc_host')
         rpc_port = populus_config.get_value(request, 'deploy_client_rpc_port')
         client = Client(rpc_host, rpc_port)
+    elif client_type == 'ipc':
+        from eth_ipc_client import Client
+        ipc_path = populus_config.get_value(request, 'ipc_path')
+        if ipc_path is None:
+            from populus.geth import get_geth_data_dir
+            geth_project_dir = populus_config.get_value(request, 'geth_project_dir')
+            geth_chain_name = populus_config.get_value(request, 'geth_chain_name')
+            geth_data_dir = get_geth_data_dir(geth_project_dir, geth_chain_name)
+            ipc_path = os.path.join(geth_data_dir, 'geth.ipc')
+        client = Client(ipc_path)
     else:
         raise ValueError(
-            "Unsupported client type '{0}'.  Supported values are 'tester' and "
-            "'rpc'"
+            "Unsupported client type '{0}'.  Supported values are 'tester', "
+            "'rpc', and 'ipc'"
         )
 
     return client
@@ -256,3 +283,10 @@ def geth_coinbase(request, populus_config):
     ensure_path_exists(data_dir)
     geth_coinbase = ensure_account_exists(data_dir)
     return geth_coinbase
+
+
+@pytest.fixture(scope="module")
+def geth_accounts(geth_data_dir):
+    from populus.geth import get_geth_accounts
+    accounts = get_geth_accounts(geth_data_dir)
+    return accounts

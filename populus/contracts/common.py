@@ -6,6 +6,14 @@ from populus.contracts.utils import (
 )
 
 
+class EmptyDataError(Exception):
+    """
+    Raised when a call to a function unexpectedly returns empty data `0x` when
+    a response was expected.
+    """
+    pass
+
+
 class ContractBound(object):
     _contract = None
 
@@ -60,7 +68,13 @@ class ContractBound(object):
 
     def cast_return_data(self, outputs):
         if len(self.output_types) != 1:
-            return decode_multi(self.output_types, outputs)
+            try:
+                return decode_multi(self.output_types, outputs)
+            except AssertionError:
+                raise EmptyDataError("call to {0} unexpectedly returned no data".format(self))
         output_type = self.output_types[0]
 
-        return decode_single(output_type, outputs)
+        try:
+            return decode_single(output_type, outputs)
+        except AssertionError:
+            raise EmptyDataError("call to {0} unexpectedly returned no data".format(self))

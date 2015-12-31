@@ -1,3 +1,10 @@
+0.7.0
+-----
+
+- When a contract function call that is supposed to return data returns no data
+  an error was thown.  Now a custom exception is thrown.  This is a breaking
+  change as previously for addresses this would return the empty address.
+
 0.6.6
 -----
 

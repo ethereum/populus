@@ -77,10 +77,6 @@ def test_decode_bytes():
     'input,expected',
     (
         (
-            '0x',
-            '0x0000000000000000000000000000000000000000',
-        ),
-        (
             '0x0000000000000000000000000000000000000000000000000000000000000000',
             '0x0000000000000000000000000000000000000000',
         ),
@@ -105,3 +101,9 @@ def test_decode_bytes():
 def test_decode_address(input, expected):
     output = decode_single('address', input)
     assert output == expected
+
+
+@pytest.mark.parametrize('_type', ('address', 'bytes32', 'uint256', 'int256', 'bool'))
+def test_raises_on_empty_data(_type):
+    with pytest.raises(AssertionError):
+        decode_single(_type, '0x')

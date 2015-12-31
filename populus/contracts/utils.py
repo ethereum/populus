@@ -8,9 +8,10 @@ from ethereum import abi
 def decode_single(typ, data):
     base, sub, _ = abi.process_type(typ)
 
+    # ensure that we aren't trying to decode an empty response.
+    assert len(data) > 2
+
     if base == 'address':
-        if data == "0x":
-            return "0x" + "0" * 40
         return '0x' + strip_0x_prefix(data[-40:])
     elif base == 'string' or base == 'bytes' or base == 'hash':
         if sub:

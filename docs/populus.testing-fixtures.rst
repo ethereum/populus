@@ -34,6 +34,7 @@ It has the following properties.
 * ``geth_rpc_port = '8545'``
 * ``geth_rpc_host = '127.0.0.1'``
 * ``geth_max_wait = 5``
+* ``ipc_path = None``
 
 In addition it has the following two special properties that evaluate to the
 current working directory of the python process.
@@ -103,6 +104,14 @@ environment variables.
 * ``RPC_CLINT_PORT``
 
 
+IPC Client
+----------
+
+A python client for the ``JSON-RPC`` server over a unix socket.
+
+* ``ipc_path`` - default is derived from the ``geth_node`` configuration.
+
+
 Contracts
 ---------
 
@@ -136,6 +145,8 @@ can be configured to use one of two clients.
   interface with the ``ethereum.tester`` module.
 * set ``deploy_client_type == "rpc"`` in your tests module to use the rpc
   client which interacts with a JSON-RPC server.
+* set ``deploy_client_type == "ipc"`` in your tests module to use the ipc
+  client which interacts with a JSON-RPC server over a socket.
 
 The default value for this is ``ethtester``.
 
@@ -145,6 +156,10 @@ Alternatively, this fixture can be configured by setting the
 To use this fixture configured to use the ``rpc`` client, you must also have a
 valid JSON RPC server running.  This can be accomplished by including either of
 ``rpc_server`` or ``geth_node`` fixtures in your test case.
+
+To use this fixture configured to use the ``ipc`` client, you must also have a
+running IPC server which can be done by including the ``geth_node`` fixtures in
+your test case.
 
 Deploy Coinbase
 ---------------
@@ -211,6 +226,8 @@ contracts.
 Geth Node
 ---------
 
+* ``geth_node``
+
 This is a module level fixture that has a geth node running against the test
 chain at ``./chains/default-test/``.
 
@@ -239,5 +256,16 @@ Logfiles for the output of the geth node can be found at
 Geth Coinbase
 -------------
 
+* ``geth_coinbase``
+
 This is a convenience fixture that returns the coinbase of the testing geth
 node.
+
+
+Geth Accounts
+-------------
+
+* ``geth_accounts``
+
+This is a convenience fixture that returns a list of the accounts for the
+testing geth node.

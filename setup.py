@@ -28,6 +28,7 @@ setup(
     install_requires=[
         "click>=5.1",
         "ethereum-rpc-client>=0.4.0",
+        "ethereum-ipc-client>=0.1.1",
         "ethereum>=1.0.3",
         "eth-testrpc>=0.1.17",
         "pytest>=2.7.2",

@@ -4,6 +4,10 @@ the `eth-testrpc` project by ConsenSys
 
 https://github.com/ConsenSys/eth-testrpc
 """
+import time
+import Queue
+import threading
+import uuid
 
 
 from ethereum import utils as ethereum_utils
@@ -121,9 +125,32 @@ class EthTesterClient(object):
     Stand-in replacement for the rpc client that speaks directly to the
     `ethereum.tester` facilities.
     """
-    def __init__(self):
+    def __init__(self, async=True):
         self.evm = t.state()
         self.evm.mine()
+
+        self.is_async = async
+
+        if self.is_async:
+            self.request_queue = Queue.Queue()
+            self.results = {}
+
+            self.request_thread = threading.Thread(target=self.process_requests)
+            self.request_thread.daemon = True
+            self.request_thread.start()
+
+    def process_requests(self):
+        while True:
+            id, args, kwargs = self.request_queue.get()
+            mine = kwargs.pop('_mine', False)
+            try:
+                self._send_transaction(*args, **kwargs)
+                if mine:
+                    self.evm.mine()
+                response = self.evm.last_tx.hash
+            except ValueError as e:
+                response = e
+            self.results[id] = response
 
     def wait_for_block(self, block_number, max_wait=0):
         while self.evm.block.number < block_number:
@@ -177,9 +204,32 @@ class EthTesterClient(object):
         return self.evm.send(sender=sender, to=to, value=value, evmdata=data)
 
     def send_transaction(self, *args, **kwargs):
-        self._send_transaction(*args, **kwargs)
-        self.evm.mine()
-        return self.evm.last_tx.hash
+        if self.is_async:
+            kwargs['_mine'] = True
+            request_id = uuid.uuid4()
+            self.request_queue.put((request_id, args, kwargs))
+            start = time.time()
+            while time.time() - start < 10:
+                if request_id in self.results:
+                    return self.results.pop(request_id)
+            raise ValueError("Timeout waiting for {0}".format(request_id))
+        else:
+            self._send_transaction(*args, **kwargs)
+            self.evm.mine()
+            return self.evm.last_tx.hash
+
+    def make_ipc_request(self, *args, **kwargs):
+        if self.is_async:
+            request_id = uuid.uuid4()
+            self.request_queue.put((request_id, args, kwargs))
+            start = time.time()
+            while time.time() - start < 10:
+                if request_id in self.results:
+                    return self.results.pop(request_id)
+            raise ValueError("Timeout waiting for {0}".format(request_id))
+        else:
+            return self._make_ipc_request(*args, **kwargs)
+
 
     def _get_transaction_by_hash(self, txn_hash):
         txn_hash = strip_0x(txn_hash)

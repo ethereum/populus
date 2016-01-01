@@ -233,7 +233,6 @@ class EthTesterClient(object):
         else:
             return self._make_ipc_request(*args, **kwargs)
 
-
     def _get_transaction_by_hash(self, txn_hash):
         txn_hash = strip_0x(txn_hash)
         if len(txn_hash) == 64:

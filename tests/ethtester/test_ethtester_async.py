@@ -7,7 +7,7 @@ from populus.ethtester_client import EthTesterClient
 
 
 def test_async_requests():
-    client = EthTesterClient(async=True)
+    client = EthTesterClient(async=True, async_timeout=60)
 
     threads = []
     errors = []

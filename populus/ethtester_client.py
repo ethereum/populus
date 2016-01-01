@@ -125,11 +125,12 @@ class EthTesterClient(object):
     Stand-in replacement for the rpc client that speaks directly to the
     `ethereum.tester` facilities.
     """
-    def __init__(self, async=True):
+    def __init__(self, async=True, async_timeout=10):
         self.evm = t.state()
         self.evm.mine()
 
         self.is_async = async
+        self.async_timeout = async_timeout
 
         if self.is_async:
             self.request_queue = Queue.Queue()
@@ -209,7 +210,7 @@ class EthTesterClient(object):
             request_id = uuid.uuid4()
             self.request_queue.put((request_id, args, kwargs))
             start = time.time()
-            while time.time() - start < 10:
+            while time.time() - start < self.async_timeout:
                 if request_id in self.results:
                     return self.results.pop(request_id)
             raise ValueError("Timeout waiting for {0}".format(request_id))

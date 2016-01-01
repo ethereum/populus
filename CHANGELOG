@@ -1,3 +1,8 @@
+0.7.2
+-----
+
+- Make the ethtester client work with asynchronous code.
+
 0.7.1
 -----
 

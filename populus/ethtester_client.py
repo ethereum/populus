@@ -140,22 +140,9 @@ class EthTesterClient(object):
             self.request_thread.daemon = True
             self.request_thread.start()
 
-    def process_requests(self):
-        while True:
-            id, args, kwargs = self.request_queue.get()
-            mine = kwargs.pop('_mine', False)
-            try:
-                self._send_transaction(*args, **kwargs)
-                if mine:
-                    self.evm.mine()
-                response = self.evm.last_tx.hash
-            except ValueError as e:
-                response = e
-            self.results[id] = response
-
     def wait_for_block(self, block_number, max_wait=0):
         while self.evm.block.number < block_number:
-            self.evm.mine()
+            self.send_transaction(only_mine=True)
         return self.get_block_by_number(self.evm.block.number)
 
     def wait_for_transaction(self, txn_hash, max_wait=0):
@@ -206,7 +193,6 @@ class EthTesterClient(object):
 
     def send_transaction(self, *args, **kwargs):
         if self.is_async:
-            kwargs['_mine'] = True
             request_id = uuid.uuid4()
             self.request_queue.put((request_id, args, kwargs))
             start = time.time()
@@ -219,20 +205,46 @@ class EthTesterClient(object):
             self.evm.mine()
             return self.evm.last_tx.hash
 
-    def make_ipc_request(self, *args, **kwargs):
-        if self.is_async:
-            request_id = uuid.uuid4()
-            self.request_queue.put((request_id, args, kwargs))
-            start = time.time()
-            while time.time() - start < 10:
-                if request_id in self.results:
-                    result = self.results.pop(request_id)
-                    if isinstance(result, Exception):
-                        raise result
-                    return result
-            raise ValueError("Timeout waiting for {0}".format(request_id))
-        else:
-            return self._make_ipc_request(*args, **kwargs)
+    def process_requests(self):
+        while True:
+            print "entering"
+            id, args, kwargs = self.request_queue.get()
+            print "enter", id
+
+            only_mine = kwargs.pop('only_mine', False)
+
+            # This is for just advancing the block number
+            if only_mine:
+                self.evm.mine()
+                self.results[id] = None
+                print "exit only mine", id
+                return
+
+            is_call = kwargs.pop('is_call', False)
+
+            try:
+                if is_call:
+                    # Take snapshot before.
+                    snapshot = self.evm.snapshot()
+
+                # Actual txn result
+                result = self._send_transaction(*args, **kwargs)
+
+                if is_call:
+                    # Revert snapshot after
+                    self.evm.revert(snapshot)
+
+                self.evm.mine()
+
+                if is_call:
+                    self.results[id] = result
+                    print "exit call", id
+                else:
+                    self.results[id] = self.evm.last_tx.hash
+                    print "exit response", id
+            except Exception as e:
+                self.results[id] = e
+                print "exit exception", id
 
     def _get_transaction_by_hash(self, txn_hash):
         txn_hash = strip_0x(txn_hash)
@@ -302,12 +314,19 @@ class EthTesterClient(object):
             raise ValueError("Using call on any block other than latest is unsupported")
         if kwargs.get('block', 'latest') != "latest":
             raise ValueError("Using call on any block other than latest is unsupported")
-        snapshot = self.evm.snapshot()
-        r = self._send_transaction(*args, **kwargs)
-        self.evm.revert(snapshot)
-        # Stop-gap solution for bug with a transaction that immediately follows
-        # a call.
-        self.evm.mine()
+
+
+        if self.is_async:
+            kwargs['is_call'] = True
+            r = self.send_transaction(*args, **kwargs)
+        else:
+            # Take snapshot before.
+            snapshot = self.evm.snapshot()
+            r = self._send_transaction(*args, **kwargs)
+            # Revert snapshot after
+            self.evm.revert(snapshot)
+            self.evm.mine()
+
         return encode_hex(r)
 
     def get_transaction_by_hash(self, txn_hash):

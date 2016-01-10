@@ -1,7 +1,7 @@
 from Queue import Queue, Empty
 from threading import Thread
 import copy
-import datetime
+from datetime import datetime
 import functools
 import time
 import json
@@ -58,7 +58,7 @@ def set_active_data_dir(project_dir, name):
 
 def get_geth_logfile_path(data_dir, logfile_name_fmt="geth-{0}.log"):
     logfile_name = logfile_name_fmt.format(
-        datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
+        datetime.now().strftime("%Y%m%d-%H%M%S"),
     )
     log_dir = os.path.join(data_dir, 'logs')
     utils.ensure_path_exists(log_dir)
@@ -351,7 +351,7 @@ def add_to_known_contracts(deployed_contracts, data_dir):
     """
     knownCts = get_known_contracts(data_dir)
 
-    ts = datetime.datetime.now().isoformat()
+    ts = datetime.now().isoformat()
     # Now we will add to our known contracts
     for name, contract in deployed_contracts:
         codeHash = hashlib.sha512(contract._config.code).hexdigest()

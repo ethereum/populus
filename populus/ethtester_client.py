@@ -207,9 +207,7 @@ class EthTesterClient(object):
 
     def process_requests(self):
         while True:
-            print "entering"
             id, args, kwargs = self.request_queue.get()
-            print "enter", id
 
             only_mine = kwargs.pop('only_mine', False)
 
@@ -217,7 +215,6 @@ class EthTesterClient(object):
             if only_mine:
                 self.evm.mine()
                 self.results[id] = None
-                print "exit only mine", id
                 return
 
             is_call = kwargs.pop('is_call', False)
@@ -238,13 +235,10 @@ class EthTesterClient(object):
 
                 if is_call:
                     self.results[id] = result
-                    print "exit call", id
                 else:
                     self.results[id] = self.evm.last_tx.hash
-                    print "exit response", id
             except Exception as e:
                 self.results[id] = e
-                print "exit exception", id
 
     def _get_transaction_by_hash(self, txn_hash):
         txn_hash = strip_0x(txn_hash)

@@ -123,6 +123,8 @@ def validate_argument(arg_meta, value):
             return False
         max_length = int(sub)
         return len(value) <= max_length
+    elif base == 'string':
+        return isinstance(value, basestring)
     else:
         raise ValueError("Unsupported base: '{0}'".format(base))
 

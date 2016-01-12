@@ -155,7 +155,7 @@ def package_contracts(contracts):
     _dict = {
         '__len__': lambda s: len(contract_classes),
         '__iter__': lambda s: iter(contract_classes.items()),
-        '__getitem__': lambda s, k: contract_classes.__getitem__[k],
+        '__getitem__': lambda s, k: contract_classes.__getitem__(k),
     }
     _dict.update(contract_classes)
 

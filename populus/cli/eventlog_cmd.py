@@ -9,6 +9,7 @@ import os
 import os.path
 import re
 import time
+import json
 
 from eth_rpc_client import Client
 
@@ -25,41 +26,188 @@ from populus.geth import (
     get_active_data_dir,
     get_latest_known_instances,
 )
+from populus.contracts.core import Contract
 
 
-def EvtCallback(**kwargs):
-    receipt = kwargs["receipt"]
-    click.echo(receipt)
+def load_speced_contracts(specs, contracts):
+    """ Load contract object definitions from the specified files.
+        @param specs iterable containing full-path names to json files
+           that this function will attempt to load and parse.
+        @param contracts dict containing the known contracts which
+           this script will add to. This function modifies `contracts`.
+        @return None
+    """
+    if len(specs) > 0:
+        for spec_file in specs:
+            if not os.path.exists(spec_file):
+                raise ValueError("No Spec File Found at path: %s" % spec_file)
+            with open(spec_file, "rb") as sf:
+                extra_cts = json.loads(sf.read())
+            for ct in extra_cts.keys():
+                if ct not in contracts:
+                    # @todo - add more verbose logging to console
+                    #    here
+                    contracts[ct] = Contract(extra_cts[ct], ct)
+                else:
+                    msg = "Contract %s in file %s already exists." % (ct, spec_file)
+                    click.echo(click.style(msg, fg="red"))
 
 
+class ContractFilter:
+    """ This class manages a contract filter as provided to the
+        eventlog sub command on the command line.
+    """
+
+    filtRe = re.compile("(\w+)=(\w+)(,)?")  # NOQA
+    hexRe = re.compile("0x([0-9A-Fa-f]+)")  # NOQA
+    CtKey = "contract"
+    AddrKey = "address"
+    EvtKey = "event"
+
+    def __init__(self, filt_str):
+        self.contract = None
+        self.address = None
+        self.events = []
+        self.raw_filter = ''
+
+        self.key_set = (
+            ContractFilter.CtKey,
+            ContractFilter.AddrKey,
+            ContractFilter.EvtKey,
+            )
+
+        self._parse(filt_str)
+
+    def __str__(self):
+        if self.address is not None:
+            return(
+                "<%s,%s, evts=%s>" %
+                (self.contract, self.address, self.events)
+            )
+        else:
+            return("<%s,evts=%s>" % (self.contract, self.events))
+
+    def _parse(self, filt_str):
+        """ This function is used to parse information from a filter
+        command argument. These arguments are used to determine what
+        events we will monitor for.
+        """
+
+        grp = 0
+        self.raw_filter = filt_str
+        content = filt_str
+        while len(content) > 0:
+            m = ContractFilter.filtRe.match(content)
+            grp += 1
+            if m:
+                key = m.group(1)
+                val = m.group(2)
+                if key not in self.key_set:
+                    raise ValueError(
+                        "Invalid Filter Command Key: %s" % key
+                    )
+
+                if key == ContractFilter.EvtKey:
+                    self.events.append(val)
+                else:
+                    # Set the contract or the address strings
+                    setattr(self, key, val)
+            else:
+                raise ValueError(
+                    "Failed to parse filter[grp=%d]: %s" % (grp, filt_str)
+                )
+            content = content[m.end():]
+
+        if self.contract is None:
+            raise ValueError(
+                "Contract Filter must include a Contract Name"
+            )
+
+        if self.address is not None:
+            m = ContractFilter.hexRe.match(self.address)
+            if not m:
+                raise ValueError(
+                    "Filter 'address' must be a hex string: %s" %
+                    self.address
+                )
+
+    def validate_filter(self, contracts):
+        """ Validate that this filter is something we can
+            actually implement.
+            @param contracts dict of the abi info for the known contracts.
+        """
+
+        if self.contract not in contracts:
+            raise ValueError(
+                "Contract '%s' in filter '%s' does not exist" %
+                (self.contract, self.raw_filter)
+            )
+
+        if len(self.events) == 0:
+            return
+
+        ctData = contracts[self.contract]
+        known_evts = [evt.name for evt in ctData._config._events]
+
+        for evt in self.events:
+            if evt not in known_evts:
+                raise RuntimeError(
+                    "Event '%s' in filter '%s' not in contract '%s'" %
+                    (evt, self.raw_filter, self.contract)
+                )
+
+    def get_event_topics(self, ct_type):
+        """ Retrieves a list of event topics for configuring the
+            filter.
+        """
+        evt_topics = []
+        for evt in self.events:
+            evt_match = [
+                evt_obj for evt_obj in ct_type._config._events
+                if evt_obj.name == evt
+            ]
+            evt_topics.append(evt_match[0].event_topic)
+        return(evt_topics)
+
+# Commandline help message for the eventlog's 'filter' command
+filterHelpMessage = (
+    "This parameter is used to filter for events from a particular "
+    "contract. The format is a key-value style format. "
+    "Valid Keys are the following: contract, address, event. "
+    "The 'contract' key is required. The 'address' and 'event' keys "
+    "are optional. "
+    "If the address option is not provided, the eventlog will check "
+    "the active project chain to determine which known contract "
+    "objects exist and match the latest compiled code. If the "
+    "filter does not include any event filters, then all the events "
+    "for a particular contract will be monitored. "
+    "User can pass multiple of these options or none. "
+    "If no contract options are passed, then the eventlog will listen "
+    "to all known contract objects in the active chain for the current "
+    "project. Please see the populus documentation for more information."
+)
+
+
+# Event Log Options
 @main.command()
 @click.option(
-    '--contract',
+    '-f', '--filt',
     default="",
     multiple=True,
-    metavar="<name>[,<hexaddr>]",
-    help=(
-        "This parameter is used to filter for events from a particular "
-        "contract either by type or by type and address. "
-        "The hex value address after the contract is optional. If not "
-        "provided then the event log will listen for any events from "
-        "any known contract instance of that type in the active chain. "
-        "Only the known contracts that are up to date with the latest "
-        "code (uses sha512 hash). "
-        "User can pass multiple of these options or none. "
-        "If no contract options are passed, then the eventlog will listen "
-        "to all known objects in the active chain for the current project.\n"
-        "Example: --contract Example,0xDEADBEEF"
-    ),
+    help=filterHelpMessage,
 )
 @click.option(
-    '--rpc',
-    default="127.0.0.1:8545",
-    metavar="<IP>:<PORT>",
+    "--spec",
+    default="",
+    metavar="<json-file>",
+    multiple=True,
     help=(
-        "Set the RPC endpoint to which we will listen for events. "
-        "Default: 127.0.0.1:8545"
-        ),
+        "This parameter can be used to tell the eventlog to read "
+        "contract specifications from a particular JSON file. "
+        "This option can be passed multiple times. This option is "
+        "useful for cases where the contract that you will to eventlog "
+        "is not in this populus project. Must be a full path name."
+    ),
 )
 @click.option(
     "--period",
@@ -75,57 +223,122 @@ def EvtCallback(**kwargs):
     help=(
         "This flag indicates whether the attach command will use "
         "the chain that is referenced from the <proj>/chains/.active-chain "
-        "to load information about known contracts or not."
+        "to load information about known contracts or not. Default is to "
+        "load the active chain if present."
     ),
 )
-def eventlog(contract, rpc, period, active):
+@click.option(
+    '--rpc',
+    default="127.0.0.1:8545",
+    metavar="<IP>:<PORT>",
+    help=(
+        "Set the RPC endpoint to which we will listen for events. "
+        "Default: 127.0.0.1:8545"
+        ),
+)
+@click.option(
+    "-v", "--verbose",
+    is_flag=True,
+    help="Print more verbose information",
+)
+def eventlog(filt, spec, period, active, rpc, verbose):
     """ Produces a log of events that are generated by contracts.
     """
-
+    # Load contract objects
     project_dir = os.path.abspath(os.getcwd())
     contracts_meta = utils.load_contracts(project_dir)
     contracts = package_contracts(contracts_meta)
 
+    load_speced_contracts(spec, contracts)
+    # Setup the RPC client.
     ipStr, port = utils.parse_ipv4_endpoint(rpc)
     client = Client(ipStr, port)
 
-    evtLogger = EventLogMonitor(client, period)
+    # Parse the filters
+    filter_set = []
+    for filt_str in filt:
+        ct_filt = ContractFilter(filt_str)
+        ct_filt.validate_filter(contracts)
+        filter_set.append(ct_filt)
 
-    data_dir = None
+    def EvtCallback(ct_type, **kwargs):
+        addr = kwargs["address"]
+        receipt = kwargs["receipt"]
+        topicList = receipt["topics"]
+
+        contract = ct_type(addr, client)
+        events = contract._meta.events
+
+        report = {}
+        report["address"] = addr
+        report["contract"] = ct_type.__name__
+
+        for event_name in events:
+            for topic in topicList:
+                event = getattr(contract, event_name)
+                if event.event_topic == topic:
+                    evtData = event.get_log_data(receipt)
+                    report["data"] = evtData
+                    report["event"] = event_name
+
+        click.echo(json.dumps(report))
+
     known_cts = {}
     if active:
         data_dir = get_active_data_dir(project_dir)
         if os.path.islink(data_dir):
             known_cts = get_latest_known_instances(contracts, data_dir)
         else:
-            click.echo(click.style("No Valid Active Chain Data Directory Found!", fg="red"))
+            msg = "No Valid Active Chain Data Directory Found!"
+            click.echo(click.style(msg, fg="red"))
 
-    if len(contract) > 0:
-        optRegex = re.compile("(\w+)(,(0x[A-Fa-f0-9]+))?")
-        for ctOpt in contract:
-            m = optRegex.match(ctOpt)
-            if m:
-                cname = m.group(1)
-                addr = m.group(3)
-                if addr is not None:
-                    # Add a filter specification by address
-                    evtLogger.add_filter(addr, EvtCallback)
+    with EventLogMonitor(client, period) as evtLogger:
+        data_dir = None
+        if len(filter_set) > 0:
+            for filt in filter_set:
+                ct_type = contracts[filt.contract]
+
+                # Little bit of trickery here to make it so that
+                # we can inject the contract class into the callback.
+                def GenCallback(ct_type):
+                    return(lambda **kwargs: EvtCallback(ct_type, **kwargs))
+
+                evt_topics = filt.get_event_topics(ct_type)
+
+                ct_addr = []
+                if filt.address is not None:
+                    ct_addr.append(filt.address)
                 else:
-                    # Check for known
-                    cts = known_cts[cname]
+                    cts = known_cts[filt.contract]
                     for data in cts:
-                        evtLogger.add_filter(data[1], EvtCallback)
-    else:
-        for ctName in known_cts.keys():
-            cts = known_cts[ctName]
-            for data in cts:
-                evtLogger.add_filter(data[1], EvtCallback)
+                        ct_addr.append(data[1])
 
-    click.echo("Event Logger Starting...")
+                for addr in ct_addr:
+                    if len(evt_topics) > 0:
+                        for topic in evt_topics:
+                            evtLogger.add_filter(
+                                addr,
+                                GenCallback(ct_type),
+                                [topic]
+                            )
+                    else:
+                        evtLogger.add_filter(
+                            addr,
+                            GenCallback(ct_type)
+                        )
+        else:
+            # No filters were provided - so we will add filters
+            # for every known contract
+            for ctName in known_cts.keys():
+                cts = known_cts[ctName]
+                for data in cts:
+                    evtLogger.add_filter(data[1], EvtCallback)
 
-    try:
-        while(True):
-            evtLogger.poll()
-            time.sleep(period)
-    except KeyboardInterrupt:
-        exit()
+        click.echo("Event Logger Starting...")
+
+        try:
+            while(True):
+                evtLogger.poll()
+                time.sleep(period)
+        except KeyboardInterrupt:
+            exit()

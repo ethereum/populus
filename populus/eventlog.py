@@ -50,27 +50,22 @@ class EventLogMonitor:
     def get_client(self):
         return(self.client)
 
-    def add_filter(self, address, cb, event=None):
+    def add_filter(self, address, cb, eventTopics=None):
         """
         Add a new event log filter associated with a particular
         type of log from the blockchain.
         @param address Contract address we are watching for.
-        @param event Event function object bound to the contract
-           at the passed address.
         @param cb callback function that accepts kw.
            Must be a callable object.
+        @param eventTopics a list of topic strings or None
         @return filter ID that was returned via the ethereum RPC that
            identifies this filter.
         """
-        topicsArg = None
-        if event is not None:
-            topicsArg = [event.event_topic]
-
         with self._flock:
             filt_id = self.client.new_filter(
-                address=address, topics=topicsArg
+                address=address, topics=eventTopics
             )
-            self._filters[filt_id] = (address, event, cb)
+            self._filters[filt_id] = (address, eventTopics, cb)
             return(filt_id)
 
     def remove_filter(self, filt_id):
@@ -92,7 +87,7 @@ class EventLogMonitor:
                 if len(changes) > 0:
                     for receipt in changes:
                         try:
-                            cb(receipt=receipt)
+                            cb(receipt=receipt, address=addr, topics=event)
                         except Exception as exc:
                             msg = "Filter[%s]: Failed CB: %s" % (filt_id, str(exc))
                             print(msg)
@@ -108,3 +103,17 @@ class EventLogMonitor:
         self.poll()
         # Restart the timer
         self._start_timer()
+
+    # Internal Methods
+    # This is primarily so we can use the with statement
+    def _cleanup(self):
+        for filt_id in self._filters.keys():
+            self.client.uninstall_filter(filt_id)
+
+    def __enter__(self):
+        return(self)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
+        """
+        self._cleanup()

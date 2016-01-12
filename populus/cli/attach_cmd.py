@@ -130,14 +130,24 @@ class ActiveDataDirChangedEventHandler(FileSystemEventHandler):
         "to load information about known contracts or not."
     ),
 )
-def attach(active):
+@click.option(
+    '--rpc',
+    default="127.0.0.1:8545",
+    metavar="<IP>:<PORT>",
+    help=(
+        "Set the RPC endpoint of the ethereum instance we are targeting. "
+        "Default: 127.0.0.1:8545"
+        ),
+)
+def attach(active, rpc):
     """
     Enter a python shell with contracts and blockchain client
     available.
     """
     project_dir = os.path.abspath(os.getcwd())
     contracts_meta = utils.load_contracts(project_dir)
-    client = Client('127.0.0.1', '8545')
+    ipStr, port = utils.parse_ipv4_endpoint(rpc)
+    client = Client(ipStr, port)
 
     context = {
         'contracts': package_contracts(contracts_meta),

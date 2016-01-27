@@ -121,7 +121,12 @@ def validate_argument(arg_meta, value):
     elif base == 'bytes':
         if not isinstance(value, basestring):
             return False
-        max_length = int(sub)
+        try:
+            max_length = int(sub)
+        except ValueError:
+            if sub == '':
+                return True
+            raise
         return len(value) <= max_length
     elif base == 'string':
         return isinstance(value, basestring)

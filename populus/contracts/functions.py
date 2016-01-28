@@ -91,11 +91,8 @@ class Function(ContractBound):
         return self.cast_return_data(output)
 
 
-from ethereum.abi import process_type
-
-
 def validate_argument(_type, value):
-    base, sub, arr_list = process_type(_type)
+    base, sub, arr_list = abi.process_type(_type)
 
     if arr_list:
         arr_value, remainder = arr_list[-1], arr_list[:-1]

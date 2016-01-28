@@ -127,6 +127,7 @@ class EthTesterClient(object):
     """
     def __init__(self, async=True, async_timeout=10):
         self.evm = t.state()
+        self.evm.block.gas_limit = 3141592
         self.evm.mine()
 
         self.is_async = async

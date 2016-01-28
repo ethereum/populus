@@ -94,15 +94,21 @@ class Function(ContractBound):
 from ethereum.abi import process_type
 
 
-def validate_argument(arg_meta, value):
-    base, sub, arrlist = process_type(arg_meta['type'])
+def validate_argument(_type, value):
+    base, sub, arr_list = process_type(_type)
 
-    if base == 'int':
+    if arr_list:
+        arr_value, remainder = arr_list[-1], arr_list[:-1]
+        if arr_value and len(value) != arr_value[0]:
+            return False
+        subtype = ''.join((base, sub, ''.join((str(v) for v in remainder))))
+        return all(validate_argument(subtype, v) for v in value)
+    elif base == 'int':
         if not isinstance(value, (int, long)):
             return False
         exp = int(sub)
-        lower_bound = (-1 * 2 ** (exp - 1)) + 1
-        upper_bound = (2 ** (exp - 1)) - 1
+        lower_bound = (-1 * 2 ** (exp / 2)) + 1
+        upper_bound = (2 ** (exp / 2)) - 1
         return lower_bound <= value <= upper_bound
     elif base == 'uint':
         if not isinstance(value, (int, long)):
@@ -168,7 +174,7 @@ class FunctionGroup(object):
             if len(function.inputs) != len(args):
                 continue
             is_match = all((
-                validate_argument(arg_meta, arg)
+                validate_argument(arg_meta['type'], arg)
                 for arg_meta, arg
                 in zip(function.inputs, args)
             ))

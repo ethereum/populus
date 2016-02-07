@@ -150,7 +150,7 @@ class EthTesterClient(object):
                 if mine:
                     self.evm.mine()
                 response = self.evm.last_tx.hash
-            except ValueError as e:
+            except Exception as e:
                 response = e
             self.results[id] = response
 
@@ -213,27 +213,15 @@ class EthTesterClient(object):
             start = time.time()
             while time.time() - start < self.async_timeout:
                 if request_id in self.results:
-                    return self.results.pop(request_id)
-            raise ValueError("Timeout waiting for {0}".format(request_id))
-        else:
-            self._send_transaction(*args, **kwargs)
-            self.evm.mine()
-            return self.evm.last_tx.hash
-
-    def make_ipc_request(self, *args, **kwargs):
-        if self.is_async:
-            request_id = uuid.uuid4()
-            self.request_queue.put((request_id, args, kwargs))
-            start = time.time()
-            while time.time() - start < 10:
-                if request_id in self.results:
                     result = self.results.pop(request_id)
                     if isinstance(result, Exception):
                         raise result
                     return result
             raise ValueError("Timeout waiting for {0}".format(request_id))
         else:
-            return self._make_ipc_request(*args, **kwargs)
+            self._send_transaction(*args, **kwargs)
+            self.evm.mine()
+            return self.evm.last_tx.hash
 
     def _get_transaction_by_hash(self, txn_hash):
         txn_hash = strip_0x(txn_hash)

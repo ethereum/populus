@@ -290,3 +290,17 @@ def geth_accounts(geth_data_dir):
     from populus.geth import get_geth_accounts
     accounts = get_geth_accounts(geth_data_dir)
     return accounts
+
+
+@pytest.fixture(scope="module")
+def accounts(populus_config, request):
+    client_type = populus_config.get_value(request, 'deploy_client_type')
+    if client_type == 'ethtester':
+        from ethereum import tester
+        return tuple(tester.encode_hex(account) for account in tester.accounts)
+    elif client_type == 'rpc':
+        raise ValueError("Not supported")
+    elif client_type == 'ipc':
+        raise ValueError("Not supported")
+    else:
+        raise ValueError("Unknown client type")

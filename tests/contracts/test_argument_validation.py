@@ -16,8 +16,8 @@ from populus.contracts.functions import validate_argument
         ("int256", 0, True),
         ("int256", 1, True),
         ("int256", -1, True),
-        ("int256", 2 ** 128 - 2, True),
-        ("int256", 2 ** 128, False),
+        ("int256", 2 ** 256 / 2 - 1, True),
+        ("int256", 2 ** 256 / 2, False),
         # bytes32
         ("bytes32", "", True),
         ("bytes32", "1", True),

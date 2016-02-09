@@ -11,6 +11,7 @@ from populus.contracts.functions import (
 
 int8_a = {'type': 'int8', 'name': 'a'}
 int8_b = {'type': 'int8', 'name': 'b'}
+int8_c = {'type': 'int8', 'name': 'c'}
 uint8_a = {'type': 'uint8', 'name': 'a'}
 uint8_b = {'type': 'uint8', 'name': 'b'}
 int256_a = {'type': 'int256', 'name': 'a'}
@@ -26,7 +27,7 @@ address_n = {'type': 'address', 'name': 'n'}
 
 
 f_1a = Function('doit', [int8_a, uint8_a, int256_a, uint256_a])
-f_1b = Function('doit', [int8_a, uint8_a, int8_b, int8_b])
+f_1b = Function('doit', [int8_a, uint8_a, int8_b, int8_c])
 
 
 f_group_1 = FunctionGroup([f_1a, f_1b])

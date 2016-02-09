@@ -104,8 +104,8 @@ def validate_argument(_type, value):
         if not isinstance(value, (int, long)):
             return False
         exp = int(sub)
-        lower_bound = (-1 * 2 ** (exp / 2)) + 1
-        upper_bound = (2 ** (exp / 2)) - 1
+        lower_bound = -1 * 2 ** exp / 2
+        upper_bound = (2 ** exp) / 2 - 1
         return lower_bound <= value <= upper_bound
     elif base == 'uint':
         if not isinstance(value, (int, long)):
@@ -170,12 +170,12 @@ class FunctionGroup(object):
         for function in self.functions:
             if len(function.inputs) != len(args):
                 continue
-            is_match = all((
+            argument_validity = tuple(
                 validate_argument(arg_meta['type'], arg)
                 for arg_meta, arg
                 in zip(function.inputs, args)
-            ))
-            if not is_match:
+            )
+            if not all(argument_validity):
                 continue
             candidates.append(function)
         if len(candidates) == 1:

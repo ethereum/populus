@@ -46,3 +46,6 @@ docs/_build
 **/chains/*/nodekey
 **/chains/*/dapp/*
 **/chains/*/chaindata/*
+
+# Known Contracts
+**/known_contracts.json

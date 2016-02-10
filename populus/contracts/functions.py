@@ -57,6 +57,17 @@ class Function(ContractBound):
             return self.call(*args, **kwargs)
         return self.sendTransaction(*args, **kwargs)
 
+    def s(self, *args, **kwargs):
+        if self.constant:
+            return self(*args, **kwargs)
+        max_wait = kwargs.pop('max_wait', 60)
+        txn_hash = self(*args, **kwargs)
+        txn_receipt = self.contract._meta.blockchain_client.wait_for_transaction(
+            txn_hash,
+            max_wait=max_wait
+        )
+        return txn_hash, txn_receipt
+
     def sendTransaction(self, *args, **kwargs):
         data = self.get_call_data(args)
 
@@ -91,18 +102,21 @@ class Function(ContractBound):
         return self.cast_return_data(output)
 
 
-from ethereum.abi import process_type
+def validate_argument(_type, value):
+    base, sub, arr_list = abi.process_type(_type)
 
-
-def validate_argument(arg_meta, value):
-    base, sub, arrlist = process_type(arg_meta['type'])
-
-    if base == 'int':
+    if arr_list:
+        arr_value, remainder = arr_list[-1], arr_list[:-1]
+        if arr_value and len(value) != arr_value[0]:
+            return False
+        subtype = ''.join((base, sub, ''.join((str(v) for v in remainder))))
+        return all(validate_argument(subtype, v) for v in value)
+    elif base == 'int':
         if not isinstance(value, (int, long)):
             return False
         exp = int(sub)
-        lower_bound = (-1 * 2 ** (exp - 1)) + 1
-        upper_bound = (2 ** (exp - 1)) - 1
+        lower_bound = -1 * 2 ** exp / 2
+        upper_bound = (2 ** exp) / 2 - 1
         return lower_bound <= value <= upper_bound
     elif base == 'uint':
         if not isinstance(value, (int, long)):
@@ -121,7 +135,12 @@ def validate_argument(arg_meta, value):
     elif base == 'bytes':
         if not isinstance(value, basestring):
             return False
-        max_length = int(sub)
+        try:
+            max_length = int(sub)
+        except ValueError:
+            if sub == '':
+                return True
+            raise
         return len(value) <= max_length
     elif base == 'string':
         return isinstance(value, basestring)
@@ -157,17 +176,21 @@ class FunctionGroup(object):
         function = self.get_function_for_call_signature(args)
         return function.call(*args, **kwargs)
 
+    def s(self, *args, **kwargs):
+        function = self.get_function_for_call_signature(args)
+        return function.s(*args, **kwargs)
+
     def get_function_for_call_signature(self, args):
         candidates = []
         for function in self.functions:
             if len(function.inputs) != len(args):
                 continue
-            is_match = all((
-                validate_argument(arg_meta, arg)
+            argument_validity = tuple(
+                validate_argument(arg_meta['type'], arg)
                 for arg_meta, arg
                 in zip(function.inputs, args)
-            ))
-            if not is_match:
+            )
+            if not all(argument_validity):
                 continue
             candidates.append(function)
         if len(candidates) == 1:

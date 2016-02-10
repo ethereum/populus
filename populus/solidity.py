@@ -27,7 +27,7 @@ def solc_version():
 
 
 def solc(source=None, input_files=None, add_std=True,
-         combined_json='abi,bin,devdoc,userdoc',
+         combined_json='abi,bin,bin-runtime,devdoc,userdoc',
          raw=False, rich=True, optimize=False):
 
     if source and input_files:
@@ -78,6 +78,7 @@ def solc(source=None, input_files=None, add_std=True,
     return {
         contract_name: {
             'code': "0x" + contract['bin'],
+            'code-runtime': "0x" + contract['bin-runtime'],
             'info': {
                 'abiDefinition': contract.get('abi'),
                 'compilerVersion': compiler_version,

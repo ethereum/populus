@@ -70,3 +70,9 @@ def test_sent_transaction_with_value(deployed_math, blockchain_client):
     assert deployed_math.get_balance() == 0
     deployed_math.add.sendTransaction(35, 45, value=1000)
     assert deployed_math.get_balance() == 1000
+
+
+def test_syncronous_transaction_sending(deployed_math, blockchain_client):
+    assert deployed_math.get_balance() == 0
+    txn_h, txn_r = deployed_math.add.s(35, 45, value=1000)
+    assert deployed_math.get_balance() == 1000

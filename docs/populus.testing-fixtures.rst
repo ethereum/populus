@@ -269,3 +269,31 @@ Geth Accounts
 
 This is a convenience fixture that returns a list of the accounts for the
 testing geth node.
+
+
+Denoms
+------
+
+* ``denoms``
+
+Python object with available property access to common denominations
+represented as *wei*.
+
++---------------------+-----------+---------------------------+
+| unit                | wei value |                           |
++---------------------+-----------+---------------------------+
+| **denoms.babbage**  | 1e3 wei   | 1,000                     |
+| **denoms.lovelace** | 1e6 wei   | 1,000,000                 |
+| **denoms.shannon**  | 1e9 wei   | 1,000,000,000             |
+| **denoms.szabo**    | 1e12 wei  | 1,000,000,000,000         |
+| **denoms.finney**   | 1e15 wei  | 1,000,000,000,000,000     |
+| **denoms.ether**    | 1e18 wei  | 1,000,000,000,000,000,000 |
++---------------------+-----------+---------------------------+
+
+
+Accounts
+--------
+
+* ``accounts``
+
+Tuple of account addresses available with the current EVM backend.

@@ -81,6 +81,12 @@ def ethtester_coinbase():
     return tester.encode_hex(tester.accounts[0])
 
 
+@pytest.fixture(scope="session")
+def denoms():
+    from ethereum.utils import denoms as _denoms
+    return _denoms
+
+
 @pytest.yield_fixture()
 def testrpc_server(request, populus_config):
     from testrpc.__main__ import create_server

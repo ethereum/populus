@@ -176,6 +176,10 @@ class FunctionGroup(object):
         function = self.get_function_for_call_signature(args)
         return function.call(*args, **kwargs)
 
+    def s(self, *args, **kwargs):
+        function = self.get_function_for_call_signature(args)
+        return function.s(*args, **kwargs)
+
     def get_function_for_call_signature(self, args):
         candidates = []
         for function in self.functions:

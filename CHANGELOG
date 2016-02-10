@@ -1,3 +1,14 @@
+0.7.3
+-----
+
+- Add `denoms` pytest fixture
+- Add `accounts` pytest fixture
+- Experimental synchronous function calls on contracts with `function.s(...)`
+- Bugfixes for function group argument validation.
+- Bugfixes for error handling within EthTesterClient
+- Inclusion of Binary Runtime in compilation
+- Fixes for tests that were dependent on specific solidity versions.
+
 0.7.2
 -----
 

@@ -57,6 +57,17 @@ class Function(ContractBound):
             return self.call(*args, **kwargs)
         return self.sendTransaction(*args, **kwargs)
 
+    def s(self, *args, **kwargs):
+        if self.constant:
+            return self(*args, **kwargs)
+        max_wait = kwargs.pop('max_wait', 60)
+        txn_hash = self(*args, **kwargs)
+        txn_receipt = self.contract._meta.blockchain_client.wait_for_transaction(
+            txn_hash,
+            max_wait=max_wait
+        )
+        return txn_hash, txn_receipt
+
     def sendTransaction(self, *args, **kwargs):
         data = self.get_call_data(args)
 

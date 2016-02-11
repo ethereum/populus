@@ -9,15 +9,13 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 
-from populus import __version__ as version
-
 
 readme = open(os.path.join(DIR, 'README.md')).read()
 
 
 setup(
     name='populus',
-    version=version,
+    version="0.7.3",
     description="""Ethereum Development Framework""",
     long_description=readme,
     author='Piper Merriam',

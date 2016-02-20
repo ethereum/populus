@@ -1,6 +1,9 @@
 from ethereum import utils as ethereum_utils
 
 from populus.contracts.common import ContractBound
+from populus.contracts.utils import (
+    decode_single,
+)
 
 
 class Event(ContractBound):
@@ -50,10 +53,16 @@ class Event(ContractBound):
             log for log in txn_receipt['logs'] if self.event_topic in log['topics']
         ]
 
-    def get_log_data(self, log_entry):
-        values = self.cast_return_data(log_entry['data'])
-        if isinstance(values, basestring):
-            values = [values]
-        return {
+    def get_log_data(self, log_entry, indexed=False):
+        values = self.cast_return_data(log_entry['data'], raw=True)
+        event_data = {
             output['name']: value for output, value in zip(self.outputs, values)
         }
+        if indexed:
+            for idx, _input in enumerate(self.inputs):
+                if _input['indexed']:
+                    event_data[_input['name']] = decode_single(
+                        _input['type'],
+                        log_entry['topics'][idx + 1],
+                    )
+        return event_data

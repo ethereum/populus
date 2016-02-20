@@ -152,6 +152,8 @@ class EthTesterClient(object):
                 response = self.evm.last_tx.hash
             except Exception as e:
                 response = e
+                if mine:
+                    self.evm.mine()
             self.results[id] = response
 
     def wait_for_block(self, block_number, max_wait=0):

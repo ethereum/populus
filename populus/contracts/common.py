@@ -66,8 +66,8 @@ class ContractBound(object):
             return [i['type'] for i in self.outputs]
         return []
 
-    def cast_return_data(self, outputs):
-        if len(self.output_types) != 1:
+    def cast_return_data(self, outputs, raw=False):
+        if raw or len(self.output_types) != 1:
             try:
                 return decode_multi(self.output_types, outputs)
             except AssertionError:

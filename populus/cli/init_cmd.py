@@ -36,7 +36,7 @@ def init():
     example_tests_path = os.path.join(tests_dir, 'test_example.py')
     if not os.path.exists(example_tests_path):
         with open(example_tests_path, 'w') as example_tests_file:
-            example_tests_file.write('def test_it(deployed_contracts):\n    example = deployed_contracts.Example\n    assert example.address\n')  # NOQA
+            example_tests_file.write('def test_it(deployed_contracts):\n    example = deployed_contracts.Example\n    assert example._meta.address\n')  # NOQA
         click.echo("Created Example Tests: ./{0}".format(os.path.relpath(example_tests_path)))  # NOQA
 
     initialize_web_directories(project_dir)

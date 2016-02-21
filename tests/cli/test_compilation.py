@@ -1,3 +1,4 @@
+import os
 import pytest
 import click
 from click.testing import CliRunner
@@ -10,10 +11,12 @@ skip_if_no_sol_compiler = pytest.mark.skipif(
     reason="'solc' compiler not available",
 )
 
+this_dir = os.path.dirname(__file__)
+
 
 @skip_if_no_sol_compiler
 def test_compiling(monkeypatch):
-    monkeypatch.chdir('./tests/cli/projects/test-01/')
+    monkeypatch.chdir(os.path.join(this_dir, 'projects/test-01/'))
     runner = CliRunner()
     result = runner.invoke(main, ['compile'])
 
@@ -27,7 +30,7 @@ def test_compiling(monkeypatch):
 
 @skip_if_no_sol_compiler
 def test_compiling_with_specified_contract(monkeypatch):
-    monkeypatch.chdir('./tests/cli/projects/test-01/')
+    monkeypatch.chdir(os.path.join(this_dir, 'projects/test-01/'))
     runner = CliRunner()
     result = runner.invoke(main, ['compile', 'Mortal'])
 
@@ -42,7 +45,7 @@ def test_compiling_with_specified_contract(monkeypatch):
 @skip_if_no_sol_compiler
 @pytest.mark.parametrize('path', ('owned.sol', 'contracts/owned.sol'))
 def test_compiling_with_specified_file(monkeypatch, path):
-    monkeypatch.chdir('./tests/cli/projects/test-01/')
+    monkeypatch.chdir(os.path.join(this_dir, 'projects/test-01/'))
     runner = CliRunner()
     result = runner.invoke(main, ['compile', path])
 
@@ -64,7 +67,7 @@ def test_compiling_with_specified_file(monkeypatch, path):
     ),
 )
 def test_compiling_with_specified_file_and_contract(monkeypatch, path):
-    monkeypatch.chdir('./tests/cli/projects/test-01/')
+    monkeypatch.chdir(os.path.join(this_dir, 'projects/test-01/'))
     runner = CliRunner()
     result = runner.invoke(main, ['compile', path])
 

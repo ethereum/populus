@@ -1,3 +1,4 @@
+import os
 import re
 import click
 import pytest
@@ -14,10 +15,11 @@ skip_if_no_geth = pytest.mark.skipif(
     reason="'geth' not available",
 )
 
+this_dir = os.path.dirname(__file__)
 
 @skip_if_no_geth
 def test_deployment(monkeypatch):
-    monkeypatch.chdir('./tests/cli/projects/test-02/')
+    monkeypatch.chdir(os.path.join(this_dir, 'projects/test-02/'))
     runner = CliRunner()
     result = runner.invoke(main, ['deploy', '--no-confirm', 'owned'])
 

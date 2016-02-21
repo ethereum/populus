@@ -13,6 +13,7 @@ from populus.utils import (
 )
 
 
+
 @pytest.fixture(autouse=True)
 def _rpc_server(testrpc_server):
     return testrpc_server

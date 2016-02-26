@@ -147,7 +147,8 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
                  genesis_block=None, miner_threads='1', extra_args=None,
                  max_peers='0', network_id='123456', no_discover=True,
                  mine=False, nice=True, unlock='0', password=DEFAULT_PW_PATH,
-                 port=None, verbosity=None, logfile=None, ipcpath=None):
+                 port=None, verbosity=None, logfile=None, whisper=True,
+                 ipcpath=None):
     if nice and is_nice_available():
         command = ['nice', '-n', '20', cmd]
     else:
@@ -160,7 +161,7 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
 
     if port is None:
         port = utils.get_open_port()
-    
+
     if ipcpath is None:
         ipcpath = tempfile.NamedTemporaryFile().name
 
@@ -172,6 +173,10 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
         '--port', port,
         '--ipcpath', ipcpath,
     ))
+
+    if whisper:
+        command.append('--shh')
+        command.extend(('--rpcapi', 'db,eth,net,web3,shh'))
 
     if miner_threads is not None:
         command.extend(('--minerthreads', miner_threads))
@@ -294,7 +299,7 @@ def parse_geth_accounts(raw_accounts_output):
 
 def run_geth_node(data_dir, rpc_server=True, rpc_addr=None, rpc_port=None,
                   mine=True, **kwargs):
-    extra_args = []
+    extra_args = kwargs.pop('extra_args', [])
 
     if rpc_server:
         extra_args.append('--rpc')

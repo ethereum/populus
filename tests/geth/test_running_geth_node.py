@@ -54,7 +54,7 @@ def test_running_node_without_mining(project_test04, open_port):
     data_dir = get_geth_data_dir(project_test04, 'default')
 
     command, proc = run_geth_node(data_dir, rpc_port=open_port, mine=False)
-    time.sleep(2)
+    wait_for_popen(proc)
     rpc_client = Client('127.0.0.1', port=open_port)
     coinbase = rpc_client.get_coinbase()
     proc.send_signal(signal.SIGINT)
@@ -67,14 +67,13 @@ def test_running_node_and_mining(project_test04, open_port):
     data_dir = get_geth_data_dir(project_test04, 'default')
 
     command, proc = run_geth_node(data_dir, rpc_port=open_port, mine=True)
-    time.sleep(2)
+    wait_for_popen(proc)
     rpc_client = Client('127.0.0.1', port=open_port)
     block_num = rpc_client.get_block_number()
     start = time.time()
-    while time.time() < start + 10:
-        time.sleep(0.2)
-        if rpc_client.get_block_number() > block_num:
-            break
+
+    rpc_client.wait_for_block(block_num + 1, 60)
+
     assert block_num < rpc_client.get_block_number()
     proc.send_signal(signal.SIGINT)
     wait_for_popen(proc)

@@ -160,7 +160,7 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
 
     if port is None:
         port = utils.get_open_port()
-    
+
     if ipcpath is None:
         ipcpath = tempfile.NamedTemporaryFile().name
 

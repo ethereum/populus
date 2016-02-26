@@ -3,16 +3,15 @@ import os
 from populus.utils import (
     load_contracts,
 )
-from populus.contracts import (
+from populus.deployment import (
     package_contracts,
     link_contract_dependency,
-    strip_0x_prefix,
 )
 
 
 
 PROJECTS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'projects')
-project_dir = os.path.join(PROJECTS_DIR, 'test-03')
+project_dir = os.path.join(PROJECTS_DIR, 'test-01')
 
 
 def test_linking_contract_dependencies():
@@ -34,5 +33,5 @@ def test_linking_contract_dependencies():
 
     # 0x prefixed version shouldn't be there.
     assert deployed_addr not in PiggyBank._config.code
-    assert strip_0x_prefix(deployed_addr) in PiggyBank._config.code
+    assert deployed_addr[2:] in PiggyBank._config.code
     assert len(contracts.PiggyBank._config.code) == pre_length

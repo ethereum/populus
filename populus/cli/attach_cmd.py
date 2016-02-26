@@ -18,15 +18,13 @@ from watchdog.events import FileSystemEventHandler
 
 import populus
 from populus import utils
-from populus.contracts import (
-    package_contracts,
-)
 from populus.geth import (
     get_active_data_dir,
     get_known_contracts,
     add_to_known_contracts,
 )
 from populus.deployment import (
+    package_contracts,
     deploy_contracts,
     validate_deployed_contracts,
 )

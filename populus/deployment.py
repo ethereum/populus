@@ -1,18 +1,57 @@
 import itertools
 import copy
 import toposort
+import re
 
-from populus.contracts import (
-    deploy_contract,
-    get_linker_dependencies,
-    link_contract_dependency,
-)
+from eth_contract import Contract
 
 from populus.utils import (
     get_contract_address_from_txn,
     merge_dependencies,
     get_dependencies,
+    strip_0x_prefix,
 )
+
+
+def deploy_contract(rpc_client, contract_class, constructor_args=None, **kwargs):
+    if 'data' in kwargs:
+        raise ValueError("Cannot supply `data` for contract deployment")
+
+    if constructor_args is None:
+        constructor_args = []
+
+    kwargs['data'] = contract_class.get_deploy_data(*constructor_args)
+    txn_hash = rpc_client.send_transaction(**kwargs)
+    return txn_hash
+
+
+DEPENDENCY_RE = re.compile((
+    r''
+    '__'  # Prefixed by double underscore
+    '(?P<name>[A-Za-z0-9_]{0,36}[A-Za-z0-9])'  # capture the name of the dependency
+    '_{1,37}'  # and then enough underscores to finish out the 40 chars.
+))
+
+
+def get_linker_dependencies(contracts):
+    dependencies = {
+        contract_name: set(DEPENDENCY_RE.findall(contract_meta._config.code))
+        for contract_name, contract_meta
+        in contracts
+        if '__' in contract_meta._config.code
+    }
+    return dependencies
+
+
+def link_contract_dependency(contract, deployed_contract):
+    location_re = re.compile(
+        deployed_contract._config.name.ljust(38, "_").rjust(40, "_"),
+    )
+    contract._config.code = location_re.sub(
+        strip_0x_prefix(deployed_contract._meta.address),
+        contract._config.code,
+    )
+    return contract
 
 
 def deploy_contracts(deploy_client,
@@ -123,3 +162,18 @@ def validate_deployed_contracts(deploy_client, deployed_contracts):
         code = deploy_client.get_code(deployed_contract._meta.address)
         if len(code) <= 2:
             raise ValueError("Looks like a contract failed to deploy")
+
+
+def package_contracts(contracts):
+    contract_classes = {
+        name: Contract(contract_meta, name) for name, contract_meta in contracts.items()
+    }
+
+    _dict = {
+        '__len__': lambda s: len(contract_classes),
+        '__iter__': lambda s: iter(contract_classes.items()),
+        '__getitem__': lambda s, k: contract_classes.__getitem__[k],
+    }
+    _dict.update(contract_classes)
+
+    return type('contracts', (object,), _dict)()

@@ -566,8 +566,8 @@ To look at the known contract instances in a particular test chain for a contrac
 
 		In [1]: contracts.Example.known
 		Out[1]:
-		[<populus.contracts.core.Example at 0x7f45..90>,
-		 <populus.contracts.core.Example at 0x7f45..10>]
+		[<eth_contract.contracts.core.Example at 0x7f45..90>,
+		 <eth_contract.contracts.core.Example at 0x7f45..10>]
 
 		In [2]: contracts.example.known[0].GetValue() 
 		Out[2]: 1

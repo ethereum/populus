@@ -1,7 +1,7 @@
 import pytest
 
 
-from populus.contracts import (
+from populus.deployment import (
     deploy_contract,
 )
 from populus.utils import (
@@ -45,4 +45,4 @@ def test_deployment_with_args(blockchain_client, Named):
 
     named = Named(contract_addr, blockchain_client)
     name = named.name.call()
-    assert name == "John"
+    assert name == "John\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"

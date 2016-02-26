@@ -136,7 +136,7 @@ def ipc_client(request, populus_config):
 @pytest.fixture(scope="module")
 def contracts(request, populus_config):
     from populus.utils import load_contracts
-    from populus.contracts import package_contracts
+    from populus.deployment import package_contracts
 
     project_dir = populus_config.get_value(request, "project_dir")
 
@@ -146,7 +146,7 @@ def contracts(request, populus_config):
 
 @pytest.fixture()
 def ethtester_client():
-    from populus.ethtester_client import EthTesterClient
+    from eth_tester_client import EthTesterClient
     return EthTesterClient()
 
 
@@ -155,7 +155,7 @@ def deploy_client(request, populus_config):
     client_type = populus_config.get_value(request, 'deploy_client_type')
 
     if client_type == 'ethtester':
-        from populus.ethtester_client import EthTesterClient
+        from eth_tester_client import EthTesterClient
         client = EthTesterClient()
     elif client_type == 'rpc':
         from eth_rpc_client import Client
@@ -316,8 +316,7 @@ def geth_accounts(populus_config, request):
 def accounts(populus_config, request):
     client_type = populus_config.get_value(request, 'deploy_client_type')
     if client_type == 'ethtester':
-        from ethereum import tester
-        return tuple("0x" + tester.encode_hex(account) for account in tester.accounts)
+        return tuple("0x" + account.encode('hex') for account in tester.accounts)
     elif client_type == 'rpc':
         raise ValueError("Not supported")
     elif client_type == 'ipc':

@@ -6,6 +6,7 @@ from populus.solidity import (
     solc,
     version_regex,
     is_solc_available,
+    CompileError,
 )
 
 skip_if_no_sol_compiler = pytest.mark.skipif(
@@ -69,6 +70,14 @@ def test_json_source_compilation():
     for left, right in zip(code, contract_compiled_json):
         assert left[0] == right[0]
         cmp_compile_data(left[1], right[1])
+
+
+@skip_if_no_sol_compiler
+def test_invalid_source_compilation():
+    with pytest.raises(CompileError) as exception:
+        solc(source=u'This is not a contract that compiles', rich=False)
+    expected_error_message = u'Error: Expected import directive or contract definition'
+    assert expected_error_message in str(exception)
 
 
 def test_version_with_hash():

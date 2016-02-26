@@ -48,7 +48,8 @@ def solc(source=None, input_files=None, add_std=True,
     if optimize:
         command.append('--optimize')
 
-    p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
 
     if source:
         stdoutdata, stderrdata = p.communicate(input=source)
@@ -56,7 +57,7 @@ def solc(source=None, input_files=None, add_std=True,
         stdoutdata, stderrdata = p.communicate()
 
     if p.returncode:
-        raise CompileError('compilation failed')
+        raise CompileError('compilation failed: ' + stderrdata)
 
     if raw:
         return stdoutdata

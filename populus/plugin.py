@@ -79,7 +79,7 @@ def populus_config():
 @pytest.fixture(scope="session")
 def ethtester_coinbase():
     from ethereum import tester
-    return tester.encode_hex(tester.accounts[0])
+    return '0x' + tester.accounts[0].encode('hex')
 
 
 @pytest.fixture(scope="session")
@@ -316,6 +316,7 @@ def geth_accounts(populus_config, request):
 def accounts(populus_config, request):
     client_type = populus_config.get_value(request, 'deploy_client_type')
     if client_type == 'ethtester':
+        from ethereum import tester
         return tuple("0x" + account.encode('hex') for account in tester.accounts)
     elif client_type == 'rpc':
         raise ValueError("Not supported")

@@ -71,10 +71,9 @@ def test_running_node_and_mining(project_test04, open_port):
     rpc_client = Client('127.0.0.1', port=open_port)
     block_num = rpc_client.get_block_number()
     start = time.time()
-    while rpc_client.get_block_number() <= block_num:
-        time.sleep(0.2)
-        if time.time() > start + 20:
-            raise Exception('Could not mine block within 20 seconds')
+
+    rpc_client.wait_for_block(block_num + 1, 60)
+
     assert block_num < rpc_client.get_block_number()
     proc.send_signal(signal.SIGINT)
     wait_for_popen(proc)

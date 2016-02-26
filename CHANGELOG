@@ -1,3 +1,16 @@
+0.7.4
+-----
+
+- Bugfix for the `geth_accounts` fixture.
+- Bugfix for project initialization fixtures.
+- Allow returning of `indexed` event data from Event.get_log_data
+- Fix EthTesterClient handling of TransactionErrors to allow continued EVM
+  interactions.
+- Bugfix for long Unix socket paths.
+- Enable whisper when running a geth instance.
+- Better error output from compile errors.
+- Testing bugfixes.
+
 0.7.3
 -----
 

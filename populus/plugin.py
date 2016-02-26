@@ -64,6 +64,7 @@ class PopulusConfig(object):
 
     geth_chain_name = 'default-test'
     geth_reset_chain = True
+    geth_num_accounts = 1
 
     geth_rpc_port = '8545'
     geth_rpc_host = '127.0.0.1'
@@ -233,6 +234,7 @@ def geth_node(request, populus_config):
         get_geth_data_dir,
         get_geth_logfile_path,
         ensure_account_exists,
+        create_geth_account,
         reset_chain,
         wait_for_geth_to_start,
     )
@@ -251,6 +253,11 @@ def geth_node(request, populus_config):
 
     ensure_path_exists(data_dir)
     ensure_account_exists(data_dir)
+
+    num_accounts = populus_config.get_value(request, 'geth_num_accounts')
+    if num_accounts > 1:
+        for _ in range(num_accounts - 1):
+            create_geth_account(data_dir)
 
     should_reset_chain = populus_config.get_value(request, 'geth_reset_chain')
 
@@ -292,8 +299,15 @@ def geth_coinbase(request, populus_config):
 
 
 @pytest.fixture(scope="module")
-def geth_accounts(geth_data_dir):
-    from populus.geth import get_geth_accounts
+def geth_accounts(populus_config, request):
+    from populus.geth import (
+        get_geth_data_dir,
+        get_geth_accounts,
+    )
+    geth_project_dir = populus_config.get_value(request, 'geth_project_dir')
+    geth_chain_name = populus_config.get_value(request, 'geth_chain_name')
+    geth_data_dir = get_geth_data_dir(geth_project_dir, geth_chain_name)
+
     accounts = get_geth_accounts(geth_data_dir)
     return accounts
 

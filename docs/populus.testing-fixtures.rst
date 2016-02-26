@@ -238,6 +238,8 @@ level of the module in which you are using this fixture.
   project.  Default: ``os.getcwd()``.
 * ``geth_chain_name`` - The name of the test chain that should be used.
   Default: ``default-test``
+* ``geth_num_accounts`` - The number of accounts that should be generated for
+  the running geth instance.  Default ``1``
 * ``geth_reset_chain`` - Boolean for whether the chain should be reset before
   starting the ``geth`` node.  Default ``True``
 * ``geth_rpc_host`` - Value to be used for ``--rpcaddr`` default: ``'127.0.0.1'```

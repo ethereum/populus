@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import hashlib
+import tempfile
 
 from populus import utils
 
@@ -146,7 +147,7 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
                  genesis_block=None, miner_threads='1', extra_args=None,
                  max_peers='0', network_id='123456', no_discover=True,
                  mine=False, nice=True, unlock='0', password=DEFAULT_PW_PATH,
-                 port=None, verbosity=None, logfile=None):
+                 port=None, verbosity=None, logfile=None, ipcpath=None):
     if nice and is_nice_available():
         command = ['nice', '-n', '20', cmd]
     else:
@@ -159,6 +160,9 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
 
     if port is None:
         port = utils.get_open_port()
+    
+    if ipcpath is None:
+        ipcpath = tempfile.NamedTemporaryFile().name
 
     command.extend((
         '--genesis', genesis_block,
@@ -166,6 +170,7 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
         '--maxpeers', max_peers,
         '--networkid', network_id,
         '--port', port,
+        '--ipcpath', ipcpath,
     ))
 
     if miner_threads is not None:

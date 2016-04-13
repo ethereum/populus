@@ -72,7 +72,8 @@ def get_contracts_observer(project_dir, contract_filters=None, compiler_kwargs=N
     )
     observer = PollingObserver()
     observer.schedule(event_handler, contracts_dir, recursive=True)
-    observer.schedule(event_handler, libraries_dir, recursive=True)
+    if os.path.exists(libraries_dir):
+        observer.schedule(event_handler, libraries_dir, recursive=True)
     return observer
 
 

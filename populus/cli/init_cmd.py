@@ -5,6 +5,7 @@ import click
 from populus import utils
 from populus.compilation import (
     get_contracts_dir,
+    get_project_libraries_dir,
 )
 
 from .main import main
@@ -19,9 +20,14 @@ def init():
     Generate project layout with an example contract.
     """
     project_dir = os.getcwd()
+
     contracts_dir = get_contracts_dir(project_dir)
     if utils.ensure_path_exists(contracts_dir):
         click.echo("Created Directory: ./{0}".format(os.path.relpath(contracts_dir)))
+
+    libraries_dir = get_project_libraries_dir(project_dir)
+    if utils.ensure_path_exists(libraries_dir):
+        click.echo("Created Directory: ./{0}".format(os.path.relpath(libraries_dir)))
 
     example_contract_path = os.path.join(contracts_dir, 'Example.sol')
     if not os.path.exists(example_contract_path):

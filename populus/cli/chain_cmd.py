@@ -63,11 +63,12 @@ def chain_run(name, mine, verbosity, active):
     ensure_account_exists(data_dir)
 
     kwargs = {
-        "logfile": logfile_path,
-        "verbosity": "%d" % verbosity
+        # "logfile": logfile_path,
+        "verbosity": "%d" % verbosity,
+        "rpccorsdomain": 'http://localhost:5000'
         }
 
-    command, proc = run_geth_node(data_dir, mine=mine, **kwargs)
+    command, proc = run_geth_node(data_dir, mine=mine,  **kwargs)
 
     click.echo("Running: '{0}'".format(' '.join(command)))
 

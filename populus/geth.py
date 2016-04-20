@@ -146,7 +146,7 @@ DEFAULT_PW_PATH = os.path.join(POPULUS_DIR, 'default_blockchain_password')
 def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
                  genesis_block=None, miner_threads='1', extra_args=None,
                  max_peers='0', network_id='123456', no_discover=True,
-                 mine=False, nice=True, unlock='0', password=DEFAULT_PW_PATH,
+                 mine=False,rpccorsdomain=None, nice=True, unlock='0', password=DEFAULT_PW_PATH,
                  port=None, verbosity=None, logfile=None, whisper=True,
                  ipcpath=None):
     if nice and is_nice_available():
@@ -208,6 +208,9 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
         if unlock is None:
             raise ValueError("Cannot mine without an unlocked account")
         command.append('--mine')
+
+    if rpccorsdomain is not None:
+        command.extend(('--rpccorsdomain', rpccorsdomain,))
 
     if extra_args:
         command.extend(extra_args)
@@ -298,7 +301,7 @@ def parse_geth_accounts(raw_accounts_output):
 
 
 def run_geth_node(data_dir, rpc_server=True, rpc_addr=None, rpc_port=None,
-                  mine=True, **kwargs):
+                  mine=True,rpc_cors_domain=None, **kwargs):
     extra_args = kwargs.pop('extra_args', [])
 
     if rpc_server:

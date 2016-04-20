@@ -57,7 +57,7 @@ def chain_reset(name, confirm):
      help="""
      Determines the value that will be passed in as the `--rpcorsdomain` to the `geth` instance.
      """)
-def chain_run(name, mine, verbosity, active):
+def chain_run(name, mine, verbosity, active, rpccorsdomain):
     """
     Run a geth node.
     """
@@ -68,7 +68,7 @@ def chain_run(name, mine, verbosity, active):
     ensure_account_exists(data_dir)
 
     kwargs = {
-        # "logfile": logfile_path,
+        "logfile": logfile_path,
         "verbosity": "%d" % verbosity,
         "rpccorsdomain": 'http://localhost:5000'
         }

@@ -301,7 +301,7 @@ def parse_geth_accounts(raw_accounts_output):
 
 
 def run_geth_node(data_dir, rpc_server=True, rpc_addr=None, rpc_port=None,
-                  mine=True, rpccorsdomain=None, **kwargs):
+                  mine=True,rpc_cors_domain=None, **kwargs):
     extra_args = kwargs.pop('extra_args', [])
 
     if rpc_server:

@@ -52,6 +52,11 @@ def chain_reset(name, confirm):
     Set whether the chain run will modify the active-chain settings.
     Default is to modify the active-chain setting.
     """)
+@click.option(
+     '--rpccorsdomain', default=None,
+     help="""
+     Determines the value that will be passed in as the `--rpcorsdomain` to the `geth` instance.
+     """)
 def chain_run(name, mine, verbosity, active):
     """
     Run a geth node.

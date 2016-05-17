@@ -181,13 +181,6 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
     if miner_threads is not None:
         command.extend(('--minerthreads', miner_threads))
 
-    # This parameter is deprecated, 
-    #see https://github.com/pipermerriam/populus/issues/79
-    #if logfile is not None:
-    #    command.extend((
-    #        '--logfile', logfile,
-    #    ))
-
     if verbosity is not None:
         command.extend((
             '--verbosity', verbosity,

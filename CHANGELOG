@@ -1,3 +1,9 @@
+0.8.0
+-----
+
+- Removal of the `--logfile` command line argument.  This is a breaking change
+  as it will break when used with older installs of `geth`.
+
 0.7.5
 -----
 

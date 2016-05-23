@@ -20,14 +20,6 @@ populus.compilation module
     :undoc-members:
     :show-inheritance:
 
-populus.contracts module
-------------------------
-
-.. automodule:: populus.contracts
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 populus.plugin module
 ---------------------
 

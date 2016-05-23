@@ -1,4 +1,4 @@
-from populus.ethtester_client import EthTesterClient
+from eth_tester_client import EthTesterClient
 
 
 deploy_client_type = 'ethtester'

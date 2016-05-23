@@ -6,7 +6,6 @@ import signal
 from eth_rpc_client import Client
 
 from populus import utils
-from populus.contracts import package_contracts
 from populus.geth import (
     get_geth_data_dir,
     get_geth_logfile_path,
@@ -18,6 +17,7 @@ from populus.geth import (
 from populus.deployment import (
     deploy_contracts,
     validate_deployed_contracts,
+    package_contracts,
 )
 
 from .main import main

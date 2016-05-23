@@ -57,7 +57,7 @@ def math_contract_meta():
 
 @pytest.fixture(scope="session")
 def Math(math_contract_meta):
-    from populus.contracts import Contract
+    from eth_contract import Contract
     Math = Contract(math_contract_meta, 'Math')
     return Math
 
@@ -107,7 +107,7 @@ def named_contract_meta():
 
 @pytest.fixture(scope="session")
 def Named(named_contract_meta):
-    from populus.contracts import Contract
+    from eth_contract import Contract
     Named = Contract(named_contract_meta, 'Named')
     return Named
 
@@ -180,6 +180,6 @@ def logs_events_contract_meta():
 
 @pytest.fixture(scope="session")
 def LogsEvents(logs_events_contract_meta):
-    from populus.contracts import Contract
+    from eth_contract import Contract
     LogsEvents = Contract(logs_events_contract_meta, 'LogsEvents')
     return LogsEvents

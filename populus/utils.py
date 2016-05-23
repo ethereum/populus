@@ -136,3 +136,9 @@ def get_dependencies(contract_name, dependencies):
             for dep in dependencies.get(contract_name, set())
         )
     ))
+
+
+def strip_0x_prefix(value):
+    if value.startswith('0x'):
+        return value[2:]
+    return value

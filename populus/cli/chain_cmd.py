@@ -68,7 +68,7 @@ def chain_run(name, mine, verbosity, active, rpccorsdomain):
     ensure_account_exists(data_dir)
 
     kwargs = {
-        "logfile": logfile_path,
+#        "logfile": logfile_path,
         "verbosity": "%d" % verbosity,
         "rpccorsdomain": 'http://localhost:5000'
         }

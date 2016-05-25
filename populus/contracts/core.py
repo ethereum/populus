@@ -21,7 +21,7 @@ class ContractBase(object):
         self._meta = ContractMeta(address, blockchain_client, functions, events)
 
     def __str__(self):
-        return "{name}({address})".format(name=self.__class__.__name__, address=self.address)
+        return "{name}({address})".format(name=self.__class__.__name__, address=self._meta.address)
 
     @classmethod
     def get_deploy_data(cls, *args):

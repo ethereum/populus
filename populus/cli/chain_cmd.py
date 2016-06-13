@@ -52,7 +52,12 @@ def chain_reset(name, confirm):
     Set whether the chain run will modify the active-chain settings.
     Default is to modify the active-chain setting.
     """)
-def chain_run(name, mine, verbosity, active):
+@click.option(
+     '--rpccorsdomain', default=None,
+     help="""
+     Determines the value that will be passed in as the `--rpcorsdomain` to the `geth` instance.
+     """)
+def chain_run(name, mine, verbosity, active, rpccorsdomain):
     """
     Run a geth node.
     """
@@ -63,11 +68,12 @@ def chain_run(name, mine, verbosity, active):
     ensure_account_exists(data_dir)
 
     kwargs = {
-        "logfile": logfile_path,
-        "verbosity": "%d" % verbosity
+#        "logfile": logfile_path,
+        "verbosity": "%d" % verbosity,
+        "rpccorsdomain": 'http://localhost:5000'
         }
 
-    command, proc = run_geth_node(data_dir, mine=mine, **kwargs)
+    command, proc = run_geth_node(data_dir, mine=mine,  **kwargs)
 
     click.echo("Running: '{0}'".format(' '.join(command)))
 

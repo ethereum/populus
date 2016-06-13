@@ -47,12 +47,12 @@ The only naming requirement of the test module is that it must begin with
         assert hasattr(contracts.Math, 'return13')
 
 
-    def test_contract_function_return_values(eth_coinbase, deployed_contracts):
+    def test_contract_function_return_values(ethtester_coinbase, deployed_contracts):
         math = deployed_contracts.Math
         # Check that our functions compute the expected values.
-        assert math.add.call(11, 12, _from=eth_coinbase) == 23
-        assert math.multiply7.call(11, _from=eth_coinbase) == 77
-        assert math.return13.call(_from=eth_coinbase) == 13
+        assert math.add.call(11, 12, _from=ethtester_coinbase) == 23
+        assert math.multiply7.call(11, _from=ethtester_coinbase) == 77
+        assert math.return13.call(_from=ethtester_coinbase) == 13
 
 
 The code above declares two tests, ``test_contracts_has_correct_functions`` and
@@ -62,18 +62,17 @@ The code above declares two tests, ``test_contracts_has_correct_functions`` and
 
 .. code-block:: shell
 
-    $ populus test
-    =================================== test session starts ===================================
-    platform darwin -- Python 2.7.10 -- py-1.4.30 -- pytest-2.7.2 -- /usr/bin/python
-    rootdir: /path/to/my-project, inifile: pytest.ini
-    plugins: populus, capturelog, timeout
+    $ py.test tests/test_math.py
+    ======================================================================================================== test session starts ========================================================================================================
+    platform linux2 -- Python 2.7.11+, pytest-2.9.1, py-1.4.31, pluggy-0.3.1
+    rootdir: tests, inifile:
+    plugins: timeout-0.5, capturelog-0.7, populus-0.8.0
     collected 2 items
 
-    tests/test_example.py::test_contracts_has_correct_functions PASSED
-    tests/test_example.py::test_contract_function_return_values PASSED
+    tests/test_math.py ..
 
-    ================================ 2 passed in 0.82 seconds =================================
+    ============================================================================================ 2 passed, 2 pytest-warnings in 5.75 seconds ============================================================================================
 
 In the tests above, you may have noticed the use of the pytest fixtures
-``eth_coinbase``, ``contracts`` and ``deployed_contracts``.  These are provided
+``ethtester_coinbase``, ``contracts`` and ``deployed_contracts``.  These are provided
 by ``populus`` to help make testing contracts easier.

@@ -100,8 +100,8 @@ the following variables at the top level of your module.
 Alternatively, you can also configure this fixture using the following
 environment variables.
 
-* ``RPC_CLINT_HOST``
-* ``RPC_CLINT_PORT``
+* ``RPC_CLIENT_HOST``
+* ``RPC_CLIENT_PORT``
 
 
 IPC Client

@@ -62,7 +62,7 @@ The code above declares two tests, ``test_contracts_has_correct_functions`` and
 
 .. code-block:: shell
 
-    $ populus test
+    $ py.test -v
     =================================== test session starts ===================================
     platform darwin -- Python 2.7.10 -- py-1.4.30 -- pytest-2.7.2 -- /usr/bin/python
     rootdir: /path/to/my-project, inifile: pytest.ini

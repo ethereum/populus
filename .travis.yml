@@ -2,14 +2,21 @@ language: python
 python:
   - "2.7"
 env:
-  global:
-    - PIP_DOWNLOAD_CACHE=$HOME/.pip_cache
   matrix:
     - TOX_ENV=py27
     - TOX_ENV=flake8
+addons:
+  apt:
+    sources:
+      - deadsnakes
+      - ubuntu-toolchain-r-test
+      - ppa:ethereum/ethereum-qt
+      - ppa:ethereum/ethereum
+    packages:
+      - cpp-ethereum
 cache:
   directories:
-    - $HOME/.pip-cache/
+    - $HOME/.cache/pip
 install:
   - 'travis_retry pip install setuptools --upgrade'
   - 'travis_retry pip install tox'

@@ -1,18 +1,20 @@
 language: python
 python:
-  - "2.7"
+  - "3.5"
+dist: trusty
+sudo: required
+before_install:
+  - sudo add-apt-repository -y ppa:ethereum/ethereum
+  - sudo apt-get update
+  - sudo apt-get install -y solc
 env:
-  global:
-    - PIP_DOWNLOAD_CACHE=$HOME/.pip_cache
   matrix:
     - TOX_ENV=py27
     - TOX_ENV=flake8
-cache:
-  directories:
-    - $HOME/.pip-cache/
+cache: pip
 install:
-  - 'travis_retry pip install setuptools --upgrade'
-  - 'travis_retry pip install tox'
+  - travis_retry pip install setuptools --upgrade
+  - travis_retry pip install tox
 script:
   - tox -e $TOX_ENV
 after_script:

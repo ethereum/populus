@@ -2,6 +2,7 @@ import pytest
 import threading
 
 from ethereum import tester
+from ethereum import utils
 
 from populus.ethtester_client import EthTesterClient
 
@@ -11,7 +12,7 @@ def test_async_requests():
 
     threads = []
     errors = []
-    to_addr = tester.encode_hex(tester.accounts[1])
+    to_addr = utils.encode_hex(tester.accounts[1])
 
     def spam_block_number():
         for i in range(5):

@@ -43,7 +43,7 @@ class Function(ContractBound):
         """
         prefix = self.encoded_abi_signature
         suffix = self.abi_args_signature(args)
-        data = "{0}{1}".format(prefix, suffix)
+        data = prefix + suffix
         return ethereum_utils.encode_hex(data)
 
     def __get__(self, obj, type=None):

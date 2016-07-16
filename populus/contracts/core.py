@@ -152,10 +152,18 @@ def package_contracts(contracts):
         name: Contract(contract_meta, name) for name, contract_meta in contracts.items()
     }
 
+    def ContractPackageSetItem(self, k, v):
+        """ Method for setting new contracts on the contract package
+        """
+        setattr(self, k, v)
+        contract_classes.__setitem__(k, v)
+
     _dict = {
         '__len__': lambda s: len(contract_classes),
         '__iter__': lambda s: iter(contract_classes.items()),
-        '__getitem__': lambda s, k: contract_classes.__getitem__[k],
+        '__getitem__': lambda s, k: contract_classes.__getitem__(k),
+        '__contains__': lambda s, k: contract_classes.__contains__(k),
+        '__setitem__': ContractPackageSetItem,
     }
     _dict.update(contract_classes)
 

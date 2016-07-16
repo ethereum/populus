@@ -7,7 +7,7 @@ import signal
 import operator
 import functools
 import itertools
-
+import re
 
 CONTRACTS_DIR = "./contracts/"
 
@@ -136,3 +136,35 @@ def get_dependencies(contract_name, dependencies):
             for dep in dependencies.get(contract_name, set())
         )
     ))
+
+# Note:
+#    This regex is not perfect but it is sufficient for
+# what we are currently trying to do.
+epRegex = re.compile("(([\d]{1,3})\.([\d]{1,3})\.([\d]{1,3})\.([\d]{1,3})):(\d+)")
+
+
+def parse_ipv4_endpoint(epStr):
+    """ Parse an IPv4 endpoint in the form "127.0.0.1:1234"
+    where the first field is the IP, and the second is the port.
+    @returns Tuple of type (ipStr, port)
+    """
+    m = epRegex.match(epStr)
+    if m:
+        ip = m.group(1)
+        port = m.group(6)
+        octets = []
+        for i in range(2, 6):
+            octets.append(m.group(i))
+
+        for octet in octets:
+            val = int(octet)
+            if val < 0 or val > 255:
+                raise ValueError("Invalid Octet in IPv4 Address")
+
+        retPort = int(port)
+        if retPort < 0 or retPort > 65535:
+            raise ValueError("Invalid Port for IPv4 Endpoint")
+
+        return(ip, retPort)
+    else:
+        raise ValueError("Endpoint string has invalid format: %s" % epStr)

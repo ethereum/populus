@@ -1,8 +1,6 @@
 import os
 import sys
 import textwrap
-import hashlib
-from datetime import datetime
 
 import click
 
@@ -23,7 +21,7 @@ from populus.contracts import (
 )
 from populus.geth import (
     get_active_data_dir,
-    get_known_contracts,
+    get_latest_known_instances,
     add_to_known_contracts,
 )
 from populus.deployment import (
@@ -77,34 +75,17 @@ def deploy_set(context, client, project_dir, data_dir=None, record=True, contrac
 
 
 def setup_known_instances(context, data_dir):
-    # Attempt to load known contracts.
-    known_cts = get_known_contracts(data_dir)
-    for name, ct_type in context["contracts"]:
-        if name in known_cts.keys():
-            addr_list = known_cts[name]
-            # Latest Instances contains a list of the deployed contracts
-            # for which the code matches with the current project
-            # context's contract code. We use a sha512 hash to compare
-            # the code of each. The idea here is to catch cases where the
-            # user has updated their code but failed to redeploy, and
-            # cases where new contract methods might attempt to be called
-            # on old contract addresses
-            latest_instances = []
-            curr_code_hash = hashlib.sha512(ct_type._config.code).hexdigest()
-            for data in addr_list:
-                if curr_code_hash == data["codehash"]:
-                    inst = ct_type(data["address"], context["client"])
-                    ts = datetime.strptime(data["ts"], "%Y-%m-%dT%H:%M:%S.%f")
-                    latest_instances.append((ts, inst))
-
-            # Ok - latest_instances has all the instances of this
-            # contract type whose code matches with what we expect
-            # it to be. Now let's sort this list by the time
-            # stamp
-            latest_instances.sort(key=lambda r: r[0])
-            setattr(ct_type, "known", [x[1] for x in latest_instances])
+    """ Setup the known instances on the contract objects.
+    """
+    latest_cts = get_latest_known_instances(context["contracts"], data_dir)
+    for name, ct in context["contracts"]:
+        if name in latest_cts.keys():
+            addr_list = latest_cts[name]
+            addr_list.sort(key=lambda r: r[0])
+            known_cts = [ct(x[1], context["client"]) for x in addr_list]
+            setattr(ct, "known", known_cts)
         else:
-            setattr(ct_type, "known", [])
+            setattr(ct, "known", [])
 
 
 class ActiveDataDirChangedEventHandler(FileSystemEventHandler):
@@ -149,14 +130,24 @@ class ActiveDataDirChangedEventHandler(FileSystemEventHandler):
         "to load information about known contracts or not."
     ),
 )
-def attach(active):
+@click.option(
+    '--rpc',
+    default="127.0.0.1:8545",
+    metavar="<IP>:<PORT>",
+    help=(
+        "Set the RPC endpoint of the ethereum instance we are targeting. "
+        "Default: 127.0.0.1:8545"
+        ),
+)
+def attach(active, rpc):
     """
     Enter a python shell with contracts and blockchain client
     available.
     """
     project_dir = os.path.abspath(os.getcwd())
     contracts_meta = utils.load_contracts(project_dir)
-    client = Client('127.0.0.1', '8545')
+    ipStr, port = utils.parse_ipv4_endpoint(rpc)
+    client = Client(ipStr, port)
 
     context = {
         'contracts': package_contracts(contracts_meta),

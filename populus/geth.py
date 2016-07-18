@@ -1,4 +1,3 @@
-from Queue import Queue, Empty
 from threading import Thread
 import copy
 import datetime
@@ -10,6 +9,9 @@ import re
 import subprocess
 import hashlib
 import tempfile
+
+import six
+from six.moves.queue import Queue, Empty
 
 from populus import utils
 
@@ -134,7 +136,7 @@ class PopenWrapper(subprocess.Popen):
                     yield self.get_stdout_nowait()
                     yield self.get_stderr_nowait()
             self._output_generator = output_generator()
-        return self._output_generator.next()
+        return next(self._output_generator)
 
     def communicate(self, *args, **kwargs):
         raise ValueError("Cannot communicate with a PopenWrapper")
@@ -228,11 +230,11 @@ def get_geth_accounts(data_dir, **kwargs):
     stdoutdata, stderrdata = proc.communicate()
 
     if proc.returncode:
-        if "no keys in store" in stderrdata:
+        if b"no keys in store" in stderrdata:
             return tuple()
         else:
             raise subprocess.CalledProcessError(1, ' '.join(command))
-    accounts = parse_geth_accounts(stdoutdata)
+    accounts = parse_geth_accounts(stdoutdata.decode("utf-8"))
     return accounts
 
 
@@ -383,6 +385,7 @@ def wait_for_geth_to_start(proc, max_wait=10):
         output = []
         line = proc.get_output_nowait()
         if line:
+            line = line.decode("utf-8")
             output.append(line)
 
         if line is None:

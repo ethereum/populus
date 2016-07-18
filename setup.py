@@ -34,6 +34,7 @@ setup(
         "watchdog>=0.8.3",
         "Flask>=0.10.1",
         "toposort>=1.4",
+        'six>1.10'
     ],
     license="MIT",
     zip_safe=False,

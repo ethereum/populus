@@ -79,7 +79,9 @@ def populus_config():
 @pytest.fixture(scope="session")
 def ethtester_coinbase():
     from ethereum import tester
-    return tester.encode_hex(tester.accounts[0])
+    from populus.ethtester_client import encode_hex
+
+    return encode_hex(tester.accounts[0])
 
 
 @pytest.fixture(scope="session")

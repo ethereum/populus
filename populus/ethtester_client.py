@@ -5,10 +5,11 @@ the `eth-testrpc` project by ConsenSys
 https://github.com/ConsenSys/eth-testrpc
 """
 import time
-import Queue
 import threading
 import uuid
 
+import six
+from six.moves import queue as Queue
 
 from ethereum import utils as ethereum_utils
 from ethereum import tester as t
@@ -21,7 +22,10 @@ def strip_0x(value):
 
 
 def encode_hex(value):
-    return "0x" + ethereum_utils.encode_hex(value)
+    encoded = ethereum_utils.encode_hex(value)
+    if type(encoded) != six.text_type:
+        encoded = encoded.decode("utf-8")
+    return "0x" + encoded
 
 
 def int_to_hex(value):
@@ -168,7 +172,10 @@ class EthTesterClient(object):
         return t.gas_limit
 
     def get_coinbase(self):
-        return "0x" + ethereum_utils.encode_hex(self.evm.block.coinbase)
+        encoded = ethereum_utils.encode_hex(self.evm.block.coinbase)
+        if type(encoded) != six.text_type:
+            encoded = encoded.decode("utf-8")
+        return "0x" + encoded
 
     def get_accounts(self):
         return [

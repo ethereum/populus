@@ -10,7 +10,6 @@ import subprocess
 import hashlib
 import tempfile
 
-import six
 from six.moves.queue import Queue, Empty
 
 from populus import utils
@@ -245,6 +244,8 @@ def create_geth_account(data_dir, **kwargs):
     if proc.returncode:
         raise subprocess.CalledProcessError(1, ' '.join(command))
 
+    stdoutdata = stdoutdata.decode("utf-8")
+
     match = account_regex.search(stdoutdata)
     if not match:
         raise ValueError("No address found in output: '{0}'".format(stdoutdata))
@@ -390,11 +391,44 @@ def wait_for_geth_to_start(proc, max_wait=10):
 
         if line is None:
             continue
+
         if 'Starting mining operation' in line:
             break
         elif "Still generating DAG" in line:
             print(line[line.index("Still generating DAG"):])
+
         elif line.startswith('Fatal:'):
+            utils.kill_proc(proc)
+            raise ValueError(
+                "Geth Errored while starting\nerror: {0}\n\nFull Output{1}".format(
+                    line, ''.join(output),
+                )
+            )
+    else:
+        utils.kill_proc(proc)
+        raise ValueError("Geth process never started\n\n{0}".format(''.join(output)))
+
+
+def wait_for_geth_to_create_dag(proc, max_wait=3600):
+    """Wait until geth creates DAG files needed to run the miner."""
+
+    start = time.time()
+    while time.time() < start + max_wait:
+        output = []
+        line = proc.get_output_nowait()
+        if line:
+            line = line.decode("utf-8")
+            output.append(line)
+
+        if line is None:
+            continue
+
+        print(line, end='')
+
+        if 'commit new work on block' in line:
+            break
+
+        if line.startswith('Fatal:'):
             utils.kill_proc(proc)
             raise ValueError(
                 "Geth Errored while starting\nerror: {0}\n\nFull Output{1}".format(

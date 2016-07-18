@@ -26,9 +26,6 @@ Below is an example by adding ``pytest_plugins`` global:
     #: http://doc.pytest.org/en/latest/plugins.html#requiring-loading-plugins-in-a-test-module-or-conftest-file
     pytest_plugins = "populus.plugin",
 
-    #: See :class:`populus.plugin.PopulusConfig` for configuration options
-    deploy_client_type = 'rpc'
-
 
     def test_my_stuff(geth_coinbase, geth_node, rpc_client):
         pass
@@ -121,6 +118,10 @@ It is not a normal Ethereum node, but one where you as the developer control the
 of new blocks. Thus, you can make all tests deterministic as you always have full
 control of transactions and balances in the test case.
 
+.. note::
+
+    ethtester doesn't have all capabilities of full Ethereum RPC service, like filters.
+
 Here is a Python 3 flavored example how to use ethtester to deploy a contract
 taht you can stress in your tests:
 
@@ -185,3 +186,135 @@ taht you can stress in your tests:
         contract_addr = get_contract_address_from_txn(ethtester_client, deploy_txn_hash)
 
         return contract_addr
+
+Using geth to run tests
+-----------------------
+
+`geth (go-ethereum) <https://github.com/ethereum/go-ethereum/>`__
+is one of the most popular Ethereum node applications.
+Populus provides facilities to spin up a geth service to run tests.
+This geth will run a local test blockchain where you can quickly get response
+for your transactions. The blockchain gets tore down at the
+end of the test run.
+
+In this local blockhain the mining difficulty is set to very
+low to make sure you get blocks fast.
+
+Stored blockchain files
++++++++++++++++++++++++
+
+When run, ``chains/default-test`` folder is created in your
+current working directory and that's where the block files
+and account files are stored
+
+Generating DAG dataset
+++++++++++++++++++++++
+
+geth performs real mining. `Mining requires dataset called
+`DAG to be generated <https://github.com/ethereum/wiki/wiki/Ethash-DAG>`__.
+The generation will take a lot of time, so you wish to recycle
+chain files across test runs.
+
+Each ethash set takes 1GB of space.
+
+These files are shared across all geth instances. They are stored
+in ``$HOME/.ethash` folder.
+
+To generate initial DAG files you can do the following.
+
+Create this faux py.test test case in your tests:
+
+.. code-block:: python
+
+    """Initialize local test geth node so that we can use it for mining.
+
+    """
+    import os
+    import pytest
+
+    from populus.geth import wait_for_geth_to_create_dag
+
+
+    pytest_plugins = "populus.plugin",
+
+
+    @pytest.mark.skipif(not os.environ.get("GETH_BOOTSTRAP"),
+                        reason="Bootstrapping geth blockchain files is very slow operation and we want to run it only once.")
+    def test_initialize_geth_node(geth_node_command: tuple, geth_coinbase):
+        """Faux test case to create default-chain folder and initial mining files."""
+        command, proc = geth_node_command
+
+        # This will keep printing geth status updates until DAG files have
+        # been created
+        wait_for_geth_to_create_dag(proc)
+
+
+Run the test to generate the DAG files:
+
+.. code-block:: console
+
+    GETH_BOOTSTRAP=1 py.test -s -k test_initialize_geth_node
+
+Deploying a contract
+++++++++++++++++++++
+
+Below is an example py.test fixture to deploy a contract in Python 3 flavor:
+
+.. code-block:: python
+
+    import pytest
+
+    from eth_rpc_client import Client
+
+    from populus.contracts.utils import deploy_contract
+    from populus.ethtester_client import EthTesterClient
+    from populus.utils import get_contract_address_from_txn
+
+
+    #: We enable populus plugin for this test file
+    #: http://doc.pytest.org/en/latest/plugins.html#requiring-loading-plugins-in-a-test-module-or-conftest-file
+    pytest_plugins = "populus.plugin",
+
+
+    @pytest.fixture
+    def contract_address(client: Client, geth_node, geth_coinbase: str) -> str:
+        """Deploy a smart contract to local private blockchain so test functions can stress it out.
+
+        :param client: py.test fixture to create RPC client to call geth node
+
+        :param geth_node: py.test fixture to spin up geth node with test network parameters
+
+        :param geth_coinbase: Ethereum account number for coinbase account where our mined ETHs appear
+
+        :return: 0x prefixed hexadecimal address of the deployed contract
+        """
+
+        # Make sure that we have at least one block mined
+        client.wait_for_block(1)
+
+        # Make sure we have some ETH on coinbase account
+        # so that we can deploy a contract
+        assert client.get_balance(geth_coinbase) > 0
+
+        # We define the Populus Contract class outside the scope
+        # of this example. It would come from compiled .sol
+        # file loaded through Populus framework contract
+        # mechanism.
+        contract = get_wallet_contract_class()
+
+        # Get a transaction hash where our contract is deployed.
+        # We set gas to very high randomish value, to make sure we don't
+        # run out of gas when deploying the contract.
+        deploy_txn_hash = deploy_contract(client, contract, gas=1500000)
+
+        # Wait that the geth mines a block with the deployment
+        # transaction
+        client.wait_for_transaction(deploy_txn_hash)
+
+        contract_addr = get_contract_address_from_txn(client, deploy_txn_hash)
+
+        return contract_addr
+
+
+
+

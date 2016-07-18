@@ -14,6 +14,8 @@ from six.moves import queue as Queue
 from ethereum import utils as ethereum_utils
 from ethereum import tester as t
 
+from .utils import encode_hex as _encode_hex
+
 
 def strip_0x(value):
     if value and value.startswith('0x'):
@@ -22,10 +24,7 @@ def strip_0x(value):
 
 
 def encode_hex(value):
-    encoded = ethereum_utils.encode_hex(value)
-    if type(encoded) != six.text_type:
-        encoded = encoded.decode("utf-8")
-    return "0x" + encoded
+    return "0x" + _encode_hex(value)
 
 
 def int_to_hex(value):

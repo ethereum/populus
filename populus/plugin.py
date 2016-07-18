@@ -228,6 +228,7 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
 
     return _deployed_contracts
 
+
 @pytest.fixture(scope="module")
 def geth_node_command(request, populus_config):
     """Launch a geth node.

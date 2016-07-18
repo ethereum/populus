@@ -8,6 +8,10 @@ import operator
 import functools
 import itertools
 
+import six
+
+from ethereum import utils as ethereum_utils
+
 
 CONTRACTS_DIR = "./contracts/"
 
@@ -136,3 +140,11 @@ def get_dependencies(contract_name, dependencies):
             for dep in dependencies.get(contract_name, set())
         )
     ))
+
+
+def encode_hex(data):
+    """Py2/Py3 compatible way to encode to call ``ethereum_utils.encode_hex(data)``."""
+    value = ethereum_utils.encode_hex(data)
+    if type(value) != six.text_type:
+        value = value.decode("utf-8")
+    return value

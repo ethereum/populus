@@ -5,6 +5,7 @@ from populus.contracts.common import ContractBound
 from populus.contracts.utils import (
     clean_args,
 )
+from populus.ethtester_client import encode_hex
 
 GAS_LIMIT_FRACTION = 0.9
 
@@ -44,7 +45,7 @@ class Function(ContractBound):
         prefix = self.encoded_abi_signature
         suffix = self.abi_args_signature(args)
         data = prefix + suffix
-        return ethereum_utils.encode_hex(data)
+        return encode_hex(data)
 
     def __get__(self, obj, type=None):
         if obj is None:
@@ -69,6 +70,7 @@ class Function(ContractBound):
         return txn_hash, txn_receipt
 
     def sendTransaction(self, *args, **kwargs):
+
         data = self.get_call_data(args)
 
         if 'gas' not in kwargs:

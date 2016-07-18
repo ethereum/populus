@@ -79,7 +79,9 @@ def populus_config():
 @pytest.fixture(scope="session")
 def ethtester_coinbase():
     from ethereum import tester
-    return tester.encode_hex(tester.accounts[0])
+    from populus.ethtester_client import encode_hex
+
+    return encode_hex(tester.accounts[0])
 
 
 @pytest.fixture(scope="session")
@@ -227,8 +229,13 @@ def deployed_contracts(request, populus_config, deploy_client, contracts):
     return _deployed_contracts
 
 
-@pytest.yield_fixture(scope="module")
-def geth_node(request, populus_config):
+@pytest.fixture(scope="module")
+def geth_node_command(request, populus_config):
+    """Launch a geth node.
+
+    :return: tuple(command line arguments, launched PopenWrapper)
+    """
+
     from populus.geth import (
         run_geth_node,
         get_geth_data_dir,
@@ -236,11 +243,9 @@ def geth_node(request, populus_config):
         ensure_account_exists,
         create_geth_account,
         reset_chain,
-        wait_for_geth_to_start,
     )
     from populus.utils import (
         ensure_path_exists,
-        kill_proc,
     )
 
     project_dir = populus_config.get_value(request, 'geth_project_dir')
@@ -267,12 +272,29 @@ def geth_node(request, populus_config):
     rpc_port = populus_config.get_value(request, 'geth_rpc_port')
     rpc_host = populus_config.get_value(request, 'geth_rpc_host')
 
-    geth_max_wait = int(populus_config.get_value(request, 'geth_max_wait'))
-
     command, proc = run_geth_node(data_dir, rpc_addr=rpc_host,
                                   rpc_port=rpc_port, logfile=logfile_path,
                                   verbosity="6")
+    return command, proc
 
+
+@pytest.yield_fixture(scope="module")
+def geth_node(request, populus_config, geth_node_command):
+    """Py.test fixture to launch a get node.
+
+    Geth node launches when the tests in the module scope are executed.
+    When we are done with the module we tear down the geth node.
+    """
+    from populus.geth import (
+        wait_for_geth_to_start
+    )
+    from populus.utils import (
+        kill_proc,
+    )
+
+    geth_max_wait = int(populus_config.get_value(request, 'geth_max_wait'))
+
+    command, proc = geth_node_command
     wait_for_geth_to_start(proc, max_wait=geth_max_wait)
 
     yield proc

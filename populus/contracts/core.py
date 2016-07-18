@@ -10,6 +10,7 @@ from populus.contracts.functions import (
     FunctionGroup,
 )
 from populus.contracts.events import Event
+from populus.utils import encode_hex
 
 
 class ContractBase(object):
@@ -29,7 +30,7 @@ class ContractBase(object):
         if args:
             if cls._config.constructor is None:
                 raise ValueError("This contract does not appear to have a constructor")
-            data += ethereum_utils.encode_hex(cls._config.constructor.abi_args_signature(args))
+            data += encode_hex(cls._config.constructor.abi_args_signature(args))
 
         return data
 

@@ -49,14 +49,14 @@ def decode_multi(types, outputs):
         binascii.a2b_hex(strip_0x_prefix(outputs)),
     )
     processed_res = [
-        "0x" + strip_0x_prefix(v) if t == "address" else v
+        b"0x" + strip_0x_prefix(v, starter=b'0x') if t == "address" else v
         for t, v in zip(types, res)
     ]
     return processed_res
 
 
-def strip_0x_prefix(value):
-    if value.startswith('0x'):
+def strip_0x_prefix(value, starter='0x'):
+    if value.startswith(starter):
         return value[2:]
     return value
 

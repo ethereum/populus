@@ -1,4 +1,3 @@
-from Queue import Queue, Empty
 from threading import Thread
 import copy
 import datetime
@@ -10,6 +9,8 @@ import re
 import subprocess
 import hashlib
 import tempfile
+
+from six.moves.queue import Queue, Empty
 
 from populus import utils
 
@@ -134,7 +135,7 @@ class PopenWrapper(subprocess.Popen):
                     yield self.get_stdout_nowait()
                     yield self.get_stderr_nowait()
             self._output_generator = output_generator()
-        return self._output_generator.next()
+        return next(self._output_generator)
 
     def communicate(self, *args, **kwargs):
         raise ValueError("Cannot communicate with a PopenWrapper")
@@ -228,11 +229,11 @@ def get_geth_accounts(data_dir, **kwargs):
     stdoutdata, stderrdata = proc.communicate()
 
     if proc.returncode:
-        if "no keys in store" in stderrdata:
+        if b"no keys in store" in stderrdata:
             return tuple()
         else:
             raise subprocess.CalledProcessError(1, ' '.join(command))
-    accounts = parse_geth_accounts(stdoutdata)
+    accounts = parse_geth_accounts(stdoutdata.decode("utf-8"))
     return accounts
 
 
@@ -242,6 +243,8 @@ def create_geth_account(data_dir, **kwargs):
 
     if proc.returncode:
         raise subprocess.CalledProcessError(1, ' '.join(command))
+
+    stdoutdata = stdoutdata.decode("utf-8")
 
     match = account_regex.search(stdoutdata)
     if not match:
@@ -383,15 +386,49 @@ def wait_for_geth_to_start(proc, max_wait=10):
         output = []
         line = proc.get_output_nowait()
         if line:
+            line = line.decode("utf-8")
             output.append(line)
 
         if line is None:
             continue
+
         if 'Starting mining operation' in line:
             break
         elif "Still generating DAG" in line:
             print(line[line.index("Still generating DAG"):])
+
         elif line.startswith('Fatal:'):
+            utils.kill_proc(proc)
+            raise ValueError(
+                "Geth Errored while starting\nerror: {0}\n\nFull Output{1}".format(
+                    line, ''.join(output),
+                )
+            )
+    else:
+        utils.kill_proc(proc)
+        raise ValueError("Geth process never started\n\n{0}".format(''.join(output)))
+
+
+def wait_for_geth_to_create_dag(proc, max_wait=3600):
+    """Wait until geth creates DAG files needed to run the miner."""
+
+    start = time.time()
+    while time.time() < start + max_wait:
+        output = []
+        line = proc.get_output_nowait()
+        if line:
+            line = line.decode("utf-8")
+            output.append(line)
+
+        if line is None:
+            continue
+
+        print(line, end='')
+
+        if 'commit new work on block' in line:
+            break
+
+        if line.startswith('Fatal:'):
             utils.kill_proc(proc)
             raise ValueError(
                 "Geth Errored while starting\nerror: {0}\n\nFull Output{1}".format(

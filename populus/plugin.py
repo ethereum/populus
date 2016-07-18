@@ -317,7 +317,8 @@ def accounts(populus_config, request):
     client_type = populus_config.get_value(request, 'deploy_client_type')
     if client_type == 'ethtester':
         from ethereum import tester
-        return tuple("0x" + tester.encode_hex(account) for account in tester.accounts)
+        from ethereum import utils
+        return tuple("0x" + utils.encode_hex(account) for account in tester.accounts)
     elif client_type == 'rpc':
         raise ValueError("Not supported")
     elif client_type == 'ipc':

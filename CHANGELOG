@@ -1,3 +1,15 @@
+1.0.0 <pending>
+-----
+
+- Remove `populus web` command.
+- Switch to `py-solc` package for solidity compilation
+- Switch to `py-geth` for running geth nodes.
+- Switch to `web3.py` for all blockchain interactions.
+- Remove filtering from `populus compile` command.
+- `populus compile` command now runs with `--optimize` enabled by default.
+- Deprecate `<project-dir>/libraries` directory in favor of all source files
+  being found within the `<project-dir>/contracts` directory.
+
 0.8.0
 -----
 

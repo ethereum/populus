@@ -24,11 +24,11 @@ from .main import main
 @click.option(
     '--optimize',
     '-o',
+    default=True,
     is_flag=True,
     help="Enable compile time optimization",
 )
-@click.argument('filters', nargs=-1)
-def compile_contracts(watch, optimize, filters):
+def compile_contracts(watch, optimize):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -43,7 +43,7 @@ def compile_contracts(watch, optimize, filters):
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
 
-    result = compile_and_write_contracts(project_dir, *filters, optimize=optimize)
+    result = compile_and_write_contracts(project_dir, optimize=optimize)
     contract_source_paths, compiled_sources, output_file_path = result
 
     click.echo("> Found {0} contract source files".format(len(contract_source_paths)))

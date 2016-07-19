@@ -4,7 +4,7 @@ import os
 import json
 import functools
 
-from populus.utils import (
+from populus.utils.filesystem import (
     get_contracts_dir,
     get_build_dir,
 )

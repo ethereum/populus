@@ -4,7 +4,12 @@ import functools
 import yaml
 import re
 
-from populus import utils
+from populus.utils.formatting import (
+    add_0x_prefix,
+)
+from populus.utils.filesystem import (
+    is_executable_available,
+)
 
 
 class CompileError(Exception):
@@ -17,7 +22,7 @@ SOLC_BINARY = 'solc'
 version_regex = re.compile('Version: ([0-9]+\.[0-9]+\.[0-9]+(-[a-f0-9]+)?)')
 
 
-is_solc_available = functools.partial(utils.is_executable_available, 'solc')
+is_solc_available = functools.partial(is_executable_available, 'solc')
 
 
 def solc_version():
@@ -27,8 +32,7 @@ def solc_version():
 
 
 def solc(source=None, input_files=None, add_std=True,
-         combined_json='abi,bin,bin-runtime,devdoc,userdoc',
-         raw=False, rich=True, optimize=False):
+         combined_json='abi,bin,bin-runtime', optimize=True):
 
     if source and input_files:
         raise ValueError("`source` and `input_files` are mutually exclusive")
@@ -43,7 +47,7 @@ def solc(source=None, input_files=None, add_std=True,
         command.extend(('--combined-json', combined_json))
 
     if input_files:
-        command.extend(itertools.chain(*zip(itertools.repeat('--input-file'), input_files)))
+        command.extend(input_files)
 
     if optimize:
         command.append('--optimize')
@@ -59,37 +63,27 @@ def solc(source=None, input_files=None, add_std=True,
     if p.returncode:
         raise CompileError('compilation failed: ' + stderrdata)
 
-    if raw:
-        return stdoutdata
-
     contracts = yaml.safe_load(stdoutdata)['contracts']
 
-    for contract_name, data in contracts.items():
+    for _, data in contracts.items():
         data['abi'] = yaml.safe_load(data['abi'])
-        data['devdoc'] = yaml.safe_load(data['devdoc'])
-        data['userdoc'] = yaml.safe_load(data['userdoc'])
 
     sorted_contracts = sorted(contracts.items(), key=lambda c: c[0])
-
-    if not rich:
-        return sorted_contracts
 
     compiler_version = solc_version()
 
     return {
         contract_name: {
-            'code': "0x" + contract['bin'],
-            'code-runtime': "0x" + contract['bin-runtime'],
-            'info': {
-                'abiDefinition': contract.get('abi'),
+            'abi': contract_data['abi'],
+            'code': add_0x_prefix(contract_data['bin']),
+            'code_runtime': add_0x_prefix(contract_data['bin-runtime']),
+            'source': source,
+            'meta': {
                 'compilerVersion': compiler_version,
-                'developerDoc': contract.get('devdoc'),
                 'language': 'Solidity',
                 'languageVersion': '0',
-                'source': source,  # what to do for files?
-                'userDoc': contract.get('userdoc')
             },
         }
-        for contract_name, contract
+        for contract_name, contract_data
         in sorted_contracts
     }

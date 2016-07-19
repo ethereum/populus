@@ -13,12 +13,11 @@ except ImportError:
     from code import InteractiveConsole
     is_ipython = False
 
-from eth_rpc_client import Client
 from watchdog.events import FileSystemEventHandler
 
 import populus
 from populus import utils
-from populus.contracts import (
+from populus.utils.contracts import (
     package_contracts,
 )
 from populus.geth import (

@@ -1,6 +1,12 @@
 import itertools
 import operator
 import functools
+import os
+import json
+
+from .filesystem import (
+    get_compiled_contracts_destination_path,
+)
 
 
 def merge_dependencies(*dependencies):
@@ -41,3 +47,15 @@ def package_contracts(web3, contracts):
     _dict.update(contract_classes)
 
     return type('contracts', (object,), _dict)()
+
+
+def load_contracts(project_dir):
+    compiled_contracts_path = get_compiled_contracts_destination_path(project_dir)
+
+    if not os.path.exists(compiled_contracts_path):
+        raise ValueError("No compiled contracts found")
+
+    with open(compiled_contracts_path) as contracts_file:
+        contracts = json.loads(contracts_file.read())
+
+    return contracts

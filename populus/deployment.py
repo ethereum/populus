@@ -2,16 +2,16 @@ import itertools
 import copy
 import toposort
 
-from populus.contracts import (
+from populus.utils.contracts import (
     deploy_contract,
-    get_linker_dependencies,
     link_contract_dependency,
-)
-
-from populus.utils import (
-    get_contract_address_from_txn,
+    get_linker_dependencies,
     merge_dependencies,
     get_dependencies,
+)
+
+from populus.utils.transaction import (
+    get_contract_address_from_txn,
 )
 
 

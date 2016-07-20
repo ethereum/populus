@@ -20,11 +20,6 @@ from populus import utils
 from populus.utils.contracts import (
     package_contracts,
 )
-from populus.geth import (
-    get_active_data_dir,
-    get_known_contracts,
-    add_to_known_contracts,
-)
 from populus.deployment import (
     deploy_contracts,
     validate_deployed_contracts,

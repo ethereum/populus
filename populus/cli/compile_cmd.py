@@ -1,5 +1,7 @@
 import os
-import time
+import random
+
+import gevent
 
 import click
 
@@ -46,9 +48,11 @@ def compile_contracts(watch, optimize):
     result = compile_and_write_contracts(project_dir, optimize=optimize)
     contract_source_paths, compiled_sources, output_file_path = result
 
-    click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
+    click.echo("> Found {0} contract source files".format(
+        len(contract_source_paths)
+    ))
     for path in contract_source_paths:
-        click.echo("- {0}".format(os.path.basename(path)))
+        click.echo("- {0}".format(os.path.relpath(path)))
     click.echo("")
     click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
     for contract_name in sorted(compiled_sources.keys()):
@@ -60,11 +64,11 @@ def compile_contracts(watch, optimize):
         # The path to watch
         click.echo("============ Watching ==============")
 
-        observer = get_contracts_observer(project_dir, filters, {'optimize': optimize})
+        observer = get_contracts_observer(project_dir, {'optimize': optimize})
         observer.start()
         try:
             while observer.is_alive():
-                time.sleep(1)
+                gevent.sleep(random.random())
         except KeyboardInterrupt:
             observer.stop()
         observer.join()

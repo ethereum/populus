@@ -1,6 +1,7 @@
 import os
 import shutil
 import json
+import fnmatch
 
 
 def ensure_path_exists(dir_path):
@@ -35,34 +36,30 @@ def get_contracts_dir(project_dir):
     return os.path.abspath(contracts_dir)
 
 
-LIBRARIES_DIR = "./libraries/"
-
-
-def get_libraries_dir(project_dir):
-    """
-    TODO: this currently only supports solidity contracts.
-    """
-    return os.path.abspath(os.path.join(project_dir, LIBRARIES_DIR))
-
-
 BUILD_DIR = "./build/"
 
 
 def get_build_dir(project_dir):
-    build_dir_path = os.path.join(project_dir, BUILD_DIR)
-    ensure_path_exists(build_dir_path)
-    return build_dir_path
+    build_dir = os.path.join(project_dir, BUILD_DIR)
+    ensure_path_exists(build_dir)
+    return build_dir
 
 
-def load_contracts(project_dir):
-    compiled_contracts_path = os.path.join(project_dir, BUILD_DIR, 'contracts.json')
-    if not os.path.exists(compiled_contracts_path):
-        raise ValueError("No compiled contracts found")
+COMPILED_CONTRACTS_FILENAME = "contracts.json"
 
-    with open(compiled_contracts_path) as contracts_file:
-        contracts = json.loads(contracts_file.read())
 
-    return contracts
+def get_compiled_contracts_destination_path(project_dir):
+    build_dir = get_build_dir(project_dir)
+    return os.path.join(build_dir, COMPILED_CONTRACTS_FILENAME)
+
+
+BLOCKCHAIN_DIR = "./chains/"
+
+
+def get_blockchains_dir(project_dir):
+    blockchains_dir = os.path.abspath(os.path.join(project_dir, BLOCKCHAIN_DIR))
+    ensure_path_exists(blockchains_dir)
+    return blockchains_dir
 
 
 def is_executable_available(program):
@@ -81,3 +78,10 @@ def is_executable_available(program):
                 return True
 
     return False
+
+
+def recursive_find_files(base_dir, pattern):
+    for dirpath, _, filenames in os.walk(base_dir):
+        for filename in filenames:
+            if fnmatch.fnmatch(filename, pattern):
+                yield os.path.join(dirpath, filename)

@@ -5,19 +5,11 @@ import pytest
 from click.testing import CliRunner
 
 from populus.cli import main
-from populus.geth import (
-    is_geth_available,
-)
 
-
-skip_if_no_geth = pytest.mark.skipif(
-    not is_geth_available(),
-    reason="'geth' not available",
-)
 
 this_dir = os.path.dirname(__file__)
 
-@skip_if_no_geth
+
 def test_deployment(monkeypatch):
     monkeypatch.chdir(os.path.join(this_dir, 'projects/test-02/'))
     runner = CliRunner()

@@ -5,14 +5,6 @@ import signal
 import click
 
 from populus import utils
-from populus.geth import (
-    get_geth_data_dir,
-    get_geth_logfile_path,
-    run_geth_node,
-    ensure_account_exists,
-    reset_chain,
-    set_active_data_dir
-)
 
 from .main import main
 

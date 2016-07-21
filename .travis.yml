@@ -11,7 +11,10 @@ env:
   matrix:
     - TOX_ENV=py27
     - TOX_ENV=flake8
-cache: pip
+cache:
+  - pip
+  - directories:
+    - .tox/py27/.hypotheses
 install:
   - travis_retry pip install setuptools --upgrade
   - travis_retry pip install tox

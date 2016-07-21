@@ -1,8 +1,5 @@
 import itertools
-import copy
-import toposort
-import random
-import gevent
+import functools
 
 from populus.utils.formatting import (
     remove_0x_prefix,
@@ -10,9 +7,11 @@ from populus.utils.formatting import (
 from populus.utils.contracts import (
     get_dependency_graph,
     get_contract_deploy_order,
+    get_all_contract_dependencies,
+    link_contract,
 )
 
-from populus.utils.transaction import (
+from populus.utils.transactions import (
     get_contract_address_from_txn,
 )
 
@@ -41,19 +40,8 @@ def deploy_contracts(web3,
     if contracts_to_deploy is None:
         contracts_to_deploy = tuple(all_contracts.keys())
 
-    # Validate that all contracts are deployable meaning they have `code`
-    # associated with them.
-    undeployable_contracts = [
-        contract_name
-        for contract_name in contracts_to_deploy
-        if remove_0x_prefix(all_contracts[contract_name].get('code')) is None
-    ]
-
-    if undeployable_contracts:
-        raise ValueError("Some contracts do not have any
-
     # Extract and dependencies that exist due to library linking.
-    dependency_graph = get_dependency_graph(contracts)
+    dependency_graph = get_dependency_graph(all_contracts)
 
     # If a subset of contracts have been specified to be deployed compute
     # any dependencies that also need to be deployed.
@@ -71,22 +59,42 @@ def deploy_contracts(web3,
         if contract_name in all_contracts_to_deploy
     ]
 
+    # Validate that all contracts are deployable meaning they have `code`
+    # associated with them.
+    undeployable_contracts = [
+        contract_name
+        for contract_name, _ in deploy_order
+        if not remove_0x_prefix(all_contracts[contract_name].get('code'))
+    ]
+
+    if undeployable_contracts:
+        raise ValueError("Some contracts do not have code and thus cannot be deployed")
+
     # If there are any dependencies either explicit or from libraries, sort the
     # contracts by their dependencies.
-
-    if from_address is None:
-        from_address = web3.eth.defaultAccount or web3.eth.coinbase
 
     for contract_name, contract_data in deploy_order:
         # if the contract has dependencies then link the code.
         if dependency_graph[contract_name]:
-            # TODO: link against the already deployed contracts
-            assert False
+
+            libraries_kwargs = {
+                name: address
+                for name, address
+                in _deployed_contracts.items()
+            }
+            code = link_contract(contract_data['code'], **libraries_kwargs)
         else:
             code = contract_data['code']
 
-        if contracts_to_deploy and contract_name not in contracts_to_deploy:
-            continue
+        contract = web3.eth.contract(
+            abi=contract_data['abi'],
+            code=code,
+        )
+        txn = {}
+        if from_address:
+            txn['from'] = from_address
+
+        deploy_txn = contract.deploy({}, [])
 
         args = constructor_args.get(contract_name, None)
         if callable(args):

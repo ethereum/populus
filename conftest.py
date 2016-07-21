@@ -23,6 +23,7 @@ def project_dir(tmpdir, monkeypatch):
 
     return _project_dir
 
+
 @pytest.fixture()
 def write_project_file(project_dir):
     from populus.utils.filesystem import (

@@ -6,6 +6,9 @@ import functools
 
 import toposort
 
+from populus.utils.functional import (
+    compose,
+)
 from .formatting import (
     remove_0x_prefix,
 )
@@ -15,7 +18,6 @@ from .filesystem import (
 
 
 def package_contracts(web3, contracts):
-    # TODO: fix this
     contract_classes = {
         name: web3.eth.contract(**contract_data) for name, contract_data in contracts.items()
     }
@@ -54,14 +56,21 @@ def find_link_references(bytecode):
     return set(DEPENDENCY_RE.findall(bytecode))
 
 
-def link_contract_dependency(code, dependency_name, dependency_address):
-    link_reference_re = re.compile(
-        dependency_name[:36].ljust(38, "_").rjust(40, "_"),
+def make_link_regex(name):
+    return re.compile(
+        name[:36].ljust(38, "_").rjust(40, "_")
     )
-    linked_code = link_reference_re.sub(
-        remove_0x_prefix(dependency_address),
-        code,
-    )
+
+
+def link_contract(code, **dependencies):
+    linker_fn = compose(*(
+        functools.partial(
+            make_link_regex(name).sub,
+            remove_0x_prefix(address),
+        )
+        for name, address in dependencies.items()
+    ))
+    linked_code = linker_fn(code)
     return linked_code
 
 

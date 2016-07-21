@@ -1,13 +1,15 @@
 import itertools
 import copy
 import toposort
+import random
+import gevent
 
+from populus.utils.formatting import (
+    remove_0x_prefix,
+)
 from populus.utils.contracts import (
-    deploy_contract,
-    link_contract_dependency,
-    get_linker_dependencies,
-    merge_dependencies,
-    get_dependencies,
+    get_dependency_graph,
+    get_contract_deploy_order,
 )
 
 from populus.utils.transaction import (
@@ -15,57 +17,74 @@ from populus.utils.transaction import (
 )
 
 
-def deploy_contracts(deploy_client,
-                     contracts,
-                     deploy_at_block=0,
-                     max_wait_for_deploy=0,
-                     from_address=None,
-                     max_wait=0,
+def deploy_contracts(web3,
+                     all_contracts,
                      contracts_to_deploy=None,
-                     dependencies=None,
+                     transaction_defaults=None,
                      constructor_args=None,
-                     deploy_gas=None):
+                     max_wait=0):
+    """
+    Do a full synchronous deploy of all project contracts or a subset of the
+    contracts.
+
+    1. Wait for whatever block number was specified (in
+    """
     _deployed_contracts = {}
     _receipts = {}
 
     if constructor_args is None:
         constructor_args = {}
 
-    if dependencies is None:
-        dependencies = {}
+    if transaction_defaults is None:
+        transaction_defaults = {}
 
-    # Potentiall wait until we've reached a specific block.
-    deploy_client.wait_for_block(deploy_at_block, max_wait_for_deploy)
+    if contracts_to_deploy is None:
+        contracts_to_deploy = tuple(all_contracts.keys())
+
+    # Validate that all contracts are deployable meaning they have `code`
+    # associated with them.
+    undeployable_contracts = [
+        contract_name
+        for contract_name in contracts_to_deploy
+        if remove_0x_prefix(all_contracts[contract_name].get('code')) is None
+    ]
+
+    if undeployable_contracts:
+        raise ValueError("Some contracts do not have any
 
     # Extract and dependencies that exist due to library linking.
-    linker_dependencies = get_linker_dependencies(contracts)
-    deploy_dependencies = merge_dependencies(
-        dependencies, linker_dependencies,
-    )
+    dependency_graph = get_dependency_graph(contracts)
 
-    # If a subset of contracts have been specified to be deployed, compute
-    # their dependencies as well.
-    contracts_to_deploy = set(itertools.chain.from_iterable(
-        get_dependencies(contract_name, deploy_dependencies)
-        for contract_name in (contracts_to_deploy or [])
-    )).union(contracts_to_deploy)
+    # If a subset of contracts have been specified to be deployed compute
+    # any dependencies that also need to be deployed.
+    all_contracts_to_deploy = set(itertools.chain.from_iterable(
+        get_all_contract_dependencies(contract_name, dependency_graph)
+        for contract_name in contracts_to_deploy
+    ))
+
+    # Now compute the order that the contracts should be deployed based on
+    # their dependencies.
+    deploy_order = [
+        (contract_name, all_contracts[contract_name])
+        for contract_name
+        in get_contract_deploy_order(dependency_graph)
+        if contract_name in all_contracts_to_deploy
+    ]
 
     # If there are any dependencies either explicit or from libraries, sort the
     # contracts by their dependencies.
-    if deploy_dependencies:
-        dependencies = copy.copy(deploy_dependencies)
-        for contract_name, _ in contracts:
-            if contract_name not in deploy_dependencies:
-                dependencies[contract_name] = set()
-        sorted_contract_names = toposort.toposort_flatten(dependencies)
-        contracts = sorted(contracts, key=lambda c: sorted_contract_names.index(c[0]))
 
     if from_address is None:
-        from_address = deploy_client.get_coinbase()
+        from_address = web3.eth.defaultAccount or web3.eth.coinbase
 
-    for contract_name, contract_class in contracts:
-        # If a subset of contracts have been specified, only deploy those or
-        # the contracts they depend upon.
+    for contract_name, contract_data in deploy_order:
+        # if the contract has dependencies then link the code.
+        if dependency_graph[contract_name]:
+            # TODO: link against the already deployed contracts
+            assert False
+        else:
+            code = contract_data['code']
+
         if contracts_to_deploy and contract_name not in contracts_to_deploy:
             continue
 

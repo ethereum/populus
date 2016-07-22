@@ -7,7 +7,6 @@ import click
 from populus import utils
 from populus.geth import (
     get_geth_data_dir,
-    get_geth_logfile_path,
     run_geth_node,
     ensure_account_exists,
     reset_chain,
@@ -58,14 +57,12 @@ def chain_run(name, mine, verbosity, active):
     """
     project_dir = os.getcwd()
     data_dir = get_geth_data_dir(project_dir, name)
-    logfile_path = get_geth_logfile_path(data_dir)
 
     ensure_account_exists(data_dir)
 
     kwargs = {
-        "logfile": logfile_path,
         "verbosity": "%d" % verbosity
-        }
+    }
 
     command, proc = run_geth_node(data_dir, mine=mine, **kwargs)
 

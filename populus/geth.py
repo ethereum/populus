@@ -57,50 +57,28 @@ def set_active_data_dir(project_dir, name):
     os.symlink(data_dir, active_dir)
 
 
-def get_geth_logfile_path(data_dir, logfile_name_fmt="geth-{0}.log"):
-    logfile_name = logfile_name_fmt.format(
-        datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
-    )
-    log_dir = os.path.join(data_dir, 'logs')
-    utils.ensure_path_exists(log_dir)
-    logfile_path = os.path.abspath(os.path.join(log_dir, logfile_name))
-    return logfile_path
-
-
-def enqueue_stream(stream, queue, logfile=None):
+def enqueue_stream(stream, queue):
     """
     Synchronously reads the output from a stream (stdout, stderr) and puts it
     onto the queue to be read.
     """
     for line in iter(stream.readline, b''):
         queue.put(line)
-        if logfile:
-            logfile.write(line)
-            logfile.flush()
-    if logfile:
-        try:
-            logfile.close()
-        except ValueError:
-            pass
 
 
 class PopenWrapper(subprocess.Popen):
     _locked = False
 
     def __init__(self, args, bufsize='1', stdin=subprocess.PIPE,
-                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs):
+                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                 **kwargs):
         super(PopenWrapper, self).__init__(args, bufsize=bufsize, stdin=stdin,
                                            stdout=stdout, stderr=stderr,
                                            **kwargs)
-        if "--logfile" in args:
-            logfile_path = args[args.index("--logfile") + 1]
-            logfile = open(logfile_path, 'a')
-        else:
-            logfile = None
         self.stdout_queue = Queue()
         self.stdout_thread = Thread(
             target=enqueue_stream,
-            args=(self.stdout, self.stdout_queue, logfile),
+            args=(self.stdout, self.stdout_queue),
         )
         self.stdout_thread.daemon = True
         self.stdout_thread.start()
@@ -108,7 +86,7 @@ class PopenWrapper(subprocess.Popen):
         self.stderr_queue = Queue()
         self.stderr_thread = Thread(
             target=enqueue_stream,
-            args=(self.stderr, self.stderr_queue, logfile),
+            args=(self.stderr, self.stderr_queue),
         )
         self.stderr_thread.daemon = True
         self.stderr_thread.start()
@@ -147,8 +125,7 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
                  genesis_block=None, miner_threads='1', extra_args=None,
                  max_peers='0', network_id='123456', no_discover=True,
                  mine=False, nice=True, unlock='0', password=DEFAULT_PW_PATH,
-                 port=None, verbosity=None, logfile=None, whisper=True,
-                 ipcpath=None):
+                 port=None, verbosity=None, whisper=True, ipcpath=None):
     if nice and is_nice_available():
         command = ['nice', '-n', '20', cmd]
     else:
@@ -214,6 +191,7 @@ def geth_wrapper(data_dir, popen_class=subprocess.Popen, cmd="geth",
         stderr=subprocess.PIPE,
         bufsize=1,
     )
+
     return command, proc
 
 

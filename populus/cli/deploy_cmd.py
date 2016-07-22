@@ -9,7 +9,6 @@ from populus import utils
 from populus.contracts import package_contracts
 from populus.geth import (
     get_geth_data_dir,
-    get_geth_logfile_path,
     ensure_account_exists,
     run_geth_node,
     wait_for_geth_to_start,
@@ -105,26 +104,20 @@ def deploy(dry_run, dry_run_chain_name, production, confirm, record, contracts_t
 
     if dry_run:
         dry_run_data_dir = get_geth_data_dir(project_dir, dry_run_chain_name)
-        logfile_path = get_geth_logfile_path(
-            dry_run_data_dir,
-            logfile_name_fmt="deploy-dry-run-{0}.log",
-        )
 
         ensure_account_exists(dry_run_data_dir)
 
-        _, dry_run_proc = run_geth_node(dry_run_data_dir, logfile=logfile_path)
+        _, dry_run_proc = run_geth_node(dry_run_data_dir)
         wait_for_geth_to_start(dry_run_proc)
 
         message = (
             "======= Executing Dry Run Deploy ========\n"
             "Chain Name     : {chain_name}\n"
             "Data Directory : {data_dir}\n"
-            "Geth Logfile   : {logfile_path}\n\n"
             "... (deploying)\n"
         ).format(
             chain_name=dry_run_chain_name,
             data_dir=dry_run_data_dir,
-            logfile_path=logfile_path,
         )
         click.echo(message)
 
@@ -164,13 +157,9 @@ def deploy(dry_run, dry_run_chain_name, production, confirm, record, contracts_t
 
     if not production:
         data_dir = get_geth_data_dir(project_dir, "default")
-        logfile_path = get_geth_logfile_path(
-            data_dir,
-            logfile_name_fmt="deploy-dry-run-{0}.log",
-        )
 
         ensure_account_exists(data_dir)
-        _, deploy_proc = run_geth_node(data_dir, logfile=logfile_path)
+        _, deploy_proc = run_geth_node(data_dir)
         wait_for_geth_to_start(deploy_proc)
     elif confirm:
         message = (
@@ -197,12 +186,10 @@ def deploy(dry_run, dry_run_chain_name, production, confirm, record, contracts_t
         "... (deploying)\n"
         "Chain Name     : {chain_name}\n"
         "Data Directory : {data_dir}\n"
-        "Geth Logfile   : {logfile_path}\n\n"
         "... (deploying)\n"
     ).format(
         chain_name="production" if production else "default",
         data_dir="N/A" if production else data_dir,
-        logfile_path="N/A" if production else logfile_path,
     )
     click.echo(message)
 

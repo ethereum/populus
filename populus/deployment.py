@@ -9,18 +9,21 @@ from populus.utils.contracts import (
     get_contract_deploy_order,
     get_all_contract_dependencies,
     link_contract,
+    package_contracts,
 )
 
 from populus.utils.transactions import (
     get_contract_address_from_txn,
+    get_block_gas_limit,
 )
 
 
 def deploy_contracts(web3,
                      all_contracts,
                      contracts_to_deploy=None,
-                     transaction_defaults=None,
+                     txn_defaults=None,
                      constructor_args=None,
+                     contract_addresses=None,
                      max_wait=0):
     """
     Do a full synchronous deploy of all project contracts or a subset of the
@@ -28,14 +31,14 @@ def deploy_contracts(web3,
 
     1. Wait for whatever block number was specified (in
     """
-    _deployed_contracts = {}
-    _receipts = {}
+    if contract_addresses is None:
+        contract_addresses = {}
 
     if constructor_args is None:
         constructor_args = {}
 
-    if transaction_defaults is None:
-        transaction_defaults = {}
+    if txn_defaults is None:
+        txn_defaults = {}
 
     if contracts_to_deploy is None:
         contracts_to_deploy = tuple(all_contracts.keys())
@@ -76,13 +79,7 @@ def deploy_contracts(web3,
     for contract_name, contract_data in deploy_order:
         # if the contract has dependencies then link the code.
         if dependency_graph[contract_name]:
-
-            libraries_kwargs = {
-                name: address
-                for name, address
-                in _deployed_contracts.items()
-            }
-            code = link_contract(contract_data['code'], **libraries_kwargs)
+            code = link_contract(contract_data['code'], **contract_addresses)
         else:
             code = contract_data['code']
 
@@ -90,63 +87,31 @@ def deploy_contracts(web3,
             abi=contract_data['abi'],
             code=code,
         )
-        txn = {}
-        if from_address:
-            txn['from'] = from_address
+        txn = dict(**txn_defaults)
 
-        deploy_txn = contract.deploy({}, [])
+        if 'from' not in txn:
+            txn['from'] = web3.eth.coinbase
 
-        args = constructor_args.get(contract_name, None)
+        if 'gas' not in txn:
+            txn['gas'] = 90 * get_block_gas_limit(web3) // 100
+
+        args = constructor_args.get(contract_name, [])
         if callable(args):
             args = args(_deployed_contracts)
 
-        if deploy_gas is None:
-            deploy_gas_limit = int(deploy_client.get_max_gas() * 0.98)
-        elif callable(deploy_gas):
-            deploy_gas_limit = deploy_gas(contract_name, contract_class)
-        else:
-            deploy_gas_limit = deploy_gas
+        deploy_txn = contract.deploy(txn, args)
 
-        if contract_name in linker_dependencies:
-            for dependency_name in linker_dependencies[contract_name]:
-                deployed_contract = _deployed_contracts[dependency_name]
-                link_contract_dependency(contract_class, deployed_contract)
-
-        txn_hash = deploy_contract(
-            deploy_client,
-            contract_class,
-            constructor_args=args,
-            _from=from_address,
-            gas=deploy_gas_limit,
-        )
-        contract_addr = get_contract_address_from_txn(
-            deploy_client,
-            txn_hash,
+        contract_addresses[contract_name] = get_contract_address_from_txn(
+            web3,
+            deploy_txn,
             max_wait=max_wait,
         )
-        _receipts[contract_name] = deploy_client.wait_for_transaction(
-            txn_hash,
-            max_wait,
-        )
-        _deployed_contracts[contract_name] = contract_class(
-            contract_addr,
-            deploy_client,
-        )
 
-    _dict = {
-        '_deploy_receipts': _receipts,
-        '__len__': lambda s: len(_deployed_contracts),
-        '__iter__': lambda s: iter(_deployed_contracts.items()),
-        '__getitem__': lambda s, k: _deployed_contracts.__getitem__[k],
-    }
-
-    _dict.update(_deployed_contracts)
-
-    return type('deployed_contracts', (object,), _dict)()
+    return package_contracts(web3, contract_addresses)
 
 
-def validate_deployed_contracts(deploy_client, deployed_contracts):
-    for _, deployed_contract in deployed_contracts:
-        code = deploy_client.get_code(deployed_contract._meta.address)
+def validate_deployed_contracts(web3, contracts):
+    for _, contract in contracts:
+        code = web3.eth.getCode(contract.address)
         if len(code) <= 2:
             raise ValueError("Looks like a contract failed to deploy")

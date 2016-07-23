@@ -67,13 +67,13 @@ def MATH_ABI():
 
 
 @pytest.fixture()
-def MathContract(web3_tester, MATH_ABI, MATH_CODE, MATH_RUNTIME, MATH_SOURCE):
-    return web3_tester.eth.contract(
-        abi=MATH_ABI,
-        code=MATH_CODE,
-        code_runtime=MATH_RUNTIME,
-        source=MATH_SOURCE,
-    )
+def MATH(MATH_ABI, MATH_CODE, MATH_RUNTIME, MATH_SOURCE):
+    return {
+        'abi': MATH_ABI,
+        'code': MATH_CODE,
+        'code_runtime': MATH_RUNTIME,
+        'source': MATH_SOURCE,
+    }
 
 
 CONTRACT_SIMPLE_CONSTRUCTOR_SOURCE = "contract WithNoArgumentConstructor { uint public data; function WithNoArgumentConstructor() { data = 3; }}"
@@ -103,17 +103,16 @@ def SIMPLE_CONSTRUCTOR_ABI():
 
 
 @pytest.fixture()
-def SimpleConstructorContract(web3_tester,
-                              SIMPLE_CONSTRUCTOR_SOURCE,
-                              SIMPLE_CONSTRUCTOR_CODE,
-                              SIMPLE_CONSTRUCTOR_RUNTIME,
-                              SIMPLE_CONSTRUCTOR_ABI):
-    return web3_tester.eth.contract(
-        abi=SIMPLE_CONSTRUCTOR_ABI,
-        code=SIMPLE_CONSTRUCTOR_CODE,
-        code_runtime=SIMPLE_CONSTRUCTOR_RUNTIME,
-        source=SIMPLE_CONSTRUCTOR_SOURCE,
-    )
+def SIMPLE_CONSTRUCTOR(SIMPLE_CONSTRUCTOR_SOURCE,
+                       SIMPLE_CONSTRUCTOR_CODE,
+                       SIMPLE_CONSTRUCTOR_RUNTIME,
+                       SIMPLE_CONSTRUCTOR_ABI):
+    return {
+        'abi': SIMPLE_CONSTRUCTOR_ABI,
+        'code': SIMPLE_CONSTRUCTOR_CODE,
+        'code_runtime': SIMPLE_CONSTRUCTOR_RUNTIME,
+        'source': SIMPLE_CONSTRUCTOR_SOURCE,
+    }
 
 
 CONTRACT_WITH_CONSTRUCTOR_ARGUMENTS_SOURCE =  "contract WithConstructorArguments { uint public data_a; bytes32 public data_b; function WithConstructorArguments(uint a, bytes32 b) { data_a = a; data_b = b; }}"
@@ -144,17 +143,16 @@ def WITH_CONSTRUCTOR_ARGUMENTS_ABI():
 
 
 @pytest.fixture()
-def WithConstructorArgumentsContract(web3_tester,
-                                     WITH_CONSTRUCTOR_ARGUMENTS_SOURCE,
-                                     WITH_CONSTRUCTOR_ARGUMENTS_CODE,
-                                     WITH_CONSTRUCTOR_ARGUMENTS_RUNTIME,
-                                     WITH_CONSTRUCTOR_ARGUMENTS_ABI):
-    return web3_tester.eth.contract(
-        abi=WITH_CONSTRUCTOR_ARGUMENTS_ABI,
-        code=WITH_CONSTRUCTOR_ARGUMENTS_CODE,
-        code_runtime=WITH_CONSTRUCTOR_ARGUMENTS_RUNTIME,
-        source=WITH_CONSTRUCTOR_ARGUMENTS_SOURCE,
-    )
+def WITH_CONSTRUCTOR_ARGUMENTS(WITH_CONSTRUCTOR_ARGUMENTS_SOURCE,
+                               WITH_CONSTRUCTOR_ARGUMENTS_CODE,
+                               WITH_CONSTRUCTOR_ARGUMENTS_RUNTIME,
+                               WITH_CONSTRUCTOR_ARGUMENTS_ABI):
+    return {
+        'abi': WITH_CONSTRUCTOR_ARGUMENTS_ABI,
+        'code': WITH_CONSTRUCTOR_ARGUMENTS_CODE,
+        'code_runtime': WITH_CONSTRUCTOR_ARGUMENTS_RUNTIME,
+        'source': WITH_CONSTRUCTOR_ARGUMENTS_SOURCE,
+    }
 
 
 CONTRACT_EMITTER_SOURCE = textwrap.dedent(("""
@@ -245,14 +243,13 @@ def EMITTER_ABI():
 
 
 @pytest.fixture()
-def EmitterContract(web3_tester,
-                    EMITTER_SOURCE,
-                    EMITTER_CODE,
-                    EMITTER_RUNTIME,
-                    EMITTER_ABI):
-    return web3_tester.eth.contract(
-        abi=EMITTER_ABI,
-        code=EMITTER_CODE,
-        code_runtime=EMITTER_RUNTIME,
-        source=EMITTER_SOURCE,
-    )
+def EMITTER(EMITTER_SOURCE,
+            EMITTER_CODE,
+            EMITTER_RUNTIME,
+            EMITTER_ABI):
+    return {
+        'abi': EMITTER_ABI,
+        'code': EMITTER_CODE,
+        'code_runtime': EMITTER_RUNTIME,
+        'source': EMITTER_SOURCE,
+    }

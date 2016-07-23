@@ -1,7 +1,8 @@
 import os
 import shutil
-import json
 import fnmatch
+import tempfile
+import contextlib
 
 
 def ensure_path_exists(dir_path):
@@ -85,3 +86,13 @@ def recursive_find_files(base_dir, pattern):
         for filename in filenames:
             if fnmatch.fnmatch(filename, pattern):
                 yield os.path.join(dirpath, filename)
+
+
+@contextlib.contextmanager
+def tempdir():
+    directory = tempfile.mkdtemp()
+
+    try:
+        yield directory
+    finally:
+        shutil.rmtree(directory)

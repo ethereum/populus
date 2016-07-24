@@ -29,22 +29,28 @@ def test_multi_contract_deployment(web3, MATH, SIMPLE_CONSTRUCTOR):
     assert web3.eth.getCode(SimpleConstructor.address) == SIMPLE_CONSTRUCTOR['code_runtime']
 
 
-def test_deployment_with_constructor_arguments(web3, WITH_CONSTRUCTOR_ARGUMENT):
+def test_deployment_with_constructor_arguments(web3, WITH_CONSTRUCTOR_ARGUMENTS):
     contracts = {
-        'WithConstructorArguments': WITH_CONSTRUCTOR_ARGUMENT,
+        'WithConstructorArguments': WITH_CONSTRUCTOR_ARGUMENTS,
     }
     deployed_contracts = deploy_contracts(
         web3,
         contracts,
         constructor_args={
-            'SimpleConstructor':
+            'WithConstructorArguments': [1234, "abcd"],
         },
-        max_wait=1)
+        max_wait=1,
+    )
 
     assert len(deployed_contracts) == 1
 
-    Math = deployed_contracts['Math']
-    assert web3.eth.getCode(Math.address) == MATH['code_runtime']
+    WithConstructorArguments = deployed_contracts['WithConstructorArguments']
+    assert web3.eth.getCode(WithConstructorArguments.address) == WITH_CONSTRUCTOR_ARGUMENTS['code_runtime']
 
-    Emitter = deployed_contracts['Emitter']
-    assert web3.eth.getCode(Emitter.address) == EMITTER['code_runtime']
+    web3.eth.sendTransaction({'to': WithConstructorArguments.address, 'from': web3.eth.coinbase, 'value': 1})
+
+    a = WithConstructorArguments.call().data_a()
+    assert a == 1234
+
+    b = WithConstructorArguments.call().data_b()
+    assert b"abcd" in b

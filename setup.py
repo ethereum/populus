@@ -31,6 +31,7 @@ setup(
         "toposort>=1.4",
         "py-geth>=0.5.0",
         "web3>=1.3.0",
+        "pysha3>=0.3",
     ],
     license="MIT",
     zip_safe=False,

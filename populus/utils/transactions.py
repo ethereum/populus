@@ -13,6 +13,8 @@ def get_contract_address_from_txn(web3, txn_hash, max_wait=0):
     return txn_receipt['contractAddress']
 
 
-def get_block_gas_limit(web3, block_identifier="latest"):
+def get_block_gas_limit(web3, block_identifier=None):
+    if block_identifier is None:
+        block_identifier = web3.eth.blockNumber
     block = web3.eth.getBlock(block_identifier)
     return block['gasLimit']

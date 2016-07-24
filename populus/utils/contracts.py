@@ -15,6 +15,9 @@ from .formatting import (
 from .filesystem import (
     get_compiled_contracts_destination_path,
 )
+from .string import (
+    coerce_args_to_text,
+)
 
 
 def package_contracts(web3, contracts):
@@ -25,7 +28,7 @@ def package_contracts(web3, contracts):
     _dict = {
         '__len__': lambda s: len(contract_classes),
         '__iter__': lambda s: iter(contract_classes.items()),
-        '__getitem__': lambda s, k: contract_classes.__getitem__[k],
+        '__getitem__': lambda s, k: contract_classes.__getitem__(k),
     }
     _dict.update(contract_classes)
 
@@ -52,6 +55,7 @@ DEPENDENCY_RE = re.compile((
 ))
 
 
+@coerce_args_to_text
 def find_link_references(bytecode):
     return set(DEPENDENCY_RE.findall(bytecode))
 

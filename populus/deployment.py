@@ -48,10 +48,11 @@ def deploy_contracts(web3,
 
     # If a subset of contracts have been specified to be deployed compute
     # any dependencies that also need to be deployed.
-    all_contracts_to_deploy = set(itertools.chain.from_iterable(
+    all_deploy_dependencies = set(itertools.chain.from_iterable(
         get_all_contract_dependencies(contract_name, dependency_graph)
         for contract_name in contracts_to_deploy
     ))
+    all_contracts_to_deploy = all_deploy_dependencies.union(contracts_to_deploy)
 
     # Now compute the order that the contracts should be deployed based on
     # their dependencies.
@@ -72,9 +73,6 @@ def deploy_contracts(web3,
 
     if undeployable_contracts:
         raise ValueError("Some contracts do not have code and thus cannot be deployed")
-
-    # If there are any dependencies either explicit or from libraries, sort the
-    # contracts by their dependencies.
 
     for contract_name, contract_data in deploy_order:
         # if the contract has dependencies then link the code.
@@ -97,7 +95,7 @@ def deploy_contracts(web3,
 
         args = constructor_args.get(contract_name, [])
         if callable(args):
-            args = args(_deployed_contracts)
+            args = args(contract_addresses)
 
         deploy_txn = contract.deploy(txn, args)
 
@@ -107,7 +105,14 @@ def deploy_contracts(web3,
             max_wait=max_wait,
         )
 
-    return package_contracts(web3, contract_addresses)
+    package_data = {
+        contract_name: dict(
+            address=contract_addresses[contract_name], **all_contracts[contract_name]
+        )
+        for contract_name in contract_addresses
+    }
+
+    return package_contracts(web3, package_data)
 
 
 def validate_deployed_contracts(web3, contracts):

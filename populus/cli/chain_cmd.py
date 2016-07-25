@@ -4,7 +4,12 @@ import signal
 
 import click
 
-from populus import utils
+from populus.utils.chain import (
+    get_datadir,
+)
+from populus.chain import (
+    reset_chain,
+)
 
 from .main import main
 
@@ -24,9 +29,18 @@ def chain_reset(name, confirm):
     """
     Reset a test chain
     """
-    data_dir = get_geth_data_dir(os.getcwd(), name)
-    if confirm and not click.confirm("Are you sure you want to reset blockchain '{0}': {1}".format(name, data_dir)):  # NOQA
-        raise click.Abort()
+    # TODO: from `main` command
+    project_dir = os.getcwd()
+    data_dir = get_datadir(project_dir, name)
+    if confirm:
+        confirmation_message = (
+            "Are you sure you want to reset blockchain {0}: {1}".format(
+                name,
+                data_dir,
+            )
+        )
+        if not click.confirm(confirmation_message):
+            raise click.Abort()
     reset_chain(data_dir)
 
 
@@ -37,12 +51,6 @@ def chain_reset(name, confirm):
     '--verbosity', default=5,
     help="""
     Set verbosity of the logging output. Default is 5, Range is 0-6.
-    """)
-@click.option(
-    '--active/--no-active', default=True,
-    help="""
-    Set whether the chain run will modify the active-chain settings.
-    Default is to modify the active-chain setting.
     """)
 def chain_run(name, mine, verbosity, active):
     """

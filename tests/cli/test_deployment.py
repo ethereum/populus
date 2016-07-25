@@ -15,7 +15,7 @@ def test_deployment(monkeypatch):
     runner = CliRunner()
     result = runner.invoke(main, ['deploy', '--no-confirm', 'owned'])
 
-    assert result.exit_code == 0, result.output
+    assert result.exit_code == 0, result.output + str(result.exception)
 
     # weak assertion but not sure what to do here.
     assert 'owned' in result.output

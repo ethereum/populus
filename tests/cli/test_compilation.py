@@ -6,7 +6,7 @@ from populus.cli import main
 
 CONTRACT_SOURCES = (
     ('contracts/owned.sol', 'contract owned { address owner; function Owned() {owner = msg.sender; }}'),
-    ('contracts/mortal.sol', 'import "owned"; contract Mortal is owned { function kill() { suicide(msg.sender); } } contract Immortal is owned { function kill() returns (bool no){ return false; }}'),
+    ('contracts/mortal.sol', 'import "./owned.sol"; contract mortal is owned { function kill() { suicide(msg.sender); } } contract Immortal is owned { function kill() returns (bool no){ return false; }}'),
 )
 
 
@@ -17,8 +17,8 @@ def test_compiling(project_dir, write_project_file):
     runner = CliRunner()
     result = runner.invoke(main, ['compile'])
 
-    assert result.exit_code == 0, result.output
+    assert result.exit_code == 0, result.output + str(result.exception)
     assert 'owned.sol' in result.output
     assert 'mortal.sol' in result.output
-    assert 'Mortal' in result.output
+    assert 'mortal' in result.output
     assert 'Immortal' in result.output

@@ -1,5 +1,4 @@
 import itertools
-import functools
 
 from populus.utils.formatting import (
     remove_0x_prefix,

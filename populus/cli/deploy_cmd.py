@@ -3,8 +3,20 @@ import os
 import click
 import signal
 
-from populus import utils
-from populus.utils.contracts import package_contracts
+from web3 import (
+    Web3,
+    TesterRPCProvider,
+    IPCProvider,
+)
+
+from populus.utils.networking import (
+    get_open_port,
+)
+from populus.utils.contracts import (
+    package_contracts,
+    load_compiled_contract_json,
+    compile_and_write_contracts,
+)
 from populus.deployment import (
     deploy_contracts,
     validate_deployed_contracts,
@@ -34,91 +46,124 @@ def echo_post_deploy_message(web3, deployed_contracts):
         ))
 
 
+@main.command('deploy')
+@click.option(
+    '--confirm/--no-confirm',
+    default=True,
+    help="Bypass any confirmation prompts",
+)
+# Deploy chain config
 @click.option(
     '--chain',
     '-c',
     is_flag=True,
     help="Specify which chain to deploy to.",
 )
+# Compilation config
 @click.option(
-    '--confirm/--no-confirm',
+    '--compile/--no-compile',
     default=True,
-    help="Bypass any confirmation prompts",
+    help="Should contracts be compiled",
+)
+@click.option(
+    '--optimize/--no-optimize',
+    default=True,
+    help="Should contracts be compiled with the --optimize flag.",
 )
 @click.argument('contracts_to_deploy', nargs=-1)
-def deploy(chain, confirm, contracts_to_deploy):
+def deploy(chain, confirm, compile, optimize, contracts_to_deploy):
     """
     Deploys the specified contracts via the RPC client.
     """
+    # TODO: project_dir should happen up at the `main` level
     project_dir = os.getcwd()
-    deploy_gas = None
 
-    contracts = package_contracts(utils.load_contracts(project_dir))
+    if compile:
+        compile_and_write_contracts(project_dir, optimize=optimize)
+
+    compiled_contract = load_compiled_contract_json(project_dir)
+
+    # TODO: web3 setup should happen up at the `main` level
+    dry_run_web3 = Web3(TesterRPCProvider(port=get_open_port()))
+
+    dry_run_contracts = package_contracts(dry_run_web3, compiled_contract)
+
+    dry_run_deployed_contracts = deploy_contracts(
+        web3=dry_run_web3,
+        all_contracts=dry_run_contracts,
+        max_wait,
+    )
+
+def deploy_contracts(web3,
+                     all_contracts,
+                     contracts_to_deploy=None,
+                     txn_defaults=None,
+                     constructor_args=None,
+                     contract_addresses=None,
+                     max_wait=0):
 
     #
-    # Dry run with test evm to determine gas needs.
+    # TODO: Dry run to figure out gas costs.
     #
-    dry_run_data_dir = get_geth_data_dir(project_dir, dry_run_chain_name)
-    logfile_path = get_geth_logfile_path(
-        dry_run_data_dir,
-        logfile_name_fmt="deploy-dry-run-{0}.log",
-    )
+    #dry_run_data_dir = get_geth_data_dir(project_dir, dry_run_chain_name)
+    #logfile_path = get_geth_logfile_path(
+    #    dry_run_data_dir,
+    #    logfile_name_fmt="deploy-dry-run-{0}.log",
+    #)
 
-    ensure_account_exists(dry_run_data_dir)
+    #ensure_account_exists(dry_run_data_dir)
 
-    _, dry_run_proc = run_geth_node(dry_run_data_dir, logfile=logfile_path)
-    wait_for_geth_to_start(dry_run_proc)
+    #_, dry_run_proc = run_geth_node(dry_run_data_dir, logfile=logfile_path)
+    #wait_for_geth_to_start(dry_run_proc)
 
-    message = (
-        "======= Executing Dry Run Deploy ========\n"
-        "Chain Name     : {chain_name}\n"
-        "Data Directory : {data_dir}\n"
-        "Geth Logfile   : {logfile_path}\n\n"
-        "... (deploying)\n"
-    ).format(
-        chain_name=dry_run_chain_name,
-        data_dir=dry_run_data_dir,
-        logfile_path=logfile_path,
-    )
-    click.echo(message)
+    #message = (
+    #    "======= Executing Dry Run Deploy ========\n"
+    #    "Chain Name     : {chain_name}\n"
+    #    "Data Directory : {data_dir}\n"
+    #    "Geth Logfile   : {logfile_path}\n\n"
+    #    "... (deploying)\n"
+    #).format(
+    #    chain_name=dry_run_chain_name,
+    #    data_dir=dry_run_data_dir,
+    #    logfile_path=logfile_path,
+    #)
+    #click.echo(message)
 
-    # Dry run deploy uses max_gas
-    dry_run_contracts = deploy_contracts(
-        deploy_client=client,
-        contracts=contracts,
-        deploy_at_block=1,
-        max_wait_for_deploy=60,
-        from_address=None,
-        max_wait=60,
-        contracts_to_deploy=contracts_to_deploy,
-        dependencies=None,
-        constructor_args=None,
-        deploy_gas=None,
-    )
-    validate_deployed_contracts(client, dry_run_contracts)
+    ## Dry run deploy uses max_gas
+    #dry_run_contracts = deploy_contracts(
+    #    deploy_client=client,
+    #    contracts=contracts,
+    #    deploy_at_block=1,
+    #    max_wait_for_deploy=60,
+    #    from_address=None,
+    #    max_wait=60,
+    #    contracts_to_deploy=contracts_to_deploy,
+    #    dependencies=None,
+    #    constructor_args=None,
+    #    deploy_gas=None,
+    #)
+    #validate_deployed_contracts(client, dry_run_contracts)
 
-    echo_post_deploy_message(client, dry_run_contracts)
+    #echo_post_deploy_message(client, dry_run_contracts)
 
-    dry_run_proc.send_signal(signal.SIGINT)
-    # Give the subprocess a SIGINT and give it a few seconds to
-    # cleanup.
-    utils.wait_for_popen(dry_run_proc)
+    #dry_run_proc.send_signal(signal.SIGINT)
+    ## Give the subprocess a SIGINT and give it a few seconds to
+    ## cleanup.
+    #utils.wait_for_popen(dry_run_proc)
 
-    def get_deploy_gas(contract_name, contract_class):
-        max_gas = int(client.get_max_gas() * 0.98)
-        receipt = dry_run_contracts._deploy_receipts.get(contract_name)
-        if receipt is None:
-            return max_gas
-        gas_used = int(receipt['gasUsed'], 16)
-        return min(max_gas, int(gas_used * 1.1))
+    #def get_deploy_gas(contract_name, contract_class):
+    #    max_gas = int(client.get_max_gas() * 0.98)
+    #    receipt = dry_run_contracts._deploy_receipts.get(contract_name)
+    #    if receipt is None:
+    #        return max_gas
+    #    gas_used = int(receipt['gasUsed'], 16)
+    #    return min(max_gas, int(gas_used * 1.1))
 
-    deploy_gas = get_deploy_gas
+    #deploy_gas = get_deploy_gas
 
     #
     # Actual deploy
     #
-    contracts = package_contracts(utils.load_contracts(project_dir))
-
     if not production:
         data_dir = get_geth_data_dir(project_dir, "default")
         logfile_path = get_geth_logfile_path(

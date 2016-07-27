@@ -10,18 +10,8 @@ from web3 import (
     Web3,
     IPCProvider,
 )
-from web3.providers.rpc import (
-    TestRPCProvider,
-)
 
-from populus.utils.networking import (
-    get_open_port,
-)
-from populus.utils.transactions import (
-    get_block_gas_limit,
-)
 from populus.utils.contracts import (
-    package_contracts,
     load_compiled_contract_json,
 )
 from populus.compilation import (

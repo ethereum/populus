@@ -1,6 +1,4 @@
 import os
-import signal
-import random
 
 import gevent
 import click
@@ -60,7 +58,7 @@ def chain_run(name, mine, verbosity):
     """
     project_dir = os.getcwd()
 
-    with dev_geth_process(project_dir, name) as geth:
+    with dev_geth_process(project_dir, name):
         try:
             while True:
                 gevent.sleep(0)

@@ -5,8 +5,10 @@ import signal
 
 from web3 import (
     Web3,
-    TesterRPCProvider,
     IPCProvider,
+)
+from web3.providers.rpc import (
+    TestRPCProvider,
 )
 
 from populus.utils.networking import (
@@ -15,6 +17,8 @@ from populus.utils.networking import (
 from populus.utils.contracts import (
     package_contracts,
     load_compiled_contract_json,
+)
+from populus.compilation import (
     compile_and_write_contracts,
 )
 from populus.deployment import (
@@ -84,23 +88,15 @@ def deploy(chain, confirm, compile, optimize, contracts_to_deploy):
     compiled_contract = load_compiled_contract_json(project_dir)
 
     # TODO: web3 setup should happen up at the `main` level
-    dry_run_web3 = Web3(TesterRPCProvider(port=get_open_port()))
+    dry_run_web3 = Web3(TestRPCProvider(port=get_open_port()))
 
     dry_run_contracts = package_contracts(dry_run_web3, compiled_contract)
 
     dry_run_deployed_contracts = deploy_contracts(
         web3=dry_run_web3,
         all_contracts=dry_run_contracts,
-        max_wait,
+        max_wait=max_wait,
     )
-
-def deploy_contracts(web3,
-                     all_contracts,
-                     contracts_to_deploy=None,
-                     txn_defaults=None,
-                     constructor_args=None,
-                     contract_addresses=None,
-                     max_wait=0):
 
     #
     # TODO: Dry run to figure out gas costs.

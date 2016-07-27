@@ -32,6 +32,7 @@ setup(
         "py-geth>=0.5.0",
         "web3>=1.3.0",
         "pysha3>=0.3",
+        "gevent>=1.1.1",
     ],
     license="MIT",
     zip_safe=False,

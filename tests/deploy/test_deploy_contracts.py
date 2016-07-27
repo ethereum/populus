@@ -5,7 +5,7 @@ from populus.deployment import (
 
 def test_single_contract_deployment(web3, MATH):
     contracts = {'Math': MATH}
-    deployed_contracts = deploy_contracts(web3, contracts, max_wait=1)
+    deployed_contracts = deploy_contracts(web3, contracts, timeout=1)
 
     assert len(deployed_contracts) == 1
 
@@ -18,7 +18,7 @@ def test_multi_contract_deployment(web3, MATH, SIMPLE_CONSTRUCTOR):
         'Math': MATH,
         'SimpleConstructor': SIMPLE_CONSTRUCTOR,
     }
-    deployed_contracts = deploy_contracts(web3, contracts, max_wait=1)
+    deployed_contracts = deploy_contracts(web3, contracts, timeout=1)
 
     assert len(deployed_contracts) == 2
 
@@ -39,7 +39,7 @@ def test_deployment_with_constructor_arguments(web3, WITH_CONSTRUCTOR_ARGUMENTS)
         constructor_args={
             'WithConstructorArguments': [1234, "abcd"],
         },
-        max_wait=1,
+        timeout=1,
     )
 
     assert len(deployed_contracts) == 1

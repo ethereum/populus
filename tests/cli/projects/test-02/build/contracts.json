@@ -1,19 +1,18 @@
 {
     "owned": {
-        "code": "0x60606040525b33600060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908302179055505b600a80603e6000396000f30060606040526008565b00",
-        "info": {
-            "abiDefinition": [
-                {
-                    "inputs": [],
-                    "type": "constructor"
-                }
-            ],
-            "compilerVersion": "0.9.73",
-            "developerDoc": null,
+        "abi": [
+            {
+                "inputs": [],
+                "type": "constructor"
+            }
+        ],
+        "code": "0x606060405260008054600160a060020a0319163317905560068060226000396000f3606060405200",
+        "code_runtime": "0x606060405200",
+        "meta": {
+            "compilerVersion": "0.3.5-9da08ac3",
             "language": "Solidity",
-            "languageVersion": "0",
-            "source": "contract owned {\n        address owner;\n\n        function owned() {\n                owner = msg.sender;\n        }\n}\n",
-            "userDoc": null
-        }
+            "languageVersion": "0"
+        },
+        "source": null
     }
 }

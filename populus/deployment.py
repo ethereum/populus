@@ -23,13 +23,15 @@ def deploy_contracts(web3,
                      txn_defaults=None,
                      constructor_args=None,
                      contract_addresses=None,
-                     max_wait=0):
+                     timeout=0):
     """
     Do a full synchronous deploy of all project contracts or a subset of the
     contracts.
 
     1. Wait for whatever block number was specified (in
     """
+    deploy_transactions = {}
+
     if contract_addresses is None:
         contract_addresses = {}
 
@@ -101,17 +103,23 @@ def deploy_contracts(web3,
         contract_addresses[contract_name] = get_contract_address_from_txn(
             web3,
             deploy_txn,
-            max_wait=max_wait,
+            timeout=timeout,
         )
+        deploy_transactions[contract_name] = deploy_txn
 
     package_data = {
         contract_name: dict(
-            address=contract_addresses[contract_name], **all_contracts[contract_name]
+            address=contract_addresses[contract_name],
+            **all_contracts[contract_name]
         )
         for contract_name in contract_addresses
     }
 
-    return package_contracts(web3, package_data)
+    contracts = package_contracts(web3, package_data)
+    for contract_name, contract in contracts:
+        contract.deploy_txn_hash = deploy_transactions[contract_name]
+
+    return contracts
 
 
 def validate_deployed_contracts(web3, contracts):

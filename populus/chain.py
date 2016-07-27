@@ -44,9 +44,11 @@ class LocalChainGethProcess(InterceptedStreamsMixin, _DevGethProcess):
         self.register_stderr_callback(functools.partial(click.echo, err=True))
 
 
+@contextlib.contextmanager
 def dev_geth_process(project_dir, chain_name):
     blockchains_dir = get_blockchains_dir(project_dir)
-    return LocalChainGethProcess(chain_name=chain_name, base_dir=blockchains_dir)
+    with LocalChainGethProcess(chain_name=chain_name, base_dir=blockchains_dir) as geth:
+        yield geth
 
 
 class TestingGethProcess(LoggingMixin, _DevGethProcess):

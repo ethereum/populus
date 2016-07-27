@@ -1,5 +1,4 @@
 import subprocess
-import itertools
 import functools
 import yaml
 import re
@@ -70,19 +69,12 @@ def solc(source=None, input_files=None, add_std=True,
 
     sorted_contracts = sorted(contracts.items(), key=lambda c: c[0])
 
-    compiler_version = solc_version()
-
     return {
         contract_name: {
             'abi': contract_data['abi'],
             'code': add_0x_prefix(contract_data['bin']),
             'code_runtime': add_0x_prefix(contract_data['bin-runtime']),
             'source': source,
-            'meta': {
-                'compilerVersion': compiler_version,
-                'language': 'Solidity',
-                'languageVersion': '0',
-            },
         }
         for contract_name, contract_data
         in sorted_contracts

@@ -34,6 +34,7 @@ setup(
         "pysha3>=0.3",
         "gevent>=1.1.1",
         "py-solc==0.2.0",
+        "eth-testrpc==0.4.2",
     ],
     license="MIT",
     zip_safe=False,

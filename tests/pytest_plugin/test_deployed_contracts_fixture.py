@@ -1,12 +1,8 @@
-import pytest
+def test_deployed_contracts_fixture(request, project_dir, write_project_file, MATH):
+    write_project_file('contracts/Math.sol', MATH['source'])
 
+    deployed_contracts = request.getfuncargvalue('deployed_contracts')
 
-@pytest.fixture(autouse=True)
-def project_contracts(project_dir, write_project_file, MATH_SOURCE):
-    write_project_file('contracts/Math.sol', MATH_SOURCE)
-
-
-def test_deployed_contracts_fixture_with_ethtester(deployed_contracts):
     math = deployed_contracts.Math
     assert math.address
 

@@ -5,9 +5,7 @@ import pytest
 
 from web3 import Web3
 
-from populus.utils.filesystem import (
-    tempdir,
-)
+from populus.deployment import deploy_contracts
 from populus.utils.networking import (
     get_open_port,
     wait_for_http_connection,
@@ -49,16 +47,6 @@ class PopulusConfig(object):
     def __getattr__(self, name):
         return self.get(name)
 
-    # RPC Config
-    @property
-    def _rpc_port(self):
-        return get_open_port()
-
-    _rpc_host = '127.0.0.1'
-
-    # IPC Config
-    _ipc_path = None
-
     # Contract source
     @property
     def _project_dir(self):
@@ -68,25 +56,9 @@ class PopulusConfig(object):
     _web3_provider = 'tester'
 
     # Deployed Contracts
-    _deploy_wait_for_block = 0
-    _deploy_wait_for_block_max_wait = 70
-    _deploy_address = None
     _deploy_max_wait = 70
-    _deploy_contracts = set()
-    _deploy_dependencies = {}
+    _contracts_to_deploy = set()
     _deploy_constructor_args = {}
-    _deploy_gas_limit = None
-
-    # Geth
-    @property
-    def _geth_base_dir(self):
-        return str(self.tmpdir.mkdir("project-dir"))
-
-    _geth_chain_name = 'default-test'
-    _geth_reset_chain = True
-    _geth_num_accounts = 1
-
-    _geth_max_wait = 5
 
 
 @pytest.fixture()
@@ -160,12 +132,8 @@ def contracts(populus_config, web3):
 
 
 @pytest.fixture()
-def deployed_contracts(populus_config, web3, contracts):
-    # TODO; fix this.
-    from populus.deployment import deploy_contracts
-
+def deployed_contracts(populus_config, web3):
     deploy_max_wait = int(populus_config['deploy_max_wait'])
-
     contracts_to_deploy = set(populus_config['contracts_to_deploy'])
     deploy_constructor_args = populus_config['deploy_constructor_args']
 
@@ -173,7 +141,7 @@ def deployed_contracts(populus_config, web3, contracts):
 
     _deployed_contracts = deploy_contracts(
         web3,
-        contracts=compiled_contracts,
+        all_contracts=compiled_contracts,
         contracts_to_deploy=contracts_to_deploy,
         constructor_args=deploy_constructor_args,
         timeout=deploy_max_wait,

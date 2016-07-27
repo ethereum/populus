@@ -91,7 +91,7 @@ def deploy_contracts(web3,
     if txn_defaults is None:
         txn_defaults = {}
 
-    if contracts_to_deploy is None:
+    if not contracts_to_deploy:
         contracts_to_deploy = tuple(all_contracts.keys())
 
     # Extract and dependencies that exist due to library linking.

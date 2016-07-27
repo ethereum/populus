@@ -33,6 +33,7 @@ setup(
         "web3>=1.3.0",
         "pysha3>=0.3",
         "gevent>=1.1.1",
+        "py-solc==0.2.0",
     ],
     license="MIT",
     zip_safe=False,

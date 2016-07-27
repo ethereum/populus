@@ -5,9 +5,21 @@ import pytest
 
 from web3 import Web3
 
+from populus.utils.filesystem import (
+    tempdir,
+)
 from populus.utils.networking import (
     get_open_port,
     wait_for_http_connection,
+)
+from populus.utils.contracts import (
+    package_contracts,
+)
+from populus.compilation import (
+    compile_and_write_contracts,
+)
+from populus.chain import (
+    testing_geth_process,
 )
 
 
@@ -83,7 +95,7 @@ def populus_config(request, tmpdir):
 
 
 @contextlib.contextmanager
-def setup_tester_rpc_provider():
+def setup_tester_rpc_provider(project_dir, test_name):
     from testrpc import testrpc
     from web3.providers.rpc import TestRPCProvider
 
@@ -103,13 +115,10 @@ def setup_tester_rpc_provider():
 
 
 @contextlib.contextmanager
-def setup_rpc_provider():
+def setup_rpc_provider(project_dir, test_name):
     from web3.providers.rpc import RPCProvider
 
-    with tempdir() as base_dir:
-        geth = GethProcess('testing', base_dir=base_dir)
-        geth.start()
-        wait_for_http_connection(geth.rpc_port)
+    with testing_geth_process(project_dir, test_name) as geth:
         provider = RPCProvider(port=geth.rpc_port)
         provider._geth = geth
         yield provider
@@ -117,21 +126,17 @@ def setup_rpc_provider():
 
 
 @contextlib.contextmanager
-def setup_ipc_provider():
+def setup_ipc_provider(project_dir, test_name):
     from web3.providers.ipc import IPCProvider
 
-    with tempdir() as base_dir:
-        geth = GethProcess('testing', base_dir=base_dir)
-        geth.start()
-        wait_for_ipc_connection(geth.ipc_path)
+    with testing_geth_process(project_dir, test_name) as geth:
         provider = IPCProvider(geth.ipc_path)
         provider._geth = geth
         yield provider
-        geth.stop()
 
 
 @pytest.yield_fixture()
-def web3(populus_config):
+def web3(request, populus_config):
     if populus_config.web3_provider == "tester":
         setup_fn = setup_tester_rpc_provider
     elif populus_config.web3_provider == "rpc":
@@ -143,48 +148,40 @@ def web3(populus_config):
     else:
         raise ValueError("Unknown param")
 
-    with setup_fn() as provider:
+    with setup_fn(populus_config.project_dir, request.module.__name__) as provider:
         _web3 = Web3(provider)
         yield _web3
 
 
 @pytest.fixture()
-def contracts(request, populus_config):
-    # TODO:
-    assert False
+def contracts(populus_config, web3):
+    _, compiled_contracts, _ = compile_and_write_contracts(populus_config.project_dir)
+    return package_contracts(web3, compiled_contracts)
 
 
 @pytest.fixture()
-def deployed_contracts(request, populus_config, web3, contracts):
+def deployed_contracts(populus_config, web3, contracts):
     # TODO; fix this.
     from populus.deployment import deploy_contracts
 
-    deploy_wait_for_block = int(populus_config['deploy_wait_for_block'])
-    deploy_wait_for_block_max_wait = int(populus_config['deploy_wait_for_block_max_wait'])
-    deploy_address = populus_config['deploy_address'] or web3.eth.coinbase
     deploy_max_wait = int(populus_config['deploy_max_wait'])
 
-    contracts_to_deploy = set(populus_config['deploy_contracts'])
-    declared_dependencies = populus_config['deploy_dependencies']
+    contracts_to_deploy = set(populus_config['contracts_to_deploy'])
     deploy_constructor_args = populus_config['deploy_constructor_args']
 
+    _, compiled_contracts, _ = compile_and_write_contracts(populus_config.project_dir)
+
     _deployed_contracts = deploy_contracts(
-        # TODO: fix call
         web3,
-        contracts=contracts,
-        deploy_at_block=deploy_wait_for_block,
-        max_wait_for_deploy=deploy_wait_for_block_max_wait,
-        from_address=deploy_address,
-        max_wait=deploy_max_wait,
+        contracts=compiled_contracts,
         contracts_to_deploy=contracts_to_deploy,
-        dependencies=declared_dependencies,
         constructor_args=deploy_constructor_args,
+        timeout=deploy_max_wait,
     )
 
     return _deployed_contracts
 
 
-@pytest.fixture(scope="module")
-def accounts(populus_config, request):
-    # TODO
-    assert False
+@pytest.fixture()
+def accounts(web3):
+    return web3.eth.accounts

@@ -1,5 +1,16 @@
 import itertools
 
+from web3 import (
+    Web3,
+    IPCProvider,
+)
+
+from populus.utils.filesystem import (
+    tempdir,
+)
+from populus.utils.transactions import (
+    wait_for_transaction_receipt,
+)
 from populus.utils.formatting import (
     remove_0x_prefix,
 )
@@ -15,6 +26,32 @@ from populus.utils.transactions import (
     get_contract_address_from_txn,
     get_block_gas_limit,
 )
+from .chain import (
+    testing_geth_process,
+)
+
+
+def measure_contract_deploy_gas(contract, txn_defaults=None,
+                                constructor_args=None, timeout=30):
+    if txn_defaults is None:
+        txn_defaults = {}
+
+    if constructor_args is None:
+        constructor_args = []
+    with tempdir() as project_dir:
+        with testing_geth_process(project_dir, 'measure-deploy-gas') as geth:
+            web3 = Web3(IPCProvider(geth.ipc_path))
+            contract = web3.eth.contract(
+                abi=contract.abi,
+                code=contract.code,
+                code_runtime=contract.code_runtime,
+                source=contract.source,
+            )
+
+            deploy_txn_hash = contract.deploy(txn_defaults, constructor_args)
+            deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
+            deploy_receipt = wait_for_transaction_receipt(web3, deploy_txn_hash, timeout)
+            return deploy_txn['gas'], deploy_receipt['gasUsed']
 
 
 def deploy_contracts(web3,

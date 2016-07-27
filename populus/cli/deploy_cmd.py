@@ -14,6 +14,9 @@ from web3.providers.rpc import (
 from populus.utils.networking import (
     get_open_port,
 )
+from populus.utils.transactions import (
+    get_block_gas_limit,
+)
 from populus.utils.contracts import (
     package_contracts,
     load_compiled_contract_json,
@@ -118,7 +121,8 @@ def deploy(chain, confirm, compile, optimize, contracts_to_deploy):
                 return max_gas
 
             gas_used = receipt['gasUsed']
-            return min(max_gas, 110 * gas_used // 100))
+            gas_used_with_buffer = 110 * gas_used // 100
+            return min(max_gas, gas_used_with_buffer)
 
 
         if confirm:

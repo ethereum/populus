@@ -1,14 +1,19 @@
+import random
 import gevent
 
 
-def get_contract_address_from_txn(web3, txn_hash, timeout=0):
+def wait_for_transaction_receipt(web3, txn_hash, timeout=0):
     with gevent.Timeout(timeout):
         while True:
             txn_receipt = web3.eth.getTransactionReceipt(txn_hash)
-            if txn_receipt is None:
-                continue
-            else:
+            if txn_receipt is not None:
                 break
+            gevent.sleep(random.random())
+    return txn_receipt
+
+
+def get_contract_address_from_txn(web3, txn_hash, timeout=0):
+    txn_receipt = wait_for_transaction_receipt(web3, txn_hash, timeout)
 
     return txn_receipt['contractAddress']
 

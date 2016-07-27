@@ -17,9 +17,12 @@ env:
     - TOX_ENV=py35
     - TOX_ENV=flake8
 cache:
-  - pip
+  - pip: true
   - directories:
+    - $HOME/.ethash
     - .tox/py27/.hypotheses
+    - .tox/py34/.hypotheses
+    - .tox/py35/.hypotheses
 install:
   - travis_retry pip install setuptools --upgrade
   - travis_retry pip install tox

@@ -4,7 +4,7 @@ import functools
 import click
 
 from pygeth import (
-    DevGethProcess as _DevGethProcess,
+    DevGethProcess,
     InterceptedStreamsMixin,
     LoggingMixin,
 )
@@ -37,7 +37,7 @@ def reset_chain(data_dir):
     remove_file_if_exists(geth_ipc_path)
 
 
-class LocalChainGethProcess(InterceptedStreamsMixin, _DevGethProcess):
+class LocalChainGethProcess(InterceptedStreamsMixin, DevGethProcess):
     def __init__(self, *args, **kwargs):
         super(LocalChainGethProcess, self).__init__(*args, **kwargs)
         self.register_stdout_callback(click.echo)
@@ -51,7 +51,7 @@ def dev_geth_process(project_dir, chain_name):
         yield geth
 
 
-class TestingGethProcess(LoggingMixin, _DevGethProcess):
+class TestingGethProcess(LoggingMixin, DevGethProcess):
     pass
 
 

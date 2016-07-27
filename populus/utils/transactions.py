@@ -12,6 +12,13 @@ def wait_for_transaction_receipt(web3, txn_hash, timeout=0):
     return txn_receipt
 
 
+def wait_for_block_number(web3, block_number=1, timeout=0):
+    with gevent.Timeout(timeout):
+        while web3.eth.blockNumber < block_number:
+            gevent.sleep(random.random())
+    return web3.eth.getBlock(block_number)
+
+
 def get_contract_address_from_txn(web3, txn_hash, timeout=0):
     txn_receipt = wait_for_transaction_receipt(web3, txn_hash, timeout)
 

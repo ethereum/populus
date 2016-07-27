@@ -1,5 +1,7 @@
 import itertools
 
+from pygeth import DevGethProcess
+
 from web3 import (
     Web3,
     IPCProvider,
@@ -25,28 +27,39 @@ from populus.utils.contracts import (
 from populus.utils.transactions import (
     get_contract_address_from_txn,
     get_block_gas_limit,
-)
-from .chain import (
-    testing_geth_process,
+    wait_for_block_number,
 )
 
 
 def measure_contract_deploy_gas(contract, txn_defaults=None,
                                 constructor_args=None, timeout=30):
+    """
+    Given a web3.eth.contract object measure the deploy gas on a transient geth
+    chain.
+    """
     if txn_defaults is None:
         txn_defaults = {}
 
     if constructor_args is None:
         constructor_args = []
+
     with tempdir() as project_dir:
-        with testing_geth_process(project_dir, 'measure-deploy-gas') as geth:
+        with DevGethProcess(chain_name='measure-deploy-gas', base_dir=project_dir) as geth:
+            geth.wait_for_ipc(30)
+
             web3 = Web3(IPCProvider(geth.ipc_path))
+            txn_defaults.setdefault('gas', get_block_gas_limit(web3))
+            txn_defaults.setdefault('from', geth.accounts[0])
             contract = web3.eth.contract(
                 abi=contract.abi,
                 code=contract.code,
                 code_runtime=contract.code_runtime,
                 source=contract.source,
             )
+
+            # wait for the first block to be mined.
+            geth.wait_for_dag(600)
+            wait_for_block_number(web3, timeout=timeout)
 
             deploy_txn_hash = contract.deploy(txn_defaults, constructor_args)
             deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
@@ -112,6 +125,8 @@ def deploy_contracts(web3,
     if undeployable_contracts:
         raise ValueError("Some contracts do not have code and thus cannot be deployed")
 
+    block_gas_limit = get_block_gas_limit(web3)
+
     for contract_name, contract_data in deploy_order:
         # if the contract has dependencies then link the code.
         if dependency_graph[contract_name]:
@@ -123,17 +138,35 @@ def deploy_contracts(web3,
             abi=contract_data['abi'],
             code=code,
         )
+
+        args = constructor_args.get(contract_name, [])
+        if callable(args):
+            args = args(contract_addresses)
+
         txn = dict(**txn_defaults)
 
         if 'from' not in txn:
             txn['from'] = web3.eth.coinbase
 
         if 'gas' not in txn:
-            txn['gas'] = 90 * get_block_gas_limit(web3) // 100
-
-        args = constructor_args.get(contract_name, [])
-        if callable(args):
-            args = args(contract_addresses)
+            provided_gas, deploy_gas = measure_contract_deploy_gas(
+                contract,
+                constructor_args=args,
+                timeout=timeout,
+            )
+            if deploy_gas > block_gas_limit:
+                raise ValueError(
+                    "The contract `{0}` requires {1} deploy gas which exceeds "
+                    "the block gas limit of {2}".format(
+                        contract_name, deploy_gas, block_gas_limit,
+                    )
+                )
+            if provided_gas == deploy_gas:
+                raise ValueError(
+                    "The contract `{0}` is probably throwing an error during "
+                    "deployment.".format(contract_name)
+                )
+            txn['gas'] = min(block_gas_limit, 110 * deploy_gas // 100)
 
         deploy_txn = contract.deploy(txn, args)
 

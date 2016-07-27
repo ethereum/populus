@@ -21,8 +21,18 @@ from .string import (
 
 
 def package_contracts(web3, contracts):
+    constructor_kwargs = {
+        contract_name: {
+            'code': contract_data.get('code'),
+            'code_runtime': contract_data.get('code_runtime'),
+            'abi': contract_data.get('abi'),
+            'source': contract_data.get('source'),
+            'address': contract_data.get('address'),
+        } for contract_name, contract_data in contracts.items()
+    }
     contract_classes = {
-        name: web3.eth.contract(**contract_data) for name, contract_data in contracts.items()
+        name: web3.eth.contract(**contract_data)
+        for name, contract_data in constructor_kwargs.items()
     }
 
     _dict = {

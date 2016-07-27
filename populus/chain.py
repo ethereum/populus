@@ -1,10 +1,11 @@
 import contextlib
+import functools
 
-import gevent
-import requests
+import click
 
 from pygeth import (
     DevGethProcess as _DevGethProcess,
+    InterceptedStreamsMixin,
     LoggingMixin,
 )
 from populus.utils.filesystem import (
@@ -18,6 +19,7 @@ from populus.utils.chain import (
     get_dapp_dir,
     get_nodekey_path,
     get_geth_ipc_path,
+    get_geth_logfile_path,
 )
 
 
@@ -35,25 +37,37 @@ def reset_chain(data_dir):
     remove_file_if_exists(geth_ipc_path)
 
 
-class DevGethProcess(LoggingMixin, _DevGethProcess):
+class LocalChainGethProcess(InterceptedStreamsMixin, _DevGethProcess):
+    def __init__(self, *args, **kwargs):
+        super(LocalChainGethProcess, self).__init__(*args, **kwargs)
+        self.register_stdout_callback(click.echo)
+        self.register_stderr_callback(functools.partial(click.echo, err=True))
+
+
+def dev_geth_process(project_dir, chain_name):
+    blockchains_dir = get_blockchains_dir(project_dir)
+    return LocalChainGethProcess(chain_name=chain_name, base_dir=blockchains_dir)
+
+
+class TestingGethProcess(LoggingMixin, _DevGethProcess):
     pass
 
 
 @contextlib.contextmanager
-def dev_geth_process(project_dir, chain_name):
-    blockchains_dir = get_blockchains_dir(project_dir)
-    with DevGethProcess(chain_name=chain_name, base_dir=blockchains_dir) as geth:
-        yield geth
-
-
-@contextlib.contextmanager
-def testing_geth_process():
-    with tempdir() as project_dir:
-        with dev_geth_process(project_dir, 'tmp-chain') as geth:
-            if geth.is_mining:
-                geth.wait_for_dag(600)
-            if geth.ipc_enabled:
-                geth.wait_for_ipc(30)
-            if geth.rpc_enabled:
-                geth.wait_for_rpc(30)
-            yield geth
+def testing_geth_process(project_dir, test_name):
+    with tempdir() as tmp_project_dir:
+        blockchains_dir = get_blockchains_dir(tmp_project_dir)
+        geth = TestingGethProcess(
+            chain_name='tmp-chain',
+            base_dir=blockchains_dir,
+            stdout_logfile_path=get_geth_logfile_path(project_dir, test_name, 'stdout'),
+            stderr_logfile_path=get_geth_logfile_path(project_dir, test_name, 'stderr'),
+        )
+        with geth as running_geth:
+            if running_geth.is_mining:
+                running_geth.wait_for_dag(600)
+            if running_geth.ipc_enabled:
+                running_geth.wait_for_ipc(30)
+            if running_geth.rpc_enabled:
+                running_geth.wait_for_rpc(30)
+            yield running_geth

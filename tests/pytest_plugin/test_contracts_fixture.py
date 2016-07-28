@@ -1,13 +1,9 @@
-import os
+def test_contracts_fixture(request, project_dir, write_project_file, MATH):
+    write_project_file('contracts/Math.sol', MATH['source'])
 
+    contracts = request.getfuncargvalue('contracts')
 
-project_dir = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)), 'projects', 'test-02',
-)
-
-
-def test_contracts_fixture(contracts):
     assert contracts.Math
-    assert hasattr(contracts.Math, 'add')
-    assert hasattr(contracts.Math, 'multiply7')
-    assert hasattr(contracts.Math, 'return13')
+    assert contracts.Math.code == MATH['code']
+    assert contracts.Math.code_runtime == MATH['code_runtime']
+    assert contracts.Math.abi == MATH['abi']

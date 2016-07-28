@@ -6,12 +6,23 @@ sudo: required
 before_install:
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
-  - sudo apt-get install -y solc
+  - travis_retry sudo apt-get install -y solc
+  - travis_retry sudo apt-get install -y ethereum
+  - mkdir -p $HOME/.ethash
+  - geth makedag 0 $HOME/.ethash
 env:
   matrix:
     - TOX_ENV=py27
+    - TOX_ENV=py34
+    - TOX_ENV=py35
     - TOX_ENV=flake8
-cache: pip
+cache:
+  - pip: true
+  - directories:
+    - $HOME/.ethash
+    - .tox/py27/.hypothesis
+    - .tox/py34/.hypothesis
+    - .tox/py35/.hypothesis
 install:
   - travis_retry pip install setuptools --upgrade
   - travis_retry pip install tox

@@ -1,5 +1,7 @@
 import os
-import time
+import random
+
+import gevent
 
 import click
 
@@ -24,11 +26,11 @@ from .main import main
 @click.option(
     '--optimize',
     '-o',
+    default=True,
     is_flag=True,
     help="Enable compile time optimization",
 )
-@click.argument('filters', nargs=-1)
-def compile_contracts(watch, optimize, filters):
+def compile_contracts(watch, optimize):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -43,12 +45,14 @@ def compile_contracts(watch, optimize, filters):
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
 
-    result = compile_and_write_contracts(project_dir, *filters, optimize=optimize)
+    result = compile_and_write_contracts(project_dir, optimize=optimize)
     contract_source_paths, compiled_sources, output_file_path = result
 
-    click.echo("> Found {0} contract source files".format(len(contract_source_paths)))
+    click.echo("> Found {0} contract source files".format(
+        len(contract_source_paths)
+    ))
     for path in contract_source_paths:
-        click.echo("- {0}".format(os.path.basename(path)))
+        click.echo("- {0}".format(os.path.relpath(path)))
     click.echo("")
     click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
     for contract_name in sorted(compiled_sources.keys()):
@@ -60,11 +64,11 @@ def compile_contracts(watch, optimize, filters):
         # The path to watch
         click.echo("============ Watching ==============")
 
-        observer = get_contracts_observer(project_dir, filters, {'optimize': optimize})
+        observer = get_contracts_observer(project_dir, {'optimize': optimize})
         observer.start()
         try:
             while observer.is_alive():
-                time.sleep(1)
+                gevent.sleep(random.random())
         except KeyboardInterrupt:
             observer.stop()
         observer.join()

@@ -12,7 +12,6 @@ Contents:
    populus.overview
    populus.testing
    populus.testing-fixtures
-   populus.contracts
 
    :maxdepth: 2
 

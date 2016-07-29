@@ -62,11 +62,19 @@ The code above declares two tests, ``test_contracts_has_correct_functions`` and
 
 .. code-block:: shell
 
+<<<<<<< HEAD
     $ py.test tests/test_math.py
     ======================================================================================================== test session starts ========================================================================================================
     platform linux2 -- Python 2.7.11+, pytest-2.9.1, py-1.4.31, pluggy-0.3.1
     rootdir: tests, inifile:
     plugins: timeout-0.5, capturelog-0.7, populus-0.8.0
+=======
+    $ py.test -v
+    =================================== test session starts ===================================
+    platform darwin -- Python 2.7.10 -- py-1.4.30 -- pytest-2.7.2 -- /usr/bin/python
+    rootdir: /path/to/my-project, inifile: pytest.ini
+    plugins: populus, capturelog, timeout
+>>>>>>> upstream/master
     collected 2 items
 
     tests/test_math.py ..

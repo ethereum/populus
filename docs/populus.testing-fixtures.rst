@@ -1,7 +1,7 @@
-pytest fixtures provided by Populus
-=======================================
+Test fixtures
+=============
 
-The following fixtures are available for your tests.
+The following `pytest <http://pytest.org>`__ fixtures are available for your tests.
 
 Populus Config
 --------------

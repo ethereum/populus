@@ -4,6 +4,14 @@ populus package
 Submodules
 ----------
 
+populus.chain module
+--------------------
+
+.. automodule:: populus.chain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 populus.cli module
 ------------------
 

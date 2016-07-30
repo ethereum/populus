@@ -92,7 +92,7 @@ def testing_geth_process(project_dir, test_name):
         @pytest.fixture(scope="session")
         def coinbase(web3) -> str:
             '''Get coinbase address of locally running geth.'''
-            return web3.coinbase
+            return web3.eth.coinbase
 
 
     :param project_dir: Directory where chain files and log files are stored

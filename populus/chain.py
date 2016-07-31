@@ -93,7 +93,7 @@ def testing_geth_process(project_dir, test_name):
             # current working directory
             with testing_geth_process(project_dir=os.getcwd(), test_name="test") as geth_proc:
                 # Launched in port 8080
-                web3 = Web3(RPCProvider(host="127.0.0.1", port="8545"))
+                web3 = Web3(RPCProvider(host="127.0.0.1", port=geth_proc.rpc_port))
 
                 # Allow access to sendTransaction() to use coinbase balance
                 # to deploy contracts. Password is from py-geth

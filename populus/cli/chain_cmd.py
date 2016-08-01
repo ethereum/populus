@@ -57,7 +57,7 @@ def chain_run(name, mine, verbosity):
     Run a geth node.
     """
     project_dir = os.getcwd()
-   with dev_geth_process(project_dir, name):
+    with dev_geth_process(project_dir, name):
         try:
             while True:
                 gevent.sleep(0)

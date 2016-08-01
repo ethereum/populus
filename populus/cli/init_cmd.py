@@ -2,7 +2,6 @@ import os
 
 import click
 
-from populus import utils
 from populus.utils.filesystem import (
     get_contracts_dir, ensure_path_exists
 )

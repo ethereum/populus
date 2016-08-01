@@ -1,10 +1,24 @@
 Testing
 =======
 
+.. contents:: :local:
+
+Introduction
+------------
+
 The Populus framework provides some powerful utilities for testing your
 contracts.  Testing in Populus is powered by the python testing framework
 ``py.test``.
 
+* Integration tests can be run against
+  `go-ethereum (geth) <https://github.com/ethereum/go-ethereum/>` or any Ethereum
+  JSON-RPC compatible client
+
+* A local geth network can be ramped up on demand to run the tests
+
+* `EVM tester <https://github.com/pipermerriam/ethereum-tester-client>`_
+  can be used for more low level Ethereum virtual machine based
+  testing
 
 Quick Example
 -------------
@@ -77,3 +91,34 @@ The code above declares two tests, ``test_contracts_has_correct_functions`` and
 In the tests above, you may have noticed the use of the pytest fixtures
 ``eth_coinbase``, ``contracts`` and ``deployed_contracts``.  These are provided
 by ``populus`` to help make testing contracts easier.
+
+
+Creating new accounts
+---------------------
+
+You might want to create new Geth accounts to test ETH transfers between accounts and your contracts. Populus internally uses `PyGeth <https://github.com/pipermerriam/py-geth>`_ library for Geth account management.
+
+Example (Python 3):
+
+.. code-block:: python
+
+    import pytest
+
+    from eth_rpc_client import Client
+    from geth.accounts import create_new_account
+
+
+    @pytest.fixture
+    def target_account(client: Client) -> str:
+        """Create external, non-database Ethereum account, that can be used as a withdrawal target.
+
+        :return: 0x address of the account
+        """
+
+        # We store keystore files in the current working directory
+        # of the test run
+        data_dir = os.getcwd()
+        account = create_new_account(data_dir, password="")
+        return account
+
+

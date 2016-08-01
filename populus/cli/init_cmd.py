@@ -2,9 +2,8 @@ import os
 
 import click
 
-from populus import utils
 from populus.utils.filesystem import (
-    get_contracts_dir,
+    get_contracts_dir, ensure_path_exists
 )
 
 from .main import main
@@ -18,7 +17,7 @@ def init():
     project_dir = os.getcwd()
 
     contracts_dir = get_contracts_dir(project_dir)
-    if utils.ensure_path_exists(contracts_dir):
+    if ensure_path_exists(contracts_dir):
         click.echo("Created Directory: ./{0}".format(os.path.relpath(contracts_dir)))
 
     example_contract_path = os.path.join(contracts_dir, 'Example.sol')
@@ -28,7 +27,7 @@ def init():
         click.echo("Created Example Contract: ./{0}".format(os.path.relpath(example_contract_path)))  # NOQA
 
     tests_dir = os.path.join(project_dir, 'tests')
-    if utils.ensure_path_exists(tests_dir):
+    if ensure_path_exists(tests_dir):
         click.echo("Created Directory: ./{0}".format(os.path.relpath(tests_dir)))
 
     example_tests_path = os.path.join(tests_dir, 'test_example.py')

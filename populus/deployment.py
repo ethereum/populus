@@ -1,6 +1,6 @@
 import itertools
 
-from pygeth import DevGethProcess
+from geth import DevGethProcess
 
 from web3 import (
     Web3,

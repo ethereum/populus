@@ -2,7 +2,7 @@ import os
 
 import click
 
-from pygeth import (
+from geth import (
     DevGethProcess,
 )
 

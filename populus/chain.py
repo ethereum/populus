@@ -3,7 +3,7 @@ import functools
 
 import click
 
-from pygeth import (
+from geth import (
     DevGethProcess,
     InterceptedStreamsMixin,
     LoggingMixin,

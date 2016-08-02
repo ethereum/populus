@@ -32,7 +32,7 @@ setup(
         "toposort>=1.4",
         "web3>=1.3.0",
         "pysha3>=0.3",
-        "py-geth>=0.5.0",
+        "py-geth>=0.7.0",
         "py-solc>=0.2.0",
         "eth-testrpc>=0.4.2",
     ],

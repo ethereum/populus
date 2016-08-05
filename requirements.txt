@@ -1,5 +1,6 @@
 click>=5.1
 eth-testrpc>=0.6.0
+ethereum-tester-client>=0.8.0
 gevent>=1.1.1
 py-geth>=0.8.0
 py-solc>=0.3.0

@@ -1,3 +1,4 @@
+import re
 import sys
 
 
@@ -39,3 +40,13 @@ def is_object(obj):
 
 def is_array(obj):
     return isinstance(obj, list)
+
+
+def is_hex_address(value):
+    from .string import force_text
+    return is_string(value) and re.match(r'^(0x)?[a-fA-F0-9]{40}$', force_text(value))
+
+
+def is_hex_transaction_hash(value):
+    from .string import force_text
+    return is_string(value) and re.match(r'^(0x)?[a-fA-F0-9]{64}$', force_text(value))

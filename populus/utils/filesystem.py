@@ -63,6 +63,15 @@ def get_blockchains_dir(project_dir):
     return blockchains_dir
 
 
+MIGRATIONS_DIR = "./migrations/"
+
+
+def get_migrations_dir(project_dir):
+    migrations_dir = os.path.abspath(os.path.join(project_dir, MIGRATIONS_DIR))
+    ensure_path_exists(migrations_dir)
+    return migrations_dir
+
+
 def is_executable_available(program):
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)

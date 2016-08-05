@@ -10,7 +10,10 @@ from populus.utils.transactions import (
     get_block_gas_limit,
 )
 
-from .registrar import REGISTRAR_SOURCE
+from .registrar import (
+    REGISTRAR_SOURCE,
+    Address,
+)
 
 
 class Operation(object):
@@ -53,7 +56,9 @@ class SendTransaction(Operation):
             wait_for_transaction_receipt(
                 web3, transaction_hash, timeout=self.timeout,
             )
-        return transaction_hash
+        return {
+            'transaction-hash': transaction_hash,
+        }
 
 
 class DeployContract(Operation):
@@ -224,11 +229,21 @@ class TransactContract(Operation):
         transaction_hash = method(*self.arguments)
 
         if self.timeout is not None:
-            wait_for_transaction_receipt(
+            contract_address = get_contract_address_from_txn(
                 web3, transaction_hash, timeout=self.timeout,
             )
-
-        return transaction_hash
+            return {
+                'contract-address': contract_address,
+                'deploy-transaction-hash': transaction_hash,
+                'canonical-contract-address': Address.defer(
+                    key=self.contract_name,
+                    value=contract_address,
+                ),
+            }
+        else:
+            return {
+                'deploy-transaction-hash': transaction_hash,
+            }
 
 
 class DeployRegistrar(DeployContract):

@@ -142,20 +142,27 @@ class DeployContract(Operation):
         )
 
         if self.timeout is not None:
-            wait_for_transaction_receipt(
-                web3, deploy_transaction_hash, timeout=self.timeout,
-            )
-
-        if self.verify:
             contract_address = get_contract_address_from_txn(
                 web3, deploy_transaction_hash, timeout=self.timeout,
             )
-            code = web3.eth.getCode(contract_address)
-            if force_text(code) != force_text(ContractFactory.code_runtime):
-                raise ValueError(
-                    "An error occured during deployment of the contract."
-                )
-        return deploy_transaction_hash
+            if self.verify:
+                code = web3.eth.getCode(contract_address)
+                if force_text(code) != force_text(ContractFactory.code_runtime):
+                    raise ValueError(
+                        "An error occured during deployment of the contract."
+                    )
+            return {
+                'contract-address': contract_address,
+                'deploy-transaction-hash': deploy_transaction_hash,
+                'canonical-contract-address': Address.defer(
+                    key='/'.join(('contract', self.contract_name)),
+                    value=contract_address,
+                ),
+            }
+
+        return {
+            'deploy-transaction-hash': deploy_transaction_hash,
+        }
 
 
 class TransactContract(Operation):
@@ -173,7 +180,7 @@ class TransactContract(Operation):
                  transaction=None,
                  contract_address=None,  # TODO: this should come from the resolver.
                  auto_gas=True,
-                 timeout=30):
+                 timeout=120):
         self.contract_address = contract_address
         self.contract_name = contract_name
         self.method_name = method_name
@@ -229,21 +236,13 @@ class TransactContract(Operation):
         transaction_hash = method(*self.arguments)
 
         if self.timeout is not None:
-            contract_address = get_contract_address_from_txn(
+            wait_for_transaction_receipt(
                 web3, transaction_hash, timeout=self.timeout,
             )
-            return {
-                'contract-address': contract_address,
-                'deploy-transaction-hash': transaction_hash,
-                'canonical-contract-address': Address.defer(
-                    key=self.contract_name,
-                    value=contract_address,
-                ),
-            }
-        else:
-            return {
-                'deploy-transaction-hash': transaction_hash,
-            }
+
+        return {
+            'deploy-transaction-hash': transaction_hash,
+        }
 
 
 class DeployRegistrar(DeployContract):

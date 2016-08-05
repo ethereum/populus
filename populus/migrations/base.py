@@ -1,9 +1,5 @@
 from toposort import toposort
 
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-)
-
 from .validation import (
     validate_all_migrations_have_ids,
     validate_migration_id_uniqueness,
@@ -12,6 +8,7 @@ from .validation import (
 from .registrar import (
     get_compiled_registrar_contract,
     generate_registrar_value_setters,
+    Bool,
 )
 
 
@@ -28,13 +25,16 @@ class Migration(object):
         if not self.migration_id:
             raise ValueError("Migrations must have a migration id.")
 
-        registrar = get_compiled_registrar_contract(web3, address=registrar_address)
+        registrar = get_compiled_registrar_contract(
+            web3,
+            address=registrar_address,
+        )
 
-        migration_registrar_key = "migration/{migration_id}".format(
+        migration_key = "migration/{migration_id}".format(
             migration_id=self.migration_id,
         )
 
-        if registrar.call().exists(migration_registrar_key):
+        if registrar.call().exists(migration_key):
             raise ValueError("This migration has already been run")
 
         for operation_index, operation in enumerate(self.operations):
@@ -44,20 +44,20 @@ class Migration(object):
                 registrar=registrar,
             )
             if operation_receipt:
-                key_prefix = "migration/{migration_id}/operation/{operation_index}".format(
-                    migration_id=self.migration_id,
+                operation_key = "{prefix}/operation/{operation_index}".format(
+                    prefix=migration_key,
                     operation_index=operation_index,
                 )
                 registrar_setters = generate_registrar_value_setters(
                     operation_receipt,
-                    prefix=key_prefix,
+                    prefix=operation_key,
                 )
-                for setter in registrar_setters:
-                    setter.bind(registrar)
-                    setter.set()
-                    print("setting:", setter.key, setter.value)
-        migration_complete_txn = registrar.transact().setBool(migration_registrar_key, True)
-        wait_for_transaction_receipt(web3, migration_complete_txn, timeout=30)
+                for Setter in registrar_setters:
+                    Setter(registrar).set()
+
+                Bool(registrar, key=operation_key, value=True).set()
+
+        Bool(registrar, key=migration_key, value=True).set()
 
 
 def sort_migrations(migration_classes):

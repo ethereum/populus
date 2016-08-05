@@ -340,14 +340,16 @@ def CONTRACTS(MATH,
 @pytest.fixture()
 def registrar(web3):
     from populus.migrations.registrar import (
-        DeployRegistrar,
         get_compiled_registrar_contract,
+    )
+    from populus.migrations.operations import (
+        DeployRegistrar,
     )
     from populus.utils.transactions import (
         get_contract_address_from_txn,
     )
-    registrar_deploy_txn = DeployRegistrar().execute(web3=web3)
-    registrar_address = get_contract_address_from_txn(web3, registrar_deploy_txn, timeout=30)
+    operation_receipt = DeployRegistrar().execute(web3=web3)
+    registrar_address = operation_receipt['contract-address']
 
     assert registrar_address
 

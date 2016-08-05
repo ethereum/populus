@@ -204,7 +204,13 @@ class RegistrarValue(object):
             self.value_type,
         ))
 
-    def set(self, value, timeout=30):
+    def set(self, value=None, timeout=120):
+        if value is None:
+            if self.value is not None:
+                value = self.value
+            else:
+                raise ValueError("No value provided")
+
         transactor = self.registrar.transact()
 
         if self.value_type == 'string':

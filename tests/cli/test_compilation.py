@@ -15,7 +15,7 @@ def test_compiling(project_dir, write_project_file):
         write_project_file(filename, source)
 
     runner = CliRunner()
-    result = runner.invoke(main, ['compile','-r','ast'])
+    result = runner.invoke(main, ['compile','-s','abi', '-s', 'userdoc'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
     assert 'owned.sol' in result.output

@@ -16,6 +16,7 @@ from solc.main import ALL_OUTPUT_VALUES
 
 from .main import main
 
+
 @main.command('compile')
 @click.option(
     '--watch',
@@ -48,13 +49,10 @@ def compile_contracts(watch, optimize, solc_overrides):
     specify only named contracts in the specified file.
     """
     project_dir = os.getcwd()
-    print(solc_overrides)
     output_values = [r for r in solc_overrides]
-    print(output_values)
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
-    result = compile_and_write_contracts(project_dir, optimize=optimize, output_values=output_values
-                                        )
+    result = compile_and_write_contracts(project_dir, optimize=optimize, output_values=output_values)
     contract_source_paths, compiled_sources, output_file_path = result
 
     click.echo("> Found {0} contract source files".format(

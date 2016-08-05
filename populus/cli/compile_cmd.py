@@ -31,12 +31,13 @@ from .main import main
     help="Enable compile time optimization",
 )
 @click.option(
-    '--removeflag',
-    '-r',
+    '--solc_overrides',
+    '-s',
     type=click.Choice(ALL_OUTPUT_VALUES),
-    help="You can remove an output flag"
+    help="Choose among the various output values which output you want",
+    multiple=True
 )
-def compile_contracts(watch, optimize, removeflag):
+def compile_contracts(watch, optimize, solc_overrides):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -47,10 +48,13 @@ def compile_contracts(watch, optimize, removeflag):
     specify only named contracts in the specified file.
     """
     project_dir = os.getcwd()
-
+    print(solc_overrides)
+    output_values = [r for r in solc_overrides]
+    print(output_values)
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
-    result = compile_and_write_contracts(project_dir, optimize=optimize, removeflag=removeflag)
+    result = compile_and_write_contracts(project_dir, optimize=optimize, output_values=output_values
+                                        )
     contract_source_paths, compiled_sources, output_file_path = result
 
     click.echo("> Found {0} contract source files".format(

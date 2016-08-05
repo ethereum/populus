@@ -28,13 +28,14 @@ from populus.migrations import (
         (Bool, False, 'setBool'),
     )
 )
-def test_registrar_value_getting(web3, registrar, RegistrarValueClass, value, setter):
+def test_registrar_value_getting(web3, registrar, RegistrarValueClass, value,
+                                 setter):
     set_txn = getattr(registrar.transact(), setter)('k', value)
     wait_for_transaction_receipt(web3, set_txn, timeout=30)
 
-    value_proxy = RegistrarValueClass('k')
-    value_proxy.bind(registrar)
+    value_proxy = RegistrarValueClass(registrar, 'k')
     assert value_proxy.get() == value
+
 
 
 @pytest.mark.parametrize(
@@ -51,10 +52,9 @@ def test_registrar_value_getting(web3, registrar, RegistrarValueClass, value, se
         (Bool, False, 'getBool'),
     )
 )
-def test_registrar_value_setting(web3, registrar, RegistrarValueClass, value, getter):
-    value_proxy = RegistrarValueClass('k')
-    value_proxy.bind(registrar)
-
+def test_registrar_value_setting(web3, registrar, RegistrarValueClass, value,
+                                 getter):
+    value_proxy = RegistrarValueClass(registrar, 'k')
     value_proxy.set(value, timeout=30)
 
     chain_value = getattr(registrar.call(), getter)('k')

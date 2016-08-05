@@ -6,9 +6,9 @@ from .operations import (  # noqa
     SendTransaction,
     DeployContract,
     TransactContract,
+    DeployRegistrar,
 )
 from .registrar import (  # noqa
-    DeployRegistrar,
     Address,
     Bytes32,
     String,

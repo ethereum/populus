@@ -1,11 +1,16 @@
-from populus.utils.string import (
+from solc import compile_source
+
+from web3.utils.string import (
     force_text,
 )
+
 from populus.utils.transactions import (
     wait_for_transaction_receipt,
     get_contract_address_from_txn,
     get_block_gas_limit,
 )
+
+from .registrar import REGISTRAR_SOURCE
 
 
 class Operation(object):
@@ -224,3 +229,20 @@ class TransactContract(Operation):
             )
 
         return transaction_hash
+
+
+class DeployRegistrar(DeployContract):
+    def __init__(self, **kwargs):
+        super(DeployRegistrar, self).__init__(
+            contract_name="Registrar",
+            **kwargs
+        )
+
+    def execute(self, web3, **kwargs):
+        kwargs.pop('compiled_contracts', None)
+        compiled_contracts = compile_source(REGISTRAR_SOURCE)
+        return super(DeployRegistrar, self).execute(
+            web3=web3,
+            compiled_contracts=compiled_contracts,
+            **kwargs
+        )

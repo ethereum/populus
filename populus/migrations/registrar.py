@@ -15,8 +15,6 @@ from populus.utils.types import (
     is_hex_transaction_hash,
 )
 
-from .operations import DeployContract
-
 
 REGISTRAR_SOURCE = """contract Registrar {
     address public owner;
@@ -45,9 +43,6 @@ REGISTRAR_SOURCE = """contract Registrar {
     function set(string key, bytes32 value) public onlyowner {
         // Compute the fixed length key
         bytes32 _key = sha3(key);
-
-        // Do not allow overwriting keys
-        if (recordExists[_key]) throw;
 
         // Set the value
         records[_key] = value;
@@ -140,23 +135,6 @@ def get_compiled_registrar_contract(web3, address=None):
     )
 
 
-class DeployRegistrar(DeployContract):
-    def __init__(self, **kwargs):
-        super(DeployRegistrar, self).__init__(
-            contract_name="Registrar",
-            **kwargs
-        )
-
-    def execute(self, web3, **kwargs):
-        kwargs.pop('compiled_contracts', None)
-        compiled_contracts = compile_source(REGISTRAR_SOURCE)
-        return super(DeployRegistrar, self).execute(
-            web3=web3,
-            compiled_contracts=compiled_contracts,
-            **kwargs
-        )
-
-
 ALLOWED_VALUE_TYPES = {
     'string'
     'bytes32',
@@ -168,84 +146,79 @@ ALLOWED_VALUE_TYPES = {
 
 
 class RegistrarValue(object):
+    registrar = None
+
     key = None
     value_type = None
     value = None
 
-    registrar = None
+    @classmethod
+    def defer(cls, key=None, value=None, value_type=None):
+        proxy_dict = {}
 
-    def __init__(self, key, value_type, value=None):
-        self.key = key
-        self.value_type = value_type
-        self.value = value
+        if key is not None:
+            proxy_dict['key'] = key
+        if value is not None:
+            proxy_dict['value'] = value
+        if value_type is not None:
+            proxy_dict['value_type'] = value_type
 
-    def bind(self, registrar):
+        return type('LazyRegistrarValue', (cls,), proxy_dict)
+
+    def __init__(self, registrar, key=None, value=None, value_type=None):
         self.registrar = registrar
 
+        if key is not None:
+            self.key = key
+        if value is not None:
+            self.value = value
+        if value_type is not None:
+            self.value_type = value_type
+
     def exists(self, key):
-        if not self.registrar:
-            raise ValueError("Must bind a registrar before calling this method")
         return self.registrar.call().exists(key)
 
     def get(self):
-        if self.value is None:
-            if not self.registrar:
-                raise ValueError("Must bind a registrar before calling this method")
-
-            if not self.exists(self.key):
-                raise KeyError(
-                    "The given key is not set on the registrar: `{0}`".format(self.key)
-                )
-
-            caller = self.registrar.call()
-
-            if self.value_type == 'string':
-                self.value = caller.getString(self.key)
-            elif self.value_type == 'bytes32':
-                self.value = caller.get(self.key)
-            elif self.value_type == 'address':
-                self.value = caller.getAddress(self.key)
-            elif self.value_type == 'uint256':
-                self.value = caller.getUInt(self.key)
-            elif self.value_type == 'int256':
-                self.value = caller.getInt(self.key)
-            elif self.value_type == 'bool':
-                self.value = caller.getBool(self.key)
-            else:
-                raise ValueError("`value_type` must be one of {0}.  Got: {1}".format(
-                    ', '.join(sorted(ALLOWED_VALUE_TYPES)),
-                    self.value_type,
-                ))
-        return self.value
-
-    def set(self, value=None, timeout=30):
-        if value is None and self.value is None:
-            raise ValueError("Must either provide value during constructor or call to `set`")
-        elif value is not None:
-            self.value = value
-
-        if not self.registrar:
-            raise ValueError("Must bind a registrar before calling this method")
-
-        if self.exists(self.key):
+        if not self.exists(self.key):
             raise KeyError(
-                "The given key is already set on the registrar: `{0}`".format(self.key)
+                "The given key is not set on the registrar: `{0}`".format(self.key)
             )
 
+        caller = self.registrar.call()
+
+        if self.value_type == 'string':
+            return caller.getString(self.key)
+        elif self.value_type == 'bytes32':
+            return caller.get(self.key)
+        elif self.value_type == 'address':
+            return caller.getAddress(self.key)
+        elif self.value_type == 'uint256':
+            return caller.getUInt(self.key)
+        elif self.value_type == 'int256':
+            return caller.getInt(self.key)
+        elif self.value_type == 'bool':
+            return caller.getBool(self.key)
+
+        raise ValueError("`value_type` must be one of {0}.  Got: {1}".format(
+            ', '.join(sorted(ALLOWED_VALUE_TYPES)),
+            self.value_type,
+        ))
+
+    def set(self, value, timeout=30):
         transactor = self.registrar.transact()
 
         if self.value_type == 'string':
-            set_txn_hash = transactor.setString(self.key, self.value)
+            set_txn_hash = transactor.setString(self.key, value)
         elif self.value_type == 'bytes32':
-            set_txn_hash = transactor.set(self.key, self.value)
+            set_txn_hash = transactor.set(self.key, value)
         elif self.value_type == 'address':
-            set_txn_hash = transactor.setAddress(self.key, self.value)
+            set_txn_hash = transactor.setAddress(self.key, value)
         elif self.value_type == 'uint256':
-            set_txn_hash = transactor.setUInt(self.key, self.value)
+            set_txn_hash = transactor.setUInt(self.key, value)
         elif self.value_type == 'int256':
-            set_txn_hash = transactor.setInt(self.key, self.value)
+            set_txn_hash = transactor.setInt(self.key, value)
         elif self.value_type == 'bool':
-            set_txn_hash = transactor.setBool(self.key, self.value)
+            set_txn_hash = transactor.setBool(self.key, value)
         else:
             raise ValueError("`value_type` must be one of {0}.  Got: {1}".format(
                 ', '.join(sorted(ALLOWED_VALUE_TYPES)),
@@ -253,50 +226,37 @@ class RegistrarValue(object):
             ))
 
         if timeout is not None:
-            wait_for_transaction_receipt(self.registrar.web3, set_txn_hash, timeout)
+            wait_for_transaction_receipt(
+                web3=self.registrar.web3,
+                txn_hash=set_txn_hash,
+                timeout=timeout,
+            )
 
         return set_txn_hash
 
 
 class Address(RegistrarValue):
-    def __init__(self, key, value=None):
-        super(Address, self).__init__(key, 'address', value)
+    value_type = 'address'
 
 
 class Bytes32(RegistrarValue):
-    def __init__(self, key, value=None):
-        super(Bytes32, self).__init__(key, 'bytes32', value)
+    value_type = 'bytes32'
 
 
 class UInt(RegistrarValue):
-    def __init__(self, key, value=None):
-        super(UInt, self).__init__(key, 'uint256', value)
+    value_type = 'uint256'
 
 
 class Int(RegistrarValue):
-    def __init__(self, key, value=None):
-        super(Int, self).__init__(key, 'int256', value)
+    value_type = 'int256'
 
 
 class String(RegistrarValue):
-    def __init__(self, key, value=None):
-        super(String, self).__init__(key, 'string', value)
+    value_type = 'string'
 
 
 class Bool(RegistrarValue):
-    def __init__(self, key, value=None):
-        super(Bool, self).__init__(key, 'bool', value)
-
-
-class ReceiptValue(object):
-    def __init__(self, value, value_type):
-        if value_type not in ALLOWED_VALUE_TYPES:
-            raise ValueError("`value_type` must be one of {0}.  Got: {1}".format(
-                ', '.join(sorted(ALLOWED_VALUE_TYPES)),
-                value_type,
-            ))
-        self.value = value
-        self.value_type = value_type
+    value_type = 'bool'
 
 
 def generate_registrar_value_setters(receipt, prefix=None):
@@ -306,22 +266,26 @@ def generate_registrar_value_setters(receipt, prefix=None):
     if is_string(prefix):
         prefix = [prefix]
 
-    if is_hex_address(receipt):
+    if isinstance(receipt, RegistrarValue):
+        raise ValueError("Receipt should not be instantiated at this point")
+    elif is_hex_address(receipt):
         # Special case for addresses
         return [
-            Address(key='/'.join(prefix), value=receipt)
+            Address.defer(key='/'.join(prefix), value=receipt)
         ]
-    if is_hex_transaction_hash(receipt):
+    elif is_hex_transaction_hash(receipt):
         # Special case for transaction hashes and addresses.
         return [
-            Bytes32(key='/'.join(prefix), value=decode_hex(receipt))
+            Bytes32.defer(key='/'.join(prefix), value=decode_hex(receipt))
         ]
-    elif isinstance(receipt, ReceiptValue):
-        return [RegistrarValue(
-            key='/'.join(prefix),
-            value_type=receipt.value_type,
-            value=receipt.value,
-        )]
+    elif isinstance(receipt, type) and issubclass(receipt, RegistrarValue):
+        return [
+            receipt.defer(
+                key=receipt.key or '/'.join(prefix),
+                value_type=receipt.value_type,
+                value=receipt.value,
+            )
+        ]
     elif isinstance(receipt, dict):
         return list(itertools.chain.from_iterable([
             generate_registrar_value_setters(value, prefix + [key])
@@ -333,4 +297,7 @@ def generate_registrar_value_setters(receipt, prefix=None):
             for index, value in enumerate(receipt)
         ]))
     else:
-        raise ValueError("Invalid type.  Must be one of ReceiptValue, dict, or list")
+        raise ValueError(
+            "Invalid type.  Must be one of transaction hash, address, "
+            "ReceiptValue, dict, or list"
+        )

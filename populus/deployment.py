@@ -6,15 +6,15 @@ from web3 import (
     Web3,
     IPCProvider,
 )
+from web3.utils.formatting import (
+    remove_0x_prefix,
+)
 
 from populus.utils.filesystem import (
     tempdir,
 )
 from populus.utils.transactions import (
     wait_for_transaction_receipt,
-)
-from populus.utils.formatting import (
-    remove_0x_prefix,
 )
 from populus.utils.contracts import (
     get_dependency_graph,

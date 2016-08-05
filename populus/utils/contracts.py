@@ -6,17 +6,18 @@ import functools
 
 import toposort
 
+from web3.utils.formatting import (
+    remove_0x_prefix,
+)
+from web3.utils.string import (
+    coerce_args_to_text,
+)
+
 from populus.utils.functional import (
     compose,
 )
-from .formatting import (
-    remove_0x_prefix,
-)
 from .filesystem import (
     get_compiled_contracts_destination_path,
-)
-from .string import (
-    coerce_args_to_text,
 )
 
 

@@ -33,6 +33,7 @@ def write_compiled_sources(project_dir, compiled_sources):
 
 
 def compile_project_contracts(project_dir, **compiler_kwargs):
+    compiler_kwargs.setdefault('output_values', ['bin', 'bin_runtime', 'abi'])
     contract_source_paths = find_project_contracts(project_dir)
     compiled_sources = compile_files(contract_source_paths, **compiler_kwargs)
 

@@ -9,6 +9,10 @@ from populus.utils.transactions import (
     get_contract_address_from_txn,
     get_block_gas_limit,
 )
+from populus.utils.contracts import (
+    find_link_references,
+    link_contract,
+)
 
 from .registrar import (
     REGISTRAR_SOURCE,
@@ -65,6 +69,7 @@ class DeployContract(Operation):
     contract = None
     transaction = None
     timeout = None
+    libraries = None
     verify = None
 
     def __init__(self,
@@ -72,9 +77,13 @@ class DeployContract(Operation):
                  transaction=None,
                  arguments=None,
                  verify=True,
-                 auto_gas=True,
+                 libraries=None,
                  timeout=120):
+        if libraries is None:
+            libraries = {}
+
         self.contract_name = contract_name
+        self.libraries = libraries
 
         if timeout is None and verify:
             raise ValueError(
@@ -91,16 +100,9 @@ class DeployContract(Operation):
                 "values in `DeployContract` transactions."
             )
 
-        if auto_gas and 'gas' in transaction:
-            raise ValueError(
-                "Invalid configuration.  Cannot use `auto_gas` when specifying "
-                "a gas value for a transaction"
-            )
-
         if arguments is None:
             arguments = []
 
-        self.auto_gas = auto_gas
         self.transaction = transaction
         self.arguments = arguments
         self.verify = verify
@@ -110,6 +112,10 @@ class DeployContract(Operation):
 
     def execute(self, web3, compiled_contracts, **kwargs):
         contract_data = compiled_contracts[self.contract_name]
+
+        library_dependencies = find_link_references(contract_data['code'])
+        if self.libraries:
+
         ContractFactory = web3.eth.contract(
             abi=contract_data['abi'],
             code=contract_data['code'],
@@ -117,27 +123,8 @@ class DeployContract(Operation):
             source=contract_data['source'],
         )
 
-        deploy_transaction = dict(**self.transaction)
-
-        if self.auto_gas:
-            gas_estimate_transaction = dict(**self.transaction)
-            deploy_data = ContractFactory.encodeConstructorData(self.arguments)
-            gas_estimate_transaction['data'] = deploy_data
-
-            gas_estimate = web3.eth.estimateGas(gas_estimate_transaction)
-
-            gas_limit = get_block_gas_limit(web3)
-
-            if gas_estimate > gas_limit:
-                raise ValueError(
-                    "Contract does not appear to be delpoyable within the "
-                    "current network gas limits"
-                )
-
-            deploy_transaction['gas'] = min(gas_limit, gas_estimate + 100000)
-
         deploy_transaction_hash = ContractFactory.deploy(
-            deploy_transaction,
+            self.transaction,
             self.arguments,
         )
 
@@ -179,12 +166,10 @@ class TransactContract(Operation):
                  arguments=None,
                  transaction=None,
                  contract_address=None,  # TODO: this should come from the resolver.
-                 auto_gas=True,
                  timeout=120):
         self.contract_address = contract_address
         self.contract_name = contract_name
         self.method_name = method_name
-        self.auto_gas = auto_gas
 
         if arguments is None:
             arguments = []
@@ -193,14 +178,7 @@ class TransactContract(Operation):
         if transaction is None:
             transaction = {}
 
-        if auto_gas and 'gas' in transaction:
-            raise ValueError(
-                "Invalid configuration.  Cannot use `auto_gas` when specifying "
-                "a gas value for a transaction"
-            )
-
         self.transaction = transaction
-        self.auto_gas = True
 
         if timeout is not None:
             self.timeout = timeout
@@ -214,22 +192,6 @@ class TransactContract(Operation):
             code_runtime=contract_data['code_runtime'],
             source=contract_data['source'],
         )
-
-        transaction = dict(**self.transaction)
-
-        if self.auto_gas:
-            gas_estimate_txn = dict(**self.transaction)
-            gas_estimator = contract.estimateGas(gas_estimate_txn)
-            gas_estimate = getattr(gas_estimator, self.method_name)(*self.arguments)
-
-            gas_limit = get_block_gas_limit(web3)
-
-            if gas_estimate > gas_limit:
-                raise ValueError(
-                    "Contract transaction appears to execeed the block gas limit"
-                )
-
-            transaction['gas'] = min(gas_limit, gas_estimate + 100000)
 
         transactor = contract.transact(self.transaction)
         method = getattr(transactor, self.method_name)

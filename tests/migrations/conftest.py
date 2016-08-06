@@ -356,3 +356,99 @@ def registrar(web3):
     registrar = get_compiled_registrar_contract(web3, registrar_address)
 
     return registrar
+
+
+MULTIPLY13_LIBRARY_SOURCE = textwrap.dedent(("""
+library Multiply13 {
+    function multiply13(uint value) returns (uint) {
+        return value * 13;
+    }
+}
+"""))
+
+MULTIPLY13_LIBRARY_CODE = "0x606060405260348060106000396000f36503059da08ac350606060405260e060020a6000350463cdbf9c4281146024575b6007565b600d600435026060908152602090f3"
+
+MULTIPLY13_LIBRARY_RUNTIME = "0x6503059da08ac350606060405260e060020a6000350463cdbf9c4281146024575b6007565b600d600435026060908152602090f3"
+
+MULTIPLY13_LIBRARY_ABI = json.loads('[{"constant":false,"inputs":[{"name":"value","type":"uint256"}],"name":"multiply13","outputs":[{"name":"","type":"uint256"}],"type":"function"}]')
+
+
+@pytest.fixture()
+def LIBRARY_13_SOURCE():
+    return MULTIPLY13_LIBRARY_SOURCE
+
+
+@pytest.fixture()
+def LIBRARY_13_CODE():
+    return MULTIPLY13_LIBRARY_CODE
+
+
+@pytest.fixture()
+def LIBRARY_13_RUNTIME():
+    return MULTIPLY13_LIBRARY_RUNTIME
+
+
+@pytest.fixture()
+def LIBRARY_13_ABI():
+    return MULTIPLY13_LIBRARY_ABI
+
+
+@pytest.fixture()
+def LIBRARY_13(LIBRARY_13_CODE,
+               LIBRARY_13_SOURCE,
+               LIBRARY_13_RUNTIME,
+               LIBRARY_13_ABI):
+    return {
+        'code': LIBRARY_13_CODE,
+        'code_runtime': LIBRARY_13_RUNTIME,
+        'abi': LIBRARY_13_ABI,
+        'source': LIBRARY_13_SOURCE,
+    }
+
+
+MULTIPLY13_CONTRACT_SOURCE = textwrap.dedent(("""
+contract LibraryMath {
+    function multiply13(uint value) returns (uint) {
+        return Multiply13.multiply13(value);
+    }
+}
+"""))
+
+MULTIPLY13_CONTRACT_CODE = "0x606060405260928060106000396000f3606060405260e060020a6000350463cdbf9c428114601a575b005b60896004357fcdbf9c42000000000000000000000000000000000000000000000000000000006060908152606482905260009073__Multiply13____________________________9063cdbf9c42906084906020906024818660325a03f4156002575050604051519392505050565b50604051602090f3"
+
+MULTIPLY13_CONTRACT_RUNTIME = "0x606060405260e060020a6000350463cdbf9c428114601a575b005b60896004357fcdbf9c42000000000000000000000000000000000000000000000000000000006060908152606482905260009073__Multiply13____________________________9063cdbf9c42906084906020906024818660325a03f4156002575050604051519392505050565b50604051602090f3"
+
+MULTIPLY13_CONTRACT_ABI = json.loads('[{"constant":false,"inputs":[{"name":"value","type":"uint256"}],"name":"multiply13","outputs":[{"name":"","type":"uint256"}],"type":"function"}]')
+
+
+@pytest.fixture()
+def MULTIPLY_13_SOURCE():
+    return MULTIPLY13_CONTRACT_SOURCE
+
+
+@pytest.fixture()
+def MULTIPLY_13_CODE():
+    return MULTIPLY13_CONTRACT_CODE
+
+
+@pytest.fixture()
+def MULTIPLY_13_RUNTIME():
+    return MULTIPLY13_CONTRACT_RUNTIME
+
+
+@pytest.fixture()
+def MULTIPLY_13_ABI():
+    return MULTIPLY13_CONTRACT_ABI
+
+
+@pytest.fixture()
+def MULTIPLY_13(MULTIPLY_13_CODE,
+                MULTIPLY_13_RUNTIME,
+                MULTIPLY_13_ABI,
+                MULTIPLY_13_SOURCE):
+    return {
+        'code': MULTIPLY_13_CODE,
+        'code_runtime': MULTIPLY_13_RUNTIME,
+        'abi': MULTIPLY_13_ABI,
+        'source': MULTIPLY_13_SOURCE,
+    }

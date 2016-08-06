@@ -7,7 +7,7 @@ from populus.migrations import (
 )
 
 
-def test_migration_execution(web3, MATH, registrar):
+def test_migrations_store_receipts_on_completion(web3, MATH, registrar):
     class TestMigration(Migration):
         migration_id = '0001_initial'
         dependencies = []

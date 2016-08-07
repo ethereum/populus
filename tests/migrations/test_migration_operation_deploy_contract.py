@@ -2,7 +2,7 @@ import pytest
 
 from populus.migrations import (
     DeployContract,
-    ReceiptValue,
+    Address,
 )
 from populus.utils.transactions import (
     wait_for_transaction_receipt,
@@ -77,7 +77,7 @@ def test_deployment_with_library_linking(web3, LIBRARY_13, MULTIPLY_13, registra
     assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
 
     set_library_addr_txn_hash = registrar.transact().setAddress(
-        'library/Multiply13',
+        'contract/Library13',
         library_13_address,
     )
     wait_for_transaction_receipt(web3, set_library_addr_txn_hash, 30)
@@ -86,16 +86,24 @@ def test_deployment_with_library_linking(web3, LIBRARY_13, MULTIPLY_13, registra
         'Multiply13',
         timeout=30,
         libraries={
-            'Multiply13': ReceiptValue('library/Multiply13'),
-        }
+            'Library13': Address.defer(key='contract/Library13'),
+        },
     )
 
-    assert '__Multiply13__' in Multiply13.code
-    assert '__Multiply13__' in Multiply13.code_runtime
+    assert '__Library13__' in Multiply13.code
+    assert '__Library13__' in Multiply13.code_runtime
 
-    operation_receipt = deploy_contract_operation.execute(
+    operation_receipt = deploy_operation.execute(
         web3=web3,
-        compiled_contracts={'WithConstructorArguments': WITH_CONSTRUCTOR_ARGUMENTS},
+        compiled_contracts={'Multiply13': MULTIPLY_13},
+        registrar=registrar,
     )
     deploy_txn_hash = operation_receipt['deploy-transaction-hash']
     contract_address = get_contract_address_from_txn(web3, deploy_txn_hash, timeout=30)
+
+    lib_contract = web3.eth.contract(address=library_13_address, **LIBRARY_13)
+    _should_be_39 = lib_contract.call().multiply13(3)
+    contract = web3.eth.contract(address=contract_address, **MULTIPLY_13)
+    code = web3.eth.getCode(contract_address)
+    should_be_39 = contract.call().multiply13(3)
+    assert should_be_39 == 39

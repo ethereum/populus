@@ -166,6 +166,9 @@ class RegistrarValue(object):
         return type('LazyRegistrarValue', (cls,), proxy_dict)
 
     def __init__(self, registrar, key=None, value=None, value_type=None):
+        if registrar is None:
+            raise ValueError("Cannot instantiate RegistrarValue without a registrar")
+
         self.registrar = registrar
 
         if key is not None:
@@ -210,6 +213,11 @@ class RegistrarValue(object):
                 value = self.value
             else:
                 raise ValueError("No value provided")
+
+        if not is_string(self.key):
+            raise ValueError("Invalid key type.  Expected string, got: {0!r}".format(
+                type(self.key)
+            ))
 
         transactor = self.registrar.transact()
 
@@ -307,3 +315,12 @@ def generate_registrar_value_setters(receipt, prefix=None):
             "Invalid type.  Must be one of transaction hash, address, "
             "ReceiptValue, dict, or list"
         )
+
+
+def resolve_if_registrar_value(value, registrar):
+    if isinstance(value, RegistrarValue):
+        return value.get()
+    elif isinstance(value, type) and issubclass(value, RegistrarValue):
+        return value(registrar).get()
+    else:
+        return value

@@ -1,3 +1,5 @@
+import functools
+
 from solc import compile_source
 
 from web3.utils.string import (
@@ -7,16 +9,16 @@ from web3.utils.string import (
 from populus.utils.transactions import (
     wait_for_transaction_receipt,
     get_contract_address_from_txn,
-    get_block_gas_limit,
 )
 from populus.utils.contracts import (
-    find_link_references,
+    get_contract_link_dependencies,
     link_contract,
 )
 
 from .registrar import (
     REGISTRAR_SOURCE,
     Address,
+    resolve_if_registrar_value,
 )
 
 
@@ -110,30 +112,39 @@ class DeployContract(Operation):
         if timeout is not None:
             self.timeout = timeout
 
-    def execute(self, web3, compiled_contracts, **kwargs):
+    def execute(self, web3, compiled_contracts, registrar=None, **kwargs):
         contract_data = compiled_contracts[self.contract_name]
 
-        all_known_contract_names = set(self.libraries.keys()) + set(compiled_contracts.keys())
-        expand_fn = functools.partial(
-            expand_shortened_reference_name,
-            full_names=all_known_contract_names,
+        all_known_contract_names = set(self.libraries.keys()).union(
+            set(compiled_contracts.keys())
         )
-        library_dependencies = {
-            expand_fn(name) for name in find_link_references(contract_data['code'])
-        }
-        if library_dependencies:
-            missing_libraries = set(self.libraries.keys()).difference(library_dependencies)
-            if not missing_libraries:
+        link_dependencies = get_contract_link_dependencies(
+            contract_data['code'],
+            all_known_contract_names,
+        )
+
+        if link_dependencies:
+            missing_libraries = set(self.libraries.keys()).difference(link_dependencies)
+            if missing_libraries:
                 raise ValueError(
                     "Missing necessary libraries for linking: {0!r}".format(missing_libraries)
                 )
-            # TODO: resolve the self.libraries references
-            linked_code = link_contract(contract_data['code'], **self.
+            resolve_fn = functools.partial(resolve_if_registrar_value, registrar=registrar)
+            resolved_dependencies = {
+                dependency_name: resolve_fn(value)
+                for dependency_name, value
+                in self.libraries.items()
+            }
+            code = link_contract(contract_data['code'], **resolved_dependencies)
+            runtime = link_contract(contract_data['code_runtime'], **resolved_dependencies)
+        else:
+            code = contract_data.get('code')
+            runtime = contract_data.get('code_runtime')
 
         ContractFactory = web3.eth.contract(
             abi=contract_data['abi'],
-            code=contract_data['code'],
-            code_runtime=contract_data['code_runtime'],
+            code=code,
+            code_runtime=runtime,
             source=contract_data['source'],
         )
 

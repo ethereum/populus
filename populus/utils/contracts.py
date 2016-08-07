@@ -68,40 +68,23 @@ DEPENDENCY_RE = re.compile((
 
 @coerce_args_to_text
 def find_link_references(bytecode):
+    """
+    Given bytecode, this will return all of the unlinked references from within
+    the bytecode.
+
+    The returned names may be truncated to 36 characters.
+    """
     return set(DEPENDENCY_RE.findall(bytecode))
 
 
-def make_link_regex(name):
+def make_link_regex(contract_name):
+    """
+    Returns a regex that will match embedded link references within a
+    contract's bytecode.
+    """
     return re.compile(
-        name[:36].ljust(38, "_").rjust(40, "_")
+        contract_name[:36].ljust(38, "_").rjust(40, "_")
     )
-
-
-def link_contract(code, **dependencies):
-    linker_fn = compose(*(
-        functools.partial(
-            make_link_regex(name).sub,
-            remove_0x_prefix(address),
-        )
-        for name, address in dependencies.items()
-    ))
-    linked_code = linker_fn(code)
-    return linked_code
-
-
-def get_dependency_graph(contracts):
-    expand_fn = functools.partial(
-        expand_shortened_reference_name,
-        full_names=set(contracts.keys()),
-    )
-
-    dependencies = {
-        contract_name: {expand_fn(n) for n in find_link_references(contract_data['code'])}
-        for contract_name, contract_data
-        in contracts.items()
-        if contract_data.get('code') is not None
-    }
-    return dependencies
 
 
 def expand_shortened_reference_name(name, full_names):
@@ -124,18 +107,67 @@ def expand_shortened_reference_name(name, full_names):
         raise ValueError("No valid names found")
 
 
+def link_contract(bytecode, **dependencies):
+    """
+    Given the bytecode for a contract, and it's dependencies in the form of
+    {contract_name: address} this functino returns the bytecode with all of the
+    link references replaced with the dependency addresses.
+    """
+    linker_fn = compose(*(
+        functools.partial(
+            make_link_regex(name).sub,
+            remove_0x_prefix(address),
+        )
+        for name, address in dependencies.items()
+    ))
+    linked_bytecode = linker_fn(bytecode)
+    return linked_bytecode
+
+
+def get_contract_link_dependencies(bytecode, full_contract_names):
+    """
+    Given a contract bytecode and an iterable of all of the known full names of
+    contracts, returns a set of the contract names that this contract bytecode
+    depends on.
+
+    To get the full dependency graph use the `get_recursive_contract_dependencies`
+    function.
+    """
+    expand_fn = functools.partial(
+        expand_shortened_reference_name,
+        full_names=full_contract_names,
+    )
+    return {
+        expand_fn(name) for name in find_link_references(bytecode)
+    }
+
+
+def get_shallow_dependency_graph(contracts):
+    """
+    Given a dictionary of compiled contract data, this returns a *shallow*
+    dependency graph of each contracts explicit link dependencies.
+    """
+    dependencies = {
+        contract_name: get_contract_link_dependencies(contract_data['code'], contracts.keys())
+        for contract_name, contract_data
+        in contracts.items()
+        if contract_data.get('code') is not None
+    }
+    return dependencies
+
+
 def get_contract_deploy_order(dependency_graph):
     return toposort.toposort_flatten(dependency_graph)
 
 
-def get_all_contract_dependencies(contract_name, dependency_graph):
+def get_recursive_contract_dependencies(contract_name, dependency_graph):
     """
     Recursive computation of the linker dependencies for a specific contract
     within a contract dependency graph.
     """
     return set(itertools.chain(
         dependency_graph.get(contract_name, set()), *(
-            get_all_contract_dependencies(dep, dependency_graph)
+            get_recursive_contract_dependencies(dep, dependency_graph)
             for dep in dependency_graph.get(contract_name, set())
         )
     ))

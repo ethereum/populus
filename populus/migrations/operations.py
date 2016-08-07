@@ -113,8 +113,22 @@ class DeployContract(Operation):
     def execute(self, web3, compiled_contracts, **kwargs):
         contract_data = compiled_contracts[self.contract_name]
 
-        library_dependencies = find_link_references(contract_data['code'])
-        if self.libraries:
+        all_known_contract_names = set(self.libraries.keys()) + set(compiled_contracts.keys())
+        expand_fn = functools.partial(
+            expand_shortened_reference_name,
+            full_names=all_known_contract_names,
+        )
+        library_dependencies = {
+            expand_fn(name) for name in find_link_references(contract_data['code'])
+        }
+        if library_dependencies:
+            missing_libraries = set(self.libraries.keys()).difference(library_dependencies)
+            if not missing_libraries:
+                raise ValueError(
+                    "Missing necessary libraries for linking: {0!r}".format(missing_libraries)
+                )
+            # TODO: resolve the self.libraries references
+            linked_code = link_contract(contract_data['code'], **self.
 
         ContractFactory = web3.eth.contract(
             abi=contract_data['abi'],

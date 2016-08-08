@@ -28,7 +28,8 @@ This will create ``html`` and ``assets`` directories in your project root. As
 well as an ``./html/index.html`` document.
 
 
-.. code-block:: shell
+::
+
     ├── project root
     │   ├── html
     │   │   └── index.html
@@ -78,7 +79,9 @@ This will create ``html`` and ``assets`` directories in your project root. As
 well as an ``./html/index.html`` document.
 
 
-.. code-block:: shell
+::
+
+>>>>>>> docs/updates
     ├── project root
     │   ├── html
     │   │   └── index.html

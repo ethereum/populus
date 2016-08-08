@@ -1,6 +1,9 @@
 Chain management
 ================
 
+Managing blockchains from command line
+--------------------------------------
+
 Populus provides a wrapper around ``geth`` to facilitate management of
 ephemeral test chains.  These commands are accessed through ``$ populus chain``
 
@@ -18,3 +21,9 @@ Each blockchain will have one account generated for it.
   blockchain, preserves accounts)
 * ``$ populus chain reset test01`` - Reset the 'test1' chain (truncates the
   blockchain, preserves accounts)
+
+Programmatically launching a new chain
+--------------------------------------
+
+To run a private chain on your local computer see :py:func:`populus.chain.testing_geth_process`.
+

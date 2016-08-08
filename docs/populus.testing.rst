@@ -25,7 +25,7 @@ Quick Example
 
 Lets write a test for the following simple contract.
 
-.. code-block::
+::
 
     # ./contracts/Math.sol
     contract Math {
@@ -49,7 +49,7 @@ Populus expects to find tests in the ``./tests`` directory of your project.
 The only naming requirement of the test module is that it must begin with
 ``test_`` so that it will be found by ``pytest``.
 
-.. code-block::
+::
 
     # ./tests/test_math.py
 

@@ -83,10 +83,9 @@ The code above declares two tests, ``test_contracts_has_correct_functions`` and
     plugins: populus, capturelog, timeout
     collected 2 items
 
-    tests/test_example.py::test_contracts_has_correct_functions PASSED
-    tests/test_example.py::test_contract_function_return_values PASSED
+    tests/test_math.py ..
 
-    ================================ 2 passed in 0.82 seconds =================================
+    ============================================================================================ 2 passed, 2 pytest-warnings in 5.75 seconds ============================================================================================
 
 In the tests above, you may have noticed the use of the pytest fixtures
 ``eth_coinbase``, ``contracts`` and ``deployed_contracts``.  These are provided

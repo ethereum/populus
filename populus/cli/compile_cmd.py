@@ -12,6 +12,7 @@ from populus.compilation import (
 from populus.observers import (
     get_contracts_observer,
 )
+from solc.main import ALL_OUTPUT_VALUES
 
 from .main import main
 
@@ -30,7 +31,14 @@ from .main import main
     is_flag=True,
     help="Enable compile time optimization",
 )
-def compile_contracts(watch, optimize):
+@click.option(
+    '--solc_overrides',
+    '-s',
+    type=click.Choice(ALL_OUTPUT_VALUES),
+    help="Choose among the various output values which output you want",
+    multiple=True
+)
+def compile_contracts(watch, optimize, solc_overrides):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -41,11 +49,10 @@ def compile_contracts(watch, optimize):
     specify only named contracts in the specified file.
     """
     project_dir = os.getcwd()
-
+    output_values = [r for r in solc_overrides]
     click.echo("============ Compiling ==============")
     click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
-
-    result = compile_and_write_contracts(project_dir, optimize=optimize)
+    result = compile_and_write_contracts(project_dir, optimize=optimize, output_values=output_values)
     contract_source_paths, compiled_sources, output_file_path = result
 
     click.echo("> Found {0} contract source files".format(

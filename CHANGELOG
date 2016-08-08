@@ -9,6 +9,7 @@
 - `populus compile` command now runs with `--optimize` enabled by default.
 - Deprecate `<project-dir>/libraries` directory in favor of all source files
   being found within the `<project-dir>/contracts` directory.
+- Deployment gas computations now handled by web3.py
 
 0.8.0
 -----

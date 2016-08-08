@@ -1,7 +1,7 @@
 from populus.migrations.writer import (
-    write_migration,
+    write_primitive_value,
 )
 
 
-def test_migration_writer(project_dir):
+def test_write_primitive_value(project_dir):
     assert False

@@ -12,7 +12,9 @@ from populus.cli import main
 
 
 def test_initializing_project(project_dir):
-    contracts_dir = get_contracts_dir(project_dir),
+    contracts_dir = get_contracts_dir(project_dir)
+
+    os.rmdir(contracts_dir)
 
     expected_paths = (
         contracts_dir,

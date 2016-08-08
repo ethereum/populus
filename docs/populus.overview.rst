@@ -2,6 +2,8 @@ Overview
 ========
 
 Populus is a framework for developing applications for Ethereum.
+It provides both command line application ``populus`` and Python
+libraries to deal with smart contracts.
 
 
 Installation

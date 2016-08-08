@@ -3,6 +3,8 @@ import contextlib
 
 import pytest
 
+import gevent
+
 from web3 import Web3
 
 from populus.deployment import deploy_contracts
@@ -110,18 +112,26 @@ def setup_ipc_provider(project_dir, test_name):
 @pytest.yield_fixture()
 def web3(request, populus_config):
     if populus_config.web3_provider == "tester":
+        # ensure that we are operating in a *modern* version of the vm.
+        from ethereum import config
+        config.default_config['HOMESTEAD_FORK_BLKNUM'] = 0
+
         setup_fn = setup_tester_rpc_provider
     elif populus_config.web3_provider == "rpc":
-        raise NotImplementedError("Not Implemented")
+        #raise NotImplementedError("Not Implemented")
         setup_fn = setup_rpc_provider
     elif populus_config.web3_provider == "ipc":
-        raise NotImplementedError("Not Implemented")
+        #raise NotImplementedError("Not Implemented")
         setup_fn = setup_ipc_provider
     else:
         raise ValueError("Unknown param")
 
     with setup_fn(populus_config.project_dir, request.module.__name__) as provider:
         _web3 = Web3(provider)
+        if populus_config.web3_provider in {"ipc", "rpc"}:
+            with gevent.Timeout(120):
+                while _web3.eth.blockNumber < 1:
+                    gevent.sleep(1)
         yield _web3
 
 

@@ -47,7 +47,7 @@ class LocalChainGethProcess(InterceptedStreamsMixin, DevGethProcess):
 @contextlib.contextmanager
 def dev_geth_process(project_dir, chain_name):
     blockchains_dir = get_blockchains_dir(project_dir)
-    with LocalChainGethProcess(chain_name=chain_name, base_dir=blockchains_dir) as geth:
+    with LocalChainGethProcess(chain_name=chain_name, base_dir=blockchains_dir, overrides={'verbosity': '5', 'suffix_kwargs': ['--rpccorsdomain=*'], 'rpc_addr': 'localhost'}) as geth:
         yield geth
 
 
@@ -127,8 +127,10 @@ def testing_geth_process(project_dir, test_name):
             base_dir=blockchains_dir,
             stdout_logfile_path=get_geth_logfile_path(project_dir, test_name, 'stdout'),
             stderr_logfile_path=get_geth_logfile_path(project_dir, test_name, 'stderr'),
+            overrides={'verbosity': '5', 'suffix_kwargs': ['--rpccorsdomain=*'], 'rpc_addr': 'localhost'},
         )
         with geth as running_geth:
+            print('Geth Port:', running_geth.rpc_port)
             if running_geth.is_mining:
                 running_geth.wait_for_dag(600)
             if running_geth.ipc_enabled:

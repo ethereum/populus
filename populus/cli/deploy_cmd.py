@@ -14,6 +14,9 @@ from web3 import (
 from populus.utils.contracts import (
     load_compiled_contract_json,
 )
+from populus.utils.transactions import (
+    wait_for_block_number,
+)
 from populus.compilation import (
     compile_and_write_contracts,
 )
@@ -89,6 +92,8 @@ def deploy(chain, confirm, compile, optimize, contracts_to_deploy):
         geth.wait_for_ipc(30)
 
         web3 = Web3(IPCProvider(geth.ipc_path))
+
+        wait_for_block_number(web3, 1, 120)
 
         if confirm:
             message = (

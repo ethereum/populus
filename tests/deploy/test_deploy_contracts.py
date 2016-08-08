@@ -53,4 +53,4 @@ def test_deployment_with_constructor_arguments(web3, WITH_CONSTRUCTOR_ARGUMENTS)
     assert a == 1234
 
     b = WithConstructorArguments.call().data_b()
-    assert b"abcd" in b
+    assert "abcd" in b

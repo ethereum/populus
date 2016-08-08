@@ -49,3 +49,6 @@ docs/_build
 
 # Known Contracts
 **/known_contracts.json
+
+# Chains
+chains/

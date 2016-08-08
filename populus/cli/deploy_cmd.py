@@ -84,7 +84,7 @@ def deploy(chain, confirm, compile, optimize, contracts_to_deploy):
     if compile:
         compile_and_write_contracts(project_dir, optimize=optimize)
 
-    compiled_contract = load_compiled_contract_json(project_dir)
+    compiled_contracts = load_compiled_contract_json(project_dir)
 
     # TODO: what if the user wants to run geth themselves.
     with DevGethProcess(chain_name=chain, base_dir=project_dir) as geth:
@@ -107,7 +107,7 @@ def deploy(chain, confirm, compile, optimize, contracts_to_deploy):
 
         deployed_contracts = deploy_contracts(
             web3,
-            compiled_contract,
+            compiled_contracts,
             contracts_to_deploy or None,
             timeout=120,
         )

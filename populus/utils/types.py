@@ -1,10 +1,24 @@
 import re
 
 
-from web3.utils.string import (
+from web3.utils.types import (
     is_string,
+    is_integer,
+    is_boolean,
+)
+from web3.utils.string import (
     force_text,
 )
+
+
+def is_primitive_type(value):
+    return any((
+        value is None,
+        is_boolean(value),
+        is_string(value),
+        is_integer(value),
+        isinstance(value, float),
+    ))
 
 
 def is_hex_address(value):

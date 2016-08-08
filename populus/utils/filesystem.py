@@ -1,8 +1,10 @@
 import os
+import re
 import shutil
 import fnmatch
 import tempfile
 import contextlib
+import glob
 
 
 def ensure_path_exists(dir_path):
@@ -66,10 +68,32 @@ def get_blockchains_dir(project_dir):
 MIGRATIONS_DIR = "./migrations/"
 
 
-def get_migrations_dir(project_dir):
+def get_migrations_dir(project_dir, lazy_create=True):
     migrations_dir = os.path.abspath(os.path.join(project_dir, MIGRATIONS_DIR))
-    ensure_path_exists(migrations_dir)
+    if lazy_create:
+        ensure_path_exists(migrations_dir)
     return migrations_dir
+
+
+VALID_MIGRATION_REGEX = re.compile(
+    '^[0-9]{4}_[_a-zA-Z0-9]+\.py$',
+)
+
+
+def is_valid_migration_filename(filename):
+    return bool(VALID_MIGRATION_REGEX.match(filename))
+
+
+def find_project_migrations(project_dir):
+    migrations_dir = get_migrations_dir(project_dir)
+    glob_pattern = os.path.join(migrations_dir, '*.py')
+    migrations = [
+        os.path.relpath(migration_path, project_dir)
+        for migration_path
+        in glob.glob(glob_pattern)
+        if is_valid_migration_filename(os.path.basename(migration_path))
+    ]
+    return migrations
 
 
 def is_executable_available(program):

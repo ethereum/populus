@@ -49,7 +49,7 @@ def get_build_dir(project_dir):
 COMPILED_CONTRACTS_FILENAME = "contracts.json"
 
 
-def get_compiled_contracts_destination_path(project_dir):
+def get_compiled_contracts_file_path(project_dir):
     build_dir = get_build_dir(project_dir)
     return os.path.join(build_dir, COMPILED_CONTRACTS_FILENAME)
 

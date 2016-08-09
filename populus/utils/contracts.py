@@ -17,7 +17,7 @@ from populus.utils.functional import (
     compose,
 )
 from .filesystem import (
-    get_compiled_contracts_destination_path,
+    get_compiled_contracts_file_path,
 )
 
 
@@ -47,7 +47,7 @@ def package_contracts(web3, contracts):
 
 
 def load_compiled_contract_json(project_dir):
-    compiled_contracts_path = get_compiled_contracts_destination_path(project_dir)
+    compiled_contracts_path = get_compiled_contracts_file_path(project_dir)
 
     if not os.path.exists(compiled_contracts_path):
         raise ValueError("No compiled contracts found")

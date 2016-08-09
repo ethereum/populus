@@ -3,7 +3,7 @@ import json
 
 from populus.utils.filesystem import (
     get_contracts_dir,
-    get_compiled_contracts_destination_path,
+    get_compiled_contracts_file_path,
     recursive_find_files,
 )
 from solc import (
@@ -20,7 +20,7 @@ def find_project_contracts(project_dir):
 
 
 def write_compiled_sources(project_dir, compiled_sources):
-    compiled_contract_path = get_compiled_contracts_destination_path(project_dir)
+    compiled_contract_path = get_compiled_contracts_file_path(project_dir)
 
     with open(compiled_contract_path, 'w') as outfile:
         outfile.write(

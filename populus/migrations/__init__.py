@@ -3,6 +3,7 @@ from .migration import (  # noqa
     run_migrations,
 )
 from .operations import (  # noqa
+    Operation,
     RunPython,
     SendTransaction,
     DeployContract,

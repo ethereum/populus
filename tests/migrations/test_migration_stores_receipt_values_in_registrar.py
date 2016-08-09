@@ -1,13 +1,12 @@
 from populus.migrations import (
     Migration,
-    SendTransaction,
-    DeployContract,
-    RunPython,
-    TransactContract,
+    Operation,
 )
 
 
 def test_migrations_store_receipts_on_completion(web3, MATH, registrar):
+    class MockOperation(Operation):
+        def execute(self, *args, **kwargs):
     class TestMigration(Migration):
         migration_id = '0001_initial'
         dependencies = []

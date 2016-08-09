@@ -6,6 +6,8 @@ from populus.utils.transactions import (
 )
 from populus.migrations.registrar import (
     get_compiled_registrar_contract,
+)
+from populus.migrations import (
     DeployRegistrar,
 )
 

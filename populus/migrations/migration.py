@@ -1,10 +1,5 @@
 from toposort import toposort
 
-from .validation import (
-    validate_all_migrations_have_ids,
-    validate_migration_id_uniqueness,
-    validate_no_self_dependencies,
-)
 from .registrar import (
     get_compiled_registrar_contract,
     generate_registrar_value_setters,
@@ -18,7 +13,14 @@ class Migration(object):
     operations = None
     compiled_contracts = None
 
-    def execute(self, web3, registrar_address):
+    registrar_address = None
+    web3 = None
+
+    def __init__(self, web3, registrar_address):
+        self.web3 = web3
+        self.registrar_address = registrar_address
+
+    def execute(self):
         if not self.operations:
             raise ValueError("Migrations without operations are not valid.")
 
@@ -26,8 +28,8 @@ class Migration(object):
             raise ValueError("Migrations must have a migration id.")
 
         registrar = get_compiled_registrar_contract(
-            web3,
-            address=registrar_address,
+            self.web3,
+            address=self.registrar_address,
         )
 
         migration_key = "migration/{migration_id}".format(
@@ -39,7 +41,7 @@ class Migration(object):
 
         for operation_index, operation in enumerate(self.operations):
             operation_receipt = operation.execute(
-                web3=web3,
+                web3=self.web3,
                 compiled_contracts=self.compiled_contracts,
                 registrar=registrar,
             )
@@ -61,11 +63,6 @@ class Migration(object):
 
 
 def sort_migrations(migration_classes):
-    # TODO, this should happen higher up in the call chain.
-    validate_all_migrations_have_ids(migration_classes)
-    validate_migration_id_uniqueness(migration_classes)
-    validate_no_self_dependencies(migration_classes)
-
     migration_dependency_graph = {
         m.migration_id: set() if m.dependencies is None else set(m.dependencies)
         for m in migration_classes

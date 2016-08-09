@@ -1,4 +1,4 @@
-from .base import (  # noqa
+from .migration import (  # noqa
     Migration,
 )
 from .operations import (  # noqa

@@ -4,10 +4,11 @@ from populus.migrations import (
     DeployContract,
     RunPython,
     TransactContract,
+    DeployRegistrar,
 )
 
 
-def test_migration_execution(MATH):
+def test_single_migration_execution(web3, MATH, registrar):
     class TestMigration(Migration):
         migration_id = '0001_initial'
         dependencies = []
@@ -16,16 +17,18 @@ def test_migration_execution(MATH):
             DeployContract('Math'),
         ]
 
-        contract_data = {
+        compiled_contracts = {
             'Math': {
-                'code': "0x606060405260405160208060318339506080604052518015601e576002565b50600680602b6000396000f3606060405200",
-                'code_runtime': "0x606060405200",
-                'abi': [
-                    {
-                        "inputs": [{"name": "shouldThrow", "type": "bool"}],
-                        "type": "constructor",
-                    },
-                ],
+                'code': MATH['code'],
+                'code_runtime': MATH['code_runtime'],
+                'abi': MATH['abi'],
             },
         }
-    assert False
+
+    migration = TestMigration(web3, registrar.address)
+    migration.execute()
+
+    registrar.call().exists('contract/Math') is False
+    math_address = registrar.call().getAddress('contract/Math')
+
+    math = web3.eth.contract(address=address, **MATH)

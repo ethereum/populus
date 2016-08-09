@@ -2,7 +2,7 @@ import pytest
 
 from populus.migrations import Migration
 
-from populus.migrations.base import (
+from populus.migrations.migration import (
     sort_migrations,
 )
 

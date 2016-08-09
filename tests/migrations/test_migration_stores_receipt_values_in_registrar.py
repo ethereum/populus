@@ -26,7 +26,7 @@ def test_migrations_store_receipts_on_completion(web3, MATH, registrar):
     assert registrar.call().exists('migration/0001_initial/operation/0/contract-address') is False
     assert registrar.call().exists('contract/Math') is False
 
-    migration = TestMigration(web3, registrar.address)
+    migration = TestMigration(web3, registrar)
     migration.execute()
 
     assert registrar.call().exists('migration/0001_initial') is True

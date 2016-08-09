@@ -1,10 +1,7 @@
 from populus.migrations import (
+    run_migrations,
     Migration,
-    SendTransaction,
     DeployContract,
-    RunPython,
-    TransactContract,
-    DeployRegistrar,
 )
 
 
@@ -25,8 +22,7 @@ def test_single_migration_execution(web3, MATH, registrar):
             },
         }
 
-    migration = TestMigration(web3, registrar)
-    migration.execute()
+    run_migrations([TestMigration], web3, registrar)
 
     registrar.call().exists('contract/Math') is False
     math_address = registrar.call().getAddress('contract/Math')

@@ -79,17 +79,3 @@ def test_circular_dependency_checking():
         sort_migrations([
             Migration_A, Migration_B,
         ])
-
-
-def test_self_dependency_is_error():
-    """
-    Test circular dependencies are handled.
-    """
-    class Migration_A(Migration):
-        migration_id = "A"
-        dependencies = ["A"]
-
-    with pytest.raises(ValueError):
-        sort_migrations([
-            Migration_A,
-        ])

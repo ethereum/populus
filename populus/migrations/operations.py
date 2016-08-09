@@ -145,7 +145,7 @@ class DeployContract(Operation):
             abi=contract_data['abi'],
             code=code,
             code_runtime=runtime,
-            source=contract_data['source'],
+            source=contract_data.get('source'),
         )
 
         deploy_transaction_hash = ContractFactory.deploy(
@@ -228,7 +228,7 @@ class TransactContract(Operation):
             )
 
         return {
-            'deploy-transaction-hash': transaction_hash,
+            'transaction-hash': transaction_hash,
         }
 
 

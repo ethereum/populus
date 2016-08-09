@@ -25,10 +25,11 @@ def test_single_migration_execution(web3, MATH, registrar):
             },
         }
 
-    migration = TestMigration(web3, registrar.address)
+    migration = TestMigration(web3, registrar)
     migration.execute()
 
     registrar.call().exists('contract/Math') is False
     math_address = registrar.call().getAddress('contract/Math')
 
-    math = web3.eth.contract(address=address, **MATH)
+    math = web3.eth.contract(address=math_address, **MATH)
+    assert math.call().multiply7(3) == 21

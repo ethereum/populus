@@ -13,7 +13,7 @@ from populus.migrations import (
 
 
 def test_deploy_registrar_operation(web3):
-    registrar_deploy_txn = DeployRegistrar().execute(web3=web3)
+    registrar_deploy_txn = DeployRegistrar().execute(web3=web3)['deploy-transaction-hash']
     registrar_address = get_contract_address_from_txn(web3, registrar_deploy_txn, timeout=30)
 
     assert registrar_address

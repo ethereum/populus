@@ -21,7 +21,7 @@ def test_transact_contract_operation(web3, math, MATH):
         web3=web3,
         compiled_contracts={'Math': MATH},
         transaction={'gas': 200000},
-    )
+    )['transaction-hash']
     wait_for_transaction_receipt(web3, transact_txn_hash, timeout=30)
 
     after_value = math.call().counter()

@@ -33,3 +33,9 @@ def validate_no_self_dependencies(migration_classes):
 
     if has_self_dependencies:
         raise ValueError("Migrations cannot depend on themselves")
+
+
+def validate_migration_classes(migration_classes):
+    validate_all_migrations_have_ids(migration_classes)
+    validate_migration_id_uniqueness(migration_classes)
+    validate_no_self_dependencies(migration_classes)

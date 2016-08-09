@@ -50,7 +50,7 @@ def test_deploy_contract_operation_with_arguments(web3, WITH_CONSTRUCTOR_ARGUMEN
     contract = ContractFactory(address=contract_address)
 
     assert contract.call().data_a() == 12345
-    assert contract.call().data_b() == b'a-string-argument-thats-32-bytes'
+    assert contract.call().data_b() == 'a-string-argument-thats-32-bytes'
 
 
 def test_deploy_contract_failure_during_deployment(web3, THROWER):

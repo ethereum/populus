@@ -8,7 +8,7 @@ from populus.utils.filesystem import (
 
 
 def test_project_directory_properties(project_dir):
-    project = Project(project_dir)
+    project = Project()
 
     contracts_dir = get_contracts_dir(project_dir)
     assert project.contracts_dir == contracts_dir

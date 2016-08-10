@@ -1,11 +1,22 @@
 import os
 import hashlib
 
+from web3 import Web3
+from web3.providers.rpc import (
+    TestRPCProvider,
+)
+
+from populus.utils.networking import (
+    get_open_port,
+)
 from populus.utils.filesystem import (
     get_contracts_dir,
     get_build_dir,
     get_compiled_contracts_file_path,
     get_blockchains_dir,
+)
+from populus.utils.module_loading import (
+    import_string,
 )
 from populus.utils.config import (
     load_config,
@@ -20,11 +31,16 @@ from populus.compilation import (
 class Project(object):
     config = None
 
-    def __init__(self, config=None):
+    def __init__(self, config=None, chain=None):
         if config is None:
             config = load_config(get_config_paths(os.getcwd()))
 
         self.config = config
+
+        if chain is None:
+            chain = self.config.get('populus', 'default_chain', fallback=None)
+
+        self.chain = chain
 
     @property
     def project_dir(self):
@@ -70,4 +86,40 @@ class Project(object):
 
     @property
     def web3(self):
-        assert False
+        if self.chain is None:
+            raise AttributeError(
+                "To access the `web3` property the `project.chain` attribute "
+                "must be set to a valid chain name from your `populus.ini` "
+                "configuration file, or to one of the preset public chain names "
+                "(mainnet/morden)"
+            )
+        elif self.chain not in self.config.chains:
+            # TODO: lookup whether this is a local chain.
+            raise KeyError(
+                "Unknown chain. given: {0!r}  expected one of: {1!r}".format(
+                    self.chain,
+                    self.config.chains.keys(),
+                )
+            )
+
+        chain_config = self.config.chains[self.chain]
+
+        try:
+            provider_import_path = chain_config['provider']
+        except KeyError:
+            # TODO: lookup whether this is a local chain and default to IPC
+            # provider with the local project chain ipc_path.
+            raise KeyError("Chain configurations must declare a provider")
+
+        ProviderClass = import_string(provider_import_path)
+        provider_kwargs = {
+            key: value
+            for key, value in chain_config.items()
+            if key != 'provider'
+        }
+
+        if issubclass(ProviderClass, TestRPCProvider):
+            provider_kwargs.setdefault('port', get_open_port())
+
+        provider = ProviderClass(**provider_kwargs)
+        return Web3(provider)

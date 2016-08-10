@@ -1,4 +1,5 @@
 import os
+import sys
 import datetime
 
 from .filesystem import (
@@ -33,6 +34,41 @@ def get_nodekey_path(data_dir):
 
 
 IPC_FILENAME = 'geth.ipc'
+
+
+def get_default_ipc_path(testnet=False):
+    if testnet:
+        testnet = "testnet"
+    else:
+        testnet = ""
+
+    if sys.platform == 'darwin':
+        return os.path.expanduser(os.path.join(
+            "~",
+            "Library",
+            "Ethereum",
+            testnet,
+            "geth.ipc",
+        ))
+    elif sys.platform.startswith('linux'):
+        return os.path.expanduser(os.path.join(
+            "~",
+            "ethereum",
+            testnet,
+            "geth.ipc",
+        ))
+    elif sys.platform == 'win32':
+        return os.path.expanduser(os.path.join(
+            "~",
+            "AppData",
+            "Roaming",
+            "Ethereum",
+        ))
+    else:
+        raise ValueError(
+            "Unsupported platform '{0}'.  Only darwin/linux2/win32 are "
+            "supported.  You must specify the ipc_path".format(sys.platform)
+        )
 
 
 def get_geth_ipc_path(data_dir):

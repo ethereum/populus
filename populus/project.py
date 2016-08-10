@@ -67,3 +67,7 @@ class Project(object):
                 project_dir=self.project_dir,
             )
         return self._cached_compiled_contracts
+
+    @property
+    def web3(self):
+        assert False

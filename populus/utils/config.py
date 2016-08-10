@@ -33,3 +33,7 @@ def load_config(config_file_paths):
     config.read(reversed(config_file_paths))
 
     return config
+
+
+class Config(object):
+    def __init__(self, overrides,

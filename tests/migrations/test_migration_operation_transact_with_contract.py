@@ -6,7 +6,7 @@ from populus.utils.transactions import (
 )
 
 
-def test_transact_contract_operation(web3, math, MATH):
+def test_transact_contract_operation(web3, chain, math, MATH):
     transact_contract_operation = TransactContract(
         contract_name='Math',
         method_name='increment',
@@ -18,7 +18,7 @@ def test_transact_contract_operation(web3, math, MATH):
     before_value = math.call().counter()
 
     transact_txn_hash = transact_contract_operation.execute(
-        web3=web3,
+        chain=chain,
         compiled_contracts={'Math': MATH},
         transaction={'gas': 200000},
     )['transaction-hash']

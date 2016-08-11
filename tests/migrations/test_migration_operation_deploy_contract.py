@@ -13,11 +13,11 @@ from populus.utils.contracts import (
 )
 
 
-def test_deploy_contract_operation_on_math_contract(web3, MATH):
+def test_deploy_contract_operation_on_math_contract(web3, chain, MATH):
     deploy_contract_operation = DeployContract('Math', timeout=30)
 
     operation_receipt = deploy_contract_operation.execute(
-        web3=web3,
+        chain=chain,
         compiled_contracts={'Math': MATH},
     )
     deploy_txn_hash = operation_receipt['deploy-transaction-hash']
@@ -28,7 +28,8 @@ def test_deploy_contract_operation_on_math_contract(web3, MATH):
     assert code == MATH['code_runtime']
 
 
-def test_deploy_contract_operation_with_arguments(web3, WITH_CONSTRUCTOR_ARGUMENTS):
+def test_deploy_contract_operation_with_arguments(web3, chain,
+                                                  WITH_CONSTRUCTOR_ARGUMENTS):
     deploy_contract_operation = DeployContract(
         'WithConstructorArguments',
         timeout=30,
@@ -36,7 +37,7 @@ def test_deploy_contract_operation_with_arguments(web3, WITH_CONSTRUCTOR_ARGUMEN
     )
 
     operation_receipt = deploy_contract_operation.execute(
-        web3=web3,
+        chain=chain,
         compiled_contracts={'WithConstructorArguments': WITH_CONSTRUCTOR_ARGUMENTS},
     )
     deploy_txn_hash = operation_receipt['deploy-transaction-hash']
@@ -53,7 +54,7 @@ def test_deploy_contract_operation_with_arguments(web3, WITH_CONSTRUCTOR_ARGUMEN
     assert contract.call().data_b() == 'a-string-argument-thats-32-bytes'
 
 
-def test_deploy_contract_failure_during_deployment(web3, THROWER):
+def test_deploy_contract_failure_during_deployment(web3, chain, THROWER):
     deploy_contract_operation = DeployContract(
         'Thrower',
         timeout=30,
@@ -62,6 +63,6 @@ def test_deploy_contract_failure_during_deployment(web3, THROWER):
 
     with pytest.raises(ValueError):
         deploy_contract_operation.execute(
-            web3=web3,
+            chain=chain,
             compiled_contracts={'Thrower': THROWER},
         )

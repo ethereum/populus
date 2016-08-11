@@ -3,7 +3,7 @@ from populus.migrations import (
 )
 
 
-def test_send_transaction_operation(web3):
+def test_send_transaction_operation(web3, chain):
     send_transaction_operation = SendTransaction({
         'from': web3.eth.coinbase,
         'to': web3.eth.accounts[1],
@@ -12,7 +12,7 @@ def test_send_transaction_operation(web3):
 
     initial_balance = web3.eth.getBalance(web3.eth.accounts[1])
 
-    send_transaction_operation.execute(web3=web3)
+    send_transaction_operation.execute(chain=chain)
 
     after_balance = web3.eth.getBalance(web3.eth.accounts[1])
 

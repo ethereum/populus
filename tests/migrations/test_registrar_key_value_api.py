@@ -2,25 +2,12 @@ import pytest
 
 from populus.utils.transactions import (
     wait_for_transaction_receipt,
-    get_contract_address_from_txn,
-)
-from populus.migrations.registrar import (
-    get_compiled_registrar_contract,
-)
-from populus.migrations import (
-    DeployRegistrar,
 )
 
 
-def test_deploy_registrar_operation(web3):
-    registrar_deploy_txn = DeployRegistrar().execute(web3=web3)['deploy-transaction-hash']
-    registrar_address = get_contract_address_from_txn(web3, registrar_deploy_txn, timeout=30)
-
-    assert registrar_address
-
-    registrar = get_compiled_registrar_contract(web3, registrar_address)
-
-    assert registrar
+@pytest.fixture
+def registrar(chain):
+    return chain.registrar
 
 
 def test_setting_bytes32(web3, registrar):

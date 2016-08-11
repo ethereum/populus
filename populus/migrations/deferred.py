@@ -15,14 +15,20 @@ from populus.utils.transactions import (
     wait_for_transaction_receipt,
 )
 
-from .registrar import get_compiled_registrar_contract
-
 
 class DeferredValue(object):
-    project = None
+    chain = None
 
-    def __init__(self, project):
-        self.project = project
+    def __init__(self, chain, **kwargs):
+        self.chain = chain
+        for key, value in kwargs.items():
+            if not hasattr(self, key):
+                raise TypeError(
+                    "{0}() received an invalid keyword {1!r}. as_view only "
+                    "accepts arguments that are already attributes of the "
+                    "class.".format(self.__class__.__name__, key)
+                )
+            setattr(self, key, value)
 
     @classmethod
     def defer(cls, **initkwargs):
@@ -39,11 +45,11 @@ class DeferredValue(object):
         raise NotImplementedError("This method must be implemented by subclasses")
 
 
-def resolve_if_deferred_value(value, registrar):
+def resolve_if_deferred_value(value, chain):
     if isinstance(value, DeferredValue):
         return value.get()
     elif isinstance(value, type) and issubclass(value, RegistrarValue):
-        return value(registrar).get()
+        return value(chain).get()
     else:
         return value
 
@@ -63,27 +69,8 @@ class RegistrarValue(DeferredValue):
     value_type = None
     value = None
 
-    def __init__(self, project, key=None, value=None, value_type=None):
-        chain_config = project.config.chains[project.chain]
-        if 'registrar' not in chain_config:
-            raise ValueError(
-                "This current chain does not have a registrar configured"
-            )
-        self.registrar = get_compiled_registrar_contract(
-            web3=project.web3,
-            address=chain_config['registrar'],
-        )
-
-        if key is not None:
-            self.key = key
-        if value is not None:
-            self.value = value
-        if value_type is not None:
-            self.value_type = value_type
-        super(RegistrarValue, self).__init__(project)
-
     def exists(self, key):
-        return self.registrar.call().exists(key)
+        return self.chain.registrar.call().exists(key)
 
     def get(self):
         if not self.exists(self.key):
@@ -91,7 +78,7 @@ class RegistrarValue(DeferredValue):
                 "The given key is not set on the registrar: `{0}`".format(self.key)
             )
 
-        caller = self.registrar.call()
+        caller = self.chain.registrar.call()
 
         if self.value_type == 'string':
             return caller.getString(self.key)
@@ -123,7 +110,7 @@ class RegistrarValue(DeferredValue):
                 type(self.key)
             ))
 
-        transactor = self.registrar.transact()
+        transactor = self.chain.registrar.transact()
 
         if self.value_type == 'string':
             set_txn_hash = transactor.setString(self.key, value)
@@ -145,7 +132,7 @@ class RegistrarValue(DeferredValue):
 
         if timeout is not None:
             wait_for_transaction_receipt(
-                web3=self.registrar.web3,
+                web3=self.chain.web3,
                 txn_hash=set_txn_hash,
                 timeout=timeout,
             )

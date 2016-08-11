@@ -17,12 +17,16 @@ class Migration(object):
     operations = None
     compiled_contracts = None
 
-    registrar_address = None
-    web3 = None
+    def __init__(self, chain):
+        self.chain = chain
 
-    def __init__(self, web3, registrar):
-        self.web3 = web3
-        self.registrar = registrar
+    @property
+    def registrar(self):
+        return self.chain.registrar
+
+    @property
+    def web3(self):
+        return self.chain.web3
 
     @property
     def migration_key(self):
@@ -48,10 +52,10 @@ class Migration(object):
             prefix=operation_key,
         )
         for Setter in registrar_setters:
-            Setter(self.registrar).set()
+            Setter(self.chain).set()
 
         # mark the operation as having been completed.
-        Bool(self.registrar, key=operation_key, value=True).set()
+        Bool(self.chain, key=operation_key, value=True).set()
 
     def execute(self):
         if self.registrar.call().exists(self.migration_key):
@@ -72,12 +76,13 @@ class Migration(object):
                 raise ValueError("This operation has already been run")
 
             operation_receipt = operation.execute(
-                web3=self.web3,
+                chain=self.chain,
                 compiled_contracts=self.compiled_contracts,
-                registrar=self.registrar,
             )
 
             self.process_operation_receipt(operation_key, operation_receipt)
+
+        Bool(self.chain, key=self.migration_key, value=True).set()
 
 
 def sort_migrations(migration_classes):
@@ -97,12 +102,12 @@ def sort_migrations(migration_classes):
     return migration_order
 
 
-def run_migrations(migration_classes, web3, registrar_address):
+def run_migrations(migration_classes, chain):
     validate_migration_classes(migration_classes)
 
     sorted_migration_classes = sort_migrations(migration_classes)
     sorted_migrations = [
-        migration_class(web3, registrar_address)
+        migration_class(chain)
         for migration_class
         in itertools.chain.from_iterable(sorted_migration_classes)
     ]

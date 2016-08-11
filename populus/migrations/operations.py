@@ -58,11 +58,11 @@ class SendTransaction(Operation):
         if timeout is not None:
             self.timeout = timeout
 
-    def execute(self, web3, **kwargs):
-        transaction_hash = web3.eth.sendTransaction(self.transaction)
+    def execute(self, chain, **kwargs):
+        transaction_hash = chain.web3.eth.sendTransaction(self.transaction)
         if self.timeout is not None:
             wait_for_transaction_receipt(
-                web3, transaction_hash, timeout=self.timeout,
+                chain.web3, transaction_hash, timeout=self.timeout,
             )
         return {
             'transaction-hash': transaction_hash,
@@ -114,7 +114,7 @@ class DeployContract(Operation):
         if timeout is not None:
             self.timeout = timeout
 
-    def execute(self, web3, compiled_contracts, registrar=None, **kwargs):
+    def execute(self, chain, compiled_contracts, **kwargs):
         contract_data = compiled_contracts[self.contract_name]
 
         all_known_contract_names = set(self.libraries.keys()).union(
@@ -132,7 +132,10 @@ class DeployContract(Operation):
                 raise ValueError(
                     "Missing necessary libraries for linking: {0!r}".format(missing_libraries)
                 )
-            resolve_fn = functools.partial(resolve_if_deferred_value, registrar=registrar)
+            resolve_fn = functools.partial(
+                resolve_if_deferred_value,
+                chain=chain,
+            )
             resolved_dependencies = {
                 dependency_name: resolve_fn(value)
                 for dependency_name, value
@@ -144,7 +147,7 @@ class DeployContract(Operation):
             code = contract_data.get('code')
             runtime = contract_data.get('code_runtime')
 
-        ContractFactory = web3.eth.contract(
+        ContractFactory = chain.web3.eth.contract(
             abi=contract_data['abi'],
             code=code,
             code_runtime=runtime,
@@ -158,10 +161,10 @@ class DeployContract(Operation):
 
         if self.timeout is not None:
             contract_address = get_contract_address_from_txn(
-                web3, deploy_transaction_hash, timeout=self.timeout,
+                chain.web3, deploy_transaction_hash, timeout=self.timeout,
             )
             if self.verify:
-                code = web3.eth.getCode(contract_address)
+                code = chain.web3.eth.getCode(contract_address)
                 if force_text(code) != force_text(ContractFactory.code_runtime):
                     raise ValueError(
                         "An error occured during deployment of the contract."
@@ -211,9 +214,9 @@ class TransactContract(Operation):
         if timeout is not None:
             self.timeout = timeout
 
-    def execute(self, web3, compiled_contracts, **kwargs):
+    def execute(self, chain, compiled_contracts, **kwargs):
         contract_data = compiled_contracts[self.contract_name]
-        contract = web3.eth.contract(
+        contract = chain.web3.eth.contract(
             address=self.contract_address,
             abi=contract_data['abi'],
             code=contract_data['code'],
@@ -227,7 +230,7 @@ class TransactContract(Operation):
 
         if self.timeout is not None:
             wait_for_transaction_receipt(
-                web3, transaction_hash, timeout=self.timeout,
+                chain.web3, transaction_hash, timeout=self.timeout,
             )
 
         return {
@@ -242,11 +245,11 @@ class DeployRegistrar(DeployContract):
             **kwargs
         )
 
-    def execute(self, web3, **kwargs):
+    def execute(self, chain, **kwargs):
         kwargs.pop('compiled_contracts', None)
         compiled_contracts = compile_source(REGISTRAR_SOURCE)
         return super(DeployRegistrar, self).execute(
-            web3=web3,
+            chain=chain,
             compiled_contracts=compiled_contracts,
             **kwargs
         )

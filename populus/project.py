@@ -137,9 +137,9 @@ class Project(object):
         :return: :class:`populus.chain.Chain`
         """
         if chain_name == 'testrpc':
-            return TestRPCChain(self, *chain_args, **chain_kwargs)
+            return TestRPCChain(self, 'testrpc', *chain_args, **chain_kwargs)
         elif chain_name == 'temp':
-            return TemporaryGethChain(self, *chain_args, **chain_kwargs)
+            return TemporaryGethChain(self, 'temp', *chain_args, **chain_kwargs)
 
         try:
             chain_config = self.config.chains[chain_name]
@@ -155,9 +155,9 @@ class Project(object):
         combined_kwargs.update(chain_kwargs)
 
         if chain_name == 'morden':
-            return MordenChain(self, *chain_args, **combined_kwargs)
+            return MordenChain(self, 'morden', *chain_args, **combined_kwargs)
         elif chain_name == 'mainnet':
-            return MainnetChain(self, *chain_args, **combined_kwargs)
+            return MainnetChain(self, 'mainnet', *chain_args, **combined_kwargs)
         else:
             return LocalGethChain(self,
                                   chain_name=chain_name,

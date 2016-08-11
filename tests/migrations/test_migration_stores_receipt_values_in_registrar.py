@@ -1,5 +1,5 @@
 from web3.utils.encoding import (
-    decode_hex,
+    encode_hex,
 )
 from populus.migrations import (
     String,
@@ -9,7 +9,8 @@ from populus.migrations import (
 )
 
 
-def test_migrations_store_receipts_on_completion(web3, MATH, registrar):
+def test_migrations_store_receipts_on_completion(web3, MATH, chain):
+    registrar = chain.registrar
 
     class MockOperation(Operation):
         def execute(self, *args, **kwargs):
@@ -36,7 +37,7 @@ def test_migrations_store_receipts_on_completion(web3, MATH, registrar):
     assert registrar.call().exists('migration/0001_initial/operation/0/no-key') is False
     assert registrar.call().exists('this-is-a-key') is False
 
-    migration = TestMigration(web3, registrar)
+    migration = TestMigration(chain)
     migration.execute()
 
     assert registrar.call().exists('migration/0001_initial') is True
@@ -50,6 +51,6 @@ def test_migrations_store_receipts_on_completion(web3, MATH, registrar):
     assert registrar.call().getBool('migration/0001_initial') is True
     assert registrar.call().getBool('migration/0001_initial/operation/0') is True
     assert registrar.call().getAddress('migration/0001_initial/operation/0/raw-address') == web3.eth.coinbase
-    assert registrar.call().get('migration/0001_initial/operation/0/raw-txn') == decode_hex('0xebb0f76aa6a6bb8d178ac2354de83d73a728d704bf47d135c188ca7b6d25f2e4')
+    assert encode_hex(registrar.call().get('migration/0001_initial/operation/0/raw-txn')) == '0xebb0f76aa6a6bb8d178ac2354de83d73a728d704bf47d135c188ca7b6d25f2e4'
     assert registrar.call().getAddress('migration/0001_initial/operation/0/no-key') == web3.eth.coinbase
     assert registrar.call().getString('this-is-a-key') == 'this-is-a-string'

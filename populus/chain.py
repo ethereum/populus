@@ -21,12 +21,18 @@ from geth import (
     InterceptedStreamsMixin,
     LoggingMixin,
 )
+from populus.utils.functional import (
+    cached_property,
+)
 from populus.utils.networking import (
     get_open_port,
     wait_for_http_connection,
 )
 from populus.utils.module_loading import (
     import_string,
+)
+from populus.utils.transactions import (
+    get_contract_address_from_txn,
 )
 from populus.utils.filesystem import (
     remove_file_if_exists,
@@ -43,6 +49,10 @@ from populus.utils.chains import (
     get_nodekey_path,
     get_geth_ipc_path,
     get_geth_logfile_path,
+)
+
+from populus.migrations.registrar import (
+    get_compiled_registrar_contract,
 )
 
 
@@ -132,16 +142,21 @@ class Chain(object):
     """
     project = None
 
-    def __init__(self, project):
+    def __init__(self, project, chain_name):
         self.project = project
+        self.chain_name = chain_name
 
     @property
     def web3(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
-    @property
+    @cached_property
     def contract_factories(self):
         return package_contracts(self.web3, self.project.compiled_contracts)
+
+    @property
+    def registrar(self):
+        raise NotImplementedError("Must be implemented by subclasses")
 
     def __enter__(self):
         raise NotImplementedError("Must be implemented by subclasses")
@@ -153,18 +168,27 @@ class Chain(object):
 class TestRPCChain(Chain):
     provider = None
     port = None
-    _web3 = None
 
-    @property
+    @cached_property
     def web3(self):
-        if self._web3 is None:
-            if self.provider is None:
-                raise ValueError(
-                    "TesterChain instances must be running to access the web3 "
-                    "object."
-                )
-            self._web3 = Web3(self.provider)
-        return self._web3
+        if self.provider is None or not self._running:
+            raise ValueError(
+                "TesterChain instances must be running to access the web3 "
+                "object."
+            )
+        return Web3(self.provider)
+
+    @cached_property
+    def registrar(self):
+        RegistrarFactory = get_compiled_registrar_contract(self.web3)
+        deploy_txn_hash = RegistrarFactory.deploy()
+        registrar_address = get_contract_address_from_txn(
+            self.web3,
+            deploy_txn_hash,
+            1,
+        )
+        registrar = RegistrarFactory(address=registrar_address)
+        return registrar
 
     _running = False
 
@@ -197,11 +221,38 @@ class TestRPCChain(Chain):
             self._running = False
 
 
+GETH_KWARGS = {
+    'data_dir',
+    'geth_executable',
+    'max_peers',
+    'network_id',
+    'no_discover',
+    'mine',
+    'autodag',
+    'miner_threads',
+    'nice',
+    'unlock',
+    'password',
+    'port',
+    'verbosity',
+    'ipc_disable',
+    'ipc_path',
+    'ipc_api',
+    'rpc_enabled',
+    'rpc_addr',
+    'rpc_port',
+    'rpc_api',
+    'prefix_cmd',
+    'suffix_args',
+    'suffix_kwargs',
+}
+
+
 class BaseGethChain(Chain):
     geth = None
     provider_class = None
 
-    def __init__(self, project, provider=IPCProvider, **geth_kwargs):
+    def __init__(self, project, chain_name, provider=IPCProvider, **geth_kwargs):
         if geth_kwargs is None:
             geth_kwargs = {}
 
@@ -209,9 +260,16 @@ class BaseGethChain(Chain):
             provider = import_string(provider)
 
         self.provider_class = provider
-        self.geth_kwargs = geth_kwargs
+        self.extra_kwargs = {
+            key: value
+            for key, value in geth_kwargs.items() if key not in GETH_KWARGS
+        }
+        self.geth_kwargs = {
+            key: value
+            for key, value in geth_kwargs.items() if key in GETH_KWARGS
+        }
 
-        super(BaseGethChain, self).__init__(project)
+        super(BaseGethChain, self).__init__(project, chain_name)
 
     _web3 = None
 
@@ -233,6 +291,17 @@ class BaseGethChain(Chain):
                 )
             self._web3 = Web3(provider)
         return self._web3
+
+    @property
+    def chain_config(self):
+        return self.project.chains[self.chain_name]
+
+    @cached_property
+    def registrar(self):
+        return get_compiled_registrar_contract(
+            self.web3,
+            address=self.chain_config['registrar'],
+        )
 
     def get_geth_process_instance(self, *args, **kwargs):
         raise NotImplementedError("Must be implemented by subclasses")
@@ -263,10 +332,6 @@ class BaseGethChain(Chain):
 
 
 class LocalGethChain(BaseGethChain):
-    def __init__(self, *args, **kwargs):
-        self.chain_name = kwargs.pop('chain_name')
-        super(LocalGethChain, self).__init__(*args, **kwargs)
-
     def get_geth_process_instance(self, *args, **kwargs):
         return LoggedDevGethProcess(
             *args,

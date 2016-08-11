@@ -1,7 +1,7 @@
 from web3.utils.encoding import (
     encode_hex,
 )
-from populus.migrations.registrar import (
+from populus.migrations.deferred import (
     RegistrarValue,
     Address,
     UInt,

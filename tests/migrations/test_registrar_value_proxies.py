@@ -28,12 +28,13 @@ from populus.migrations import (
         (Bool, False, 'setBool'),
     )
 )
-def test_registrar_value_getting(web3, registrar, RegistrarValueClass, value,
+def test_registrar_value_getting(web3, chain, RegistrarValueClass, value,
                                  setter):
+    registrar = chain.registrar
     set_txn = getattr(registrar.transact(), setter)('k', value)
     wait_for_transaction_receipt(web3, set_txn, timeout=30)
 
-    value_proxy = RegistrarValueClass(registrar, 'k')
+    value_proxy = RegistrarValueClass(chain, key='k')
     assert value_proxy.get() == value
 
 
@@ -52,9 +53,10 @@ def test_registrar_value_getting(web3, registrar, RegistrarValueClass, value,
         (Bool, False, 'getBool'),
     )
 )
-def test_registrar_value_setting(web3, registrar, RegistrarValueClass, value,
+def test_registrar_value_setting(web3, chain, RegistrarValueClass, value,
                                  getter):
-    value_proxy = RegistrarValueClass(registrar, 'k')
+    registrar = chain.registrar
+    value_proxy = RegistrarValueClass(chain, key='k')
     value_proxy.set(value, timeout=30)
 
     chain_value = getattr(registrar.call(), getter)('k')

@@ -337,29 +337,6 @@ def CONTRACTS(MATH,
     }
 
 
-@pytest.fixture()
-def registrar(web3):
-    from populus.migrations.registrar import (
-        get_compiled_registrar_contract,
-    )
-    from populus.migrations.operations import (
-        DeployRegistrar,
-    )
-    from populus.utils.transactions import (
-        get_contract_address_from_txn,
-    )
-    operation_receipt = DeployRegistrar().execute(web3=web3)
-    registrar_address = operation_receipt['contract-address']
-
-    assert registrar_address
-
-    registrar = get_compiled_registrar_contract(web3, registrar_address)
-
-    return registrar
-
-
-import solc
-
 MULTIPLY13_LIBRARY_SOURCE = textwrap.dedent(("""
 library Library13 {
     function multiply13(uint v) constant returns (uint) {

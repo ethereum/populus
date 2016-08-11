@@ -13,7 +13,9 @@ from populus.utils.contracts import (
 )
 
 
-def test_deployment_with_library_linking(web3, LIBRARY_13, MULTIPLY_13, registrar):
+def test_deployment_with_library_linking(web3, LIBRARY_13, MULTIPLY_13, chain):
+    registrar = chain.registrar
+
     Library13 = web3.eth.contract(**LIBRARY_13)
     Multiply13 = web3.eth.contract(**MULTIPLY_13)
 
@@ -42,9 +44,8 @@ def test_deployment_with_library_linking(web3, LIBRARY_13, MULTIPLY_13, registra
     assert '__Library13__' in Multiply13.code_runtime
 
     operation_receipt = deploy_operation.execute(
-        web3=web3,
+        chain,
         compiled_contracts={'Multiply13': MULTIPLY_13},
-        registrar=registrar,
     )
     deploy_txn_hash = operation_receipt['deploy-transaction-hash']
     deploy_txn = web3.eth.getTransaction(deploy_txn_hash)

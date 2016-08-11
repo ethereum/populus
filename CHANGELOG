@@ -10,6 +10,8 @@
 - Deprecate `<project-dir>/libraries` directory in favor of all source files
   being found within the `<project-dir>/contracts` directory.
 - Deployment gas computations now handled by web3.py
+- New `populus.project.Project` object for sane access to populus project
+  configuration and assets.
 
 0.8.0
 -----

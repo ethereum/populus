@@ -6,7 +6,13 @@ Usage
 Introduction
 ------------
 
-Populus provides `populus` command line command and `populus` package. Besides this, Populus exposes `py-solc <https://github.com/pipermerriam/py-solc>`__ and `py-geth <https://github.com/pipermerriam/py-geth>`__ packages.
+Populus provides `populus` command line command and `populus` package. Besides this, Populus interally uses and exposes
+
+* `web3.py <https://github.com/pipermerriam/web3.py>`__
+
+* `py-solc <https://github.com/pipermerriam/py-solc>`__
+
+* `py-geth <https://github.com/pipermerriam/py-geth>`__
 
 Project Layout
 --------------
@@ -91,3 +97,13 @@ your contract classes and an RPC client available in the local namespace.
     Contracts: Example, AnotherExample
 
     ... >
+
+Programmatic use
+----------------
+
+You can use and import Python modules from :py:mod:`populus` package.
+
+Gevent asynchronous event loop notice
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Populus and underlying libraries (py-geth, web3.py) use  `gevent <http://www.gevent.org/>`_. gevent is a coroutine -based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libev event loop.

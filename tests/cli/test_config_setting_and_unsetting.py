@@ -20,20 +20,20 @@ def test_setting_with_no_config_file_lazily_creates_file(project_dir):
     assert os.path.exists(populus_ini_path)
 
     config = load_config([populus_ini_path])
-    assert config['populus']['default_chain'] == 'testnet'
+    assert config.get('populus', 'default_chain') == 'testnet'
 
 
 def test_setting_overwritting_value(project_dir, write_project_file):
-    ini_contents = textwrap.dedent(("""
-    [populus]
-    default_chain=mainnet
-    """).strip())
+    ini_contents = '\n'.join((
+        "[populus]",
+        "default_chain=mainnet",
+    )).format(project_dir=project_dir)
     write_project_file('populus.ini', ini_contents)
 
     populus_ini_path = os.path.join(project_dir, 'populus.ini')
 
     config = load_config([populus_ini_path])
-    assert config['populus']['default_chain'] == 'mainnet'
+    assert config.get('populus', 'default_chain') == 'mainnet'
 
     runner = CliRunner()
     result = runner.invoke(main, ['config', 'set', 'default_chain:testnet'])
@@ -41,13 +41,13 @@ def test_setting_overwritting_value(project_dir, write_project_file):
     assert result.exit_code == 0, result.output + str(result.exception)
 
     config = load_config([populus_ini_path])
-    assert config['populus']['default_chain'] == 'testnet'
+    assert config.get('populus', 'default_chain') == 'testnet'
 
 
 def test_setting_non_default_section(project_dir, write_project_file):
-    ini_contents = textwrap.dedent(("""
-    [populus]
-    """).strip())
+    ini_contents = '\n'.join((
+        "[populus]",
+    )).format(project_dir=project_dir)
     write_project_file('populus.ini', ini_contents)
 
     populus_ini_path = os.path.join(project_dir, 'populus.ini')
@@ -66,16 +66,16 @@ def test_setting_non_default_section(project_dir, write_project_file):
 
 
 def test_unsetting_value(project_dir, write_project_file):
-    ini_contents = textwrap.dedent(("""
-    [populus]
-    default_chain=mainnet
-    """).strip())
+    ini_contents = '\n'.join((
+        "[populus]",
+        "default_chain=mainnet",
+    )).format(project_dir=project_dir)
     write_project_file('populus.ini', ini_contents)
 
     populus_ini_path = os.path.join(project_dir, 'populus.ini')
 
     config = load_config([populus_ini_path])
-    assert 'default_chain' in config['populus']
+    assert config.has_option('populus', 'default_chain')
 
     runner = CliRunner()
     result = runner.invoke(main, ['config', 'unset', 'default_chain'])
@@ -83,19 +83,19 @@ def test_unsetting_value(project_dir, write_project_file):
     assert result.exit_code == 0, result.output + str(result.exception)
 
     config = load_config([populus_ini_path])
-    assert 'default_chain' not in config['populus']
+    assert not config.has_option('populus', 'default_chain')
 
 
 def test_unsetting_value_that_is_not_present(project_dir, write_project_file):
-    ini_contents = textwrap.dedent(("""
-    [populus]
-    """).strip())
+    ini_contents = '\n'.join((
+        "[populus]",
+    )).format(project_dir=project_dir)
     write_project_file('populus.ini', ini_contents)
 
     populus_ini_path = os.path.join(project_dir, 'populus.ini')
 
     config = load_config([populus_ini_path])
-    assert 'default_chain' not in config['populus']
+    assert not config.has_option('populus', 'default_chain')
 
     runner = CliRunner()
     result = runner.invoke(main, ['config', 'unset', 'default_chain'])
@@ -103,15 +103,15 @@ def test_unsetting_value_that_is_not_present(project_dir, write_project_file):
     assert result.exit_code == 0, result.output + str(result.exception)
 
     config = load_config([populus_ini_path])
-    assert 'default_chain' not in config['populus']
+    assert not config.has_option('populus', 'default_chain')
 
 
 def test_unsetting_entire_section(project_dir, write_project_file):
-    ini_contents = textwrap.dedent(("""
-    [populus]
-
-    [extra_section]
-    """).strip())
+    ini_contents = '\n'.join((
+        "[populus]",
+        "",
+        "[extra_section]",
+    )).format(project_dir=project_dir)
     write_project_file('populus.ini', ini_contents)
 
     populus_ini_path = os.path.join(project_dir, 'populus.ini')

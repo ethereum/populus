@@ -23,14 +23,14 @@ def test_error_if_no_chain_specified_and_no_default_chain(project_dir):
 
 
 def test_uses_default_chain_when_specified(project_dir, write_project_file):
-    ini_contents = textwrap.dedent(("""
-    [populus]
-    project_dir={project_dir}
-    default_chain=custom_chain
-
-    [chain:custom_chain]
-    provider = web3.providers.ipc.IPCProvider
-    """.format(project_dir=project_dir)).strip())
+    ini_contents = '\n'.join((
+        "[populus]",
+        "project_dir={project_dir}",
+        "default_chain=custom_chain",
+        "",
+        "[chain:custom_chain]",
+        "provider = web3.providers.ipc.IPCProvider",
+    )).format(project_dir=project_dir)
     write_project_file('populus.ini', ini_contents)
 
     project = Project()

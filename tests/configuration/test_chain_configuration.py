@@ -1,5 +1,4 @@
 import os
-import textwrap
 
 from populus.utils.config import (
     get_config_paths,
@@ -8,12 +7,13 @@ from populus.utils.config import (
 
 
 def test_chains_property(project_dir, write_project_file):
-    ini_contents = textwrap.dedent(("""
-    [populus]
-    project_dir={project_dir}
-
-    [chain:local]
-    """.format(project_dir=project_dir)).strip())
+    ini_contents = '\n'.join((
+        "[populus]",
+        "project_dir={project_dir}",
+        "",
+        "[chain:local]",
+        "provider=web3.providers.ipc.IPCProvider",
+    )).format(project_dir=project_dir)
     write_project_file('populus.ini', ini_contents)
 
     config = load_config(get_config_paths(project_dir, []))
@@ -43,13 +43,13 @@ def test_mainnet_chain_config_defaults(project_dir):
 
 
 def test_custom_declared_chain_configuration(project_dir, write_project_file):
-    ini_contents = textwrap.dedent(("""
-    [populus]
-    project_dir={project_dir}
-
-    [chain:mainnet]
-    provider = web3.providers.rpc.RPCProvider
-    """.format(project_dir=project_dir)).strip())
+    ini_contents = '\n'.join((
+        "[populus]",
+        "project_dir={project_dir}",
+        "",
+        "[chain:mainnet]",
+        "provider=web3.providers.rpc.RPCProvider",
+    )).format(project_dir=project_dir)
     write_project_file('populus.ini', ini_contents)
 
     config = load_config(get_config_paths(project_dir, []))

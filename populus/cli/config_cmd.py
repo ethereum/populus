@@ -103,7 +103,8 @@ def config_unset(ctx, section, confirm, keys):
                     section
                 )
             )
-            click.prompt(confirm_msg, abort=True)
+            if not click.prompt(confirm_msg):
+                ctx.abort()
         ctx.abort("Unknown section: {0!r}".format(section))
 
     if len(keys) == 1 and keys[0] == "*":

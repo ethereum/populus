@@ -37,16 +37,16 @@ class Project(object):
 
         self.config = config
 
-        if chain is None:
-            chain = self.config.get('populus', 'default_chain', fallback=None)
+        if chain is None and self.config.has_option('populus', 'default_chain'):
+            chain = self.config.get('populus', 'default_chain')
 
         self.chain = chain
 
     @property
     def project_dir(self):
-        try:
-            return self.config['populus']['project_dir']
-        except KeyError:
+        if self.config.has_option('populus', 'project_dir'):
+            return self.config.get('populus', 'project_dir')
+        else:
             return os.getcwd()
 
     @property

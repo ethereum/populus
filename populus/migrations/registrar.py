@@ -1,19 +1,4 @@
-import itertools
-
 from solc import compile_source
-
-from web3.utils.encoding import (
-    decode_hex,
-)
-
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-)
-from populus.utils.types import (
-    is_string,
-    is_hex_address,
-    is_hex_transaction_hash,
-)
 
 
 REGISTRAR_SOURCE = """contract Registrar {

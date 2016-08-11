@@ -3,10 +3,23 @@ import functools
 
 import click
 
+from testrpc import testrpc
+
+from web3.providers.rpc import TestRPCProvider
+from web3 import (
+    Web3,
+    RPCProvider,
+    IPCProvider,
+)
+
 from geth import (
     DevGethProcess,
     InterceptedStreamsMixin,
     LoggingMixin,
+)
+from populus.utils.networking import (
+    get_open_port,
+    wait_for_http_connection,
 )
 from populus.utils.filesystem import (
     remove_file_if_exists,
@@ -14,7 +27,7 @@ from populus.utils.filesystem import (
     get_blockchains_dir,
     tempdir,
 )
-from populus.utils.chain import (
+from populus.utils.chains import (
     get_chaindata_dir,
     get_dapp_dir,
     get_nodekey_path,
@@ -47,7 +60,11 @@ class LocalChainGethProcess(InterceptedStreamsMixin, DevGethProcess):
 @contextlib.contextmanager
 def dev_geth_process(project_dir, chain_name):
     blockchains_dir = get_blockchains_dir(project_dir)
-    with LocalChainGethProcess(chain_name=chain_name, base_dir=blockchains_dir, overrides={'verbosity': '5', 'suffix_kwargs': ['--rpccorsdomain=*'], 'rpc_addr': 'localhost'}) as geth:
+    local_chain_geth = LocalChainGethProcess(
+        chain_name=chain_name,
+        base_dir=blockchains_dir,
+    )
+    with local_chain_geth as geth:
         yield geth
 
 
@@ -138,3 +155,69 @@ def testing_geth_process(project_dir, test_name):
             if running_geth.rpc_enabled:
                 running_geth.wait_for_rpc(30)
             yield running_geth
+
+
+class Chain(object):
+    """
+    Base class for how populus interacts with the blockchain.
+    """
+    project = None
+
+    def __init__(self, project):
+        self.project = project
+
+    @property
+    def web3(self):
+        raise NotImplementedError("Must be implemented by subclasses")
+
+    def __enter__(self):
+        raise NotImplementedError("Must be implemented by subclasses")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+class TesterChain(Chain):
+    provider = None
+    port = None
+    _web3 = None
+
+    @property
+    def web3(self):
+        if self._web3 is None:
+            if self.provider is None:
+                raise ValueError(
+                    "TesterChain instances must be running to access the web3 "
+                    "object."
+                )
+            self._web3 = Web3(self.provider)
+        return self._web3
+
+    _running = False
+
+    def __enter__(self):
+        if self._running:
+            raise ValueError("The TesterChain is already running")
+
+        if self.port is None:
+            self.port = get_open_port()
+
+        self.provider = TestRPCProvider(port=self.port)
+
+        testrpc.full_reset()
+        testrpc.rpc_configure('eth_mining', False)
+        testrpc.rpc_configure('eth_protocolVersion', '0x3f')
+        testrpc.rpc_configure('net_version', 1)
+        testrpc.evm_mine()
+
+        wait_for_http_connection('127.0.0.1', self.port)
+        self._running = True
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self._running:
+            raise ValueError("The TesterChain is not running")
+        try:
+            self.provider.server.shutdown()
+            self.provider.server.server_close()
+        finally:
+            self._running = False

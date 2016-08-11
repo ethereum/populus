@@ -17,8 +17,10 @@ from populus.utils.contracts import (
 
 from .registrar import (
     REGISTRAR_SOURCE,
+)
+from .deferred import (
     Address,
-    resolve_if_registrar_value,
+    resolve_if_deferred_value,
 )
 
 
@@ -124,12 +126,13 @@ class DeployContract(Operation):
         )
 
         if link_dependencies:
+            # TODO: try to look these values up with the registrar.
             missing_libraries = set(self.libraries.keys()).difference(link_dependencies)
             if missing_libraries:
                 raise ValueError(
                     "Missing necessary libraries for linking: {0!r}".format(missing_libraries)
                 )
-            resolve_fn = functools.partial(resolve_if_registrar_value, registrar=registrar)
+            resolve_fn = functools.partial(resolve_if_deferred_value, registrar=registrar)
             resolved_dependencies = {
                 dependency_name: resolve_fn(value)
                 for dependency_name, value

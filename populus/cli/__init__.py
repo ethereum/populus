@@ -5,3 +5,4 @@ from .deploy_cmd import deploy  # NOQA
 from .init_cmd import init  # NOQA
 from .config_cmd import config  # NOQA
 from .makemigration_cmd import make_migration  # NOQA
+from .migrate_cmd import migrate  # NOQA

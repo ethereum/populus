@@ -2,12 +2,10 @@ import itertools
 
 from toposort import toposort
 
-from .registrar import (
-    get_compiled_registrar_contract,
+from .deferred import (
     generate_registrar_value_setters,
     Bool,
 )
-
 from .validation import (
     validate_migration_classes,
 )

@@ -14,6 +14,7 @@ from populus.utils.filesystem import (
     get_build_dir,
     get_compiled_contracts_file_path,
     get_blockchains_dir,
+    get_migrations_dir,
 )
 from populus.utils.module_loading import (
     import_string,
@@ -21,13 +22,23 @@ from populus.utils.module_loading import (
 from populus.utils.contracts import (
     package_contracts,
 )
+from populus.utils.chains import (
+    get_data_dir,
+    get_chaindata_dir,
+    get_geth_ipc_path,
+)
 from populus.utils.config import (
     load_config,
     get_config_paths,
+    PRIMARY_CONFIG_FILENAME,
 )
 from populus.compilation import (
     find_project_contracts,
     compile_project_contracts,
+)
+
+from populus.chain import (
+    TesterChain,
 )
 
 
@@ -39,10 +50,6 @@ class Project(object):
             config = load_config(get_config_paths(os.getcwd()))
 
         self.config = config
-
-        if chain is None and self.config.has_option('populus', 'default_chain'):
-            chain = self.config.get('populus', 'default_chain')
-
         self.chain = chain
 
     @property
@@ -52,6 +59,13 @@ class Project(object):
         else:
             return os.getcwd()
 
+    @property
+    def config_file_path(self):
+        return os.path.join(self.project_dir, PRIMARY_CONFIG_FILENAME)
+
+    #
+    # Contracts
+    #
     @property
     def contracts_dir(self):
         return get_contracts_dir(self.project_dir)
@@ -63,10 +77,6 @@ class Project(object):
     @property
     def compiled_contracts_file_path(self):
         return get_compiled_contracts_file_path(self.project_dir)
-
-    @property
-    def blockchains_dir(self):
-        return get_blockchains_dir(self.project_dir)
 
     _cached_compiled_contracts_hash = None
     _cached_compiled_contracts = None
@@ -86,6 +96,60 @@ class Project(object):
                 project_dir=self.project_dir,
             )
         return self._cached_compiled_contracts
+
+    @property
+    def contract_factories(self):
+        if self.chain is None:
+            raise AttributeError(
+                "To access the `contract_factories` property the project must "
+                "be initialized within the context of a specific chain. This "
+                "can bei one of the pre-configured public chains "
+                "(mainnet/morden) or a custom chain declared within the "
+                "'populus.ini' configuration file."
+            )
+        return package_contracts(self.web3, self.compiled_contracts)
+
+    #
+    # Local Blockchains
+    #
+    def get_chain(self, chain_name):
+        if chain_name == 'tester':
+            return TesterChain()
+
+        try:
+            chain_config = self.config.chains[chain_name]
+        except KeyError:
+            raise KeyError(
+                "Unknown chain: {0!r} - Must be one of {1!r}".format(
+                    chain_name,
+                    sorted(self.config.chains.keys()),
+                )
+            )
+
+        if chain_name == 'mainnet':
+            raise NotImplementedError("Not Implemented")
+        elif chain_name == 'morden':
+            raise NotImplementedError("Not Implemented")
+
+    @property
+    def blockchains_dir(self):
+        return get_blockchains_dir(self.project_dir)
+
+    def get_blockchain_data_dir(self, chain_name):
+        return get_data_dir(self.project_dir, chain_name)
+
+    def get_blockchain_chaindata_dir(self, chain_name):
+        return get_chaindata_dir(self.get_blockchain_data_dir(chain_name))
+
+    def get_blockchain_ipc_path(self, chain_name):
+        return get_geth_ipc_path(self.get_blockchain_data_dir(chain_name))
+
+    #
+    # Migrations
+    #
+    @property
+    def migrations_dir(self):
+        return get_migrations_dir(self.project_dir)
 
     @property
     def web3(self):
@@ -126,7 +190,3 @@ class Project(object):
 
         provider = ProviderClass(**provider_kwargs)
         return Web3(provider)
-
-    @property
-    def contract_factories(self):
-        return package_contracts(self.web3, self.compiled_contracts)

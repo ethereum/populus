@@ -43,7 +43,7 @@ from .main import main
 @click.pass_context
 def make_migration(ctx, empty, migration_name, compile, optimize):
     """
-    Generate project layout with an example contract.
+    Generate an empty migration.
     """
     if not empty:
         ctx.fail((
@@ -51,14 +51,12 @@ def make_migration(ctx, empty, migration_name, compile, optimize):
             "Please rerun with `--empty`."
         ))
 
-    project_dir = os.getcwd()
+    project = ctx.obj['PROJECT']
 
     if compile:
-        compile_and_write_contracts(project_dir, optimize=optimize)
+        compile_and_write_contracts(project.project_dir, optimize=optimize)
 
-    migrations_dir = get_migrations_dir(project_dir)
-
-    next_migration_number = get_next_migration_number(project_dir)
+    next_migration_number = get_next_migration_number(project.migrations_dir)
 
     if migration_name is None:
         if next_migration_number == 1:
@@ -79,7 +77,7 @@ def make_migration(ctx, empty, migration_name, compile, optimize):
             "underscores: {0!r}".format(migration_filename)
         )
 
-    migration_file_path = os.path.join(migrations_dir, migration_filename)
+    migration_file_path = os.path.join(project.migrations_dir, migration_filename)
     if os.path.exists(migration_file_path):
         ctx.fail((
             "Unexpectedly found duplicate migration name: {0}".format(
@@ -87,13 +85,13 @@ def make_migration(ctx, empty, migration_name, compile, optimize):
             )
         ))
 
-    compiled_contracts = load_compiled_contract_json(project_dir)
+    compiled_contracts = load_compiled_contract_json(project.project_dir)
 
     with open(migration_file_path, 'w') as file_obj:
         write_empty_migration(file_obj, migration_id, compiled_contracts)
 
     click.echo(
         "Wrote new migration to: {0}".format(os.path.relpath(
-            migration_file_path, project_dir,
+            migration_file_path, project.project_dir,
         ))
     )

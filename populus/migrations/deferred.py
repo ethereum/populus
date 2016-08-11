@@ -1,14 +1,31 @@
+import itertools
 
+from web3.utils.encoding import (
+    decode_hex,
+)
+from web3.utils.types import (
+    is_string,
+)
+
+from populus.utils.types import (
+    is_hex_address,
+    is_hex_transaction_hash,
+)
+from populus.utils.transactions import (
+    wait_for_transaction_receipt,
+)
+
+from .registrar import get_compiled_registrar_contract
 
 
 class DeferredValue(object):
-    web3 = None
+    project = None
 
-    def __init__(self, web3):
-        self.web3 = web3
+    def __init__(self, project):
+        self.project = project
 
     @classmethod
-    def defer(cls, **init_kwargs):
+    def defer(cls, **initkwargs):
         for key in initkwargs:
             if not hasattr(cls, key):
                 raise TypeError(
@@ -20,6 +37,15 @@ class DeferredValue(object):
 
     def get(self):
         raise NotImplementedError("This method must be implemented by subclasses")
+
+
+def resolve_if_deferred_value(value, registrar):
+    if isinstance(value, DeferredValue):
+        return value.get()
+    elif isinstance(value, type) and issubclass(value, RegistrarValue):
+        return value(registrar).get()
+    else:
+        return value
 
 
 ALLOWED_VALUE_TYPES = {
@@ -37,11 +63,16 @@ class RegistrarValue(DeferredValue):
     value_type = None
     value = None
 
-    def __init__(self, web3, key=None, value=None, value_type=None):
-        if registrar is None:
-            raise ValueError("Cannot instantiate RegistrarValue without a registrar")
-
+    def __init__(self, project, key=None, value=None, value_type=None):
+        chain_config = project.config.chains[project.chain]
+        if 'registrar' not in chain_config:
+            raise ValueError(
+                "This current chain does not have a registrar configured"
+            )
         self.registrar = get_compiled_registrar_contract(
+            web3=project.web3,
+            address=chain_config['registrar'],
+        )
 
         if key is not None:
             self.key = key
@@ -49,6 +80,7 @@ class RegistrarValue(DeferredValue):
             self.value = value
         if value_type is not None:
             self.value_type = value_type
+        super(RegistrarValue, self).__init__(project)
 
     def exists(self, key):
         return self.registrar.call().exists(key)
@@ -187,12 +219,3 @@ def generate_registrar_value_setters(receipt, prefix=None):
             "Invalid type.  Must be one of transaction hash, address, "
             "ReceiptValue, dict, or list"
         )
-
-
-def resolve_if_registrar_value(value, registrar):
-    if isinstance(value, RegistrarValue):
-        return value.get()
-    elif isinstance(value, type) and issubclass(value, RegistrarValue):
-        return value(registrar).get()
-    else:
-        return value

@@ -3,7 +3,7 @@ import os
 import gevent
 import click
 
-from populus.utils.chain import (
+from populus.utils.chains import (
     get_data_dir,
 )
 from populus.chain import (
@@ -15,7 +15,8 @@ from .main import main
 
 
 @main.group()
-def chain():
+@click.pass_context
+def chain(ctx):
     """
     Wrapper around `geth`.
     """
@@ -23,41 +24,45 @@ def chain():
 
 
 @chain.command('reset')
-@click.argument('name', nargs=1, default="default")
+@click.argument('chain_name', nargs=1, default="default")
 @click.option('--confirm/--no-confirm', default=True)
-def chain_reset(name, confirm):
+@click.pass_context
+def chain_reset(ctx, chain_name, confirm):
     """
     Reset a test chain
     """
-    # TODO: from `main` command
-    project_dir = os.getcwd()
-    data_dir = get_data_dir(project_dir, name)
+    project = ctx.obj['PROJECT']
+
     if confirm:
         confirmation_message = (
             "Are you sure you want to reset blockchain {0}: {1}".format(
-                name,
-                data_dir,
+                chain_name,
+                project.get_blockchain_data_dir(chain_name),
             )
         )
         if not click.confirm(confirmation_message):
-            raise click.Abort()
-    reset_chain(data_dir)
+            raise ctx.abort()
+    reset_chain(project.get_blockchain_data_dir(chain_name))
 
 
 @chain.command('run')
-@click.argument('name', nargs=1, default="default")
+@click.argument('chain_name', nargs=1, default="default")
 @click.option('--mine/--no-mine', default=True)
 @click.option(
     '--verbosity', default=5,
     help="""
     Set verbosity of the logging output. Default is 5, Range is 0-6.
     """)
-def chain_run(name, mine, verbosity):
+@click.pass_context
+def chain_run(ctx, chain_name, mine, verbosity):
     """
     Run a geth node.
     """
-    project_dir = os.getcwd()
-    with dev_geth_process(project_dir, name):
+    project = ctx.obj['PROJECT']
+
+    chain = project.get_chain(chain_name)
+
+    with chain:
         try:
             while True:
                 gevent.sleep(0)

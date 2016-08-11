@@ -18,6 +18,9 @@ from populus.utils.filesystem import (
 from populus.utils.module_loading import (
     import_string,
 )
+from populus.utils.contracts import (
+    package_contracts,
+)
 from populus.utils.config import (
     load_config,
     get_config_paths,
@@ -123,3 +126,7 @@ class Project(object):
 
         provider = ProviderClass(**provider_kwargs)
         return Web3(provider)
+
+    @property
+    def contract_factories(self):
+        return package_contracts(self.web3, self.compiled_contracts)

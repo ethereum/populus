@@ -107,11 +107,3 @@ Gevent asynchronous event loop notice
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Populus and underlying libraries (py-geth, web3.py) use  `gevent <http://www.gevent.org/>`_. gevent is a coroutine -based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libev event loop.
-
-Gevent monkey patches Python standard library. If you are using Populus and its networking facilities inside your own application, `you need to run monkey patch functionality as early as possible in your application <http://www.gevent.org/gevent.monkey.html>`_.
-
-Populus command line application does this in :py:mod:`populus.cli` module import.
-
-
-
-

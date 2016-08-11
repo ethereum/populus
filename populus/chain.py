@@ -5,6 +5,8 @@ import click
 
 from testrpc import testrpc
 
+from web3.utils.types import is_string
+
 from web3.providers.rpc import TestRPCProvider
 from web3 import (
     Web3,
@@ -14,6 +16,8 @@ from web3 import (
 
 from geth import (
     DevGethProcess,
+    LiveGethProcess,
+    TestnetGethProcess,
     InterceptedStreamsMixin,
     LoggingMixin,
 )
@@ -21,11 +25,17 @@ from populus.utils.networking import (
     get_open_port,
     wait_for_http_connection,
 )
+from populus.utils.module_loading import (
+    import_string,
+)
 from populus.utils.filesystem import (
     remove_file_if_exists,
     remove_dir_if_exists,
     get_blockchains_dir,
     tempdir,
+)
+from populus.utils.contracts import (
+    package_contracts,
 )
 from populus.utils.chains import (
     get_chaindata_dir,
@@ -34,6 +44,10 @@ from populus.utils.chains import (
     get_geth_ipc_path,
     get_geth_logfile_path,
 )
+
+
+TESTNET_BLOCK_1_HASH = '0xad47413137a753b2061ad9b484bf7b0fc061f654b951b562218e9f66505be6ce'  # noqa
+MAINNET_BLOCK_1_HASH = '0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6'  # noqa
 
 
 def reset_chain(data_dir):
@@ -68,93 +82,48 @@ def dev_geth_process(project_dir, chain_name):
         yield geth
 
 
-class TestingGethProcess(LoggingMixin, DevGethProcess):
-    pass
-
-
-@contextlib.contextmanager
-def testing_geth_process(project_dir, test_name):
-    """A content manager to launch a new local Geth process for running tests.
-
-    A fresh run in a new environment may need up to 10 minutes to
-    generate DAG files.
-
-    * See https://github.com/ethereum/wiki/wiki/Ethash-DAG
-
-    * These are shared across all Ethereum nodes and live in
-      ``$(HOME)/.ethash/`` folder
-
-    Example:
-
-    .. code-block:: python
-
-        import pytest
-
-        from web3 import Web3, RPCProvider
-        from populus.chain import testing_geth_process
-
-
-        @pytest.yield_fixture(scope="session")
-        def web3(request, client_mode, client_credentials) -> Web3:
-            '''A py.test fixture to get a Web3 interface to locally launched geth.
-
-            This is session scoped fixture.
-            Geth is launched only once during the beginning of the test run.
-
-            Geth will have huge instant balance on its coinbase account.
-            Geth will also mine our transactions on artificially
-            low difficulty level.
-            '''
-
-            # Ramp up a local geth server, store blockchain files in the
-            # current working directory
-            with testing_geth_process(project_dir=os.getcwd(), test_name="test") as geth_proc:
-                # Launched in port 8080
-                web3 = Web3(RPCProvider(host="127.0.0.1", port=geth_proc.rpc_port))
-
-                # Allow access to sendTransaction() to use coinbase balance
-                # to deploy contracts. Password is from py-geth
-                # default_blockchain_password file. Assume we don't
-                # run tests for more than 9999 seconds
-                coinbase = web3.eth.coinbase
-                success = web3.personal.unlockAccount(
-                    coinbase,
-                    passphrase="this-is-not-a-secure-password",
-                    duration=9999)
-
-                assert success, "Could not unlock test geth coinbase account"
-
-                yield web3
-
-
-        @pytest.fixture(scope="session")
-        def coinbase(web3) -> str:
-            '''Get coinbase address of locally running geth.'''
-            return web3.eth.coinbase
-
-
-    :param project_dir: Directory where chain files and log files are stored
-    :param test_name: An identifier that llows separatation log files for each test
-    :return: :class:`populus.chain.TestingGethProcess`
-    """
-    with tempdir() as tmp_project_dir:
-        blockchains_dir = get_blockchains_dir(tmp_project_dir)
-        geth = TestingGethProcess(
-            chain_name='tmp-chain',
+class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
+    def __init__(self, project_dir, blockchains_dir, chain_name, overrides):
+        super(LoggedDevGethProcess, self).__init__(
+            overrides=overrides,
+            chain_name=chain_name,
             base_dir=blockchains_dir,
-            stdout_logfile_path=get_geth_logfile_path(project_dir, test_name, 'stdout'),
-            stderr_logfile_path=get_geth_logfile_path(project_dir, test_name, 'stderr'),
-            overrides={'verbosity': '5', 'suffix_kwargs': ['--rpccorsdomain=*'], 'rpc_addr': 'localhost'},
+            stdout_logfile_path=get_geth_logfile_path(
+                project_dir,
+                chain_name,
+                'stdout'
+            ),
+            stderr_logfile_path=get_geth_logfile_path(
+                project_dir,
+                chain_name,
+                'stderr',
+            ),
+
         )
-        with geth as running_geth:
-            print('Geth Port:', running_geth.rpc_port)
-            if running_geth.is_mining:
-                running_geth.wait_for_dag(600)
-            if running_geth.ipc_enabled:
-                running_geth.wait_for_ipc(30)
-            if running_geth.rpc_enabled:
-                running_geth.wait_for_rpc(30)
-            yield running_geth
+
+
+class LoggedMordenGethProccess(LoggingMixin, TestnetGethProcess):
+    def __init__(self, project_dir, geth_kwargs):
+        super(LoggedMordenGethProccess, self).__init__(
+            geth_kwargs=geth_kwargs,
+        )
+
+
+class LoggedMainnetGethProcess(LoggingMixin, LiveGethProcess):
+    def __init__(self, project_dir, geth_kwargs):
+        super(LoggedMainnetGethProcess, self).__init__(
+            geth_kwargs=geth_kwargs,
+            stdout_logfile_path=get_geth_logfile_path(
+                project_dir,
+                'mainnet',
+                'stdout'
+            ),
+            stderr_logfile_path=get_geth_logfile_path(
+                project_dir,
+                'mainnet',
+                'stderr',
+            ),
+        )
 
 
 class Chain(object):
@@ -170,6 +139,10 @@ class Chain(object):
     def web3(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
+    @property
+    def contract_factories(self):
+        return package_contracts(self.web3, self.project.compiled_contracts)
+
     def __enter__(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
@@ -177,7 +150,7 @@ class Chain(object):
         pass
 
 
-class TesterChain(Chain):
+class TestRPCChain(Chain):
     provider = None
     port = None
     _web3 = None
@@ -212,8 +185,9 @@ class TesterChain(Chain):
 
         wait_for_http_connection('127.0.0.1', self.port)
         self._running = True
+        return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, *exc_info):
         if not self._running:
             raise ValueError("The TesterChain is not running")
         try:
@@ -221,3 +195,122 @@ class TesterChain(Chain):
             self.provider.server.server_close()
         finally:
             self._running = False
+
+
+class BaseGethChain(Chain):
+    geth = None
+    provider_class = None
+
+    def __init__(self, project, provider=IPCProvider, **geth_kwargs):
+        if geth_kwargs is None:
+            geth_kwargs = {}
+
+        if is_string(provider):
+            provider = import_string(provider)
+
+        self.provider_class = provider
+        self.geth_kwargs = geth_kwargs
+
+        super(BaseGethChain, self).__init__(project)
+
+    _web3 = None
+
+    @property
+    def web3(self):
+        if not self.geth.is_running:
+            raise ValueError(
+                "Underlying geth process doesn't appear to be running"
+            )
+        if self._web3 is None:
+            if issubclass(self.provider_class, IPCProvider):
+                provider = IPCProvider(self.geth.ipc_path)
+            elif issubclass(self.provider, RPCProvider):
+                provider = RPCProvider(port=self.geth.rpc_port)
+            else:
+                raise NotImplementedError(
+                    "Unsupported provider class {0!r}.  Must be one of "
+                    "IPCProvider or RPCProvider"
+                )
+            self._web3 = Web3(provider)
+        return self._web3
+
+    def get_geth_process_instance(self, *args, **kwargs):
+        raise NotImplementedError("Must be implemented by subclasses")
+
+    def __enter__(self, *args, **kwargs):
+        # context manager shenanigans
+        self.stack = contextlib.ExitStack()
+
+        self.geth = self.stack.enter_context(
+            self.get_geth_process_instance(
+                *args,
+                **kwargs
+            )
+        )
+
+        if self.geth.is_mining:
+            self.geth.wait_for_dag(600)
+        if self.geth.ipc_enabled:
+            self.geth.wait_for_ipc(30)
+        if self.geth.rpc_enabled:
+            self.geth.wait_for_rpc(30)
+
+        return self
+
+    def __exit__(self, *exc_info):
+        self.stack.close()
+        del self.stack
+
+
+class LocalGethChain(BaseGethChain):
+    def __init__(self, *args, **kwargs):
+        self.chain_name = kwargs.pop('chain_name')
+        super(LocalGethChain, self).__init__(*args, **kwargs)
+
+    def get_geth_process_instance(self, *args, **kwargs):
+        return LoggedDevGethProcess(
+            *args,
+            project_dir=self.project.project_dir,
+            blockchains_dir=self.project.blockchains_dir,
+            chain_name=self.chain_name,
+            overrides=self.geth_kwargs,
+            **kwargs
+        )
+
+
+class TemporaryGethChain(BaseGethChain):
+    def get_geth_process_instance(self,
+                                  name='temporary-geth-chain',
+                                  *args,
+                                  **kwargs):
+        tmp_project_dir = self.stack.enter_context(tempdir())
+        blockchains_dir = get_blockchains_dir(tmp_project_dir)
+
+        return LoggedDevGethProcess(
+            *args,
+            project_dir=self.project.project_dir,
+            blockchains_dir=blockchains_dir,
+            chain_name=name,
+            overrides=self.geth_kwargs,
+            **kwargs
+        )
+
+
+class MordenChain(BaseGethChain):
+    def get_geth_process_instance(self, *args, **kwargs):
+        return LoggedMordenGethProccess(
+            *args,
+            project_dir=self.project.project_dir,
+            geth_kwargs=self.geth_kwargs,
+            **kwargs
+        )
+
+
+class MainnetChain(BaseGethChain):
+    def get_geth_process_instance(self, *args, **kwargs):
+        return LoggedMainnetGethProcess(
+            *args,
+            project_dir=self.project.project_dir,
+            geth_kwargs=self.geth_kwargs,
+            **kwargs
+        )

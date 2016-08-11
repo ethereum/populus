@@ -52,3 +52,7 @@ docs/_build
 
 # Chains
 chains/
+.hypothesis
+chaindata/
+genesis.json
+keystore/

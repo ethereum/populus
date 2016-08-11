@@ -1,26 +1,12 @@
 import os
 import hashlib
 
-from web3 import Web3
-from web3.providers.rpc import (
-    TestRPCProvider,
-)
-
-from populus.utils.networking import (
-    get_open_port,
-)
 from populus.utils.filesystem import (
     get_contracts_dir,
     get_build_dir,
     get_compiled_contracts_file_path,
     get_blockchains_dir,
     get_migrations_dir,
-)
-from populus.utils.module_loading import (
-    import_string,
-)
-from populus.utils.contracts import (
-    package_contracts,
 )
 from populus.utils.chains import (
     get_data_dir,
@@ -38,19 +24,22 @@ from populus.compilation import (
 )
 
 from populus.chain import (
-    TesterChain,
+    TestRPCChain,
+    TemporaryGethChain,
+    MordenChain,
+    MainnetChain,
+    LocalGethChain,
 )
 
 
 class Project(object):
     config = None
 
-    def __init__(self, config=None, chain=None):
+    def __init__(self, config=None):
         if config is None:
             config = load_config(get_config_paths(os.getcwd()))
 
         self.config = config
-        self.chain = chain
 
     @property
     def project_dir(self):
@@ -97,24 +86,60 @@ class Project(object):
             )
         return self._cached_compiled_contracts
 
-    @property
-    def contract_factories(self):
-        if self.chain is None:
-            raise AttributeError(
-                "To access the `contract_factories` property the project must "
-                "be initialized within the context of a specific chain. This "
-                "can bei one of the pre-configured public chains "
-                "(mainnet/morden) or a custom chain declared within the "
-                "'populus.ini' configuration file."
-            )
-        return package_contracts(self.web3, self.compiled_contracts)
-
     #
     # Local Blockchains
     #
-    def get_chain(self, chain_name):
-        if chain_name == 'tester':
-            return TesterChain()
+    def get_chain(self, chain_name, *chain_args, **chain_kwargs):
+        """
+        Returns a context manager that runs a chain within the context of the
+        current populus project.
+
+        Support pre-configured chain names:
+
+        - 'testrpc': Chain backed by an ephemeral eth-testrpc chain.
+        - 'temp': Chain backed by geth running a local chain in a temporary
+          directory that will be automatically deleted when the chain shuts down.
+        - 'mainnet': Chain backed by geth running against the public mainnet.
+        - 'morden': Chain backed by geth running against the public morden
+          testnet.
+
+        Alternatively you can specify any of the pre-configured chains from the
+        project's populus.ini configuration file.
+
+        All geth backed chains are subject to up to 10 minutes of wait time
+        during first boot to generate the DAG file if the chain configured to
+        mine.
+
+        * See https://github.com/ethereum/wiki/wiki/Ethash-DAG
+        * These are shared across all Ethereum nodes and live in
+          ``$(HOME)/.ethash/`` folder
+
+        To avoid this long wait time, you can manuall pre-generate the DAG with
+        ``$ geth makedag 0 $HOME/.ethash``
+
+        Example:
+
+        .. code-block:: python
+
+            >>> from populus.project import default_project as my_project
+            >>> with my_project.get_chain('testrpc') as chain:
+            ...     web3 = chain.web3
+            ...     MyContract = chain.contract_factories.MyContract
+            ...     # do things
+
+
+        :param chain_name: The name of the chain that should be returned
+        :param chain_args: Positional arguments that should be passed into the
+                           chain constructor.
+        :param chain_kwargs: Named arguments that should be passed into the
+                             constructor
+
+        :return: :class:`populus.chain.Chain`
+        """
+        if chain_name == 'testrpc':
+            return TestRPCChain(self, *chain_args, **chain_kwargs)
+        elif chain_name == 'temp':
+            return TemporaryGethChain(self, *chain_args, **chain_kwargs)
 
         try:
             chain_config = self.config.chains[chain_name]
@@ -126,10 +151,18 @@ class Project(object):
                 )
             )
 
-        if chain_name == 'mainnet':
-            raise NotImplementedError("Not Implemented")
-        elif chain_name == 'morden':
-            raise NotImplementedError("Not Implemented")
+        combined_kwargs = dict(**chain_config)
+        combined_kwargs.update(chain_kwargs)
+
+        if chain_name == 'morden':
+            return MordenChain(self, *chain_args, **combined_kwargs)
+        elif chain_name == 'mainnet':
+            return MainnetChain(self, *chain_args, **combined_kwargs)
+        else:
+            return LocalGethChain(self,
+                                  chain_name=chain_name,
+                                  *chain_args,
+                                  **chain_kwargs)
 
     @property
     def blockchains_dir(self):
@@ -150,43 +183,3 @@ class Project(object):
     @property
     def migrations_dir(self):
         return get_migrations_dir(self.project_dir)
-
-    @property
-    def web3(self):
-        if self.chain is None:
-            raise AttributeError(
-                "To access the `web3` property the `project.chain` attribute "
-                "must be set to a valid chain name from your `populus.ini` "
-                "configuration file, or to one of the preset public chain names "
-                "(mainnet/morden)"
-            )
-        elif self.chain not in self.config.chains:
-            # TODO: lookup whether this is a local chain.
-            raise KeyError(
-                "Unknown chain. given: {0!r}  expected one of: {1!r}".format(
-                    self.chain,
-                    self.config.chains.keys(),
-                )
-            )
-
-        chain_config = self.config.chains[self.chain]
-
-        try:
-            provider_import_path = chain_config['provider']
-        except KeyError:
-            # TODO: lookup whether this is a local chain and default to IPC
-            # provider with the local project chain ipc_path.
-            raise KeyError("Chain configurations must declare a provider")
-
-        ProviderClass = import_string(provider_import_path)
-        provider_kwargs = {
-            key: value
-            for key, value in chain_config.items()
-            if key != 'provider'
-        }
-
-        if issubclass(ProviderClass, TestRPCProvider):
-            provider_kwargs.setdefault('port', get_open_port())
-
-        provider = ProviderClass(**provider_kwargs)
-        return Web3(provider)

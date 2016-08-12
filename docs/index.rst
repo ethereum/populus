@@ -16,6 +16,7 @@ Contents
     deploy
     chain
     devenv
+    config
     populus.testing
     populus.testing-fixtures
     modules

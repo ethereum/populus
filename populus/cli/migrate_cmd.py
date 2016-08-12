@@ -1,12 +1,13 @@
-import itertools
 import click
 
 from populus.utils.transactions import (
-    get_contract_address_from_txn,
     is_account_locked,
 )
 from populus.utils.cli import (
     select_chain,
+    select_account,
+    request_account_unlock,
+    deploy_contract_and_verify,
 )
 
 from .main import main
@@ -43,85 +44,65 @@ def migrate_init(ctx):
     else:
         chain_name = select_chain(project)
 
+    chain_config = project.config.chains[chain_name]
+
     if chain_name == 'testrpc':
         ctx.abort("Cannot initialize the {0!r} chain".format(chain_name))
 
+    # The `mainnet` and `morden` chains have default configurations.  If the
+    # user is working on one of these chains then we need to add the section
+    # header so that we can write new config to it.
     if not project.config.has_section("chain:{0}".format(chain_name)):
         project.config.add_section("chain:{0}".format(chain_name))
 
-    with project.get_chain(chain_name) as chain:
-        web3 = chain.web3
+    chain = project.get_chain(chain_name)
 
-        # TODO: Check syncing status here:
-        syncing = web3.eth.syncing
-        if syncing:
-            ctx.abort(str(syncing))
+    if 'registrar' not in chain.chain_config:
+        # We need to deploy the registrar
+        with chain:
+            web3 = chain.web3
+            # TODO: Check syncing status here:
+            syncing = web3.eth.syncing
+            if syncing:
+                ctx.abort(str(syncing))
 
-        if not web3.eth.accounts:
-            # TODO: we can actually create a new account for the user.
-            no_accounts_msg = (
-                "There are no accounts on this chain. Once you have created an "
-                "account, you can initialize the migrations."
-            )
-            ctx.abort(no_accounts_msg)
-
-        if 'registrar' not in chain.chain_config:
-            if is_account_locked(web3, web3.eth.defaultAccount):
-                unlock_message = (
-                    "In order to initialize the chain populus needs to deploy the "
-                    "Registrar contract which requires an unlocked account.  Populus "
-                    "will do this for you if you will provide the password for the "
-                    "account {0!r}.  The account will be unlocked for 5 seconds."
-                    "".format(
-                        web3.eth.defaultAccount,
+            # Choose the address we should deploy from.
+            if 'deploy_from' in chain_config:
+                account = chain_config['deploy_from']
+                if account not in web3.eth.accounts:
+                    raise click.Abort(
+                        "The chain {0!r} is configured to deploy from account {1!r} "
+                        "which was not found in the account list for this chain. "
+                        "Please ensure that this account exists.".format(
+                            account,
+                            chain_name,
+                        )
                     )
-                )
-                account_password = click.prompt(unlock_message, hide_input=True)
-                unlock_successful = web3.personal.unlockAccount(
-                    web3.eth.defaultAccount,
-                    account_password,
-                    5,
-                )
-                if not unlock_successful:
-                    ctx.abort("Unable to unlock account.")
+            else:
+                account = select_account(chain)
 
+            # Unlock the account if needed.
+            if is_account_locked(web3, account):
+                request_account_unlock(chain, account)
+
+            # Configure web3 to now send from our chosen account by default
+            web3.eth.defaultAccount = account
+
+            # Deploy the registrar
             RegistrarFactory = chain.RegistrarFactory
-            deploy_txn_hash = RegistrarFactory.deploy()
+            registrar = deploy_contract_and_verify(RegistrarFactory, 'Registrar')
 
-            click.echo("Deployed Registrar contract via txn: {0}".format(
-                deploy_txn_hash,
-            ))
-            registrar_address = get_contract_address_from_txn(
-                web3=web3,
-                txn_hash=deploy_txn_hash,
-                timeout=180,
-            )
+            # TODO: set the value in the registrar.
+            project.config.set
+            assert False
 
-            deployed_code = web3.eth.getCode(registrar_address)
-            if deployed_code != RegistrarFactory.code_runtime:
-                registrar_deploy_failed_msg = (
-                    "Something appears to have gone wrong during deployment. "
-                    "The code for the deployed registrar contract does not match "
-                    "the expected runtime bytecode."
-                    "\n"
-                    "expected: {0!r}\n"
-                    "actual: {1!r}".format(
-                        RegistrarFactory.code_runtime,
-                        deployed_code,
-                    )
-                )
-                ctx.abort(registrar_deploy_failed_msg)
-
-            project.config.set(
-                'chain:{0}'.format(chain_name),
-                'registrar',
-                registrar_address,
-            )
+            # Write the registrar address to the chain config
             with open(ctx.obj['PRIMARY_CONFIG'], 'w') as config_file:
                 project.config.write(config_file)
 
             click.echo("Wrote updated configuration to {0!r}".format(
                 ctx.obj['PRIMARY_CONFIG'],
             ))
-        else:
-            click.echo("Looks like this chain already has a registrar")
+    else:
+        # TODO: better messaging.
+        click.echo("Looks like this chain already has a registrar")

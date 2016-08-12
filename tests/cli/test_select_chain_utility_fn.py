@@ -55,3 +55,23 @@ def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expecte
 
     assert result.exit_code == 0
     assert expected in result.output
+
+
+@pytest.mark.parametrize(
+    'stdin', ('local_a\n', '20\n'),
+)
+def test_cli_select_chain_helper_select_invalid_options(project_dir, stdin):
+    project = Project()
+
+    assert 'local_a' not in project.config.chains
+    assert len(project.config.chains) < 20
+
+    @click.command()
+    def wrapper():
+        chain_name = select_chain(project)
+        print("~~{0}~~".format(chain_name))
+
+    runner = CliRunner()
+    result = runner.invoke(wrapper, [], input=stdin)
+
+    assert result.exit_code != 0

@@ -6,7 +6,8 @@ Configuration
 Introduction
 ^^^^^^^^^^^^
 
-Populus supports configuration via a configuration file.  By default, populus will search the following paths for a file named ``populus.ini``
+Populus supports configuration via a configuration file.  By default, populus
+will search the following paths for a file named ``populus.ini``
 
 * ``/the-path-to/your-project-directory/populus.ini``
 * ``$HOME/populus.ini``
@@ -70,3 +71,41 @@ command.
     $ populus config
     [populus]
       default_chain = mainnet
+
+
+Configuration Options
+^^^^^^^^^^^^^^^^^^^^^
+
+The following configuration options are recognized by populus.
+
+
+Project Configuration
+---------------------
+
+All project level configuration should happen under the ``[populus]`` section
+of the config file.
+
+* ``TODO``
+
+
+Chain Configuration
+-------------------
+
+Configuration for individual chains should be done under
+``[chain:my-chain-name]`` sections.
+
+By default, populus recognizes the following pre-configured chain names.
+
+* ``mainnet``: The primary public ethereum network.
+* ``morden``: The ethereum test network.
+* ``testrpc``: A test chain backed by the ``eth-testrpc`` package.  *(Does not
+  persist any data between runs)*
+* ``temp``: A test chain backed by geth that runs in a temporary directory
+  which is removed when the chain shuts down.
+
+Each chain allows configuration via the following options.
+
+* ``provider``
+
+Specify the python path to the provider class that ``web3.py`` should use to
+connect to this chain.

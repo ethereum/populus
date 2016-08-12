@@ -5,6 +5,9 @@ from populus.utils.transactions import (
     get_contract_address_from_txn,
     is_account_locked,
 )
+from populus.utils.cli import (
+    select_chain,
+)
 
 from .main import main
 
@@ -38,26 +41,9 @@ def migrate_init(ctx):
     if 'CHAIN_NAME' in ctx.obj:
         chain_name = ctx['CHAIN_NAME']
     else:
-        chain_options = set(project.config.chains.keys())
-        while True:
-            choose_chain_msg = "\n".join(itertools.chain((
-                "Available Chains",
-            ), (
-                "- {0}".format(chain_name)
-                for chain_name in sorted(chain_options)
-            ), (
-                "",
-                "Type the name of chain you would like to initialize"
-            )))
-            chain_name = click.prompt(choose_chain_msg)
-            if chain_name in chain_options:
-                break
-            click.echo(
-                "Invalid chain name: {0!r}.  Please choose from one of the "
-                "provided options.".format(chain_name)
-            )
+        chain_name = select_chain(project)
 
-    if chain_name in {'testrpc', 'temp'}:
+    if chain_name == 'testrpc':
         ctx.abort("Cannot initialize the {0!r} chain".format(chain_name))
 
     if not project.config.has_section("chain:{0}".format(chain_name)):

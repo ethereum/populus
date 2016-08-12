@@ -65,4 +65,4 @@ def main(ctx, config, project_dir, chain):
     ctx.obj['PRIMARY_CONFIG'] = primary_config
 
     if chain is not None:
-        ctx.obj['CHAIN'] = project.get_chain(chain)
+        ctx.obj['CHAIN_NAME'] = chain

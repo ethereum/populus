@@ -94,21 +94,22 @@ def dev_geth_process(project_dir, chain_name):
 
 class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
     def __init__(self, project_dir, blockchains_dir, chain_name, overrides):
+        stdout_logfile_path = get_geth_logfile_path(
+            project_dir,
+            chain_name,
+            'stdout'
+        )
+        stderr_logfile_path = get_geth_logfile_path(
+            project_dir,
+            chain_name,
+            'stderr',
+        )
         super(LoggedDevGethProcess, self).__init__(
             overrides=overrides,
             chain_name=chain_name,
             base_dir=blockchains_dir,
-            stdout_logfile_path=get_geth_logfile_path(
-                project_dir,
-                chain_name,
-                'stdout'
-            ),
-            stderr_logfile_path=get_geth_logfile_path(
-                project_dir,
-                chain_name,
-                'stderr',
-            ),
-
+            stdout_logfile_path=stdout_logfile_path,
+            stderr_logfile_path=stderr_logfile_path,
         )
 
 
@@ -150,9 +151,17 @@ class Chain(object):
     def web3(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
+    @property
+    def chain_config(self):
+        raise NotImplementedError("Must be implemented by subclasses")
+
     @cached_property
     def contract_factories(self):
         return package_contracts(self.web3, self.project.compiled_contracts)
+
+    @property
+    def RegistrarFactory(self):
+        return get_compiled_registrar_contract(self.web3)
 
     @property
     def registrar(self):
@@ -177,6 +186,14 @@ class TestRPCChain(Chain):
                 "object."
             )
         return Web3(self.provider)
+
+    @cached_property
+    def chain_config(self):
+        config = self.project.config.chains[self.chain_name]
+        config.update({
+            'registrar': self.registrar.address,
+        })
+        return config
 
     @cached_property
     def registrar(self):
@@ -253,11 +270,16 @@ class BaseGethChain(Chain):
     provider_class = None
 
     def __init__(self, project, chain_name, provider=IPCProvider, **geth_kwargs):
+        super(BaseGethChain, self).__init__(project, chain_name)
+
         if geth_kwargs is None:
             geth_kwargs = {}
 
         if is_string(provider):
             provider = import_string(provider)
+
+        # context manager shenanigans
+        self.stack = contextlib.ExitStack()
 
         self.provider_class = provider
         self.extra_kwargs = {
@@ -268,8 +290,7 @@ class BaseGethChain(Chain):
             key: value
             for key, value in geth_kwargs.items() if key in GETH_KWARGS
         }
-
-        super(BaseGethChain, self).__init__(project, chain_name)
+        self.geth = self.get_geth_process_instance()
 
     _web3 = None
 
@@ -279,6 +300,7 @@ class BaseGethChain(Chain):
             raise ValueError(
                 "Underlying geth process doesn't appear to be running"
             )
+
         if self._web3 is None:
             if issubclass(self.provider_class, IPCProvider):
                 provider = IPCProvider(self.geth.ipc_path)
@@ -290,11 +312,14 @@ class BaseGethChain(Chain):
                     "IPCProvider or RPCProvider"
                 )
             self._web3 = Web3(provider)
+
+            # TODO: web3 should be configured with things like the
+            # `defaultAccount` from the project configuration.
         return self._web3
 
     @property
     def chain_config(self):
-        return self.project.chains[self.chain_name]
+        return self.project.config.chains[self.chain_name]
 
     @cached_property
     def registrar(self):
@@ -303,19 +328,11 @@ class BaseGethChain(Chain):
             address=self.chain_config['registrar'],
         )
 
-    def get_geth_process_instance(self, *args, **kwargs):
+    def get_geth_process_instance(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
     def __enter__(self, *args, **kwargs):
-        # context manager shenanigans
-        self.stack = contextlib.ExitStack()
-
-        self.geth = self.stack.enter_context(
-            self.get_geth_process_instance(
-                *args,
-                **kwargs
-            )
-        )
+        self.stack.enter_context(self.geth)
 
         if self.geth.is_mining:
             self.geth.wait_for_dag(600)
@@ -328,54 +345,42 @@ class BaseGethChain(Chain):
 
     def __exit__(self, *exc_info):
         self.stack.close()
-        del self.stack
 
 
 class LocalGethChain(BaseGethChain):
-    def get_geth_process_instance(self, *args, **kwargs):
+    def get_geth_process_instance(self):
         return LoggedDevGethProcess(
-            *args,
             project_dir=self.project.project_dir,
             blockchains_dir=self.project.blockchains_dir,
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
-            **kwargs
         )
 
 
 class TemporaryGethChain(BaseGethChain):
-    def get_geth_process_instance(self,
-                                  name='temporary-geth-chain',
-                                  *args,
-                                  **kwargs):
+    def get_geth_process_instance(self):
         tmp_project_dir = self.stack.enter_context(tempdir())
         blockchains_dir = get_blockchains_dir(tmp_project_dir)
 
         return LoggedDevGethProcess(
-            *args,
             project_dir=self.project.project_dir,
             blockchains_dir=blockchains_dir,
-            chain_name=name,
+            chain_name=self.chain_name,
             overrides=self.geth_kwargs,
-            **kwargs
         )
 
 
 class MordenChain(BaseGethChain):
-    def get_geth_process_instance(self, *args, **kwargs):
+    def get_geth_process_instance(self):
         return LoggedMordenGethProccess(
-            *args,
             project_dir=self.project.project_dir,
             geth_kwargs=self.geth_kwargs,
-            **kwargs
         )
 
 
 class MainnetChain(BaseGethChain):
-    def get_geth_process_instance(self, *args, **kwargs):
+    def get_geth_process_instance(self):
         return LoggedMainnetGethProcess(
-            *args,
             project_dir=self.project.project_dir,
             geth_kwargs=self.geth_kwargs,
-            **kwargs
         )

@@ -58,8 +58,11 @@ def main(ctx, config, project_dir, chain):
     else:
         primary_config = config[0]
 
-    project = Project(load_config(config), chain=chain)
+    project = Project(load_config(config))
 
     ctx.obj = {}
     ctx.obj['PROJECT'] = project
     ctx.obj['PRIMARY_CONFIG'] = primary_config
+
+    if chain is not None:
+        ctx.obj['CHAIN'] = project.get_chain(chain)

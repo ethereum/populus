@@ -66,8 +66,8 @@ def project_config(populus_config):
 
 
 @pytest.fixture()
-def project(populus_config):
-    return Project(populus_config)
+def project(project_config):
+    return Project(project_config)
 
 
 @pytest.yield_fixture()

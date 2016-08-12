@@ -6,9 +6,18 @@ Deploy
 Introduction
 ------------
 
-Deployment is a process where you take the contract ABI definition
-and create a new smart contract in a blockchain with its own address
-and balance.
+Deployment is the process of taking your contract source code and creating a
+new smart contract on an ethereum blockchain.  During deployment, some, or all
+of the following may take place.
+
+* Compilation of source code.
+* Library linking
+* Derivation of deploy order based on contract dependencies.
+
+.. note::
+
+    Deployment currently cannot handle 
+
 
 Deploying contracts using a command line client
 -----------------------------------------------
@@ -21,19 +30,13 @@ Deploying contracts using a command line client
       Deploys the specified contracts via the RPC client.
 
     Options:
-      -d, --dry-run                  Do a dry run deploy first.  When doing a
-                                     production deploy, you should always do a dry
-                                     run so that deploy gas prices can be known.
-      -n, --dry-run-chain-name TEXT  Specifies the chain name that should be used
-                                     for the dry run deployment.  Defaults to
-                                     'default'
-      -p, --production               Deploy to a production chain (RPC server must
-                                     be run manually)
-      --confirm / --no-confirm       Bypass any confirmation prompts
-			--record / --no-record         Record the created contracts in the
-			                               'known_contracts' lists. This only works for
-																		 non-production chains.
-      --help                         Show this message and exit.
+      --confirm / --no-confirm    Bypass any confirmation prompts
+      -c, --chain TEXT            Specify which chain to deploy to.
+      --compile / --no-compile    Should contracts be compiled
+      --optimize / --no-optimize  Should contracts be compiled with the --optimize
+                                  flag.
+      -h, --help                  Show this message and exit.
+
 
 Running ``$ populus deploy`` will deploy all specifed contracts to either the
 default test chain or to a running JSON-RPC server depending on whether
@@ -162,5 +165,3 @@ This is mainly aimed for testing.
             "value": to_wei(value)
         }
         return web3.eth.sendTransaction(tx)
-
-

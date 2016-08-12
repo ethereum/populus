@@ -14,6 +14,7 @@ Contents
     tutorial
     compile
     deploy
+    migrations
     chain
     devenv
     config

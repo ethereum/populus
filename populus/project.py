@@ -1,12 +1,17 @@
 import os
 import hashlib
 
+from web3.utils.string import (
+    is_string,
+)
+
 from populus.utils.filesystem import (
     get_contracts_dir,
     get_build_dir,
     get_compiled_contracts_file_path,
     get_blockchains_dir,
     get_migrations_dir,
+    find_project_migrations,
 )
 from populus.utils.chains import (
     get_data_dir,
@@ -35,22 +40,48 @@ from populus.chain import (
 class Project(object):
     config = None
 
-    def __init__(self, config=None):
-        if config is None:
-            config = load_config(get_config_paths(os.getcwd()))
+    def __init__(self, config_file_paths=None):
+        if not config_file_paths:
+            config_file_paths = get_config_paths(os.getcwd())
+        else:
+            self.primary_config_file_path = config_file_paths[0]
 
-        self.config = config
+        if is_string(config_file_paths):
+            config_file_paths = [config_file_paths]
 
+        self.config = load_config(config_file_paths)
+
+    #
+    # Config
+    #
+    _primary_config_file_path = None
+
+    @property
+    def primary_config_file_path(self):
+        if self._primary_config_file_path is not None:
+            return self._primary_config_file_path
+        return os.path.join(self.project_dir, PRIMARY_CONFIG_FILENAME)
+
+    @primary_config_file_path.setter
+    def primary_config_file_path(self, value):
+        self._primary_config_file_path = value
+
+    def write_config(self, destination_path=None):
+        if destination_path is None:
+            destination_path = self.primary_config_file_path
+        with open(destination_path, 'w') as config_file:
+            self.config.write(config_file)
+        return destination_path
+
+    #
+    # Project
+    #
     @property
     def project_dir(self):
         if self.config.has_option('populus', 'project_dir'):
             return self.config.get('populus', 'project_dir')
         else:
             return os.getcwd()
-
-    @property
-    def config_file_path(self):
-        return os.path.join(self.project_dir, PRIMARY_CONFIG_FILENAME)
 
     #
     # Contracts
@@ -183,3 +214,7 @@ class Project(object):
     @property
     def migrations_dir(self):
         return get_migrations_dir(self.project_dir)
+
+    @property
+    def migration_files(self):
+        return find_project_migrations(self.project_dir)

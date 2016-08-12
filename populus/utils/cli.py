@@ -89,7 +89,15 @@ def request_account_unlock(chain, account, timeout):
         raise click.Abort("Unable to unlock account: `{0}`".format(account))
 
 
-def deploy_contract_and_verify(ContractFactory, contract_name):
+def deploy_contract_and_verify(ContractFactory,
+                               contract_name,
+                               deploy_transaction=None,
+                               deploy_arguments=None):
+    if deploy_transaction is None:
+        deploy_transaction = {}
+    if deploy_arguments is None:
+        deploy_arguments = []
+
     web3 = ContractFactory.web3
 
     if is_account_locked(web3, web3.eth.defaultAccount):
@@ -97,7 +105,7 @@ def deploy_contract_and_verify(ContractFactory, contract_name):
 
     click.echo("Deploying {0}".format(contract_name))
 
-    deploy_txn_hash = ContractFactory.deploy()
+    deploy_txn_hash = ContractFactory.deploy(deploy_transaction, deploy_arguments)
     deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
 
     click.echo("Deploy Transaction Sent: {0}".format(deploy_txn_hash))
@@ -130,33 +138,41 @@ def deploy_contract_and_verify(ContractFactory, contract_name):
 
     if ContractFactory.code_runtime:
         click.echo("Verifying deployed bytecode...")
-        is_bytecode_match = deployed_code != ContractFactory.code_runtime
+        is_bytecode_match = deployed_code == ContractFactory.code_runtime
         if is_bytecode_match:
             click.echo(
                 "Verified contract bytecode @ {0} matches expected runtime "
                 "bytecode".format(contract_address)
             )
         else:
-            raise click.Abort(
+            click.echo(
                 "Bytecode @ {0} does not match expected contract bytecode.\n\n"
                 "expected : '{1}'\n"
                 "actual   : '{2}'\n".format(
                     contract_address,
                     ContractFactory.code_runtime,
                     deployed_code,
-                )
+                ),
+                err=True,
             )
+            raise click.Abort("Error deploying contract")
     else:
         click.echo(
             "No runtime available.  Falling back to verifying non-empty "
             "bytecode."
         )
         if len(deployed_code) <= 2:
-            raise click.Abort(
-                "Bytecode @ {0} is unexpectedly empty.".format(contract_address)
+            click.echo(
+                "Bytecode @ {0} is unexpectedly empty.".format(contract_address),
+                err=True,
             )
+            raise click.Abort("Error deploying contract")
         else:
             click.echo(
                 "Verified bytecode @ {0} is non-empty".format(contract_address)
             )
     return ContractFactory(address=contract_address)
+
+
+def wait_for_sync(chain):
+    assert False

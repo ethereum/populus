@@ -1,11 +1,6 @@
 import os
 import click
 
-from populus.utils.config import (
-    load_config,
-    get_config_paths,
-    PRIMARY_CONFIG_FILENAME,
-)
 from populus.project import (
     Project,
 )
@@ -52,17 +47,10 @@ def main(ctx, config, project_dir, chain):
     """
     Populus
     """
-    if not config:
-        primary_config = os.path.join(project_dir, PRIMARY_CONFIG_FILENAME)
-        config = get_config_paths(project_dir)
-    else:
-        primary_config = config[0]
-
-    project = Project(load_config(config))
+    project = Project(config)
 
     ctx.obj = {}
     ctx.obj['PROJECT'] = project
-    ctx.obj['PRIMARY_CONFIG'] = primary_config
 
     if chain is not None:
         ctx.obj['CHAIN_NAME'] = chain

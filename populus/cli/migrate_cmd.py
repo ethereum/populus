@@ -1,13 +1,22 @@
 import click
 
+import gevent
+
+from populus.utils.filesystem import (
+    ensure_path_exists,
+)
 from populus.utils.transactions import (
     is_account_locked,
+    wait_for_unlock,
 )
 from populus.utils.cli import (
     select_chain,
     select_account,
     request_account_unlock,
     deploy_contract_and_verify,
+)
+from populus.migrations.writer import (
+    write_empty_migration,
 )
 
 from .main import main
@@ -29,8 +38,9 @@ def migrate(ctx):
 
 
 @migrate.command('init')
+@click.argument('chain_name', required=False)
 @click.pass_context
-def migrate_init(ctx):
+def migrate_init(ctx, chain_name):
     """
     Prepare the current chain for migrations.
 
@@ -38,11 +48,16 @@ def migrate_init(ctx):
     """
     project = ctx.obj['PROJECT']
 
-    # First determine which chain should be used.
-    if 'CHAIN_NAME' in ctx.obj:
-        chain_name = ctx['CHAIN_NAME']
-    else:
-        chain_name = select_chain(project)
+    ensure_path_exists(project.migrations_dir)
+
+    # Determine which chain should be used.
+    if not chain_name:
+        try:
+            chain_name = ctx.obj['CHAIN_NAME']
+        except KeyError:
+            chain_name = select_chain(project)
+
+    chain_section_name = "chain:{0}".format(chain_name)
 
     chain_config = project.config.chains[chain_name]
 
@@ -52,8 +67,8 @@ def migrate_init(ctx):
     # The `mainnet` and `morden` chains have default configurations.  If the
     # user is working on one of these chains then we need to add the section
     # header so that we can write new config to it.
-    if not project.config.has_section("chain:{0}".format(chain_name)):
-        project.config.add_section("chain:{0}".format(chain_name))
+    if not project.config.has_section(chain_section_name):
+        project.config.add_section(chain_section_name)
 
     chain = project.get_chain(chain_name)
 
@@ -80,10 +95,27 @@ def migrate_init(ctx):
                     )
             else:
                 account = select_account(chain)
+                set_as_deploy_from_msg = (
+                    "Would you like set the address '{0}' as the default"
+                    "`deploy_from` address for the '{1}' chain?".format(
+                        account,
+                        chain_name,
+                    )
+                )
+                if click.confirm(set_as_deploy_from_msg):
+                    project.config.set(chain_section_name, 'deploy_from', account)
+                    click.echo(
+                        "Wrote updated chain configuration to '{0}'".format(
+                            project.write_config()
+                        )
+                    )
 
             # Unlock the account if needed.
             if is_account_locked(web3, account):
-                request_account_unlock(chain, account)
+                try:
+                    wait_for_unlock(web3, account, 2)
+                except gevent.Timeout:
+                    request_account_unlock(chain, account, None)
 
             # Configure web3 to now send from our chosen account by default
             web3.eth.defaultAccount = account
@@ -93,16 +125,15 @@ def migrate_init(ctx):
             registrar = deploy_contract_and_verify(RegistrarFactory, 'Registrar')
 
             # TODO: set the value in the registrar.
-            project.config.set
-            assert False
 
             # Write the registrar address to the chain config
-            with open(ctx.obj['PRIMARY_CONFIG'], 'w') as config_file:
-                project.config.write(config_file)
+            project.config.set(chain_section_name, 'registrar', registrar.address)
+            config_file_path = project.write_config()
 
-            click.echo("Wrote updated configuration to {0!r}".format(
-                ctx.obj['PRIMARY_CONFIG'],
+            click.echo("Wrote updated chain configuration to {0!r}".format(
+                config_file_path,
             ))
-    else:
-        # TODO: better messaging.
-        click.echo("Looks like this chain already has a registrar")
+
+    click.echo("The '{0}' blockchain is ready for migrations.".format(
+        chain_name
+    ))

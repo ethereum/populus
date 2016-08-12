@@ -39,3 +39,15 @@ def is_account_locked(web3, account):
         return 'account is locked' in str(err)
     else:
         return False
+
+
+def wait_for_unlock(web3, account, timeout=0):
+    with gevent.Timeout(timeout):
+        while is_account_locked(web3, account):
+            gevent.sleep(random.random())
+
+
+def wait_for_peers(web3, peer_count=1, timeout=0):
+    with gevent.Timeout(timeout):
+        while web3.net.peerCount < peer_count:
+            gevent.sleep(random.random())

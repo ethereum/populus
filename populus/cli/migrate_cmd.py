@@ -79,26 +79,26 @@ def migrate_init(ctx):
             )
             ctx.abort(no_accounts_msg)
 
-        if is_account_locked(web3, web3.eth.defaultAccount):
-            unlock_message = (
-                "In order to initialize the chain populus needs to deploy the "
-                "Registrar contract which requires an unlocked account.  Populus "
-                "will do this for you if you will provide the password for the "
-                "account {0!r}.  The account will be unlocked for 5 seconds."
-                "".format(
-                    web3.eth.defaultAccount,
-                )
-            )
-            account_password = click.prompt(unlock_message, hide_input=True)
-            unlock_successful = web3.personal.unlockAccount(
-                web3.eth.defaultAccount,
-                account_password,
-                5,
-            )
-            if not unlock_successful:
-                ctx.abort("Unable to unlock account.")
-
         if 'registrar' not in chain.chain_config:
+            if is_account_locked(web3, web3.eth.defaultAccount):
+                unlock_message = (
+                    "In order to initialize the chain populus needs to deploy the "
+                    "Registrar contract which requires an unlocked account.  Populus "
+                    "will do this for you if you will provide the password for the "
+                    "account {0!r}.  The account will be unlocked for 5 seconds."
+                    "".format(
+                        web3.eth.defaultAccount,
+                    )
+                )
+                account_password = click.prompt(unlock_message, hide_input=True)
+                unlock_successful = web3.personal.unlockAccount(
+                    web3.eth.defaultAccount,
+                    account_password,
+                    5,
+                )
+                if not unlock_successful:
+                    ctx.abort("Unable to unlock account.")
+
             RegistrarFactory = chain.RegistrarFactory
             deploy_txn_hash = RegistrarFactory.deploy()
 
@@ -137,3 +137,5 @@ def migrate_init(ctx):
             click.echo("Wrote updated configuration to {0!r}".format(
                 ctx.obj['PRIMARY_CONFIG'],
             ))
+        else:
+            click.echo("Looks like this chain already has a registrar")

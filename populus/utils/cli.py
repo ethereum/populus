@@ -9,6 +9,7 @@ from .transactions import (
     is_account_locked,
     get_contract_address_from_txn,
     wait_for_syncing,
+    wait_for_peers,
 )
 
 
@@ -180,9 +181,15 @@ def deploy_contract_and_verify(ContractFactory,
 
 
 def show_chain_sync_progress(chain):
-    click.echo("Waiting for chain synchronization to begin...")
+    if not chain.web3.net.peerCount:
+        click.echo("Waiting for peer connections.")
+        try:
+            wait_for_peers(chain.web3, timeout=120)
+        except gevent.Timeout:
+            raise click.Abort("Never connected to any peers.")
 
     if not chain.web3.eth.syncing:
+        click.echo("Waiting for synchronization to start.")
         try:
             wait_for_syncing(chain.web3, timeout=120)
         except gevent.Timeout:

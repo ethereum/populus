@@ -79,7 +79,7 @@ class Migration(object):
 
             self.process_operation_receipt(operation_key, operation_receipt)
 
-        Bool(self.chain, key=self.migration_key, value=True).set()
+        self.mark_as_executed()
 
 
 def sort_migrations(migration_classes):
@@ -142,7 +142,7 @@ def get_migration_classes_for_execution(migration_classes, chain):
     migrations_to_run = [
         migration_instance
         for migration_instance
-        in execution_set_candidates
+        in itertools.chain.from_iterable(execution_set_candidates)
         if not migration_instance.has_been_executed
     ]
 

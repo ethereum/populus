@@ -79,6 +79,21 @@ def migrate(ctx, chain_name):
             ))
 
     with project.get_chain(chain_name) as chain:
+        web3 = chain.web3
+
+        if chain_name in {'mainnet', 'morden'}:
+            show_chain_sync_progress(chain)
+
+        # TODO: pull in the block of code that selects an account
+        account = web3.eth.coinbase
+
+        # Unlock the account if needed.
+        if is_account_locked(web3, account):
+            try:
+                wait_for_unlock(web3, account, 2)
+            except gevent.Timeout:
+                request_account_unlock(chain, account, None)
+
         # Wait for chain sync if this is a public network.
         if chain_name in {'mainnet', 'morden'}:
             show_chain_sync_progress(chain)
@@ -101,7 +116,7 @@ def migrate(ctx, chain_name):
                 " ({0} operations)".format(len(migration.operations)),
                 ":",
             )))
-            for operation_index, operation in enumerate(migration.operation):
+            for operation_index, operation in enumerate(migration.operations):
                 click.echo(''.join((
                     "    ",
                     str(operation_index),

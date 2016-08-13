@@ -2,19 +2,12 @@ import os
 
 import click
 
-from populus.utils.contracts import (
-    load_compiled_contract_json,
-)
-from populus.utils.filesystem import (
-    get_migrations_dir,
-    is_valid_migration_filename,
-)
 from populus.migrations.writer import (
     get_next_migration_number,
     write_empty_migration,
 )
-from populus.compilation import (
-    compile_and_write_contracts,
+from populus.migrations.loading import (
+    is_valid_migration_filename,
 )
 
 from .main import main
@@ -29,19 +22,8 @@ from .main import main
     help="Write an empty migration file",
 )
 @click.argument('migration_name', required=False)
-# Compilation config
-@click.option(
-    '--compile/--no-compile',
-    default=True,
-    help="Should contracts be compiled",
-)
-@click.option(
-    '--optimize/--no-optimize',
-    default=True,
-    help="Should contracts be compiled with the --optimize flag.",
-)
 @click.pass_context
-def make_migration(ctx, empty, migration_name, compile, optimize):
+def make_migration(ctx, empty, migration_name):
     """
     Generate an empty migration.
     """
@@ -52,9 +34,6 @@ def make_migration(ctx, empty, migration_name, compile, optimize):
         ))
 
     project = ctx.obj['PROJECT']
-
-    if compile:
-        compile_and_write_contracts(project.project_dir, optimize=optimize)
 
     next_migration_number = get_next_migration_number(project.migrations_dir)
 
@@ -85,7 +64,7 @@ def make_migration(ctx, empty, migration_name, compile, optimize):
             )
         ))
 
-    compiled_contracts = load_compiled_contract_json(project.project_dir)
+    compiled_contracts = project.compiled_contracts
 
     with open(migration_file_path, 'w') as file_obj:
         write_empty_migration(file_obj, migration_id, compiled_contracts)

@@ -215,18 +215,24 @@ class TransactContract(Operation):
             self.timeout = timeout
 
     def execute(self, chain, compiled_contracts, **kwargs):
-        contract_data = compiled_contracts[self.contract_name]
+        contract_name = resolve_if_deferred_value(self.contract_name, chain=chain)
+        contract_address = resolve_if_deferred_value(self.contract_address, chain=chain)
+
+        contract_data = compiled_contracts[contract_name]
         contract = chain.web3.eth.contract(
-            address=self.contract_address,
+            address=contract_address,
             abi=contract_data['abi'],
             code=contract_data['code'],
             code_runtime=contract_data['code_runtime'],
             source=contract_data['source'],
         )
 
+        arguments = [resolve_if_deferred_value(arg, chain=chain) for arg in self.arguments]
+        method_name = resolve_if_deferred_value(self.method_name, chain=chain)
+
         transactor = contract.transact(self.transaction)
-        method = getattr(transactor, self.method_name)
-        transaction_hash = method(*self.arguments)
+        method = getattr(transactor, method_name)
+        transaction_hash = method(*arguments)
 
         if self.timeout is not None:
             wait_for_transaction_receipt(

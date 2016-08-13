@@ -41,7 +41,7 @@ class Migration(object):
         return self.registrar.call().getBool(self.migration_key)
 
     def mark_as_executed(self):
-        Bool(self.registrar, key=self.migration_key, value=True).set()
+        Bool(self.chain, key=self.migration_key, value=True).set()
 
     def process_operation_receipt(self, operation_key, receipt):
         registrar_setters = generate_registrar_value_setters(
@@ -49,6 +49,7 @@ class Migration(object):
             prefix=operation_key,
         )
         for Setter in registrar_setters:
+            print("Key: ", Setter.key)
             Setter(self.chain).set()
 
         # mark the operation as having been completed.

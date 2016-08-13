@@ -72,6 +72,7 @@ def test_migrate_cmd(project_dir, write_project_file, MATH):
     math_runtime = MATH['code_runtime']
     math_abi = json.dumps(MATH['abi'])
 
+    write_project_file('contracts/Math.sol', MATH['source'])
     write_project_file('migrations/0001_deploy_math.py', MIGRATION_0001.format(
         abi=math_abi,
         code=math_code,
@@ -102,10 +103,6 @@ def test_migrate_cmd(project_dir, write_project_file, MATH):
 
     runner = CliRunner()
     result = runner.invoke(main, ['migrate', '--chain', 'local_a'])
-
-    with project.get_chain('local_a') as chain:
-        registrar = chain.registrar
-        import pdb; pdb.set_trace()
 
     assert result.exit_code == 0, result.output + str(result.exception)
 

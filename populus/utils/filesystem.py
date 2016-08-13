@@ -1,10 +1,8 @@
 import os
-import re
 import shutil
 import fnmatch
 import tempfile
 import contextlib
-import glob
 
 
 def ensure_path_exists(dir_path):
@@ -15,6 +13,19 @@ def ensure_path_exists(dir_path):
         os.makedirs(dir_path)
         return True
     return False
+
+
+def ensure_file_exists(file_path):
+    """
+    Make sure that a path exists
+    """
+    if os.path.exists(file_path):
+        return False
+    base_dir = os.path.dirname(file_path)
+    ensure_path_exists(base_dir)
+    with open(file_path, 'w'):
+        pass
+    return True
 
 
 def remove_file_if_exists(path):
@@ -71,29 +82,10 @@ MIGRATIONS_DIR = "./migrations/"
 def get_migrations_dir(project_dir, lazy_create=True):
     migrations_dir = os.path.abspath(os.path.join(project_dir, MIGRATIONS_DIR))
     if lazy_create:
+        init_file_path = os.path.join(migrations_dir, '__init__.py')
         ensure_path_exists(migrations_dir)
+        ensure_file_exists(init_file_path)
     return migrations_dir
-
-
-VALID_MIGRATION_REGEX = re.compile(
-    '^[0-9]{4}_[_a-zA-Z0-9]+\.py$',
-)
-
-
-def is_valid_migration_filename(filename):
-    return bool(VALID_MIGRATION_REGEX.match(filename))
-
-
-def find_project_migrations(project_dir):
-    migrations_dir = get_migrations_dir(project_dir)
-    glob_pattern = os.path.join(migrations_dir, '*.py')
-    migrations = [
-        os.path.relpath(migration_path, project_dir)
-        for migration_path
-        in glob.glob(glob_pattern)
-        if is_valid_migration_filename(os.path.basename(migration_path))
-    ]
-    return migrations
 
 
 def is_executable_available(program):

@@ -11,7 +11,6 @@ from populus.utils.filesystem import (
     get_compiled_contracts_file_path,
     get_blockchains_dir,
     get_migrations_dir,
-    find_project_migrations,
 )
 from populus.utils.chains import (
     get_data_dir,
@@ -22,6 +21,10 @@ from populus.utils.config import (
     load_config,
     get_config_paths,
     PRIMARY_CONFIG_FILENAME,
+)
+from populus.migrations.loading import (
+    find_project_migrations,
+    load_project_migrations,
 )
 from populus.compilation import (
     find_project_contracts,
@@ -218,3 +221,7 @@ class Project(object):
     @property
     def migration_files(self):
         return find_project_migrations(self.project_dir)
+
+    @property
+    def migrations(self):
+        return load_project_migrations(self.project_dir)

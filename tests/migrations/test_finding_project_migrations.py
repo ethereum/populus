@@ -1,6 +1,6 @@
 import os
 
-from populus.utils.filesystem import (
+from populus.migrations.loading import (
     find_project_migrations,
 )
 

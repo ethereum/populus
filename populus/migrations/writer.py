@@ -4,7 +4,7 @@ import functools
 from populus.utils.types import (
     is_primitive_type,
 )
-from populus.utils.filesystem import (
+from .loading import (
     find_project_migrations,
 )
 

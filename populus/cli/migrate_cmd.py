@@ -8,7 +8,6 @@ from populus.utils.filesystem import (
 from populus.utils.transactions import (
     is_account_locked,
     wait_for_unlock,
-    wait_for_syncing,
 )
 from populus.utils.cli import (
     select_chain,
@@ -17,8 +16,11 @@ from populus.utils.cli import (
     deploy_contract_and_verify,
     show_chain_sync_progress,
 )
-from populus.migrations.writer import (
-    write_empty_migration,
+from populus.migrations.migration import (
+    get_migration_classes_for_execution,
+)
+from populus.migrations.validation import (
+    validate_migration_classes,
 )
 
 from .main import main
@@ -28,15 +30,94 @@ from .main import main
     'migrate',
     invoke_without_command=True,
 )
+@click.option(
+    'chain_name',
+    '--chain',
+    '-c',
+    help=(
+        "Specifies the chain that should be migrated. The chains "
+        "mainnet' and 'morden' are pre-configured to connect to the public "
+        "networks.  Other values should be predefined in your populus.ini"
+    ),
+)
 @click.pass_context
-def migrate(ctx):
+def migrate(ctx, chain_name):
     """
     Run project migrations
     """
-    if ctx.invoked_subcommand is None:
-        click.echo("Invoked migration command")
-        # run the migrations
-        pass
+    if ctx.invoked_subcommand is not None:
+        return
+    project = ctx.obj['PROJECT']
+
+    if not project.migrations:
+        raise click.Abort((
+            "The project does not appear to have any migrations.  You can use "
+            "the `populus makemigration command to generate project migrations"
+        ))
+
+    # Validate the project migrations
+    validate_migration_classes(project.migrations)
+
+    # Determine which chain should be used.
+    if not chain_name:
+        chain_name = select_chain(project)
+
+    chain_config = project.config.chains[chain_name]
+
+    # Determine if the chain is *migratable*
+    if 'registrar' not in chain_config:
+        # TODO: this should be a property of the chain object itself.
+        # Something like `chain.is_ready_for_migrations`.
+        if chain_name not in {'testrpc', 'temp'}:
+            # ignore `testrpc` and `temp` because they lazily create their
+            # registrar contracts.
+            # TODO: We can present the use with the option to just initialize
+            # the chain right here rather than throwing an error.
+            raise click.Abort((
+                "The chain {0!r} is not ready for migrations.  Please initialize this "
+                "chain with the `populus migrate init` command".format(chain_name)
+            ))
+
+    with project.get_chain(chain_name) as chain:
+        # Wait for chain sync if this is a public network.
+        if chain_name in {'mainnet', 'morden'}:
+            show_chain_sync_progress(chain)
+
+        # Determine if we have any migrations to run.
+        migrations_to_execute = get_migration_classes_for_execution(
+            project.migrations,
+            chain,
+        )
+
+        if not migrations_to_execute:
+            raise click.Abort(("All migrations have been run."))
+
+        click.echo("Migration operations to perform:")
+
+        for migration in migrations_to_execute:
+            click.echo(''.join((
+                "  ",
+                migration.migration_id,
+                " ({0} operations)".format(len(migration.operations)),
+                ":",
+            )))
+            for operation_index, operation in enumerate(migration.operation):
+                click.echo(''.join((
+                    "    ",
+                    str(operation_index),
+                    " - ",
+                    str(operation),
+                )))
+
+        click.echo("Executing migrations:")
+        for migration in migrations_to_execute:
+            click.echo(''.join((
+                "  ",
+                migration.migration_id,
+                "... ",
+            )), nl=False)
+            migration.execute()
+            click.echo(" DONE")
 
 
 @migrate.command('init')

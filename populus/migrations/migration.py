@@ -6,9 +6,6 @@ from .deferred import (
     generate_registrar_value_setters,
     Bool,
 )
-from .validation import (
-    validate_migration_classes,
-)
 
 
 class Migration(object):
@@ -102,20 +99,51 @@ def sort_migrations(migration_classes):
     return migration_order
 
 
-def run_migrations(migration_classes, chain):
-    validate_migration_classes(migration_classes)
-
-    sorted_migration_classes = sort_migrations(migration_classes)
-    sorted_migrations = [
-        migration_class(chain)
-        for migration_class
-        in itertools.chain.from_iterable(sorted_migration_classes)
+def get_migration_classes_for_execution(migration_classes, chain):
+    migration_class_execution_sets = sort_migrations(migration_classes)
+    migration_execution_sets = [
+        {migration_class(chain) for migration_class in execution_set}
+        for execution_set
+        in migration_class_execution_sets
     ]
+
+    # For each set of migrations in the sorted order, mark whether all of the
+    # migrations in that set have been executed.
+    execution_set_statuses = [
+        all(m.has_been_executed for m in execution_set)
+        for execution_set
+        in migration_execution_sets
+    ]
+
+    # Now find the first set that has not been fully executed and exclude all
+    # of the previous sets which have been fully executed.
+    try:
+        first_executable_set_idx = execution_set_statuses.index(False)
+    except ValueError:
+        # All migrations have been executed
+        return []
+
+    execution_set_candidates = migration_execution_sets[first_executable_set_idx:]
+
+    # Now we check for an invalid state.  If any migration in any migration set
+    # past the first unexecuted set has been executed then something is wrong.
+    migrations_that_should_not_be_executed = itertools.chain.from_iterable(
+        execution_set_candidates[1:]
+    )
+
+    if any(m.has_been_executed for m in migrations_that_should_not_be_executed):
+        raise ValueError(
+            "Something is wrong.  Migrations that depend on un-executed "
+            "migrations have already been executed."
+        )
+
+    # Get a flattened list of all of the migration instances that still need to
+    # be executed.
     migrations_to_run = [
         migration_instance
         for migration_instance
-        in sorted_migrations
+        in execution_set_candidates
         if not migration_instance.has_been_executed
     ]
-    for migration_instance in migrations_to_run:
-        migration_instance.execute()
+
+    return migrations_to_run

@@ -369,6 +369,22 @@ class TemporaryGethChain(BaseGethChain):
             overrides=self.geth_kwargs,
         )
 
+    @cached_property
+    def registrar(self):
+        if 'registrar' in self.chain_config:
+            registrar_address = self.chain_config['registrar']
+        else:
+            # TODO: this lazy creation might cause some problems.
+            RegistrarFactory = get_compiled_registrar_contract(self.web3)
+            deploy_txn_hash = RegistrarFactory.deploy()
+            registrar_address = get_contract_address_from_txn(
+                self.web3,
+                deploy_txn_hash,
+                60,
+            )
+        registrar = RegistrarFactory(address=registrar_address)
+        return registrar
+
 
 class MordenChain(BaseGethChain):
     def get_geth_process_instance(self):

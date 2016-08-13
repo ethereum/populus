@@ -1,7 +1,9 @@
 from populus.migrations import (
-    run_migrations,
     Migration,
     DeployContract,
+)
+from populus.migrations.migration import (
+    get_migration_classes_for_execution,
 )
 
 
@@ -22,7 +24,9 @@ def test_single_migration_execution(web3, chain, MATH):
             },
         }
 
-    run_migrations([TestMigration], chain)
+    migrations_to_run = get_migration_classes_for_execution([TestMigration], chain)
+    for migration in migrations_to_run:
+        migration.execute()
 
     assert chain.registrar.call().exists('contract/Math') is True
     math_address = chain.registrar.call().getAddress('contract/Math')

@@ -1,6 +1,5 @@
 from .migration import (  # noqa
     Migration,
-    run_migrations,
 )
 from .operations import (  # noqa
     Operation,

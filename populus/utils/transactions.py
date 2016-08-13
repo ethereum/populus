@@ -51,3 +51,9 @@ def wait_for_peers(web3, peer_count=1, timeout=0):
     with gevent.Timeout(timeout):
         while web3.net.peerCount < peer_count:
             gevent.sleep(random.random())
+
+
+def wait_for_syncing(web3, timeout=0):
+    with gevent.Timeout(timeout):
+        while not web3.eth.syncing:
+            gevent.sleep(random.random())

@@ -1,9 +1,14 @@
 import itertools
+import random
+
 import click
+
+import gevent
 
 from .transactions import (
     is_account_locked,
     get_contract_address_from_txn,
+    wait_for_syncing,
 )
 
 
@@ -174,5 +179,31 @@ def deploy_contract_and_verify(ContractFactory,
     return ContractFactory(address=contract_address)
 
 
-def wait_for_sync(chain):
-    assert False
+def show_chain_sync_progress(chain):
+    click.echo("Waiting for chain synchronization to begin...")
+
+    if not chain.web3.eth.syncing:
+        try:
+            wait_for_syncing(chain.web3, timeout=120)
+        except gevent.Timeout:
+            raise click.Abort("Chain synchronization never started.")
+
+    sync_data = chain.web3.eth.syncing
+
+    starting_block = sync_data['startingBlock']
+    highest_block = sync_data['highestBlock']
+    blocks_to_sync = highest_block - starting_block
+
+    with click.progressbar(length=blocks_to_sync,
+                           label='Syncing Blocks:') as progress_bar:
+        while True:
+            progress_data = chain.web3.eth.syncing
+            position = progress_data['currentBlock'] - starting_block
+
+            if position:
+                progress_bar.update(position)
+
+            if progress_data['currentBlock'] >= highest_block:
+                break
+
+            gevent.sleep(random.random())

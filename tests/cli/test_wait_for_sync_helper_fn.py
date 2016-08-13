@@ -6,43 +6,64 @@ from click.testing import CliRunner
 import random
 import gevent
 
+from populus.utils.networking import (
+    get_open_port,
+)
 from populus.utils.transactions import (
     wait_for_peers,
     wait_for_block_number,
+    wait_for_syncing,
 )
 from populus.utils.cli import (
-    wait_for_sync,
+    show_chain_sync_progress,
 )
 from populus.project import Project
 
 
-def test_request_account_unlock_with_correct_password(project_dir):
+def test_wait_for_sync_helper():
     project = Project()
 
-    main_chain = project.get_chain('temp', nodiscover=False)
-    sync_chain = project.get_chain('temp', mine=False, miner_threads=None)
-
-    main_chain_data_dir = main_chain.geth.data_dir
-    sync_chain_data_dir = sync_chain.geth.data_dir
-
-    main_genesis_file = os.path.join(main_chain_data_dir, 'genesis.json')
-    sync_genesis_file = os.path.join(sync_chain_data_dir, 'genesis.json')
-
-    os.remove(sync_genesis_file)
-
-    shutil.copyfile(main_genesis_file, sync_genesis_file)
-
-    block_numbers = []
-
-    runner = CliRunner()
-
-    @click.command()
-    def wrapper():
-        block_numbers.append(sync_chain.web3.eth.blockNumber)
-        wait_for_sync(sync_chain)
-        block_numbers.append(sync_chain.web3.eth.blockNumber)
-
+    main_chain = project.get_chain('temp',
+                                   no_discover=False,
+                                   max_peers=None,
+                                   port=str(get_open_port()),
+                                   rpc_enabled=False,
+                                   ws_enabled=False)
     with main_chain:
+        sync_chain = project.get_chain('temp',
+                                       no_discover=False,
+                                       max_peers=None,
+                                       mine=False,
+                                       miner_threads=None,
+                                       port=str(get_open_port()),
+                                       rpc_enabled=False,
+                                       ws_enabled=False)
+
+        main_chain_data_dir = main_chain.geth.data_dir
+        sync_chain_data_dir = sync_chain.geth.data_dir
+
+        main_genesis_file = os.path.join(main_chain_data_dir, 'genesis.json')
+        sync_genesis_file = os.path.join(sync_chain_data_dir, 'genesis.json')
+
+        main_chaindata_dir = os.path.join(main_chain_data_dir, 'chaindata')
+        sync_chaindata_dir = os.path.join(sync_chain_data_dir, 'chaindata')
+
+        os.remove(sync_genesis_file)
+        shutil.rmtree(sync_chaindata_dir)
+
+        shutil.copyfile(main_genesis_file, sync_genesis_file)
+        shutil.copytree(main_chaindata_dir, sync_chaindata_dir)
+
+        block_numbers = []
+
+        runner = CliRunner()
+
+        @click.command()
+        def wrapper():
+            block_numbers.append(sync_chain.web3.eth.blockNumber)
+            wait_for_sync(sync_chain)
+            block_numbers.append(sync_chain.web3.eth.blockNumber)
+
         with sync_chain:
             main_node_info = main_chain.web3.admin.nodeInfo
             main_enode = "enode://{node_id}@127.0.0.1:{node_port}".format(
@@ -55,12 +76,12 @@ def test_request_account_unlock_with_correct_password(project_dir):
                 node_port=sync_node_info['ports']['listener'],
             )
 
-            wait_for_block_number(main_chain.web3, 5, 120)
+            wait_for_block_number(main_chain.web3, 20, 120)
 
             main_chain_start_block = main_chain.web3.eth.blockNumber
             sync_chain_start_block = sync_chain.web3.eth.blockNumber
 
-            assert main_chain_start_block - sync_chain_start_block >= 5
+            assert main_chain_start_block - sync_chain_start_block >= 10
 
             assert sync_chain.web3.net.peerCount == 0
 
@@ -68,9 +89,15 @@ def test_request_account_unlock_with_correct_password(project_dir):
             main_chain.web3.admin.addPeer(sync_enode)
 
             wait_for_peers(sync_chain.web3, timeout=30)
+            wait_for_syncing(sync_chain.web3, timeout=30)
 
             result = runner.invoke(wrapper, [])
 
             assert result.exit_code == 0
             assert len(block_numbers) == 2
-            import pdb; pdb.set_trace()
+
+            start_block = block_numbers[0]
+            end_block = block_numbers[1]
+
+            assert start_block <= 1
+            assert end_block >= 20

@@ -337,9 +337,9 @@ class BaseGethChain(Chain):
         if self.geth.is_mining:
             self.geth.wait_for_dag(600)
         if self.geth.ipc_enabled:
-            self.geth.wait_for_ipc(30)
+            self.geth.wait_for_ipc(10)
         if self.geth.rpc_enabled:
-            self.geth.wait_for_rpc(30)
+            self.geth.wait_for_rpc(10)
 
         return self
 

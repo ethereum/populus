@@ -8,12 +8,14 @@ from populus.utils.filesystem import (
 from populus.utils.transactions import (
     is_account_locked,
     wait_for_unlock,
+    wait_for_syncing,
 )
 from populus.utils.cli import (
     select_chain,
     select_account,
     request_account_unlock,
     deploy_contract_and_verify,
+    show_chain_sync_progress,
 )
 from populus.migrations.writer import (
     write_empty_migration,
@@ -76,10 +78,9 @@ def migrate_init(ctx, chain_name):
         # We need to deploy the registrar
         with chain:
             web3 = chain.web3
-            # TODO: Check syncing status here:
-            syncing = web3.eth.syncing
-            if syncing:
-                ctx.abort(str(syncing))
+
+            if chain_name in {'mainnet', 'morden'}:
+                show_chain_sync_progress(chain)
 
             # Choose the address we should deploy from.
             if 'deploy_from' in chain_config:

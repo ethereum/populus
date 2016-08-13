@@ -40,7 +40,16 @@ def migrate(ctx):
 
 
 @migrate.command('init')
-@click.argument('chain_name', required=False)
+@click.option(
+    'chain_name',
+    '--chain',
+    '-c',
+    help=(
+        "Specifies the chain that should be initialized. The chains "
+        "mainnet' and 'morden' are pre-configured to connect to the public "
+        "networks.  Other values should be predefined in your populus.ini"
+    ),
+)
 @click.pass_context
 def migrate_init(ctx, chain_name):
     """
@@ -54,10 +63,7 @@ def migrate_init(ctx, chain_name):
 
     # Determine which chain should be used.
     if not chain_name:
-        try:
-            chain_name = ctx.obj['CHAIN_NAME']
-        except KeyError:
-            chain_name = select_chain(project)
+        chain_name = select_chain(project)
 
     chain_section_name = "chain:{0}".format(chain_name)
 
@@ -90,8 +96,8 @@ def migrate_init(ctx, chain_name):
                         "The chain {0!r} is configured to deploy from account {1!r} "
                         "which was not found in the account list for this chain. "
                         "Please ensure that this account exists.".format(
-                            account,
                             chain_name,
+                            account,
                         )
                     )
             else:

@@ -44,20 +44,28 @@ def echo_post_deploy_message(web3, deployed_contracts):
 
 @main.command('deploy')
 @click.option(
-    '--confirm/--no-confirm',
-    default=True,
-    help="Bypass any confirmation prompts",
+    'deploy_from',
+    '--deploy-from',
+    '-d',
+    help=(
+        "Specifies the account that should be used for deploys.  You can "
+        "specify either the full account address, or the integer 0 based index "
+        "of the account in the account list."
+    ),
 )
-# Deploy chain config
 @click.option(
-    '--chain-name',
+    'chain_name',
+    '--chain',
     '-c',
-    default='default',
-    help="Specify which chain to deploy to.",
+    help=(
+        "Specifies the chain that contracts should be deployed to. The chains "
+        "mainnet' and 'morden' are pre-configured to connect to the public "
+        "networks.  Other values should be predefined in your populus.ini"
+    ),
 )
 @click.argument('contracts_to_deploy', nargs=-1)
 @click.pass_context
-def deploy(ctx, chain_name, contracts_to_deploy):
+def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
     """
     Deploys the specified contracts via the RPC client.
     """
@@ -65,10 +73,7 @@ def deploy(ctx, chain_name, contracts_to_deploy):
 
     # Determine which chain should be used.
     if not chain_name:
-        try:
-            chain_name = ctx.obj['CHAIN_NAME']
-        except KeyError:
-            chain_name = select_chain(project)
+        chain_name = select_chain(project)
 
     chain_section_name = "chain:{0}".format(chain_name)
 
@@ -85,15 +90,29 @@ def deploy(ctx, chain_name, contracts_to_deploy):
             show_chain_sync_progress(chain)
 
         # Choose the address we should deploy from.
-        if 'deploy_from' in chain_config:
+        # TODO: this set of if blocks should be it's own helper function.
+        if deploy_from:
+            if deploy_from in web3.eth.accounts:
+                account = deploy_from
+            elif deploy_from.isdigit() and int(deploy_from) < len(web3.eth.accounts):
+                account = web3.eth.accounts[int(deploy_from)]
+            else:
+                raise click.Abort(
+                    "The account {0!r} was not found in the list of accounts "
+                    "for chain {1!r}.".format(
+                        account,
+                        chain_name,
+                    )
+                )
+        elif 'deploy_from' in chain_config:
             account = chain_config['deploy_from']
             if account not in web3.eth.accounts:
                 raise click.Abort(
                     "The chain {0!r} is configured to deploy from account {1!r} "
                     "which was not found in the account list for this chain. "
                     "Please ensure that this account exists.".format(
-                        account,
                         chain_name,
+                        account,
                     )
                 )
         else:

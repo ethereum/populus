@@ -90,7 +90,7 @@ def test_initializing_with_specified_chain(project_dir, write_project_file):
 
     result = runner.invoke(
         main,
-        ['--chain', 'local_a', 'migrate', 'init'],
+        ['migrate', 'init', '--chain', 'local_a'],
         input=((
             "0\n"              # pick deploy account.
             "Y\n"                # set account as default
@@ -117,31 +117,7 @@ def test_initializing_no_choices(project_dir, write_project_file):
 
     result = runner.invoke(
         main,
-        ['--chain', 'local_a', 'migrate', 'init'],
-    )
-
-    assert result.exit_code == 0, result.output + str(result.exception)
-
-    updated_project = Project()
-    assert 'registrar' in updated_project.config.chains['local_a']
-    assert 'deploy_from' in updated_project.config.chains['local_a']
-
-
-@flaky
-def test_initializing_specifying_chain_as_argument(project_dir,
-                                                   write_project_file):
-    write_project_file('populus.ini', "[chain:local_a]")
-    project = Project()
-
-    with project.get_chain('local_a') as chain:
-        project.config.set('chain:local_a', 'deploy_from', chain.web3.eth.coinbase)
-        project.write_config()
-
-    runner = CliRunner()
-
-    result = runner.invoke(
-        main,
-        ['migrate', 'init', 'local_a'],
+        ['migrate', 'init', '--chain', 'local_a'],
     )
 
     assert result.exit_code == 0, result.output + str(result.exception)

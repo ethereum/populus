@@ -17,10 +17,10 @@ def init(ctx):
     """
     project = ctx.obj['PROJECT']
 
-    if not os.path.exists(project.config_file_path):
-        with open(project.config_file_path, 'w') as config_file:
+    if not os.path.exists(project.primary_config_file_path):
+        with open(project.primary_config_file_path, 'w') as config_file:
             config_file.write("[populus]\n")
-            config_file.write("# project_dir = {0}".format(
+            config_file.write("project_dir = {0}".format(
                 os.path.relpath(project.project_dir)
             ))
 

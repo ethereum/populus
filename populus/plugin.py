@@ -3,14 +3,7 @@ import os
 import pytest
 
 from populus.project import Project
-from populus.utils.config import (
-    load_config,
-    get_config_paths,
-)
 from populus.deployment import deploy_contracts
-from populus.compilation import (
-    compile_and_write_contracts,
-)
 
 
 class PopulusConfig(object):
@@ -61,13 +54,8 @@ def populus_config(request, tmpdir):
 
 
 @pytest.fixture()
-def project_config(populus_config):
-    return load_config(get_config_paths(populus_config.project_dir))
-
-
-@pytest.fixture()
-def project(project_config):
-    return Project(project_config)
+def project():
+    return Project()
 
 
 @pytest.yield_fixture()
@@ -94,12 +82,12 @@ def contracts(chain):
 
 
 @pytest.fixture()
-def deployed_contracts(populus_config, web3):
+def deployed_contracts(populus_config, project, web3):
     deploy_max_wait = int(populus_config['deploy_max_wait'])
     contracts_to_deploy = set(populus_config['contracts_to_deploy'])
     deploy_constructor_args = populus_config['deploy_constructor_args']
 
-    _, compiled_contracts, _ = compile_and_write_contracts(populus_config.project_dir)
+    compiled_contracts = project.compiled_contracts
 
     _deployed_contracts = deploy_contracts(
         web3,

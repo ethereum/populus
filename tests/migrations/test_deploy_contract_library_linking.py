@@ -13,7 +13,7 @@ from populus.utils.contracts import (
 )
 
 
-def test_deployment_with_library_linking(web3, LIBRARY_13, MULTIPLY_13, chain):
+def test_deployment_with_library_linking(project_dir, web3, LIBRARY_13, MULTIPLY_13, chain):
     registrar = chain.registrar
 
     Library13 = web3.eth.contract(**LIBRARY_13)

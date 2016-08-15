@@ -35,7 +35,7 @@ def make_migration(ctx, empty, migration_name):
 
     project = ctx.obj['PROJECT']
 
-    next_migration_number = get_next_migration_number(project.migrations_dir)
+    next_migration_number = get_next_migration_number(project.project_dir)
 
     if migration_name is None:
         if next_migration_number == 1:
@@ -60,7 +60,7 @@ def make_migration(ctx, empty, migration_name):
     if os.path.exists(migration_file_path):
         ctx.fail((
             "Unexpectedly found duplicate migration name: {0}".format(
-                os.path.abspath(migration_file_path)
+                os.path.abspath(migration_file_path),
             )
         ))
 

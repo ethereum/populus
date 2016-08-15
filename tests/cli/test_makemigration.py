@@ -1,5 +1,4 @@
 import os
-import pytest
 from click.testing import CliRunner
 
 from populus.utils.filesystem import (
@@ -7,8 +6,6 @@ from populus.utils.filesystem import (
 )
 
 from populus.cli import main
-
-
 
 
 def test_makemigration(project_dir, write_project_file):

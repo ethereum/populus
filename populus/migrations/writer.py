@@ -78,6 +78,34 @@ def write_dict(file_obj, value, level=0, *args, **kwargs):
     file_obj.write(indent('}', level))
 
 
+@writer_fn
+def write_deconstructable(file_obj, value, level=0, *args, **kwargs):
+    constructor_import_path, construct_args, construct_kwargs = value.deconstruct()
+    # TODO: figure out how to do imports.
+
+    _, _, constructor = constructor_import_path.rpartitian('.')
+    file_obj.write(constructor)
+    if not construct_args and not construct_kwargs:
+        file_obj.write("()")
+        return
+
+    file_obj.write("(\n")
+
+    for construct_arg in construct_args:
+        write_value(file_obj, construct_arg, level=level + 1, suffix=",")
+
+    for construct_kwarg_name, construct_kwarg_value in construct_kwargs.items():
+        write_assignment(
+            file_obj,
+            construct_kwarg_name,
+            construct_kwarg_value,
+            level=level + 1,
+            suffix=",",
+            assignment_operator="=",
+        )
+    file_obj.write(indent(")", level))
+
+
 def write_value(file_obj, value, *args, **kwargs):
     if is_primitive_type(value):
         write_primitive_type(file_obj, value, *args, **kwargs)
@@ -85,12 +113,20 @@ def write_value(file_obj, value, *args, **kwargs):
         write_list(file_obj, value, *args, **kwargs)
     elif isinstance(value, dict):
         write_dict(file_obj, value, *args, **kwargs)
+    elif hasattr(value, 'deconstruct'):
+        write_deconstructable(file_obj, value, *args, **kwargs)
     else:
         raise ValueError("Unsupported type: {0!r}".format(type(value)))
 
 
-def write_assignment(file_obj, name, value, *args, **kwargs):
-    write_value(file_obj, value, prefix="{0} = ".format(name), *args, **kwargs)
+def write_assignment(file_obj, name, value, assignment_operator=" = ", *args, **kwargs):
+    write_value(
+        file_obj,
+        value,
+        prefix="{0}{1}".format(name, assignment_operator),
+        *args,
+        **kwargs
+    )
 
 
 def write_empty_migration(file_obj, migration_id, compiled_contracts):
@@ -109,6 +145,27 @@ def write_empty_migration(file_obj, migration_id, compiled_contracts):
         file_obj,
         name='compiled_contracts',
         value=compiled_contracts,
+        level=1,
+        newline=True,
+    )
+
+
+def write_migration(file_obj, migration_class):
+    file_obj.write("# -*- coding: utf-8 -*-\n")
+    file_obj.write("from __future__ import unicode_literals\n")
+    file_obj.write("\n")
+    file_obj.write("from populus import migrations\n")
+    file_obj.write("\n")
+    file_obj.write("\n")
+    file_obj.write("class Migration(migrations.Migration):\n")
+    file_obj.write("\n")
+    write_assignment(file_obj, 'migration_id', migration_class.migration_id, level=1)
+    write_assignment(file_obj, 'dependencies', migration_class.dependencies, level=1)
+    write_assignment(file_obj, 'operations', migration_class.operations, level=1)
+    write_assignment(
+        file_obj,
+        name='compiled_contracts',
+        value=migration_class.compiled_contracts,
         level=1,
         newline=True,
     )

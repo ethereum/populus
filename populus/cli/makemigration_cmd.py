@@ -2,9 +2,12 @@ import os
 
 import click
 
+from populus.migrations import (
+    Migration,
+)
 from populus.migrations.writer import (
     get_next_migration_number,
-    write_empty_migration,
+    write_migration,
 )
 from populus.migrations.loading import (
     is_valid_migration_filename,
@@ -14,25 +17,12 @@ from .main import main
 
 
 @main.command('makemigration')
-@click.option(
-    '--empty',
-    '-e',
-    is_flag=True,
-    default=False,
-    help="Write an empty migration file",
-)
 @click.argument('migration_name', required=False)
 @click.pass_context
-def make_migration(ctx, empty, migration_name):
+def make_migration(ctx, migration_name):
     """
     Generate an empty migration.
     """
-    if not empty:
-        ctx.fail((
-            "Creation of non-empty migrations is currently not supported. "
-            "Please rerun with `--empty`."
-        ))
-
     project = ctx.obj['PROJECT']
 
     next_migration_number = get_next_migration_number(project.project_dir)
@@ -66,8 +56,22 @@ def make_migration(ctx, empty, migration_name):
 
     compiled_contracts = project.compiled_contracts
 
+    new_migration_dict = {
+        'migration_id': migration_id,
+        'operations': [],
+        'dependencies': [],
+        'compiled_contracts': compiled_contracts,
+    }
+
+    if project.migrations:
+        new_migration_dict['dependencies'].append(
+            project.migrations[-1].migration_id,
+        )
+
+    new_migration = type('Migration', (Migration,), new_migration_dict)
+
     with open(migration_file_path, 'w') as file_obj:
-        write_empty_migration(file_obj, migration_id, compiled_contracts)
+        write_migration(file_obj, new_migration)
 
     click.echo(
         "Wrote new migration to: {0}".format(os.path.relpath(

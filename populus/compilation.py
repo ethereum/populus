@@ -9,6 +9,9 @@ from populus.utils.filesystem import (
 from solc import (
     compile_files,
 )
+from solc.exceptions import (
+    ContractsNotFound,
+)
 
 
 def find_project_contracts(project_dir):
@@ -35,7 +38,10 @@ def write_compiled_sources(project_dir, compiled_sources):
 def compile_project_contracts(project_dir, **compiler_kwargs):
     compiler_kwargs.setdefault('output_values', ['bin', 'bin-runtime', 'abi'])
     contract_source_paths = find_project_contracts(project_dir)
-    compiled_sources = compile_files(contract_source_paths, **compiler_kwargs)
+    try:
+        compiled_sources = compile_files(contract_source_paths, **compiler_kwargs)
+    except ContractsNotFound:
+        return contract_source_paths, {}
 
     return contract_source_paths, compiled_sources
 

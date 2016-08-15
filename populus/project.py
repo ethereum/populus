@@ -22,6 +22,9 @@ from populus.utils.config import (
     get_config_paths,
     PRIMARY_CONFIG_FILENAME,
 )
+from populus.migrations.migration import (
+    sort_migrations,
+)
 from populus.migrations.loading import (
     find_project_migrations,
     load_project_migrations,
@@ -220,8 +223,11 @@ class Project(object):
 
     @property
     def migration_files(self):
-        return find_project_migrations(self.project_dir)
+        return list(sorted(find_project_migrations(self.project_dir)))
 
     @property
     def migrations(self):
-        return load_project_migrations(self.project_dir)
+        return sort_migrations(
+            load_project_migrations(self.project_dir),
+            flatten=True,
+        )

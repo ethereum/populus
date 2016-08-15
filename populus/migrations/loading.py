@@ -1,7 +1,10 @@
 import os
 import glob
 import re
-from importlib import import_module
+from importlib import (
+    import_module,
+    invalidate_caches,
+)
 
 from populus.utils.filesystem import (
     get_migrations_dir,
@@ -38,6 +41,9 @@ def load_project_migrations(project_dir):
         file_path[:-3].replace(os.sep, '.')
         for file_path in migration_file_paths
     ]
+
+    invalidate_caches()
+
     migration_modules = [
         import_module(module_path)
         for module_path in migration_module_paths

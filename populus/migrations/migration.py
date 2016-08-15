@@ -83,7 +83,7 @@ class Migration(object):
         self.mark_as_executed()
 
 
-def sort_migrations(migration_classes):
+def sort_migrations(migration_classes, flatten=False):
     migration_dependency_graph = {
         m.migration_id: set() if m.dependencies is None else set(m.dependencies)
         for m in migration_classes
@@ -93,11 +93,14 @@ def sort_migrations(migration_classes):
         m.migration_id: m for m in migration_classes
     }
     migration_id_order = toposort(migration_dependency_graph)
-    migration_order = [
+    migration_execution_sets = [
         {migration_classes_by_id[migration_id] for migration_id in execution_set}
         for execution_set in migration_id_order
     ]
-    return migration_order
+    if flatten:
+        return list(itertools.chain.from_iterable(migration_execution_sets))
+    else:
+        return migration_execution_sets
 
 
 def get_migration_classes_for_execution(migration_classes, chain):

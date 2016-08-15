@@ -39,7 +39,29 @@ class DeferredValue(object):
                     "accepts arguments that are already attributes of the "
                     "class.".format(cls.__name__, key)
                 )
-        return type(cls.__name__, (cls,), initkwargs)
+        deferred_type = type(cls.__name__, (cls,), initkwargs)
+        # without assigning the module here anytime a class is deferred, the
+        # deferred class is assigned this module rather than the original
+        # module that the class was defined.
+        deferred_type.__module__ = cls.__module__
+        return deferred_type
+
+    @classmethod
+    def deconstruct(cls):
+        deferred_kwargs = {
+            key: getattr(cls, key)
+            for key in dir(cls)
+            if (
+                not key.startswith('__') and
+                not callable(getattr(cls, key)) and
+                getattr(cls, key) != getattr(super(cls, cls), key)
+            )
+        }
+        return (
+            '.'.join((cls.__module__, cls.__name__, 'defer')),
+            tuple(),
+            deferred_kwargs,
+        )
 
     def get(self):
         raise NotImplementedError("This method must be implemented by subclasses")

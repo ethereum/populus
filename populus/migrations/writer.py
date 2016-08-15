@@ -1,8 +1,13 @@
 import os
 import functools
+from io import StringIO
+from collections import OrderedDict
 
 from populus.utils.types import (
     is_primitive_type,
+)
+from populus.utils.module_loading import (
+    split_at_longest_importable_path,
 )
 from .loading import (
     find_project_migrations,
@@ -26,102 +31,185 @@ def indent(text, level=0):
     return "    " * level + text
 
 
-def writer_fn(fn):
+def serializer_fn(fn):
     @functools.wraps(fn)
-    def inner(file_obj, value, level=0, prefix='', suffix='', newline=True, *args, **kwargs):
-        if prefix is not None:
-            file_obj.write(indent(prefix, level))
+    def inner(value, level=0, prefix='', suffix='', newline=True, *args, **kwargs):
+        imports = set()
+        serialized_value = StringIO()
 
-        fn(file_obj, value=value, level=level, *args, **kwargs)
+        if prefix is not None:
+            serialized_value.write(indent(prefix, level))
+
+        inner_imports, inner_serialized_value = fn(
+            value=value,
+            level=level,
+            *args,
+            **kwargs
+        )
+
+        imports |= inner_imports
+        serialized_value.write(inner_serialized_value)
 
         if suffix:
-            file_obj.write(suffix)
+            serialized_value.write(suffix)
 
         if newline:
-            file_obj.write('\n')
+            serialized_value.write('\n')
+        return imports, serialized_value.getvalue()
     return inner
 
 
-@writer_fn
-def write_primitive_type(file_obj, value, *args, **kwargs):
-    file_obj.write(repr(value))
+@serializer_fn
+def serialize_primitive_type(value, *args, **kwargs):
+    return set(), repr(value)
 
 
-@writer_fn
-def write_list(file_obj, value, level=0, *args, **kwargs):
+@serializer_fn
+def serialize_list(value, level=0, *args, **kwargs):
     if not value:
-        file_obj.write('[]')
-        return
+        return set(), '[]'
 
-    file_obj.write('[\n')
+    imports = set()
+    serialized_value = StringIO()
+
+    serialized_value.write('[\n')
 
     for item in value:
-        write_value(file_obj, item, level=level + 1, suffix=",")
+        item_imports, item_serialized_value = serialize(
+            item,
+            level=level + 1,
+            suffix=",",
+            *args,
+            **kwargs
+        )
 
-    file_obj.write(indent(']', level))
+        imports |= item_imports
+        serialized_value.write(item_serialized_value)
+
+    serialized_value.write(indent(']', level))
+
+    return imports, serialized_value.getvalue()
 
 
-@writer_fn
-def write_dict(file_obj, value, level=0, *args, **kwargs):
+@serializer_fn
+def serialize_dict(value, level=0, *args, **kwargs):
     if not value:
-        file_obj.write('{}')
-        return
+        return set(), '{}'
 
-    file_obj.write('{\n')
+    ordered_value = OrderedDict(sorted(value.items(), key=lambda kv: kv[0]))
 
-    for key, item in value.items():
-        write_value(file_obj, key, level=level + 1, newline=False)
-        file_obj.write(": ")
-        write_value(file_obj, item, level=level + 1, prefix=None, newline=False)
-        file_obj.write(",\n")
+    imports = set()
+    serialized_value = StringIO()
 
-    file_obj.write(indent('}', level))
+    serialized_value.write('{\n')
+
+    for key, item in ordered_value.items():
+        inner_kwargs = dict(**kwargs)
+        inner_kwargs.pop('newline', None)
+
+        key_imports, key_serialized_value = serialize(
+            key,
+            level=level + 1,
+            newline=False,
+            *args,
+            **inner_kwargs
+        )
+
+        item_imports, item_serialized_value = serialize(
+            item,
+            level=level + 1,
+            prefix=None,
+            newline=False,
+            *args,
+            **inner_kwargs
+        )
+
+        imports |= key_imports
+        imports |= item_imports
+
+        serialized_value.write(key_serialized_value)
+        serialized_value.write(": ")
+        serialized_value.write(item_serialized_value)
+        serialized_value.write(",\n")
+
+    serialized_value.write(indent('}', level))
+
+    return imports, serialized_value.getvalue()
 
 
-@writer_fn
-def write_deconstructable(file_obj, value, level=0, *args, **kwargs):
-    constructor_import_path, construct_args, construct_kwargs = value.deconstruct()
-    # TODO: figure out how to do imports.
+@serializer_fn
+def serialize_class(value, level=0, *args, **kwargs):
+    assert False
 
-    _, _, constructor = constructor_import_path.rpartitian('.')
-    file_obj.write(constructor)
+
+@serializer_fn
+def serialize_deconstructable(value, level=0, *args, **kwargs):
+    import_path, construct_args, construct_kwargs = value.deconstruct()
+
+    import_part, constructor_part = split_at_longest_importable_path(import_path)
+    # TODO: This *effectively* just re-joins the two parts but that is ok for
+    # now.  Ideally later I can figure out how to do imports in the "from a.b.c
+    # import d" but this will do for now.
+    constructor = '.'.join((import_part, constructor_part))
+
+    imports = {import_part}
+    serialized_value = StringIO()
+
+    serialized_value.write(constructor)
     if not construct_args and not construct_kwargs:
-        file_obj.write("()")
+        serialized_value.write("()")
         return
 
-    file_obj.write("(\n")
+    serialized_value.write("(\n")
+
+    inner_kwargs = dict(**kwargs)
+    inner_kwargs.pop('suffix', None)
 
     for construct_arg in construct_args:
-        write_value(file_obj, construct_arg, level=level + 1, suffix=",")
+        arg_imports, arg_serialized_value = serialize(
+            construct_arg,
+            level=level + 1,
+            suffix=",",
+            *args,
+            **inner_kwargs
+        )
+
+        imports |= arg_imports
+        serialized_value.write(arg_serialized_value)
 
     for construct_kwarg_name, construct_kwarg_value in construct_kwargs.items():
-        write_assignment(
-            file_obj,
+        kwarg_imports, kwarg_serialized_value = serialize_assignment(
             construct_kwarg_name,
             construct_kwarg_value,
             level=level + 1,
             suffix=",",
             assignment_operator="=",
+            *args,
+            **kwargs
         )
-    file_obj.write(indent(")", level))
+
+        imports |= kwarg_imports
+        serialized_value.write(kwarg_serialized_value)
+
+    serialized_value.write(indent(")", level))
+    return imports, serialized_value.getvalue()
 
 
-def write_value(file_obj, value, *args, **kwargs):
-    if is_primitive_type(value):
-        write_primitive_type(file_obj, value, *args, **kwargs)
+def serialize(value, *args, **kwargs):
+    if hasattr(value, 'deconstruct') and callable(value.deconstruct):
+        return serialize_deconstructable(value, *args, **kwargs)
+    elif is_primitive_type(value):
+        return serialize_primitive_type(value, *args, **kwargs)
     elif isinstance(value, list):
-        write_list(file_obj, value, *args, **kwargs)
+        return serialize_list(value, *args, **kwargs)
     elif isinstance(value, dict):
-        write_dict(file_obj, value, *args, **kwargs)
-    elif hasattr(value, 'deconstruct'):
-        write_deconstructable(file_obj, value, *args, **kwargs)
+        return serialize_dict(value, *args, **kwargs)
     else:
         raise ValueError("Unsupported type: {0!r}".format(type(value)))
 
 
-def write_assignment(file_obj, name, value, assignment_operator=" = ", *args, **kwargs):
-    write_value(
-        file_obj,
+def serialize_assignment(name, value, assignment_operator=" = ", *args, **kwargs):
+    return serialize(
         value,
         prefix="{0}{1}".format(name, assignment_operator),
         *args,
@@ -129,43 +217,38 @@ def write_assignment(file_obj, name, value, assignment_operator=" = ", *args, **
     )
 
 
-def write_empty_migration(file_obj, migration_id, compiled_contracts):
-    file_obj.write("# -*- coding: utf-8 -*-\n")
-    file_obj.write("from __future__ import unicode_literals\n")
-    file_obj.write("\n")
-    file_obj.write("from populus import migrations\n")
-    file_obj.write("\n")
-    file_obj.write("\n")
-    file_obj.write("class Migration(migrations.Migration):\n")
-    file_obj.write("\n")
-    write_assignment(file_obj, 'migration_id', migration_id, level=1)
-    write_assignment(file_obj, 'dependencies', [], level=1)
-    write_assignment(file_obj, 'operations', [], level=1)
-    write_assignment(
-        file_obj,
-        name='compiled_contracts',
-        value=compiled_contracts,
-        level=1,
-        newline=True,
-    )
+MIGRATION_PROPS = (
+    'migration_id',
+    'dependencies',
+    'operations',
+    'compiled_contracts',
+)
 
 
 def write_migration(file_obj, migration_class):
-    file_obj.write("# -*- coding: utf-8 -*-\n")
-    file_obj.write("from __future__ import unicode_literals\n")
-    file_obj.write("\n")
-    file_obj.write("from populus import migrations\n")
-    file_obj.write("\n")
-    file_obj.write("\n")
-    file_obj.write("class Migration(migrations.Migration):\n")
-    file_obj.write("\n")
-    write_assignment(file_obj, 'migration_id', migration_class.migration_id, level=1)
-    write_assignment(file_obj, 'dependencies', migration_class.dependencies, level=1)
-    write_assignment(file_obj, 'operations', migration_class.operations, level=1)
-    write_assignment(
-        file_obj,
-        name='compiled_contracts',
-        value=migration_class.compiled_contracts,
-        level=1,
-        newline=True,
-    )
+    header = StringIO()
+    body = StringIO()
+
+    imports = {'from populus import migrations'}
+
+    body.write("class Migration(migrations.Migration):\n\n")
+
+    for prop_name in MIGRATION_PROPS:
+        prop_imports, prop_serialized_value = serialize_assignment(
+            prop_name,
+            getattr(migration_class, prop_name),
+            level=1,
+        )
+
+        imports |= prop_imports
+        body.write(prop_serialized_value)
+
+    header.write("# -*- coding: utf-8 -*-\n")
+    header.write("from __future__ import unicode_literals\n")
+    header.write("\n")
+
+    header.writelines(sorted(imports))
+
+    file_obj.write(header.getvalue())
+    file_obj.write("\n\n\n")
+    file_obj.write(body.getvalue())

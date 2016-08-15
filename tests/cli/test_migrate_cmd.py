@@ -44,7 +44,7 @@ from populus import migrations
 
 class Migration(migrations.Migration):
     migration_id = '0002_increment'
-    dependencies = []
+    dependencies = ['0001_deploy_math']
 
     operations = [
         migrations.TransactContract(

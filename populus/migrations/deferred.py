@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import itertools
 
 from web3.utils.encoding import (

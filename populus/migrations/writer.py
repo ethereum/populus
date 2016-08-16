@@ -1,7 +1,11 @@
+from __future__ import unicode_literals
+
 import os
 import functools
 from io import StringIO
 from collections import OrderedDict
+
+from web3.utils.string import force_text
 
 from populus.utils.types import (
     is_primitive_type,
@@ -61,7 +65,7 @@ def serializer_fn(fn):
 
 @serializer_fn
 def serialize_primitive_type(value, *args, **kwargs):
-    return set(), repr(value)
+    return set(), force_text(repr(value))
 
 
 @serializer_fn
@@ -135,11 +139,6 @@ def serialize_dict(value, level=0, *args, **kwargs):
     serialized_value.write(indent('}', level))
 
     return imports, serialized_value.getvalue()
-
-
-@serializer_fn
-def serialize_class(value, level=0, *args, **kwargs):
-    assert False
 
 
 @serializer_fn

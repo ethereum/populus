@@ -6,6 +6,10 @@ from io import StringIO
 from collections import OrderedDict
 
 from web3.utils.string import force_text
+from web3.utils.types import (
+    is_bytes,
+    is_text,
+)
 
 from populus.utils.types import (
     is_primitive_type,
@@ -65,7 +69,12 @@ def serializer_fn(fn):
 
 @serializer_fn
 def serialize_primitive_type(value, *args, **kwargs):
-    return set(), force_text(repr(value))
+    if is_bytes(value):
+        return set(), "b'{0}'".format(force_text(value))
+    elif is_text(value):
+        return set(), "'{0}'".format(value)
+    else:
+        return set(), force_text(repr(value))
 
 
 @serializer_fn

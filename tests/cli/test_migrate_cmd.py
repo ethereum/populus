@@ -28,9 +28,9 @@ class Migration(migrations.Migration):
 
     compiled_contracts = {{
         'Math': {{
+            'abi': json.loads('{abi}'),
             'code': '{code}',
             'code_runtime': '{code_runtime}',
-            'abi': json.loads('{abi}'),
             'source': None,
         }},
     }}
@@ -58,9 +58,9 @@ class Migration(migrations.Migration):
 
     compiled_contracts = {{
         'Math': {{
+            'abi': json.loads('{abi}'),
             'code': '{code}',
             'code_runtime': '{code_runtime}',
-            'abi': json.loads('{abi}'),
             'source': None,
         }},
     }}

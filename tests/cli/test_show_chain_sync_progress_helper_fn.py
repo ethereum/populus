@@ -1,10 +1,6 @@
 import os
-import pytest
 import click
-import shutil
 from click.testing import CliRunner
-import random
-import gevent
 
 from populus.utils.networking import (
     get_open_port,
@@ -20,7 +16,7 @@ from populus.utils.cli import (
 from populus.project import Project
 
 
-def test_wait_for_sync_helper():
+def test_show_chain_sync_progress():
     project = Project()
 
     main_chain = project.get_chain('temp',
@@ -61,7 +57,7 @@ def test_wait_for_sync_helper():
         @click.command()
         def wrapper():
             block_numbers.append(sync_chain.web3.eth.blockNumber)
-            wait_for_sync(sync_chain)
+            show_chain_sync_progress(sync_chain)
             block_numbers.append(sync_chain.web3.eth.blockNumber)
 
         with sync_chain:

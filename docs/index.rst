@@ -13,11 +13,13 @@ Contents
     usage
     tutorial
     compile
+    testing
+    fixtures
     deploy
+    migrations
     chain
     devenv
-    populus.testing
-    populus.testing-fixtures
+    config
     modules
 
 

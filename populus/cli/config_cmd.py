@@ -68,8 +68,7 @@ def config_set(ctx, section, keys_and_values):
         key, value = key_and_value.split(':')
         config.set(section, key, value)
 
-    with open(ctx.obj['PRIMARY_CONFIG'], 'w') as config_file:
-        config.write(config_file)
+    project.write_config()
 
 
 @config.command('unset')
@@ -113,5 +112,4 @@ def config_unset(ctx, section, confirm, keys):
         for key in keys:
             config.remove_option(section, key)
 
-    with open(ctx.obj['PRIMARY_CONFIG'], 'w') as config_file:
-        config.write(config_file)
+    project.write_config()

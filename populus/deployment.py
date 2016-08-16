@@ -5,9 +5,9 @@ from web3.utils.formatting import (
 )
 
 from populus.utils.contracts import (
-    get_dependency_graph,
+    get_shallow_dependency_graph,
     get_contract_deploy_order,
-    get_all_contract_dependencies,
+    get_recursive_contract_dependencies,
     link_contract,
     package_contracts,
 )
@@ -23,7 +23,7 @@ def deploy_contracts(web3,
                      txn_defaults=None,
                      constructor_args=None,
                      contract_addresses=None,
-                     timeout=0):
+                     timeout=120):
     """
     Do a full synchronous deploy of all project contracts or a subset of the
     contracts.
@@ -45,12 +45,12 @@ def deploy_contracts(web3,
         contracts_to_deploy = tuple(all_contracts.keys())
 
     # Extract and dependencies that exist due to library linking.
-    dependency_graph = get_dependency_graph(all_contracts)
+    dependency_graph = get_shallow_dependency_graph(all_contracts)
 
     # If a subset of contracts have been specified to be deployed compute
     # any dependencies that also need to be deployed.
     all_deploy_dependencies = set(itertools.chain.from_iterable(
-        get_all_contract_dependencies(contract_name, dependency_graph)
+        get_recursive_contract_dependencies(contract_name, dependency_graph)
         for contract_name in contracts_to_deploy
     ))
     all_contracts_to_deploy = all_deploy_dependencies.union(contracts_to_deploy)

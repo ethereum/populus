@@ -36,7 +36,11 @@ def get_nodekey_path(data_dir):
 IPC_FILENAME = 'geth.ipc'
 
 
-def get_default_ipc_path(testnet=False):
+def get_geth_ipc_path(data_dir):
+    return os.path.join(data_dir, IPC_FILENAME)
+
+
+def get_default_datadir_path(testnet=False):
     if testnet:
         testnet = "testnet"
     else:
@@ -48,14 +52,12 @@ def get_default_ipc_path(testnet=False):
             "Library",
             "Ethereum",
             testnet,
-            "geth.ipc",
         ))
     elif sys.platform.startswith('linux'):
         return os.path.expanduser(os.path.join(
             "~",
             "ethereum",
             testnet,
-            "geth.ipc",
         ))
     elif sys.platform == 'win32':
         return os.path.expanduser(os.path.join(
@@ -67,12 +69,27 @@ def get_default_ipc_path(testnet=False):
     else:
         raise ValueError(
             "Unsupported platform '{0}'.  Only darwin/linux2/win32 are "
-            "supported.  You must specify the ipc_path".format(sys.platform)
+            "supported.".format(sys.platform)
         )
 
 
-def get_geth_ipc_path(data_dir):
-    return os.path.join(data_dir, IPC_FILENAME)
+def get_default_ipc_path(testnet=False):
+    data_dir = get_default_datadir_path(testnet=testnet)
+
+    if sys.platform == 'darwin' or sys.platform.startswith('linux'):
+        return os.path.join(data_dir, "geth.ipc")
+    elif sys.platform == 'win32':
+        return os.path.expanduser(os.path.join(
+            "~",
+            "AppData",
+            "Roaming",
+            "Ethereum",
+        ))
+    else:
+        raise ValueError(
+            "Unsupported platform '{0}'.  Only darwin/linux2/win32 are "
+            "supported.".format(sys.platform)
+        )
 
 
 def get_geth_logfile_path(project_dir, prefix, suffix):

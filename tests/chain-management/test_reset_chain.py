@@ -3,7 +3,7 @@ import os
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
-from populus.utils.chain import (
+from populus.utils.chains import (
     get_data_dir,
     get_chaindata_dir,
     get_dapp_dir,

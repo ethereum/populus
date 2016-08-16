@@ -7,7 +7,7 @@ try:
 except ImportError:
     import ConfigParser as configparser
 
-from .chain import (
+from .chains import (
     get_default_ipc_path,
 )
 
@@ -22,7 +22,7 @@ CONFIG_FILENAMES = [
 ]
 
 
-TEST_DEFAULTS = {
+TESTRPC_DEFAULTS = {
     'provider': 'web3.providers.rpc.TestRPCProvider',
 }
 
@@ -43,7 +43,7 @@ class Config(configparser.ConfigParser):
         defaults = {
             'mainnet': copy.deepcopy(MAINNET_DEFAULTS),
             'morden': copy.deepcopy(MORDEN_DEFAULTS),
-            'test': copy.deepcopy(TEST_DEFAULTS),
+            'testrpc': copy.deepcopy(TESTRPC_DEFAULTS),
         }
         declared_chains = {
             section.partition(':')[2]: {

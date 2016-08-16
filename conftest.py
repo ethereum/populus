@@ -20,6 +20,7 @@ def project_dir(tmpdir, monkeypatch):
     ensure_path_exists(get_blockchains_dir(_project_dir))
 
     monkeypatch.chdir(_project_dir)
+    monkeypatch.syspath_prepend(_project_dir)
 
     return _project_dir
 

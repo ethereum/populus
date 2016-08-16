@@ -1,5 +1,5 @@
 from populus.utils.contracts import (
-    get_dependency_graph,
+    get_shallow_dependency_graph,
 )
 #
 # A -> (B, C)
@@ -17,7 +17,7 @@ CONTRACTS = {
 }
 
 
-def test_get_dependency_graph():
+def test_get_shallow_dependency_graph():
     expected_graph = {
         'A': {'B', 'C'},
         'C': {'E'},
@@ -25,5 +25,5 @@ def test_get_dependency_graph():
         'E': {'B'},
         'B': set(),
     }
-    actual_graph = get_dependency_graph(CONTRACTS)
+    actual_graph = get_shallow_dependency_graph(CONTRACTS)
     assert actual_graph == expected_graph

@@ -30,3 +30,30 @@ def get_block_gas_limit(web3, block_identifier=None):
         block_identifier = web3.eth.blockNumber
     block = web3.eth.getBlock(block_identifier)
     return block['gasLimit']
+
+
+def is_account_locked(web3, account):
+    try:
+        web3.eth.sign(account, 'simple-test-data')
+    except ValueError as err:
+        return 'account is locked' in str(err)
+    else:
+        return False
+
+
+def wait_for_unlock(web3, account, timeout=0):
+    with gevent.Timeout(timeout):
+        while is_account_locked(web3, account):
+            gevent.sleep(random.random())
+
+
+def wait_for_peers(web3, peer_count=1, timeout=0):
+    with gevent.Timeout(timeout):
+        while web3.net.peerCount < peer_count:
+            gevent.sleep(random.random())
+
+
+def wait_for_syncing(web3, timeout=0):
+    with gevent.Timeout(timeout):
+        while not web3.eth.syncing:
+            gevent.sleep(random.random())

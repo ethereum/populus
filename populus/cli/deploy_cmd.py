@@ -1,25 +1,18 @@
-import os
+import gevent
 
 import click
 
-from geth import (
-    DevGethProcess,
-)
-
-from web3 import (
-    Web3,
-    IPCProvider,
-)
-
-from populus.utils.contracts import (
-    load_compiled_contract_json,
-)
 from populus.utils.transactions import (
-    wait_for_block_number,
+    is_account_locked,
+    wait_for_unlock,
 )
-from populus.compilation import (
-    compile_and_write_contracts,
+from populus.utils.cli import (
+    select_chain,
+    select_account,
+    request_account_unlock,
+    show_chain_sync_progress,
 )
+
 from populus.deployment import (
     deploy_contracts,
     validate_deployed_contracts,
@@ -51,63 +44,107 @@ def echo_post_deploy_message(web3, deployed_contracts):
 
 @main.command('deploy')
 @click.option(
-    '--confirm/--no-confirm',
-    default=True,
-    help="Bypass any confirmation prompts",
+    'deploy_from',
+    '--deploy-from',
+    '-d',
+    help=(
+        "Specifies the account that should be used for deploys.  You can "
+        "specify either the full account address, or the integer 0 based index "
+        "of the account in the account list."
+    ),
 )
-# Deploy chain config
 @click.option(
+    'chain_name',
     '--chain',
     '-c',
-    default='default',
-    help="Specify which chain to deploy to.",
-)
-# Compilation config
-@click.option(
-    '--compile/--no-compile',
-    default=True,
-    help="Should contracts be compiled",
-)
-@click.option(
-    '--optimize/--no-optimize',
-    default=True,
-    help="Should contracts be compiled with the --optimize flag.",
+    help=(
+        "Specifies the chain that contracts should be deployed to. The chains "
+        "mainnet' and 'morden' are pre-configured to connect to the public "
+        "networks.  Other values should be predefined in your populus.ini"
+    ),
 )
 @click.argument('contracts_to_deploy', nargs=-1)
-def deploy(chain, confirm, compile, optimize, contracts_to_deploy):
+@click.pass_context
+def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
     """
     Deploys the specified contracts via the RPC client.
     """
-    # TODO: project_dir should happen up at the `main` level
-    project_dir = os.getcwd()
+    project = ctx.obj['PROJECT']
 
-    if compile:
-        compile_and_write_contracts(project_dir, optimize=optimize)
+    # Determine which chain should be used.
+    if not chain_name:
+        chain_name = select_chain(project)
 
-    compiled_contract = load_compiled_contract_json(project_dir)
+    chain_section_name = "chain:{0}".format(chain_name)
 
-    # TODO: what if the user wants to run geth themselves.
-    with DevGethProcess(chain_name=chain, base_dir=project_dir) as geth:
-        geth.wait_for_dag(600)
-        geth.wait_for_ipc(30)
+    chain_config = project.config.chains[chain_name]
 
-        web3 = Web3(IPCProvider(geth.ipc_path))
+    compiled_contracts = project.compiled_contracts
 
-        wait_for_block_number(web3, 1, 120)
+    chain = project.get_chain(chain_name)
 
-        if confirm:
-            message = (
-                "You are about to deploy contracts to a production environment. "
-                "You must have an RPC server that is unlocked running for this to "
-                "work.\n\n"
-                "Would you like to proceed?"
+    with chain:
+        web3 = chain.web3
+
+        if chain_name in {'mainnet', 'morden'}:
+            show_chain_sync_progress(chain)
+
+        # Choose the address we should deploy from.
+        # TODO: this set of if blocks should be it's own helper function.
+        if deploy_from:
+            if deploy_from in web3.eth.accounts:
+                account = deploy_from
+            elif deploy_from.isdigit() and int(deploy_from) < len(web3.eth.accounts):
+                account = web3.eth.accounts[int(deploy_from)]
+            else:
+                raise click.Abort(
+                    "The account {0!r} was not found in the list of accounts "
+                    "for chain {1!r}.".format(
+                        account,
+                        chain_name,
+                    )
+                )
+        elif 'deploy_from' in chain_config:
+            account = chain_config['deploy_from']
+            if account not in web3.eth.accounts:
+                raise click.Abort(
+                    "The chain {0!r} is configured to deploy from account {1!r} "
+                    "which was not found in the account list for this chain. "
+                    "Please ensure that this account exists.".format(
+                        chain_name,
+                        account,
+                    )
+                )
+        else:
+            account = select_account(chain)
+            set_as_deploy_from_msg = (
+                "Would you like set the address '{0}' as the default"
+                "`deploy_from` address for the '{1}' chain?".format(
+                    account,
+                    chain_name,
+                )
             )
-            if not click.confirm(message):
-                raise click.Abort()
+            if click.confirm(set_as_deploy_from_msg):
+                project.config.set(chain_section_name, 'deploy_from', account)
+                click.echo(
+                    "Wrote updated chain configuration to '{0}'".format(
+                        project.write_config()
+                    )
+                )
+
+        # Unlock the account if needed.
+        if is_account_locked(web3, account):
+            try:
+                wait_for_unlock(web3, account, 2)
+            except gevent.Timeout:
+                request_account_unlock(chain, account, None)
+
+        # Configure web3 to now send from our chosen account by default
+        web3.eth.defaultAccount = account
 
         deployed_contracts = deploy_contracts(
             web3,
-            compiled_contract,
+            compiled_contracts,
             contracts_to_deploy or None,
             timeout=120,
         )

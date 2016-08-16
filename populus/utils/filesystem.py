@@ -15,6 +15,19 @@ def ensure_path_exists(dir_path):
     return False
 
 
+def ensure_file_exists(file_path):
+    """
+    Make sure that a path exists
+    """
+    if os.path.exists(file_path):
+        return False
+    base_dir = os.path.dirname(file_path)
+    ensure_path_exists(base_dir)
+    with open(file_path, 'w'):
+        pass
+    return True
+
+
 def remove_file_if_exists(path):
     if os.path.isfile(path):
         os.remove(path)
@@ -61,6 +74,18 @@ def get_blockchains_dir(project_dir):
     blockchains_dir = os.path.abspath(os.path.join(project_dir, BLOCKCHAIN_DIR))
     ensure_path_exists(blockchains_dir)
     return blockchains_dir
+
+
+MIGRATIONS_DIR = "./migrations/"
+
+
+def get_migrations_dir(project_dir, lazy_create=True):
+    migrations_dir = os.path.abspath(os.path.join(project_dir, MIGRATIONS_DIR))
+    if lazy_create:
+        init_file_path = os.path.join(migrations_dir, '__init__.py')
+        ensure_path_exists(migrations_dir)
+        ensure_file_exists(init_file_path)
+    return migrations_dir
 
 
 def is_executable_available(program):

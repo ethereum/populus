@@ -1,27 +1,14 @@
 import os
-import contextlib
 
 import pytest
 
-from web3 import Web3
-
+from populus.project import Project
 from populus.deployment import deploy_contracts
-from populus.utils.networking import (
-    get_open_port,
-    wait_for_http_connection,
-)
-from populus.utils.contracts import (
-    package_contracts,
-)
-from populus.compilation import (
-    compile_and_write_contracts,
-)
-from populus.chain import (
-    testing_geth_process,
-)
 
 
 class PopulusConfig(object):
+    """
+    """
     def __init__(self, request, tmpdir, **kwargs):
         self.request = request
         self.tmpdir = tmpdir
@@ -52,8 +39,8 @@ class PopulusConfig(object):
     def _project_dir(self):
         return os.getcwd()
 
-    # Deploy Client
-    _web3_provider = 'tester'
+    # What chain to test against.
+    _test_chain = 'testrpc'
 
     # Deployed Contracts
     _deploy_max_wait = 70
@@ -66,78 +53,41 @@ def populus_config(request, tmpdir):
     return PopulusConfig(request=request, tmpdir=tmpdir)
 
 
-@contextlib.contextmanager
-def setup_tester_rpc_provider(project_dir, test_name):
-    from testrpc import testrpc
-    from web3.providers.rpc import TestRPCProvider
-
-    port = get_open_port()
-    provider = TestRPCProvider(port=port)
-
-    testrpc.full_reset()
-    testrpc.rpc_configure('eth_mining', False)
-    testrpc.rpc_configure('eth_protocolVersion', '0x3f')
-    testrpc.rpc_configure('net_version', 1)
-    testrpc.evm_mine()
-
-    wait_for_http_connection('127.0.0.1', port)
-    yield provider
-    provider.server.shutdown()
-    provider.server.server_close()
-
-
-@contextlib.contextmanager
-def setup_rpc_provider(project_dir, test_name):
-    from web3.providers.rpc import RPCProvider
-
-    with testing_geth_process(project_dir, test_name) as geth:
-        provider = RPCProvider(port=geth.rpc_port)
-        provider._geth = geth
-        yield provider
-        geth.stop()
-
-
-@contextlib.contextmanager
-def setup_ipc_provider(project_dir, test_name):
-    from web3.providers.ipc import IPCProvider
-
-    with testing_geth_process(project_dir, test_name) as geth:
-        provider = IPCProvider(geth.ipc_path)
-        provider._geth = geth
-        yield provider
+@pytest.fixture()
+def project():
+    return Project()
 
 
 @pytest.yield_fixture()
-def web3(request, populus_config):
-    if populus_config.web3_provider == "tester":
-        setup_fn = setup_tester_rpc_provider
-    elif populus_config.web3_provider == "rpc":
-        raise NotImplementedError("Not Implemented")
-        setup_fn = setup_rpc_provider
-    elif populus_config.web3_provider == "ipc":
-        raise NotImplementedError("Not Implemented")
-        setup_fn = setup_ipc_provider
+def chain(request, project, populus_config):
+    if populus_config.test_chain == "testrpc":
+        chain = project.get_chain('testrpc')
+    elif populus_config.web3_provider == "temp":
+        chain = project.get_chain('temp', name=request.module.__name__)
     else:
-        raise ValueError("Unknown param")
+        raise ValueError("Unknown param chain configuration")
 
-    with setup_fn(populus_config.project_dir, request.module.__name__) as provider:
-        _web3 = Web3(provider)
-        yield _web3
-
-
-@pytest.fixture()
-def contracts(populus_config, web3):
-    _, compiled_contracts, _ = compile_and_write_contracts(populus_config.project_dir)
-    return package_contracts(web3, compiled_contracts)
+    with chain:
+        yield chain
 
 
 @pytest.fixture()
-def deployed_contracts(populus_config, web3):
+def web3(chain):
+    return chain.web3
+
+
+@pytest.fixture()
+def contracts(chain):
+    return chain.contract_factories
+
+
+@pytest.fixture()
+def deployed_contracts(populus_config, project, web3):
     deploy_max_wait = int(populus_config['deploy_max_wait'])
     contracts_to_deploy = set(populus_config['contracts_to_deploy'])
     deploy_constructor_args = populus_config['deploy_constructor_args']
 
-    _, compiled_contracts, _ = compile_and_write_contracts(populus_config.project_dir)
+    compiled_contracts = project.compiled_contracts
 
     _deployed_contracts = deploy_contracts(
         web3,

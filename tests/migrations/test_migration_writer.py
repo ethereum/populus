@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
 
-import pytest
 from io import StringIO
-
 import textwrap
 from collections import OrderedDict
+
+import pytest
 
 from populus.migrations import (
     Migration,
@@ -32,6 +32,8 @@ from populus.migrations.writer import (
         (b"1234", {'level': 1}, set(), "    b'1234'\n"),
         (1234, {'level': 1}, set(), "    1234\n"),
         (1234.5678, {'level': 1}, set(), "    1234.5678\n"),
+        # newlines
+        ("1234\n56789", {}, set(), "'1234\\n56789'\n"),
     )
 )
 def test_serialize_primitive_type(value,

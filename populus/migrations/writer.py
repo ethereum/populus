@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import os
 import functools
+import codecs
 from io import StringIO
 from collections import OrderedDict
 
@@ -70,9 +71,13 @@ def serializer_fn(fn):
 @serializer_fn
 def serialize_primitive_type(value, *args, **kwargs):
     if is_bytes(value):
-        return set(), "b'{0}'".format(force_text(value))
+        return set(), "b'{0}'".format(
+            force_text(codecs.encode(force_text(value), 'unicode_escape'))
+        )
     elif is_text(value):
-        return set(), "'{0}'".format(value)
+        return set(), "'{0}'".format(
+            force_text(codecs.encode(value, 'unicode_escape'))
+        )
     else:
         return set(), force_text(repr(value))
 

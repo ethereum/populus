@@ -12,6 +12,8 @@
 - Deployment gas computations now handled by web3.py
 - New `populus.project.Project` object for sane access to populus project
   configuration and assets.
+- New `populus migrate` and `populus makemigration` commands and underlying
+  Migrations API.
 
 0.8.0
 -----

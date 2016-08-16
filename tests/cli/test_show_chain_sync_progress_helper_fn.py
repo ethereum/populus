@@ -2,6 +2,7 @@ import os
 import click
 import shutil
 from click.testing import CliRunner
+from flaky import flaky
 
 from populus.utils.networking import (
     get_open_port,
@@ -17,6 +18,7 @@ from populus.utils.cli import (
 from populus.project import Project
 
 
+@flaky
 def test_show_chain_sync_progress():
     project = Project()
 

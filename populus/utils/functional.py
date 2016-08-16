@@ -1,6 +1,10 @@
 import functools
 
 
+def noop(*args, **kwargs):
+    pass
+
+
 def identity(value):
     return value
 

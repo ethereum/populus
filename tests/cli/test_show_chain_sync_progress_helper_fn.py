@@ -1,5 +1,6 @@
 import os
 import click
+import shutil
 from click.testing import CliRunner
 
 from populus.utils.networking import (

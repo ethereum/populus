@@ -3,8 +3,16 @@ import glob
 import re
 from importlib import (
     import_module,
-    invalidate_caches,
 )
+try:
+    from importlib import invalidate_caches
+except ImportError:
+    from populus.utils.functional import noop as invalidate_caches
+
+try:
+    from importlib import reload
+except ImportError:
+    pass
 
 from populus.utils.filesystem import (
     get_migrations_dir,
@@ -42,7 +50,15 @@ def load_project_migrations(project_dir):
         for file_path in migration_file_paths
     ]
 
+    # we need to both
     invalidate_caches()
+    migration_base_paths = set([
+        migration_module_path.rpartition('.')[0]
+        for migration_module_path in migration_module_paths
+    ])
+
+    for migration_base_path in migration_base_paths:
+        reload(import_module(migration_base_path))
 
     migration_modules = [
         import_module(module_path)

@@ -25,6 +25,7 @@ setup(
     py_modules=['populus'],
     install_requires=[
         "click>=5.1",
+        "contextlib2>=0.5.4",
         "eth-testrpc>=0.6.0",
         "ethereum-tester-client>=0.8.0",
         "gevent>=1.1.1",

@@ -1,5 +1,10 @@
-import contextlib
 import functools
+import contextlib
+
+try:
+    from contextlib import ExitStack
+except ImportError:
+    from contextlib2 import ExitStack
 
 import click
 
@@ -279,7 +284,7 @@ class BaseGethChain(Chain):
             provider = import_string(provider)
 
         # context manager shenanigans
-        self.stack = contextlib.ExitStack()
+        self.stack = ExitStack()
 
         self.provider_class = provider
         self.extra_kwargs = {

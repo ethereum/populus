@@ -3,6 +3,7 @@ import re
 import click
 import pytest
 from click.testing import CliRunner
+from flaky import flaky
 
 from populus.cli import main
 
@@ -10,6 +11,7 @@ from populus.cli import main
 this_dir = os.path.dirname(__file__)
 
 
+@flaky
 def test_deployment_command_with_no_specified_contracts(project_dir,
                                                         write_project_file,
                                                         MATH,
@@ -34,6 +36,7 @@ def test_deployment_command_with_no_specified_contracts(project_dir,
     assert re.search('WithNoArgumentConstructor \(0x[0-9a-f]{40}\)', result.output)
 
 
+@flaky
 def test_deployment_command_with_specified_contracts(project_dir,
                                                      write_project_file,
                                                      MATH,

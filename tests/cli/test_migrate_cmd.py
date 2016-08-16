@@ -1,4 +1,5 @@
 import json
+from flaky import flaky
 
 from click.testing import CliRunner
 
@@ -67,6 +68,7 @@ class Migration(migrations.Migration):
 """)
 
 
+@flaky
 def test_migrate_cmd(project_dir, write_project_file, MATH):
     math_code = MATH['code']
     math_runtime = MATH['code_runtime']

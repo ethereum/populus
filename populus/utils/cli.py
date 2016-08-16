@@ -197,6 +197,9 @@ def show_chain_sync_progress(chain):
 
     sync_data = chain.web3.eth.syncing
 
+    if not sync_data:
+        return
+
     starting_block = sync_data['startingBlock']
     highest_block = sync_data['highestBlock']
     blocks_to_sync = highest_block - starting_block
@@ -205,6 +208,10 @@ def show_chain_sync_progress(chain):
                            label='Syncing Blocks:') as progress_bar:
         while True:
             progress_data = chain.web3.eth.syncing
+
+            if not progress_data:
+                break
+
             position = progress_data['currentBlock'] - starting_block
 
             if position:

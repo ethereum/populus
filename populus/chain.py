@@ -1,12 +1,7 @@
-import functools
-import contextlib
-
 try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
-
-import click
 
 from testrpc import testrpc
 
@@ -23,7 +18,6 @@ from geth import (
     DevGethProcess,
     LiveGethProcess,
     TestnetGethProcess,
-    InterceptedStreamsMixin,
     LoggingMixin,
 )
 from populus.utils.functional import (
@@ -77,24 +71,6 @@ def reset_chain(data_dir):
 
     geth_ipc_path = get_geth_ipc_path(data_dir)
     remove_file_if_exists(geth_ipc_path)
-
-
-class LocalChainGethProcess(InterceptedStreamsMixin, DevGethProcess):
-    def __init__(self, *args, **kwargs):
-        super(LocalChainGethProcess, self).__init__(*args, **kwargs)
-        self.register_stdout_callback(click.echo)
-        self.register_stderr_callback(functools.partial(click.echo, err=True))
-
-
-@contextlib.contextmanager
-def dev_geth_process(project_dir, chain_name):
-    blockchains_dir = get_blockchains_dir(project_dir)
-    local_chain_geth = LocalChainGethProcess(
-        chain_name=chain_name,
-        base_dir=blockchains_dir,
-    )
-    with local_chain_geth as geth:
-        yield geth
 
 
 class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
@@ -152,6 +128,9 @@ class Chain(object):
         self.project = project
         self.chain_name = chain_name
 
+    #
+    # Required Public API
+    #
     @property
     def web3(self):
         raise NotImplementedError("Must be implemented by subclasses")
@@ -177,6 +156,62 @@ class Chain(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
+
+class ExternalChain(Chain):
+    """
+    Chain class to represent an externally running blockchain that is not
+    locally managed.  This class only houses a pre-configured web3 instance.
+    """
+    def __init__(self, project, chain_name, *args, **kwargs):
+        super(ExternalChain, self).__init__(project, chain_name)
+
+        provider_import_path = kwargs.pop(
+            'provider',
+            'web3.providers.ipc.IPCProvider',
+        )
+        provider_class = import_string(provider_import_path)
+
+        if provider_class == RPCProvider:
+            host = kwargs.pop('host', '127.0.0.1')
+            port = kwargs.pop('port', 8545)
+            provider = provider_class(host=host, port=port)
+        elif provider_class == IPCProvider:
+            ipc_path = kwargs.pop('ipc_path', None)
+            provider = provider_class(ipc_path=ipc_path)
+        else:
+            raise NotImplementedError(
+                "Only the IPCProvider and RPCProvider provider classes are "
+                "currently supported for external chains."
+            )
+
+        self._web3 = Web3(provider)
+
+    @property
+    def chain_config(self):
+        return self.project.config.chains[self.chain_name]
+
+    @property
+    def web3(self):
+        if 'default_account' in self.chain_config:
+            self._web3.eth.defaultAccount = self.chain_config['default_account']
+        return self._web3
+
+    def __enter__(self):
+        return self
+
+    @cached_property
+    def registrar(self):
+        if 'registrar' not in self.chain_config:
+            raise KeyError(
+                "The configuration for the {0} chain does not include a "
+                "registrar.  Please set this value to the address of the "
+                "deployed registrar contract.".format(self.chain_name)
+            )
+        return get_compiled_registrar_contract(
+            self.web3,
+            address=self.chain_config['registrar'],
+        )
 
 
 class TestRPCChain(Chain):
@@ -327,10 +362,12 @@ class BaseGethChain(Chain):
                     "Unsupported provider class {0!r}.  Must be one of "
                     "IPCProvider or RPCProvider"
                 )
-            self._web3 = Web3(provider)
+            _web3 = Web3(provider)
 
-            # TODO: web3 should be configured with things like the
-            # `defaultAccount` from the project configuration.
+            if 'default_account' in self.chain_config:
+                _web3.eth.defaultAccount = self.chain_config['default_account']
+
+            self._web3 = _web3
         return self._web3
 
     @property

@@ -7,6 +7,7 @@ import click
 from populus.chain import (
     reset_chain,
 )
+from populus.utils.cli import configure_chain
 
 from .main import main
 
@@ -71,3 +72,15 @@ def chain_run(ctx, chain_name, mine, verbosity):
                 gevent.sleep(random.random())
         except KeyboardInterrupt:
             pass
+
+
+@chain_cmd.command('configure')
+@click.argument('chain_name', nargs=1)
+@click.pass_context
+def chain_configure(ctx, chain_name):
+    """
+    Configure a blockchain
+    """
+    project = ctx.obj['PROJECT']
+
+    configure_chain(project, chain_name)

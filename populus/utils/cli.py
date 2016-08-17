@@ -77,6 +77,121 @@ def select_account(chain):
         )
 
 
+def configure_chain(project, chain_name):
+    is_existing_chain = chain_name in project.config.chains
+
+    chain_section_header = "chain:{chain_name}".format(chain_name=chain_name)
+
+    if is_existing_chain:
+        chain_config = dict(project.config.items(chain_section_header))
+    else:
+        chain_config = {}
+
+    start_msg = "Configuring {status} chain: {chain_name}".format(
+        status="existing" if is_existing_chain else "**new**",
+        chain_name=chain_name,
+    )
+    click.echo(start_msg)
+    click.echo('-' * len(start_msg))
+
+    if is_existing_chain:
+        current_configuration_msg = "\n".join(itertools.chain((
+            "Current Configuration",
+        ), (
+            "  {key} = {value}".format(key=key, value=value)
+            for key, value in chain_config.items()
+        )))
+        click.echo(current_configuration_msg)
+
+    # Internal or External
+    internal_or_external_msg = (
+        "\n\nPopulus can run the blockchain client for you, including "
+        "connecting to the public main and test networks.\n\n "
+        "Should populus manage running this chain?"
+    )
+    is_internal = click.confirm(internal_or_external_msg, default=True)
+
+    if not is_internal:
+        chain_config['is_external'] = 'True'
+
+    # Web3 Provider
+    web3_provider_msg = (
+        "\n\nWeb3 Provider Choices:\n"
+        "1) IPC socket (default)\n"
+        "2) RPC via HTTP\n\n"
+        "How should populus connect web3.py to this chain?"
+    )
+    provider = click.prompt(web3_provider_msg, default='ipc')
+
+    if provider.lower() in {'ipc', '1'}:
+        chain_config['provider'] = 'web3.providers.ipc.IPCProvider'
+    elif provider.lower() in {'rpc', '2'}:
+        chain_config['provider'] = 'web3.providers.rpc.RPCProvider'
+    else:
+        raise click.Abort("Invalid response.  Allowed responses are 1/2/ipc/rpc")
+
+    if chain_config['provider'] == 'web3.providers.ipc.IPCProvider':
+        custom_ipc_path_msg = (
+            "\n\nWill this blockchain be running with a non-standard `geth.ipc`"
+            "path?\n\n"
+        )
+        if click.confirm(custom_ipc_path_msg, default=False):
+            ipc_path_msg = "Path to `geth.ipc` socket?"
+            ipc_path = click.prompt(ipc_path_msg)
+            chain_config['ipc_path'] = ipc_path
+    elif chain_config['provider'] == 'web3.providers.rpc.RPCProvider':
+        custom_rpc_host = (
+            "\n\nWill the RPC server be bound to `localhost`?"
+        )
+        if not click.confirm(custom_rpc_host, default=True):
+            rpc_host_msg = "Hostname?"
+            rpc_host = click.prompt(rpc_host_msg)
+            chain_config['rpc_host'] = rpc_host
+
+        custom_rpc_port = (
+            "\n\nWill the RPC server be listening on port 8545?"
+        )
+        if not click.confirm(custom_rpc_port, default=True):
+            rpc_port_msg = "Port?"
+            rpc_port = click.prompt(rpc_port_msg)
+            chain_config['rpc_port'] = rpc_port
+
+    if not project.config.has_section(chain_section_header):
+        project.config.add_section(chain_section_header)
+
+    # Save config so that we can spin this chain up.
+    for key, value in chain_config.items():
+        project.config.set(chain_section_header, key, value)
+
+    project.write_config()
+
+    if project.config.chains[chain_name].get('is_external', False):
+        is_chain_ready_msg = (
+            "Populus needs to connect to the chain.  Press [Enter] when the "
+            "chain is ready for populus"
+        )
+        click.confirm(is_chain_ready_msg)
+
+    with project.get_chain(chain_name) as chain:
+        web3 = chain.web3
+        choose_default_account_msg = (
+            "This chain will default to sending transactions from "
+            "{0}.  Would you like to set a different default "
+            "account?".format(web3.eth.defaultAccount)
+        )
+        if click.confirm(choose_default_account_msg):
+            default_account = select_account(chain)
+            project.config.set(
+                chain_section_header, 'default_account', default_account,
+            )
+
+    click.echo(
+        "Writing configuration to {0} ...".format(project.primary_config_file_path)
+    )
+    project.write_config()
+    click.echo("Sucess!")
+
+
 def request_account_unlock(chain, account, timeout):
     if not is_account_locked(chain.web3, account):
         raise click.Abort(

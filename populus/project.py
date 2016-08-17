@@ -42,6 +42,7 @@ from populus.chain import (
     MordenChain,
     MainnetChain,
     LocalGethChain,
+    ExternalChain,
 )
 
 
@@ -203,6 +204,12 @@ class Project(object):
 
         combined_kwargs = dict(**chain_config)
         combined_kwargs.update(chain_kwargs)
+
+        if chain_config.get('is_external'):
+            # TODO: the chain_kwargs is really currently required to contain a
+            # `web3` instance.  This isn't quite congruent with the current
+            # API.
+            return ExternalChain(self, chain_name, *chain_args, **combined_kwargs)
 
         if chain_name == 'morden':
             return MordenChain(self, 'morden', *chain_args, **combined_kwargs)

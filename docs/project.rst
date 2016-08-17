@@ -6,26 +6,43 @@ Project
 Introduction
 ^^^^^^^^^^^^
 
-The ``populus.project.Project`` object is meant to expose an easy to use API
-that lets you get at all of the many aspects of your project.
+The ``populus.project.Project`` API is the common entry point to all aspects of
+your populus project.
+
+
+Basic Usage
+^^^^^^^^^^^
 
 ``Project(config_file_paths=None)``
 
-The *Project* object can typically be instantiated with no arguments.
+When instantaited with no arguments, the project will load any ``populus.ini``
+file found in the current working directory and the current user's ``$HOME``
+directory.
+
+If there are specific configuration files that you would like loaded then you
+can do so by passing them in as an array to the constructor.
 
 .. code-block::
 
     from populus.project import Project
+    # loads local `populus.ini` and `$HOME/populus.ini` if present.
     project = Project()
 
-In this case populus will load any of the following files that it finds on your system.
+    # loads only the specified paths.
+    other_project = Project(['/path/to/other/populus.ini'])
+    other_project = Project([
+        '/path/to/other/populus.ini',
+        '/another/path/config.ini',
+    ])
 
-* ``$Home/populus.ini`` (The current user's home directory)
-* ``./populus.ini`` (the current working directory)
+Configuration files are loaded in reverse order meaning that configuration
+values set in the first files will supercede files later in the list.
 
 
-If there are specific configuration files that you would like loaded then you
-can do so by passing them in as an array to the constructor.
+Loading, Reloading, and Writing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+** ``Project.load_config(
 
 
 Directories and Paths

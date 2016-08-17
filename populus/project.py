@@ -44,6 +44,8 @@ from populus.chain import (
 
 
 class Project(object):
+
+    #: Instance of :class:`populus.utils.Config`, a subclass of ConfigParser
     config = None
 
     def __init__(self, config_file_paths=None):
@@ -98,7 +100,10 @@ class Project(object):
 
     @property
     def build_dir(self):
-        return get_build_dir(self.project_dir)
+        if self.config.has_option('populus', 'build_dir'):
+            return self.config.get('populus', 'build_dir')
+        else:
+            return get_build_dir(self.project_dir)
 
     @property
     def compiled_contracts_file_path(self):

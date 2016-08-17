@@ -10,6 +10,7 @@ from .operations import (  # noqa
     DeployRegistrar,
 )
 from .deferred import (  # noqa
+    DeferredValue,
     Address,
     Bytes32,
     String,

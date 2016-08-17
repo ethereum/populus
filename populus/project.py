@@ -67,6 +67,15 @@ class Project(object):
     def primary_config_file_path(self, value):
         self._primary_config_file_path = value
 
+    def write_config(self, destination_path=None):
+        if destination_path is None:
+            destination_path = self.primary_config_file_path
+
+        with open(destination_path, 'w') as config_file:
+            self.config.write(config_file)
+
+        return destination_path
+
     def load_config(self, config_file_paths=None):
         self._config_file_paths = config_file_paths
 
@@ -79,15 +88,6 @@ class Project(object):
             config_file_paths = [config_file_paths]
 
         self.config = load_config(config_file_paths)
-
-    def write_config(self, destination_path=None):
-        if destination_path is None:
-            destination_path = self.primary_config_file_path
-
-        with open(destination_path, 'w') as config_file:
-            self.config.write(config_file)
-
-        return destination_path
 
     def reload_config(self):
         self.load_config(self._config_file_paths)

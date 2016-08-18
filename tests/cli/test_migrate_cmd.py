@@ -1,90 +1,74 @@
+import os
 import json
+
 from flaky import flaky
 
 from click.testing import CliRunner
 
 from populus.project import Project
+from populus import migrations
 from populus.migrations.registrar import (
     get_compiled_registrar_contract,
+)
+from populus.migrations.writer import (
+    write_migration,
 )
 from populus.utils.transactions import (
     get_contract_address_from_txn,
     wait_for_unlock,
 )
+
 from populus.cli import main
-
-
-MIGRATION_0001 = ("""
-import json
-from populus import migrations
-
-
-class Migration(migrations.Migration):
-    migration_id = '0001_deploy_math'
-    dependencies = []
-
-    operations = [
-        migrations.DeployContract('Math'),
-    ]
-
-    compiled_contracts = {{
-        'Math': {{
-            'abi': json.loads('{abi}'),
-            'code': '{code}',
-            'code_runtime': '{code_runtime}',
-            'source': None,
-        }},
-    }}
-""")
-
-
-MIGRATION_0002 = ("""
-import json
-from populus import migrations
-
-
-class Migration(migrations.Migration):
-    migration_id = '0002_increment'
-    dependencies = ['0001_deploy_math']
-
-    operations = [
-        migrations.TransactContract(
-            contract_name='Math',
-            method_name='increment',
-            arguments=[3],
-            contract_address=migrations.Address.defer(key='contract/Math'),
-            timeout=30,
-        ),
-    ]
-
-    compiled_contracts = {{
-        'Math': {{
-            'abi': json.loads('{abi}'),
-            'code': '{code}',
-            'code_runtime': '{code_runtime}',
-            'source': None,
-        }},
-    }}
-""")
 
 
 @flaky
 def test_migrate_cmd(project_dir, write_project_file, MATH):
-    math_code = MATH['code']
-    math_runtime = MATH['code_runtime']
-    math_abi = json.dumps(MATH['abi'])
+    class MigrationA(migrations.Migration):
+        migration_id = '0001_deploy_math'
+        dependencies = []
+
+        operations = [
+            migrations.DeployContract('Math'),
+        ]
+
+        compiled_contracts = {
+            'Math': MATH,
+        }
+
+    class MigrationB(migrations.Migration):
+        migration_id = '0002_increment'
+        dependencies = ['0001_deploy_math']
+
+        operations = [
+            migrations.TransactContract(
+                contract_name='Math',
+                method_name='increment',
+                arguments=[3],
+                contract_address=migrations.Address.defer(key='contract/Math'),
+                timeout=30,
+            ),
+        ]
+
+        compiled_contracts = {
+            'Math': MATH,
+        }
+
 
     write_project_file('contracts/Math.sol', MATH['source'])
-    write_project_file('migrations/0001_deploy_math.py', MIGRATION_0001.format(
-        abi=math_abi,
-        code=math_code,
-        code_runtime=math_runtime,
-    ))
-    write_project_file('migrations/0002_increment.py', MIGRATION_0002.format(
-        abi=math_abi,
-        code=math_code,
-        code_runtime=math_runtime,
-    ))
+    write_project_file('migrations/__init__.py')
+
+    migration_0001_path = os.path.join(
+        project_dir, 'migrations', '0001_deploy_math.py',
+    )
+    with open(migration_0001_path, 'w') as migration_0001:
+        write_migration(migration_0001, MigrationA)
+
+    migration_0002_path = os.path.join(
+        project_dir, 'migrations', '0002_increment.py',
+    )
+    with open(migration_0002_path, 'w') as migration_0002:
+        write_migration(migration_0002, MigrationB)
+
     write_project_file('populus.ini', '[chain:local_a]')
 
     project = Project()

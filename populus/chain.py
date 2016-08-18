@@ -61,8 +61,8 @@ from populus.migrations.registrar import (
 )
 
 
-TESTNET_BLOCK_1_HASH = '0xad47413137a753b2061ad9b484bf7b0fc061f654b951b562218e9f66505be6ce'  # noqa
-MAINNET_BLOCK_1_HASH = '0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6'  # noqa
+TESTNET_BLOCK_1_HASH = '0xad47413137a753b2061ad9b484bf7b0fc061f654b951b562218e9f66505be6ce'
+MAINNET_BLOCK_1_HASH = '0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6'
 
 
 def reset_chain(data_dir):
@@ -211,6 +211,16 @@ class TestRPCChain(Chain):
         )
         registrar = RegistrarFactory(address=registrar_address)
         return registrar
+
+    full_reset = staticmethod(testrpc.full_reset)
+    reset = staticmethod(testrpc.evm_reset)
+
+    @staticmethod
+    def snapshot(*args, **kwargs):
+        return int(testrpc.evm_snapshot(*args, **kwargs), 16)
+
+    revert = staticmethod(testrpc.evm_revert)
+    mine = staticmethod(testrpc.evm_mine)
 
     _running = False
 

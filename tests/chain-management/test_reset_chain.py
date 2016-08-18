@@ -3,27 +3,25 @@ import os
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
-from populus.utils.chains import (
-    get_data_dir,
-    get_chaindata_dir,
-    get_dapp_dir,
-    get_nodekey_path,
-    get_geth_ipc_path,
-)
+from populus.project import Project
 from populus.chain import (
     reset_chain,
 )
 
 
-def test_reset_chain_on_empty_project_dir(project_dir):
-    data_dir = get_data_dir(project_dir, 'test-chain')
+def test_reset_chain_on_empty_project_dir(project_dir, write_project_file):
+    project = Project()
 
-    chaindata_dir = get_chaindata_dir(data_dir)
-    dapp_dir = get_dapp_dir(data_dir)
-    nodekey_path = get_nodekey_path(data_dir)
-    geth_ipc_path = get_geth_ipc_path(data_dir)
+    data_dir = project.get_blockchain_data_dir('test-chain')
+    ensure_path_exists(data_dir)
+
+    chaindata_dir = project.get_blockchain_chaindata_dir('test-chain')
+    dapp_dir = project.get_blockchain_dapp_dir('test-chain')
+    nodekey_path = project.get_blockchain_nodekey_path('test-chain')
+    geth_ipc_path = project.get_blockchain_ipc_path('test-chain')
 
     # sanity check
+    assert os.path.exists(data_dir)
     assert not os.path.exists(chaindata_dir)
     assert not os.path.exists(dapp_dir)
     assert not os.path.exists(nodekey_path)
@@ -31,7 +29,7 @@ def test_reset_chain_on_empty_project_dir(project_dir):
 
     reset_chain(data_dir)
 
-    # sanity check
+    assert os.path.exists(data_dir)
     assert not os.path.exists(chaindata_dir)
     assert not os.path.exists(dapp_dir)
     assert not os.path.exists(nodekey_path)
@@ -39,12 +37,15 @@ def test_reset_chain_on_empty_project_dir(project_dir):
 
 
 def test_reset_chain(project_dir, write_project_file):
-    data_dir = get_data_dir(project_dir, 'test-chain')
+    project = Project()
 
-    chaindata_dir = get_chaindata_dir(data_dir)
-    dapp_dir = get_dapp_dir(data_dir)
-    nodekey_path = get_nodekey_path(data_dir)
-    geth_ipc_path = get_geth_ipc_path(data_dir)
+    data_dir = project.get_blockchain_data_dir('test-chain')
+    ensure_path_exists(data_dir)
+
+    chaindata_dir = project.get_blockchain_chaindata_dir('test-chain')
+    dapp_dir = project.get_blockchain_dapp_dir('test-chain')
+    nodekey_path = project.get_blockchain_nodekey_path('test-chain')
+    geth_ipc_path = project.get_blockchain_ipc_path('test-chain')
 
     ensure_path_exists(chaindata_dir)
     ensure_path_exists(dapp_dir)
@@ -52,6 +53,7 @@ def test_reset_chain(project_dir, write_project_file):
     write_project_file(geth_ipc_path)
 
     # sanity check
+    assert os.path.exists(data_dir)
     assert os.path.exists(chaindata_dir)
     assert os.path.exists(dapp_dir)
     assert os.path.exists(nodekey_path)
@@ -59,7 +61,7 @@ def test_reset_chain(project_dir, write_project_file):
 
     reset_chain(data_dir)
 
-    # sanity check
+    assert os.path.exists(data_dir)
     assert not os.path.exists(chaindata_dir)
     assert not os.path.exists(dapp_dir)
     assert not os.path.exists(nodekey_path)

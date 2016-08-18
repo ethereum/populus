@@ -17,9 +17,9 @@ Contents
     fixtures
     deploy
     migrations
+    config
     chain
     devenv
-    config
     modules
 
 

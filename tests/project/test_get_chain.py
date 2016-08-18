@@ -52,9 +52,32 @@ def test_project_morden_chain(project_dir):
 
 
 @flaky
-def test_project_local_chain(project_dir, write_project_file):
+def test_project_local_chain_ipc(project_dir, write_project_file):
     write_project_file('populus.ini', '\n'.join((
         '[chain:custom-chain]',
+        'provider=web3.providers.ipc.IPCProvider',
+    )))
+    project = Project()
+
+    chain = project.get_chain('custom-chain')
+
+    with chain as running_local_chain:
+        web3 = running_local_chain.web3
+        assert web3.version.node.startswith('Geth')
+
+        wait_for_block_number(web3, 1, 180)
+
+        block_1 = web3.eth.getBlock(1)
+        assert block_1['hash'] != MAINNET_BLOCK_1_HASH
+        assert block_1['hash'] != TESTNET_BLOCK_1_HASH
+        assert block_1['miner'] == web3.eth.coinbase
+
+
+@flaky
+def test_project_local_chain_rpc(project_dir, write_project_file):
+    write_project_file('populus.ini', '\n'.join((
+        '[chain:custom-chain]',
+        'provider=web3.providers.rpc.RPCProvider',
     )))
     project = Project()
 

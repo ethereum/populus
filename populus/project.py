@@ -224,7 +224,7 @@ class Project(object):
             return LocalGethChain(self,
                                   chain_name=chain_name,
                                   *chain_args,
-                                  **chain_kwargs)
+                                  **combined_kwargs)
 
     @property
     def blockchains_dir(self):

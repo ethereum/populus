@@ -247,8 +247,7 @@ class TestRPCChain(Chain):
         if not self._running:
             raise ValueError("The TesterChain is not running")
         try:
-            self.provider.server.shutdown()
-            self.provider.server.server_close()
+            self.provider.server.close()
         finally:
             self._running = False
 

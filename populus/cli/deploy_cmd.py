@@ -125,6 +125,8 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
                 )
             )
             if click.confirm(set_as_deploy_from_msg):
+                if not project.config.has_section(chain_section_name):
+                    project.config.add_section(chain_section_name)
                 project.config.set(chain_section_name, 'deploy_from', account)
                 click.echo(
                     "Wrote updated chain configuration to '{0}'".format(

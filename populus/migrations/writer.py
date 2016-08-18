@@ -272,5 +272,5 @@ def write_migration(file_obj, migration_class):
     ])
 
     file_obj.write(header.getvalue())
-    file_obj.write("\n\n\n")
+    file_obj.write("\n")
     file_obj.write(body.getvalue())

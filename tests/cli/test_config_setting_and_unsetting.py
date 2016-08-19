@@ -13,7 +13,7 @@ def test_setting_with_no_config_file_lazily_creates_file(project_dir):
     assert not os.path.exists(populus_ini_path)
 
     runner = CliRunner()
-    result = runner.invoke(main, ['config', 'set', 'default_chain:testnet'])
+    result = runner.invoke(main, ['config:set', 'default_chain:testnet'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
 
@@ -36,7 +36,7 @@ def test_setting_overwritting_value(project_dir, write_project_file):
     assert config.get('populus', 'default_chain') == 'mainnet'
 
     runner = CliRunner()
-    result = runner.invoke(main, ['config', 'set', 'default_chain:testnet'])
+    result = runner.invoke(main, ['config:set', 'default_chain:testnet'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
 
@@ -56,7 +56,7 @@ def test_setting_non_default_section(project_dir, write_project_file):
     assert not config.has_section('chain:mainnet')
 
     runner = CliRunner()
-    result = runner.invoke(main, ['config', 'set', '--section', 'chain:mainnet', 'provider:web3.providers.rpc.RPCProvider'])
+    result = runner.invoke(main, ['config:set', '--section', 'chain:mainnet', 'provider:web3.providers.rpc.RPCProvider'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
 
@@ -78,7 +78,7 @@ def test_unsetting_value(project_dir, write_project_file):
     assert config.has_option('populus', 'default_chain')
 
     runner = CliRunner()
-    result = runner.invoke(main, ['config', 'unset', 'default_chain'])
+    result = runner.invoke(main, ['config:unset', 'default_chain'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
 
@@ -98,7 +98,7 @@ def test_unsetting_value_that_is_not_present(project_dir, write_project_file):
     assert not config.has_option('populus', 'default_chain')
 
     runner = CliRunner()
-    result = runner.invoke(main, ['config', 'unset', 'default_chain'])
+    result = runner.invoke(main, ['config:unset', 'default_chain'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
 
@@ -120,7 +120,7 @@ def test_unsetting_entire_section(project_dir, write_project_file):
     assert config.has_section('extra_section')
 
     runner = CliRunner()
-    result = runner.invoke(main, ['config', 'unset', '--section', 'extra_section', '--no-confirm', '*'])
+    result = runner.invoke(main, ['config:unset', '--section', 'extra_section', '--no-confirm', '*'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
 

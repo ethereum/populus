@@ -14,34 +14,33 @@ def validate_key_value_pair(ctx, param, keys_and_values):
     return keys_and_values
 
 
-@main.group(invoke_without_command=True)
+@main.command()
 @click.pass_context
 def config(ctx):
     """
-    Wrapper around `geth`.
+    Print the current project configuration
     """
-    if ctx.invoked_subcommand is None:
-        project = ctx.obj['PROJECT']
-        config = project.config
+    project = ctx.obj['PROJECT']
+    config = project.config
 
-        if not any(config.options(section) for section in config.sections()):
-            click.echo(
-                "No configuration values set.  Use `populus config set "
-                "some_key:a_value` to set configuration options."
-            )
+    if not any(config.options(section) for section in config.sections()):
+        click.echo(
+            "No configuration values set.  Use `populus config set "
+            "some_key:a_value` to set configuration options."
+        )
 
-        for section in config.sections():
-            if not config.options(section):
-                # don't print empty sections
-                continue
-            click.echo("[{0}]".format(section))
-            for key in config.options(section):
-                click.echo("  {key} = {value}".format(
-                    key=key, value=config.get(section, key)
-                ))
+    for section in config.sections():
+        if not config.options(section):
+            # don't print empty sections
+            continue
+        click.echo("[{0}]".format(section))
+        for key in config.options(section):
+            click.echo("  {key} = {value}".format(
+                key=key, value=config.get(section, key)
+            ))
 
 
-@config.command('set')
+@main.command('config:set')
 @click.option(
     '--section',
     '-s',
@@ -71,7 +70,7 @@ def config_set(ctx, section, keys_and_values):
     project.write_config()
 
 
-@config.command('unset')
+@main.command('config:unset')
 @click.option(
     '--section',
     '-s',

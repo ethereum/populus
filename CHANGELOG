@@ -14,6 +14,8 @@
   configuration and assets.
 - New `populus migrate` and `populus makemigration` commands and underlying
   Migrations API.
+- New `populus config`, `populus config:set` and `populus config:unset` commands.
+- New `populus.chain.ExternalChain` object for running external chains.
 
 0.8.0
 -----

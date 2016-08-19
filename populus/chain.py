@@ -121,6 +121,8 @@ class LoggedMainnetGethProcess(LoggingMixin, LiveGethProcess):
 class Chain(object):
     """
     Base class for how populus interacts with the blockchain.
+
+    :param project: Instance of :class:`populus.project.Project`
     """
     project = None
 
@@ -355,7 +357,7 @@ class BaseGethChain(Chain):
         if self._web3 is None:
             if issubclass(self.provider_class, IPCProvider):
                 provider = IPCProvider(self.geth.ipc_path)
-            elif issubclass(self.provider, RPCProvider):
+            elif issubclass(self.provider_class, RPCProvider):
                 provider = RPCProvider(port=self.geth.rpc_port)
             else:
                 raise NotImplementedError(

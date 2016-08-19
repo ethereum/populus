@@ -41,7 +41,10 @@ def is_account_locked(web3, account):
         return False
 
 
-def wait_for_unlock(web3, account, timeout=0):
+def wait_for_unlock(web3, account=None, timeout=0):
+    if account is None:
+        account = web3.eth.coinbase
+
     with gevent.Timeout(timeout):
         while is_account_locked(web3, account):
             gevent.sleep(random.random())

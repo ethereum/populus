@@ -1,6 +1,13 @@
-import gevent
 import random
-import requests
+
+import gevent
+from gevent import monkey
+
+
+monkey.patch_socket()
+
+
+import requests  # noqa
 
 
 def get_open_port():

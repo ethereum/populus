@@ -3,6 +3,12 @@ import os
 import pytest
 
 
+from gevent import monkey
+
+
+monkey.patch_all()
+
+
 @pytest.fixture()
 def project_dir(tmpdir, monkeypatch):
     from populus.utils.filesystem import (

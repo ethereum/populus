@@ -159,6 +159,10 @@ def serialize_dict(value, level=0, *args, **kwargs):
 def serialize_deconstructable(value, level=0, *args, **kwargs):
     import_path, construct_args, construct_kwargs = value.deconstruct()
 
+    ordered_construct_kwargs = OrderedDict(
+        sorted(construct_kwargs.items(), key=lambda kv: kv[0])
+    )
+
     import_part, constructor_part = split_at_longest_importable_path(import_path)
     # TODO: This *effectively* just re-joins the two parts but that is ok for
     # now.  Ideally later I can figure out how to do imports in the "from a.b.c
@@ -171,7 +175,7 @@ def serialize_deconstructable(value, level=0, *args, **kwargs):
     serialized_value.write(constructor)
     if not construct_args and not construct_kwargs:
         serialized_value.write("()")
-        return
+        return imports, serialized_value.getvalue()
 
     serialized_value.write("(\n")
 
@@ -190,7 +194,7 @@ def serialize_deconstructable(value, level=0, *args, **kwargs):
         imports |= arg_imports
         serialized_value.write(arg_serialized_value)
 
-    for construct_kwarg_name, construct_kwarg_value in construct_kwargs.items():
+    for construct_kwarg_name, construct_kwarg_value in ordered_construct_kwargs.items():
         kwarg_imports, kwarg_serialized_value = serialize_assignment(
             construct_kwarg_name,
             construct_kwarg_value,
@@ -242,7 +246,7 @@ def write_migration(file_obj, migration_class):
     header = StringIO()
     body = StringIO()
 
-    imports = {'from populus import migrations'}
+    imports = set()
 
     body.write("class Migration(migrations.Migration):\n\n")
 
@@ -259,9 +263,14 @@ def write_migration(file_obj, migration_class):
     header.write("# -*- coding: utf-8 -*-\n")
     header.write("from __future__ import unicode_literals\n")
     header.write("\n")
+    header.write("from populus import migrations\n")
+    header.write("\n")
 
-    header.writelines(sorted(imports))
+    header.writelines([
+        "import {import_path}\n".format(import_path=import_path)
+        for import_path in sorted(imports)
+    ])
 
     file_obj.write(header.getvalue())
-    file_obj.write("\n\n\n")
+    file_obj.write("\n")
     file_obj.write(body.getvalue())

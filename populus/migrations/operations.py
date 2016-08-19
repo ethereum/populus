@@ -1,3 +1,4 @@
+import types
 import functools
 
 from solc import compile_source
@@ -33,6 +34,31 @@ class Operation(object):
             "The `execute` method must be implemented by each Operation subclass"
         )
 
+    def deconstruct(self):
+        deferred_kwargs = {
+            key: getattr(self, key)
+            for key in dir(self)
+            if all((
+                # magic methods
+                not key.startswith('__'),
+                # functions
+                not isinstance(getattr(self, key), types.FunctionType),
+                # methods
+                not isinstance(getattr(self, key), types.MethodType),
+                # attributes that are either not present on the parent class or
+                # don't match the version found on the parent class.
+                (
+                    not hasattr(type(self), key) or
+                    getattr(self, key) != getattr(type(self), key)
+                ),
+            ))
+        }
+        return (
+            '.'.join((self.__class__.__module__, self.__class__.__name__)),
+            tuple(),
+            deferred_kwargs,
+        )
+
 
 class RunPython(Operation):
     """
@@ -51,7 +77,7 @@ class SendTransaction(Operation):
     A migration operation that sends a transaction.
     """
     transaction = None
-    timeout = 30
+    timeout = 120
 
     def __init__(self, transaction, timeout=120):
         self.transaction = transaction
@@ -59,7 +85,11 @@ class SendTransaction(Operation):
             self.timeout = timeout
 
     def execute(self, chain, **kwargs):
-        transaction_hash = chain.web3.eth.sendTransaction(self.transaction)
+        transaction = {
+            key: resolve_if_deferred_value(value, chain)
+            for key, value in self.transaction.items()
+        }
+        transaction_hash = chain.web3.eth.sendTransaction(transaction)
         if self.timeout is not None:
             wait_for_transaction_receipt(
                 chain.web3, transaction_hash, timeout=self.timeout,
@@ -196,7 +226,7 @@ class TransactContract(Operation):
                  method_name,
                  arguments=None,
                  transaction=None,
-                 contract_address=None,  # TODO: this should come from the resolver.
+                 contract_address=None,
                  timeout=120):
         self.contract_address = contract_address
         self.contract_name = contract_name
@@ -216,7 +246,13 @@ class TransactContract(Operation):
 
     def execute(self, chain, compiled_contracts, **kwargs):
         contract_name = resolve_if_deferred_value(self.contract_name, chain=chain)
-        contract_address = resolve_if_deferred_value(self.contract_address, chain=chain)
+        contract_address = resolve_if_deferred_value(
+            self.contract_address,
+            chain=chain,
+        )
+
+        if not contract_address:
+            raise ValueError("cannot transact without an address")
 
         contract_data = compiled_contracts[contract_name]
         contract = chain.web3.eth.contract(

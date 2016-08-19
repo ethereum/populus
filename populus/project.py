@@ -15,7 +15,9 @@ from populus.utils.filesystem import (
 from populus.utils.chains import (
     get_data_dir,
     get_chaindata_dir,
+    get_dapp_dir,
     get_geth_ipc_path,
+    get_nodekey_path,
 )
 from populus.utils.config import (
     load_config,
@@ -47,20 +49,13 @@ class Project(object):
     config = None
 
     def __init__(self, config_file_paths=None):
-        if not config_file_paths:
-            config_file_paths = get_config_paths(os.getcwd())
-        else:
-            self.primary_config_file_path = config_file_paths[0]
-
-        if is_string(config_file_paths):
-            config_file_paths = [config_file_paths]
-
-        self.config = load_config(config_file_paths)
+        self.load_config(config_file_paths)
 
     #
     # Config
     #
     _primary_config_file_path = None
+    _config_file_paths = None
 
     @property
     def primary_config_file_path(self):
@@ -72,12 +67,30 @@ class Project(object):
     def primary_config_file_path(self, value):
         self._primary_config_file_path = value
 
+    def load_config(self, config_file_paths=None):
+        self._config_file_paths = config_file_paths
+
+        if not config_file_paths:
+            config_file_paths = get_config_paths(os.getcwd())
+        else:
+            self.primary_config_file_path = config_file_paths[0]
+
+        if is_string(config_file_paths):
+            config_file_paths = [config_file_paths]
+
+        self.config = load_config(config_file_paths)
+
     def write_config(self, destination_path=None):
         if destination_path is None:
             destination_path = self.primary_config_file_path
+
         with open(destination_path, 'w') as config_file:
             self.config.write(config_file)
+
         return destination_path
+
+    def reload_config(self):
+        self.load_config(self._config_file_paths)
 
     #
     # Project
@@ -211,8 +224,14 @@ class Project(object):
     def get_blockchain_chaindata_dir(self, chain_name):
         return get_chaindata_dir(self.get_blockchain_data_dir(chain_name))
 
+    def get_blockchain_dapp_dir(self, chain_name):
+        return get_dapp_dir(self.get_blockchain_data_dir(chain_name))
+
     def get_blockchain_ipc_path(self, chain_name):
         return get_geth_ipc_path(self.get_blockchain_data_dir(chain_name))
+
+    def get_blockchain_nodekey_path(self, chain_name):
+        return get_nodekey_path(self.get_blockchain_data_dir(chain_name))
 
     #
     # Migrations

@@ -15,7 +15,7 @@ from .main import main
 @click.pass_context
 def chain_cmd(ctx):
     """
-    Wrapper around `geth`.
+    Manage and run ethereum blockchains.
     """
     pass
 
@@ -26,7 +26,8 @@ def chain_cmd(ctx):
 @click.pass_context
 def chain_reset(ctx, chain_name, confirm):
     """
-    Reset a test chain
+    Reset a chain removing all chain data and resetting it to it's genesis
+    state..
     """
     project = ctx.obj['PROJECT']
 
@@ -53,7 +54,7 @@ def chain_reset(ctx, chain_name, confirm):
 @click.pass_context
 def chain_run(ctx, chain_name, mine, verbosity):
     """
-    Run a geth node.
+    Run the named chain.
     """
     project = ctx.obj['PROJECT']
 

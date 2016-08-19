@@ -1,3 +1,5 @@
+from flaky import flaky
+
 from populus.utils.transactions import (
     wait_for_block_number,
 )
@@ -10,6 +12,7 @@ from populus.project import (
 )
 
 
+@flaky
 def test_project_tester_chain(project_dir):
     project = Project()
 
@@ -20,6 +23,7 @@ def test_project_tester_chain(project_dir):
         assert web3.version.node.startswith('TestRPC')
 
 
+@flaky
 def test_project_temp_chain(project_dir):
     project = Project()
 
@@ -31,6 +35,7 @@ def test_project_temp_chain(project_dir):
         assert web3.version.node.startswith('Geth')
 
 
+@flaky
 def test_project_morden_chain(project_dir):
     project = Project()
 
@@ -46,6 +51,7 @@ def test_project_morden_chain(project_dir):
         assert block_1['hash'] == TESTNET_BLOCK_1_HASH
 
 
+@flaky
 def test_project_local_chain(project_dir, write_project_file):
     write_project_file('populus.ini', '\n'.join((
         '[chain:custom-chain]',

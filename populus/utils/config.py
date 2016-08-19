@@ -1,11 +1,12 @@
 import os
 import copy
 import itertools
+import operator
 
 try:
     import configparser
 except ImportError:
-    import ConfigParser as configparser
+    from backports import configparser
 
 from .chains import (
     get_default_ipc_path,
@@ -37,6 +38,11 @@ MORDEN_DEFAULTS = {
 }
 
 
+OPTION_TYPES = {
+    'is_external': 'getboolean',
+}
+
+
 class Config(configparser.ConfigParser):
     @property
     def chains(self):
@@ -44,10 +50,15 @@ class Config(configparser.ConfigParser):
             'mainnet': copy.deepcopy(MAINNET_DEFAULTS),
             'morden': copy.deepcopy(MORDEN_DEFAULTS),
             'testrpc': copy.deepcopy(TESTRPC_DEFAULTS),
+            'temp': {},
         }
         declared_chains = {
             section.partition(':')[2]: {
-                section_key: self.get(section, section_key)
+                section_key: operator.methodcaller(
+                    OPTION_TYPES.get(section_key, 'get'),
+                    section,
+                    section_key,
+                )(self)
                 for section_key in self.options(section)
             }
             for section in self.sections()

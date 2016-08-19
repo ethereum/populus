@@ -18,7 +18,10 @@ from populus.utils.cli import (
 from populus.project import Project
 
 
-@flaky
+BLOCK_DELTA = int(os.environ.get('CHAIN_SYNC_BLOCK_DELTA', '40'))
+
+
+@flaky(max_runs=3)
 def test_show_chain_sync_progress():
     project = Project()
 
@@ -75,20 +78,19 @@ def test_show_chain_sync_progress():
                 node_port=sync_node_info['ports']['listener'],
             )
 
-            wait_for_block_number(main_chain.web3, 40, 180)
+            wait_for_block_number(main_chain.web3, BLOCK_DELTA, BLOCK_DELTA * 4)
 
             main_chain_start_block = main_chain.web3.eth.blockNumber
             sync_chain_start_block = sync_chain.web3.eth.blockNumber
 
-            assert main_chain_start_block - sync_chain_start_block >= 10
+            assert main_chain_start_block - sync_chain_start_block >= BLOCK_DELTA // 2
 
             assert sync_chain.web3.net.peerCount == 0
 
             sync_chain.web3.admin.addPeer(main_enode)
             main_chain.web3.admin.addPeer(sync_enode)
 
-            wait_for_peers(sync_chain.web3, timeout=30)
-            wait_for_syncing(sync_chain.web3, timeout=30)
+            wait_for_peers(sync_chain.web3, timeout=60)
 
             result = runner.invoke(wrapper, [])
 

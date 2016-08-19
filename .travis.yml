@@ -16,6 +16,8 @@ env:
     - TOX_ENV=py34
     - TOX_ENV=py35
     - TOX_ENV=flake8
+  global:
+    - CHAIN_SYNC_BLOCK_DELTA=100
 cache:
   - pip: true
   - directories:

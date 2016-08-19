@@ -37,7 +37,7 @@ setup(
         "requests>=2.7.0",
         "toposort>=1.4",
         "watchdog>=0.8.3",
-        "web3>=1.9.0",
+        "web3>=2.0.0",
     ],
     license="MIT",
     zip_safe=False,

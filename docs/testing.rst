@@ -10,15 +10,11 @@ The Populus framework provides some powerful utilities for testing your
 contracts.  Testing in Populus is powered by the python testing framework
 ``py.test``.
 
-* Integration tests can be run against
-  `go-ethereum (geth) <https://github.com/ethereum/go-ethereum/>` or any Ethereum
-  JSON-RPC compatible client
+Your tests can be run against any of the various chains that Populus supports,
+including test chains backed by the go-ethereum client, the eth-testrpc EVM
+backed by the ``pyethereum.tester`` EVM, or even the public ethereum networks
+if you were to so choose.
 
-* A local geth network can be ramped up on demand to run the tests
-
-* `EVM tester <https://github.com/pipermerriam/ethereum-tester-client>`_
-  can be used for more low level Ethereum virtual machine based
-  testing
 
 Quick Example
 -------------
@@ -45,9 +41,10 @@ Lets write a test for the following simple contract.
             }
     }
 
-Populus expects to find tests in the ``./tests`` directory of your project.
-The only naming requirement of the test module is that it must begin with
-``test_`` so that it will be found by ``pytest``.
+While you may locate your tests anywhere you would like, Populus projects
+default to using the ``./tests`` directory.  Test files within this directory
+need to be valid python modules that begin with ``test_`` in order for
+``py.test`` to find them.
 
 ::
 

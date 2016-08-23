@@ -199,7 +199,7 @@ def request_account_unlock(chain, account, timeout):
         )
 
     unlock_account_msg = (
-        "Please provide the password to unlock account `{0}`."
+        "Please provide the password to unlock account `{0}`.".format(account)
     )
     unlock_successful = chain.web3.personal.unlockAccount(
         account,
@@ -296,43 +296,56 @@ def deploy_contract_and_verify(ContractFactory,
 
 
 def show_chain_sync_progress(chain):
-    if not chain.web3.net.peerCount:
+    web3 = chain.web3
+
+    if not web3.net.peerCount:
         click.echo("Waiting for peer connections.")
         try:
-            wait_for_peers(chain.web3, timeout=120)
+            wait_for_peers(web3, timeout=240)
         except gevent.Timeout:
             raise click.Abort("Never connected to any peers.")
 
-    if not chain.web3.eth.syncing:
+    if not web3.eth.syncing:
         click.echo("Waiting for synchronization to start.")
         try:
-            wait_for_syncing(chain.web3, timeout=120)
+            wait_for_syncing(web3, timeout=240)
         except gevent.Timeout:
             raise click.Abort("Chain synchronization never started.")
 
-    sync_data = chain.web3.eth.syncing
+    starting_block = web3.eth.syncing['startingBlock']
 
-    if not sync_data:
-        return
+    while True:
+        sync_data = web3.eth.syncing
 
-    starting_block = sync_data['startingBlock']
-    highest_block = sync_data['highestBlock']
-    blocks_to_sync = highest_block - starting_block
+        if not sync_data:
+            break
 
-    with click.progressbar(length=blocks_to_sync,
-                           label='Syncing Blocks:') as progress_bar:
-        while True:
-            progress_data = chain.web3.eth.syncing
+        highest_block = sync_data['highestBlock']
+        blocks_to_sync = highest_block - starting_block
 
-            if not progress_data:
-                break
+        with click.progressbar(length=blocks_to_sync, label="Syncing") as bar:
 
-            position = progress_data['currentBlock'] - starting_block
+            while highest_block == sync_data['highestBlock']:
+                sync_data = web3.eth.syncing
 
-            if position:
-                progress_bar.update(position)
+                if not sync_data:
+                    break
 
-            if progress_data['currentBlock'] >= highest_block:
-                break
+                current_block = sync_data['currentBlock']
+                blocks_to_sync = highest_block - starting_block
 
-            gevent.sleep(random.random())
+                position = current_block - starting_block
+
+                if position:
+                    bar.update(position)
+
+                if current_block >= highest_block:
+                    break
+
+                gevent.sleep(random.random())
+            else:
+                # start a new progress bar with the new `highestBlock`
+                continue
+
+            # break out of the outer loop
+            break

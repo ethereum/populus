@@ -1,18 +1,21 @@
 import pytest
 
 from populus.project import Project
+from populus.deployment import deploy_contracts
 
 
 @pytest.fixture()
 def project(request):
-    # TODO: allow configuring the project based on the pytest `request` object.
+    # This should probably be configurable using the `request` fixture but it's
+    # unclear what needs to be configurable.
     return Project()
 
 
 @pytest.yield_fixture()
 def chain(request, project):
-    # TODO: this needs to pick the chain to test against based on the project
-    # config.
+    # This should probably allow you to specify the test chain to be used based
+    # on the `request` object.  It's unclear what the best way to do this is
+    # so... punt!
     chain = project.get_chain('testrpc')
 
     # TODO: this should run migrations.  If `testrpc` it should be snapshotted.
@@ -34,10 +37,13 @@ def contracts(chain):
 
 
 @pytest.fixture()
-def deployed_contracts(populus_config, project, web3):
-    # This should really just load from the registrar since at this point the
-    # migrations have been run.
-    assert False
+def deployed_contracts(project, web3):
+    # TODO: This should really just load from the registrar since at this point
+    # the migrations have been run.
+    return deploy_contracts(
+        web3=web3,
+        compiled_contracts=project.compiled_contracts,
+    )
 
 
 @pytest.fixture()

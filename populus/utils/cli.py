@@ -16,6 +16,10 @@ from .transactions import (
 
 
 def select_chain(project):
+    """
+    Present the user with a prompt to select which of the project chains they
+    want to use.
+    """
     chain_options = set(project.config.chains.keys())
 
     choose_chain_msg = "\n".join(itertools.chain((
@@ -41,6 +45,10 @@ def select_chain(project):
 
 
 def select_account(chain):
+    """
+    Present the user with a prompt to select which of the chain accounts they
+    would like to use.
+    """
     all_accounts = chain.web3.eth.accounts
     if not all_accounts:
         raise click.Abort("No accounts found on chain.")
@@ -80,6 +88,14 @@ def select_account(chain):
 
 
 def configure_chain(project, chain_name):
+    """
+    Interactive configuration of an existing or new chain.
+
+    - is it external?
+    - rpc or ipc?
+    - rpc/ipc configuration
+    - select default account (web3.eth.defaultAccount)
+    """
     is_existing_chain = chain_name in project.config.chains
 
     chain_section_header = "chain:{chain_name}".format(chain_name=chain_name)
@@ -195,6 +211,9 @@ def configure_chain(project, chain_name):
 
 
 def request_account_unlock(chain, account, timeout):
+    """
+    Present a password prompt to unlock the given account.
+    """
     if not is_account_locked(chain.web3, account):
         raise click.Abort(
             "The account `{0}` is already unlocked".format(account)
@@ -216,6 +235,11 @@ def deploy_contract_and_verify(ContractFactory,
                                contract_name,
                                deploy_transaction=None,
                                deploy_arguments=None):
+    """
+    Deploy a contract, displaying information about the deploy process as it
+    happens.  This also verifies that the deployed contract's bytecode matches
+    the expected value.
+    """
     if deploy_transaction is None:
         deploy_transaction = {}
     if deploy_arguments is None:
@@ -298,6 +322,9 @@ def deploy_contract_and_verify(ContractFactory,
 
 
 def show_chain_sync_progress(chain):
+    """
+    Display the syncing status of a chain as a progress bar
+    """
     web3 = chain.web3
 
     if not web3.net.peerCount:

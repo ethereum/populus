@@ -34,7 +34,6 @@ class ContractSourceChangedEventHandler(FileSystemEventHandler):
     """
     def __init__(self, *args, **kwargs):
         self.project_dir = kwargs.pop('project_dir')
-        self.contract_filters = kwargs.pop('contract_filters')
         self.compiler_kwargs = kwargs.pop('compiler_kwargs')
 
     def on_any_event(self, event):
@@ -43,7 +42,6 @@ class ContractSourceChangedEventHandler(FileSystemEventHandler):
         click.echo("> recompiling...")
         compile_and_write_contracts(
             self.project_dir,
-            *self.contract_filters,
             **self.compiler_kwargs
         )
         click.echo("> watching...")

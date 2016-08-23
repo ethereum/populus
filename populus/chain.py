@@ -125,6 +125,7 @@ class Chain(object):
     :param project: Instance of :class:`populus.project.Project`
     """
     project = None
+    chain_name = None
 
     def __init__(self, project, chain_name):
         self.project = project

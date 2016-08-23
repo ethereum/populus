@@ -1,16 +1,9 @@
-import gevent
-
 import click
 
-from populus.utils.transactions import (
-    is_account_locked,
-    wait_for_unlock,
-)
 from populus.utils.cli import (
     select_chain,
-    select_account,
-    request_account_unlock,
     show_chain_sync_progress,
+    get_unlocked_deploy_from_address,
 )
 
 from populus.deployment import (
@@ -75,10 +68,6 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
     if not chain_name:
         chain_name = select_chain(project)
 
-    chain_section_name = "chain:{0}".format(chain_name)
-
-    chain_config = project.config.chains[chain_name]
-
     compiled_contracts = project.compiled_contracts
 
     chain = project.get_chain(chain_name)
@@ -89,58 +78,7 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
         if chain_name in {'mainnet', 'morden'}:
             show_chain_sync_progress(chain)
 
-        # Choose the address we should deploy from.
-        # TODO: this set of if blocks should be it's own helper function.
-        if deploy_from:
-            if deploy_from in web3.eth.accounts:
-                account = deploy_from
-            elif deploy_from.isdigit() and int(deploy_from) < len(web3.eth.accounts):
-                account = web3.eth.accounts[int(deploy_from)]
-            else:
-                raise click.Abort(
-                    "The account {0!r} was not found in the list of accounts "
-                    "for chain {1!r}.".format(
-                        account,
-                        chain_name,
-                    )
-                )
-        elif 'deploy_from' in chain_config:
-            account = chain_config['deploy_from']
-            if account not in web3.eth.accounts:
-                raise click.Abort(
-                    "The chain {0!r} is configured to deploy from account {1!r} "
-                    "which was not found in the account list for this chain. "
-                    "Please ensure that this account exists.".format(
-                        chain_name,
-                        account,
-                    )
-                )
-        else:
-            account = select_account(chain)
-            set_as_deploy_from_msg = (
-                "Would you like set the address '{0}' as the default"
-                "`deploy_from` address for the '{1}' chain?".format(
-                    account,
-                    chain_name,
-                )
-            )
-            if click.confirm(set_as_deploy_from_msg):
-                if not project.config.has_section(chain_section_name):
-                    project.config.add_section(chain_section_name)
-                project.config.set(chain_section_name, 'deploy_from', account)
-                click.echo(
-                    "Wrote updated chain configuration to '{0}'".format(
-                        project.write_config()
-                    )
-                )
-
-        # Unlock the account if needed.
-        if is_account_locked(web3, account):
-            try:
-                wait_for_unlock(web3, account, 2)
-            except gevent.Timeout:
-                request_account_unlock(chain, account, None)
-
+        account = get_unlocked_deploy_from_address(chain)
         # Configure web3 to now send from our chosen account by default
         web3.eth.defaultAccount = account
 

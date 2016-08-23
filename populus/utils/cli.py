@@ -1,4 +1,5 @@
 import itertools
+
 import random
 
 import click
@@ -10,6 +11,7 @@ from .transactions import (
     get_contract_address_from_txn,
     wait_for_syncing,
     wait_for_peers,
+    wait_for_unlock,
 )
 
 
@@ -349,3 +351,60 @@ def show_chain_sync_progress(chain):
 
             # break out of the outer loop
             break
+
+
+def get_unlocked_deploy_from_address(chain):
+    """
+    Combination of other utils to get the address deployments should come from.
+
+    Defaults to the one set in the config.
+    If not set, asks for one.
+    If not in config, asks if it should be set as default.
+    If not unlocked, askes for password to unlock.
+    """
+    web3 = chain.web3
+    chain_config = chain.chain_config
+    chain_name = chain.chain_name
+    chain_section_name = "chain:{name}".format(name=chain_name)
+    project = chain.project
+    config = project.config
+
+    # Choose the address we should deploy from.
+    if 'deploy_from' in chain_config:
+        account = chain_config['deploy_from']
+        if account not in web3.eth.accounts:
+            raise click.Abort(
+                "The chain {0!r} is configured to deploy from account {1!r} "
+                "which was not found in the account list for this chain. "
+                "Please ensure that this account exists.".format(
+                    chain_name,
+                    account,
+                )
+            )
+    else:
+        account = select_account(chain)
+        set_as_deploy_from_msg = (
+            "Would you like set the address '{0}' as the default"
+            "`deploy_from` address for the '{1}' chain?".format(
+                account,
+                chain_name,
+            )
+        )
+        if click.confirm(set_as_deploy_from_msg):
+            if not config.has_section(chain_section_name):
+                config.add_section(chain_section_name)
+            config.set(chain_section_name, 'deploy_from', account)
+            click.echo(
+                "Wrote updated chain configuration to '{0}'".format(project.write_config())
+            )
+
+    # Unlock the account if needed.
+    if is_account_locked(web3, account):
+        try:
+            # in case the chain is still spinning up, give it a moment to
+            # unlock itself.
+            wait_for_unlock(web3, account, 2)
+        except gevent.Timeout:
+            request_account_unlock(chain, account, None)
+
+    return account

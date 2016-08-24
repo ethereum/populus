@@ -58,6 +58,8 @@ def verify_multiply_13_linked(library_13, deploy_chain):
     project = chain.project
     web3 = deploy_chain.web3
 
+    LIBRARY_13 = project.compiled_contracts['Library13']
+
     MULTIPLY_13 = project.compiled_contracts['Multiply13']
     Multiply13 = chain.contract_factories.Multiply13
 
@@ -67,7 +69,10 @@ def verify_multiply_13_linked(library_13, deploy_chain):
 
         operation_receipt = deploy_operation.execute(
             chain,
-            compiled_contracts={'Multiply13': MULTIPLY_13},
+            compiled_contracts={
+                'Multiply13': MULTIPLY_13,
+                'Library13': LIBRARY_13,
+            },
         )
 
         deploy_txn_hash = operation_receipt['deploy-transaction-hash']

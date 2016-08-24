@@ -102,9 +102,22 @@ def expand_shortened_reference_name(name, full_names):
     if len(candidates) == 1:
         return candidates[0]
     elif len(candidates) > 1:
-        raise ValueError("Multiple candidates for name")
+        raise ValueError(
+            "Multiple candidates found trying to expand '{0}'.  Found '{1}'. "
+            "Searched '{2}'".format(
+                name,
+                ','.join(candidates),
+                ','.join(full_names),
+            )
+        )
     else:
-        raise ValueError("No valid names found")
+        raise ValueError(
+            "Unable to expand '{0}'. "
+            "Searched '{1}'".format(
+                name,
+                ','.join(full_names),
+            )
+        )
 
 
 def link_contract(bytecode, **dependencies):

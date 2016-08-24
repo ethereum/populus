@@ -1,5 +1,4 @@
 import types
-import functools
 
 from solc import compile_source
 
@@ -156,20 +155,29 @@ class DeployContract(Operation):
         )
 
         if link_dependencies:
-            # TODO: try to look these values up with the registrar.
-            missing_libraries = set(self.libraries.keys()).difference(link_dependencies)
-            if missing_libraries:
-                raise ValueError(
-                    "Missing necessary libraries for linking: {0!r}".format(missing_libraries)
-                )
-            resolve_fn = functools.partial(
-                resolve_if_deferred_value,
-                chain=chain,
-            )
+            registrar = chain.registrar
+
+            def resolve_library_link(library_name):
+                # TODO: this whole process of linking should probably be
+                # handled by the `chain` object itself.
+                registrar_key = "contract/{0}".format(library_name)
+
+                if library_name in self.libraries:
+                    return resolve_if_deferred_value(self.libraries[library_name], chain)
+                elif registrar.call().exists(registrar_key):
+                    library_address = registrar.call().getAddress(registrar_key)
+                    # TODO: implement validation that this contract address is
+                    # in fact the library we want to link against.
+                    return library_address
+                else:
+                    raise ValueError(
+                        "Unable to find address for library '{0}'".format(library_name)
+                    )
+
             resolved_dependencies = {
-                dependency_name: resolve_fn(value)
-                for dependency_name, value
-                in self.libraries.items()
+                dependency_name: resolve_library_link(dependency_name)
+                for dependency_name
+                in link_dependencies
             }
             code = link_contract(contract_data['code'], **resolved_dependencies)
             runtime = link_contract(contract_data['code_runtime'], **resolved_dependencies)

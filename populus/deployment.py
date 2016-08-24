@@ -18,7 +18,7 @@ from populus.utils.transactions import (
 
 
 def deploy_contracts(web3,
-                     all_contracts,
+                     compiled_contracts,
                      contracts_to_deploy=None,
                      txn_defaults=None,
                      constructor_args=None,
@@ -42,10 +42,10 @@ def deploy_contracts(web3,
         txn_defaults = {}
 
     if not contracts_to_deploy:
-        contracts_to_deploy = tuple(all_contracts.keys())
+        contracts_to_deploy = tuple(compiled_contracts.keys())
 
     # Extract and dependencies that exist due to library linking.
-    dependency_graph = get_shallow_dependency_graph(all_contracts)
+    dependency_graph = get_shallow_dependency_graph(compiled_contracts)
 
     # If a subset of contracts have been specified to be deployed compute
     # any dependencies that also need to be deployed.
@@ -58,7 +58,7 @@ def deploy_contracts(web3,
     # Now compute the order that the contracts should be deployed based on
     # their dependencies.
     deploy_order = [
-        (contract_name, all_contracts[contract_name])
+        (contract_name, compiled_contracts[contract_name])
         for contract_name
         in get_contract_deploy_order(dependency_graph)
         if contract_name in all_contracts_to_deploy
@@ -69,7 +69,7 @@ def deploy_contracts(web3,
     undeployable_contracts = [
         contract_name
         for contract_name, _ in deploy_order
-        if not remove_0x_prefix(all_contracts[contract_name].get('code'))
+        if not remove_0x_prefix(compiled_contracts[contract_name].get('code'))
     ]
 
     if undeployable_contracts:
@@ -105,7 +105,7 @@ def deploy_contracts(web3,
     package_data = {
         contract_name: dict(
             address=contract_addresses[contract_name],
-            **all_contracts[contract_name]
+            **compiled_contracts[contract_name]
         )
         for contract_name in contract_addresses
     }

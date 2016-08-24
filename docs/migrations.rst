@@ -106,8 +106,19 @@ previously initialized.
     # TODO: real command output.
 
 
+Migrations
+----------
+
+A migration
+
+
 Operations
 ----------
+
+Each migratino is 
+
+
+* ``populus.migrations.
 
 TODO: operations stuff
 

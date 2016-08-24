@@ -228,7 +228,10 @@ class TestRPCChain(Chain):
                 "TesterChain instances must be running to access the web3 "
                 "object."
             )
-        return Web3(self.provider)
+        _web3 = Web3(self.provider)
+        if 'default_account' in self.chain_config:
+            _web3.eth.defaultAccount = self.chain_config['default_account']
+        return _web3
 
     @cached_property
     def chain_config(self):

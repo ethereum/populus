@@ -173,7 +173,9 @@ def migrate_init(ctx, chain_name):
 
             # Deploy the registrar
             RegistrarFactory = chain.RegistrarFactory
-            registrar = deploy_contract_and_verify(RegistrarFactory, 'Registrar')
+            registrar = deploy_contract_and_verify(chain,
+                                                   contract_name='Registrar',
+                                                   contract_factory=RegistrarFactory)
 
             # TODO: set the value in the registrar.
 

@@ -154,4 +154,4 @@ def get_contract_from_registrar(chain,
     if actual_runtime != expected_runtime:
         return None
 
-    return contract_address
+    return contract_factory(address=contract_address)

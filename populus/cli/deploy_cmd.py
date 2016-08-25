@@ -1,17 +1,15 @@
 import click
 
+from collections import OrderedDict
+
 from populus.utils.cli import (
     select_chain,
     show_chain_sync_progress,
     get_unlocked_deploy_from_address,
+    deploy_contract_and_verify,
 )
 from populus.utils.deploy import (
     get_deploy_order,
-)
-
-from populus.deployment import (
-    deploy_contracts,
-    validate_deployed_contracts,
 )
 
 from .main import main
@@ -96,6 +94,7 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
         )
 
     chain = project.get_chain(chain_name)
+    deployed_contracts = OrderedDict()
 
     with chain:
         web3 = chain.web3
@@ -112,21 +111,41 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
             compiled_contracts,
         )
 
-        # now for each contract that was not specified but is required as a
-        # dependency, determine if we already have an existing deployed version
-        # of that contract (via the registry).  For each of these, prompt the
-        # user if they would like to use the existing version.
-        # TODO
+        for contract_name, contract_factory in deploy_order.items():
+            # Check if we already have an existing deployed version of that
+            # contract (via the registry).  For each of these, prompt the user
+            # if they would like to use the existing version.
+            if contract_name not in contracts_to_deploy and chain.has_registrar:
+                link_dependencies = {
+                    contract_name: contract.address
+                    for contract_name, contract
+                    in deployed_contracts.items()
+                }
+                existing_contract = get_contract_from_registrar(
+                    chain=chain,
+                    contract_name=contract_name,
+                    contract_factory=contract_factory,
+                    link_dependencies=link_dependencies,
+                )
+                if existing_contract:
+                    found_existing_contract_prompt = (
+                        "Found existing version of {name} in registrar. "
+                        "Would you like to use the previously deployed "
+                        "contract @ {address}?".format(
+                            name=contract_name,
+                            address=existing_contract.address,
+                        )
+                    )
+                    if click.prompt(found_existing_contract_prompt):
+                        deployed_contracts[contract_name] = existing_contract
+                        continue
 
-        # now step through the deploy order and use the
-        # `populus.utils.cli.deploy_contract` hepler to deploy the contract.
-        # Each contract should be (optionally) registered in the registry.
+            # We don't have an existing version of this contract available so
+            contract = deploy_contract_and_verify(
+                chain,
+                contract_name=contract_name,
+            )
+            deployed_contracts[contract_name] = contract
 
-        deployed_contracts = deploy_contracts(
-            web3,
-            compiled_contracts,
-            contracts_to_deploy or None,
-            timeout=120,
-        )
-        validate_deployed_contracts(web3, deployed_contracts)
+        # TODO: fix this message.
         echo_post_deploy_message(web3, deployed_contracts)

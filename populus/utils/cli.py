@@ -231,8 +231,9 @@ def request_account_unlock(chain, account, timeout):
         raise click.Abort("Unable to unlock account: `{0}`".format(account))
 
 
-def deploy_contract_and_verify(ContractFactory,
+def deploy_contract_and_verify(chain,
                                contract_name,
+                               contract_factory=None,
                                deploy_transaction=None,
                                deploy_arguments=None):
     """
@@ -245,14 +246,19 @@ def deploy_contract_and_verify(ContractFactory,
     if deploy_arguments is None:
         deploy_arguments = []
 
-    web3 = ContractFactory.web3
+    web3 = chain.web3
+
+    if contract_factory is None:
+        contract_factory = chain.contract_factories[contract_name]
 
     if is_account_locked(web3, web3.eth.defaultAccount):
-        raise click.Abort("The default `from` address must be unlocked.")
+        deploy_from = select_account(chain)
+        if is_account_locked(web3, deploy_from):
+            request_account_unlock(chain, deploy_from, None)
 
     click.echo("Deploying {0}".format(contract_name))
 
-    deploy_txn_hash = ContractFactory.deploy(deploy_transaction, deploy_arguments)
+    deploy_txn_hash = contract_factory.deploy(deploy_transaction, deploy_arguments)
     deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
 
     click.echo("Deploy Transaction Sent: {0}".format(deploy_txn_hash))
@@ -283,9 +289,9 @@ def deploy_contract_and_verify(ContractFactory,
     # Verification
     deployed_code = web3.eth.getCode(contract_address)
 
-    if ContractFactory.code_runtime:
+    if contract_factory.code_runtime:
         click.echo("Verifying deployed bytecode...")
-        is_bytecode_match = deployed_code == ContractFactory.code_runtime
+        is_bytecode_match = deployed_code == contract_factory.code_runtime
         if is_bytecode_match:
             click.echo(
                 "Verified contract bytecode @ {0} matches expected runtime "
@@ -297,7 +303,7 @@ def deploy_contract_and_verify(ContractFactory,
                 "expected : '{1}'\n"
                 "actual   : '{2}'\n".format(
                     contract_address,
-                    ContractFactory.code_runtime,
+                    contract_factory.code_runtime,
                     deployed_code,
                 ),
                 err=True,
@@ -318,7 +324,7 @@ def deploy_contract_and_verify(ContractFactory,
             click.echo(
                 "Verified bytecode @ {0} is non-empty".format(contract_address)
             )
-    return ContractFactory(address=contract_address)
+    return contract_factory(address=contract_address)
 
 
 def show_chain_sync_progress(chain):

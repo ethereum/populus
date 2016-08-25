@@ -109,8 +109,10 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
         if chain_name in {'mainnet', 'morden'}:
             show_chain_sync_progress(chain)
 
-        account = get_unlocked_deploy_from_address(chain)
-        web3.eth.defaultAccount = account
+        if deploy_from is None:
+            deploy_from = get_unlocked_deploy_from_address(chain)
+
+        web3.eth.defaultAccount = deploy_from
 
         # Get the deploy order.
         deploy_order = get_deploy_order(

@@ -256,6 +256,7 @@ def deploy_contract_and_verify(chain,
         if is_account_locked(web3, deploy_from):
             request_account_unlock(chain, deploy_from, None)
 
+    # TODO: this needs to do contract linking.
     click.echo("Deploying {0}".format(contract_name))
 
     deploy_txn_hash = contract_factory.deploy(deploy_transaction, deploy_arguments)

@@ -11,11 +11,18 @@ from populus.utils.cli import (
 from populus.utils.deploy import (
     get_deploy_order,
 )
+from populus.utils.transactions import (
+    wait_for_transaction_receipt,
+)
+from populus.migrations.registrar import (
+    get_contract_from_registrar,
+)
 
 from .main import main
 
 
 def echo_post_deploy_message(web3, deployed_contracts):
+    # TODO: update this message.
     message = (
         "========== Deploy Completed ==========\n"
         "Deployed {n} contracts:"
@@ -111,11 +118,25 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
             compiled_contracts,
         )
 
+        # Display Start Message Info.
+        starting_msg = (
+            "Beginning contract deployment.  Deploying {0} total contracts ({1} "
+            "Specified, {2} because of library dependencies)."
+            "\n\n"
+            (" > ".join(deploy_order.keys())).format(
+                len(deploy_order),
+                len(contracts_to_deploy),
+                len(deploy_order) - len(contracts_to_deploy),
+            )
+        )
+        click.echo(starting_msg)
+
         for contract_name, contract_factory in deploy_order.items():
             # Check if we already have an existing deployed version of that
             # contract (via the registry).  For each of these, prompt the user
             # if they would like to use the existing version.
             if contract_name not in contracts_to_deploy and chain.has_registrar:
+                # TODO: this block should be a standalone cli util.
                 link_dependencies = {
                     contract_name: contract.address
                     for contract_name, contract
@@ -141,11 +162,32 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
                         continue
 
             # We don't have an existing version of this contract available so
+            # deploy it.
             contract = deploy_contract_and_verify(
                 chain,
                 contract_name=contract_name,
             )
+            if chain.has_registrar:
+                # TODO: this block should be a standalone cli util.
+                contract_key = 'contract/{name}'.format(contract_name)
+                register_txn_hash = chain.registrar.transact().setAddress(
+                    contract_key, contract.address
+                )
+                register_msg = (
+                    "Registering contract '{name}' @ {address} "
+                    "in registrar in txn: {txn_hash} ...".format(
+                        name=contract_name,
+                        address=contract.address,
+                        txn_hash=register_txn_hash,
+                    )
+                )
+                click.echo(register_msg, nl=False)
+                wait_for_transaction_receipt(web3, register_txn_hash, 180)
+                click.echo(' DONE')
             deployed_contracts[contract_name] = contract
 
         # TODO: fix this message.
-        echo_post_deploy_message(web3, deployed_contracts)
+        success_msg = (
+            "Deployment Successful.",
+        )
+        click.echo(success_msg)

@@ -5,6 +5,9 @@ from populus.utils.cli import (
     show_chain_sync_progress,
     get_unlocked_deploy_from_address,
 )
+from populus.utils.deploy import (
+    get_deploy_order,
+)
 
 from populus.deployment import (
     deploy_contracts,
@@ -103,12 +106,11 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
         account = get_unlocked_deploy_from_address(chain)
         web3.eth.defaultAccount = account
 
-        # get the dependency ordering
-        master_dependency_order = get_dependency_order(compiled_contracts)
-
-        # now get the subset of the dependency order that is needed to deploy
-        # the specified contracts.
-        # TODO
+        # Get the deploy order.
+        deploy_order = get_deploy_order(
+            contracts_to_deploy,
+            compiled_contracts,
+        )
 
         # now for each contract that was not specified but is required as a
         # dependency, determine if we already have an existing deployed version

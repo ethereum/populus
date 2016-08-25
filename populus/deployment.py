@@ -8,7 +8,7 @@ from populus.utils.contracts import (
     get_shallow_dependency_graph,
     get_contract_deploy_order,
     get_recursive_contract_dependencies,
-    link_contract,
+    link_bytecode,
     package_contracts,
 )
 
@@ -78,7 +78,7 @@ def deploy_contracts(web3,
     for contract_name, contract_data in deploy_order:
         # if the contract has dependencies then link the code.
         if dependency_graph[contract_name]:
-            code = link_contract(contract_data['code'], **contract_addresses)
+            code = link_bytecode(contract_data['code'], **contract_addresses)
         else:
             code = contract_data['code']
 

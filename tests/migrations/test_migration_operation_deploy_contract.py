@@ -8,9 +8,6 @@ from populus.utils.transactions import (
     wait_for_transaction_receipt,
     get_contract_address_from_txn,
 )
-from populus.utils.contracts import (
-    link_contract,
-)
 
 
 def test_deploy_contract_operation_on_math_contract(web3, chain, MATH):

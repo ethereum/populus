@@ -120,7 +120,7 @@ def expand_shortened_reference_name(name, full_names):
         )
 
 
-def link_contract(bytecode, **dependencies):
+def link_bytecode(bytecode, **dependencies):
     """
     Given the bytecode for a contract, and it's dependencies in the form of
     {contract_name: address} this functino returns the bytecode with all of the

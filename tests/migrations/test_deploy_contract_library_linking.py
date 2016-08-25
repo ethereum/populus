@@ -10,7 +10,7 @@ from populus.utils.transactions import (
     get_contract_address_from_txn,
 )
 from populus.utils.contracts import (
-    link_contract,
+    link_bytecode,
 )
 
 
@@ -79,11 +79,11 @@ def verify_multiply_13_linked(library_13, deploy_chain):
         deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
         contract_address = get_contract_address_from_txn(web3, deploy_txn_hash, timeout=30)
 
-        expected_code = link_contract(
+        expected_code = link_bytecode(
             MULTIPLY_13['code'],
             Library13=library_13.address,
         )
-        expected_runtime = link_contract(
+        expected_runtime = link_bytecode(
             MULTIPLY_13['code_runtime'],
             Library13=library_13.address,
         )

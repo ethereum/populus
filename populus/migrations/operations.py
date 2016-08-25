@@ -12,7 +12,7 @@ from populus.utils.transactions import (
 )
 from populus.utils.contracts import (
     get_contract_link_dependencies,
-    link_contract,
+    link_bytecode,
 )
 
 from .registrar import (
@@ -179,8 +179,8 @@ class DeployContract(Operation):
                 for dependency_name
                 in link_dependencies
             }
-            code = link_contract(contract_data['code'], **resolved_dependencies)
-            runtime = link_contract(contract_data['code_runtime'], **resolved_dependencies)
+            code = link_bytecode(contract_data['code'], **resolved_dependencies)
+            runtime = link_bytecode(contract_data['code_runtime'], **resolved_dependencies)
         else:
             code = contract_data.get('code')
             runtime = contract_data.get('code_runtime')

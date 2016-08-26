@@ -40,6 +40,8 @@ def package_contracts(web3, contracts):
         '__len__': lambda s: len(contract_classes),
         '__iter__': lambda s: iter(contract_classes.items()),
         '__getitem__': lambda s, k: contract_classes.__getitem__(k),
+        'keys': lambda s: contract_classes.keys(),
+        'values': lambda s: contract_classes.values(),
     }
     _dict.update(contract_classes)
 

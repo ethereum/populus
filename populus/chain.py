@@ -41,6 +41,8 @@ from populus.utils.filesystem import (
 )
 from populus.utils.contracts import (
     package_contracts,
+    get_contract_library_dependencies,
+    link_bytecode,
 )
 from populus.utils.chains import (
     get_chaindata_dir,
@@ -163,6 +165,108 @@ class Chain(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
+    def get_linked_contract_factory(self,
+                                    contract_name,
+                                    link_dependencies=None,
+                                    validate_bytecode=True):
+        if link_dependencies is None:
+            link_dependencies = {}
+
+        all_known_contract_names = set(link_dependencies.keys()).union(
+            self.contract_factories.keys(),
+        )
+
+        base_contract_factory = self.contract_factories[contract_name]
+        library_dependencies = get_contract_library_dependencies(
+            base_contract_factory.code,
+            all_known_contract_names,
+        )
+
+        registrar_dependencies = set(library_dependencies).difference(
+            link_dependencies.keys()
+        )
+        if registrar_dependencies and not self.has_registrar:
+            raise ValueError(
+                "Unable to link bytecode for contract {0}.  Missing addresses "
+                "for the following link dependencies:\n\n{1}".format(
+                    contract_name,
+                    ', '.join(registrar_dependencies),
+                )
+            )
+
+        registrar = self.registrar
+
+        missing_dependencies = {
+            library_name
+            for library_name in registrar_dependencies
+            if not self.is_contract_available(
+                    library_name,
+                    validate_bytecode=validate_bytecode
+            )
+        }
+
+        if missing_dependencies:
+            raise ValueError(
+                "Unable to link bytecode for contract {0}.  The following "
+                "libraries were not found in the registrar:\n\n{1}".format(
+                    contract_name,
+                    ', '.join(missing_dependencies),
+                )
+            )
+
+        for library_name in registrar_dependencies:
+            link_dependencies[library_name] = self.get_contract_address(
+                library_name,
+                validate_bytecode=validate_bytecode,
+            )
+
+        code = link_bytecode(base_contract_factory.code, **link_dependencies)
+        code_runtime = link_bytecode(
+            base_contract_factory.code_runtime,
+            **link_dependencies
+        )
+
+        contract_factory = self.web3.eth.contract(
+            code=code,
+            code_runtime=code_runtime,
+            abi=base_contract_factory.abi,
+            source=base_contract_factory.source,
+        )
+        return contract_factory
+
+    def get_contract_address(self, contract_name, validate_bytecode=True):
+        if not self.is_contract_available(contract_name, validate_bytecode):
+            raise KeyError("Contract not available")
+
+        return self.registrar.call().getAddress(
+            'contract/{0}'.format(contract_name)
+        )
+
+    def is_contract_available(self, contract_name, validate_bytecode=True):
+        if not self.has_registrar:
+            raise ValueError(
+                'The `is_contract_available` API is only usable on chains that '
+                'have a registrar contract'
+            )
+        contract_key = 'contract/{name}'.format(name=contract_name)
+
+        if not self.registrar.call().exists(contract_key):
+            return False
+
+        if not validate_bytecode:
+            return True
+
+        contract_factory = self.contract_factories[contract_name]
+        library_dependencies = get_contract_library_dependencies(
+            contract_factory.code,
+
+        )
+
+        contract_address = self.registrar.call().getAddress(contract_key)
+
+        chain_bytecode = self.web3.eth.getCode(contract_address)
+
 
 
 class ExternalChain(Chain):

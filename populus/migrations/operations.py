@@ -147,7 +147,7 @@ class DeployContract(Operation):
 
     def execute(self, chain, compiled_contracts, **kwargs):
         contract_data = compiled_contracts[self.contract_name]
-        ContractFactory = chain.web3.eth.contract(
+        BaseContractFactory = chain.web3.eth.contract(
             abi=contract_data['abi'],
             code=contract_data['code'],
             code_runtime=contract_data['code_runtime'],
@@ -158,7 +158,7 @@ class DeployContract(Operation):
             set(compiled_contracts.keys())
         )
         library_dependencies = get_contract_library_dependencies(
-            ContractFactory.code,
+            BaseContractFactory.code,
             all_known_contract_names,
         )
 
@@ -185,10 +185,10 @@ class DeployContract(Operation):
             in library_dependencies
         }
 
-        deploy_transaction_hash = deploy_contract(
+        deploy_transaction_hash, contract_factory = deploy_contract(
             chain=chain,
             contract_name=self.contract_name,
-            contract_factory=ContractFactory,
+            contract_factory=BaseContractFactory,
             deploy_transaction=self.transaction,
             deploy_arguments=self.arguments,
             link_dependencies=link_dependencies,
@@ -199,10 +199,18 @@ class DeployContract(Operation):
                 chain.web3, deploy_transaction_hash, timeout=self.timeout,
             )
             if self.verify:
-                code = chain.web3.eth.getCode(contract_address)
-                if force_text(code) != force_text(ContractFactory.code_runtime):
+                code = force_text(chain.web3.eth.getCode(contract_address))
+                expected_code = force_text(contract_factory.code_runtime)
+                if code != expected_code:
                     raise ValueError(
-                        "An error occured during deployment of the contract."
+                        "Bytecode @ {0} does not match expected contract "
+                        "bytecode.\n\n"
+                        "expected : '{1}'\n"
+                        "actual   : '{2}'\n".format(
+                            contract_address,
+                            expected_code,
+                            code,
+                        ),
                     )
             return {
                 'contract-address': contract_address,

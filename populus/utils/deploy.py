@@ -57,4 +57,4 @@ def deploy_contract(chain,
         deploy_transaction,
         deploy_arguments,
     )
-    return deploy_transaction_hash
+    return deploy_transaction_hash, ContractFactory

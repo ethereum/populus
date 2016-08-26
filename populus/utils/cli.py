@@ -255,7 +255,7 @@ def deploy_contract_and_verify(chain,
     web3 = chain.web3
 
     if contract_factory is None:
-        contract_factory = chain.contract_factories[contract_name]
+        base_contract_factory = chain.contract_factories[contract_name]
 
     if is_account_locked(web3, web3.eth.defaultAccount):
         deploy_from = select_account(chain)
@@ -265,10 +265,10 @@ def deploy_contract_and_verify(chain,
     # TODO: this needs to do contract linking.
     click.echo("Deploying {0}".format(contract_name))
 
-    deploy_txn_hash = deploy_contract(
+    deploy_txn_hash, contract_factory = deploy_contract(
         chain=chain,
         contract_name=contract_name,
-        contract_factory=contract_factory,
+        contract_factory=base_contract_factory,
         deploy_transaction=deploy_transaction,
         deploy_arguments=deploy_arguments,
         link_dependencies=link_dependencies,

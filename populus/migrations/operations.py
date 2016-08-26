@@ -151,7 +151,7 @@ class DeployContract(Operation):
             abi=contract_data['abi'],
             code=contract_data['code'],
             code_runtime=contract_data['code_runtime'],
-            source=contract_data['source'],
+            source=contract_data.get('source'),
         )
 
         all_known_contract_names = set(self.libraries.keys()).union(

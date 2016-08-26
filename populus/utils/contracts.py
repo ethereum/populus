@@ -137,7 +137,7 @@ def link_bytecode(bytecode, **dependencies):
     return linked_bytecode
 
 
-def get_contract_link_dependencies(bytecode, full_contract_names):
+def get_contract_library_dependencies(bytecode, full_contract_names):
     """
     Given a contract bytecode and an iterable of all of the known full names of
     contracts, returns a set of the contract names that this contract bytecode
@@ -161,7 +161,10 @@ def get_shallow_dependency_graph(contracts):
     dependency graph of each contracts explicit link dependencies.
     """
     dependencies = {
-        contract_name: get_contract_link_dependencies(contract_data['code'], contracts.keys())
+        contract_name: get_contract_library_dependencies(
+            contract_data['code'],
+            contracts.keys(),
+        )
         for contract_name, contract_data
         in contracts.items()
         if contract_data.get('code') is not None

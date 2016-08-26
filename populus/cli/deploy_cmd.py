@@ -111,6 +111,13 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
 
         if deploy_from is None:
             deploy_from = get_unlocked_deploy_from_address(chain)
+        elif deploy_from not in web3.eth.accounts:
+            try:
+                deploy_from = web3.eth.accounts[int(deploy_from)]
+            except IndexError:
+                raise click.Abort(
+                    "Unknown deploy_from account: {0}".format(deploy_from)
+                )
 
         web3.eth.defaultAccount = deploy_from
 
@@ -124,26 +131,27 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
         starting_msg = (
             "Beginning contract deployment.  Deploying {0} total contracts ({1} "
             "Specified, {2} because of library dependencies)."
-            "\n\n"
-            (" > ".join(deploy_order.keys())).format(
-                len(deploy_order),
-                len(contracts_to_deploy),
-                len(deploy_order) - len(contracts_to_deploy),
-            )
+            "\n\n" +
+            (" > ".join(deploy_order.keys()))
+        ).format(
+            len(deploy_order),
+            len(contracts_to_deploy),
+            len(deploy_order) - len(contracts_to_deploy),
         )
         click.echo(starting_msg)
 
         for contract_name, contract_factory in deploy_order.items():
+            link_dependencies = {
+                contract_name: contract.address
+                for contract_name, contract
+                in deployed_contracts.items()
+            }
+
             # Check if we already have an existing deployed version of that
             # contract (via the registry).  For each of these, prompt the user
             # if they would like to use the existing version.
             if contract_name not in contracts_to_deploy and chain.has_registrar:
                 # TODO: this block should be a standalone cli util.
-                link_dependencies = {
-                    contract_name: contract.address
-                    for contract_name, contract
-                    in deployed_contracts.items()
-                }
                 existing_contract = get_contract_from_registrar(
                     chain=chain,
                     contract_name=contract_name,
@@ -168,10 +176,12 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
             contract = deploy_contract_and_verify(
                 chain,
                 contract_name=contract_name,
+                link_dependencies=link_dependencies,
             )
+
             if chain.has_registrar:
                 # TODO: this block should be a standalone cli util.
-                contract_key = 'contract/{name}'.format(contract_name)
+                contract_key = 'contract/{name}'.format(name=contract_name)
                 register_txn_hash = chain.registrar.transact().setAddress(
                     contract_key, contract.address
                 )

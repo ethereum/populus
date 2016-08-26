@@ -11,8 +11,10 @@ from populus.utils.transactions import (
     get_contract_address_from_txn,
 )
 from populus.utils.contracts import (
-    get_contract_link_dependencies,
-    link_bytecode,
+    get_contract_library_dependencies,
+)
+from populus.utils.deploy import (
+    deploy_contract,
 )
 
 from .registrar import (
@@ -145,56 +147,51 @@ class DeployContract(Operation):
 
     def execute(self, chain, compiled_contracts, **kwargs):
         contract_data = compiled_contracts[self.contract_name]
+        ContractFactory = chain.web3.eth.contract(
+            abi=contract_data['abi'],
+            code=contract_data['code'],
+            code_runtime=contract_data['code_runtime'],
+            source=contract_data['source'],
+        )
 
         all_known_contract_names = set(self.libraries.keys()).union(
             set(compiled_contracts.keys())
         )
-        link_dependencies = get_contract_link_dependencies(
-            contract_data['code'],
+        library_dependencies = get_contract_library_dependencies(
+            ContractFactory.code,
             all_known_contract_names,
         )
 
-        if link_dependencies:
-            registrar = chain.registrar
+        registrar = chain.registrar
 
-            def resolve_library_link(library_name):
-                # TODO: this whole process of linking should probably be
-                # handled by the `chain` object itself.
-                registrar_key = "contract/{0}".format(library_name)
+        def resolve_library_link(library_name):
+            registrar_key = "contract/{0}".format(library_name)
 
-                if library_name in self.libraries:
-                    return resolve_if_deferred_value(self.libraries[library_name], chain)
-                elif registrar.call().exists(registrar_key):
-                    library_address = registrar.call().getAddress(registrar_key)
-                    # TODO: implement validation that this contract address is
-                    # in fact the library we want to link against.
-                    return library_address
-                else:
-                    raise ValueError(
-                        "Unable to find address for library '{0}'".format(library_name)
-                    )
+            if library_name in self.libraries:
+                return resolve_if_deferred_value(self.libraries[library_name], chain)
+            elif registrar.call().exists(registrar_key):
+                library_address = registrar.call().getAddress(registrar_key)
+                # TODO: implement validation that this contract address is
+                # in fact the library we want to link against.
+                return library_address
+            else:
+                raise ValueError(
+                    "Unable to find address for library '{0}'".format(library_name)
+                )
 
-            resolved_dependencies = {
-                dependency_name: resolve_library_link(dependency_name)
-                for dependency_name
-                in link_dependencies
-            }
-            code = link_bytecode(contract_data['code'], **resolved_dependencies)
-            runtime = link_bytecode(contract_data['code_runtime'], **resolved_dependencies)
-        else:
-            code = contract_data.get('code')
-            runtime = contract_data.get('code_runtime')
+        link_dependencies = {
+            dependency_name: resolve_library_link(dependency_name)
+            for dependency_name
+            in library_dependencies
+        }
 
-        ContractFactory = chain.web3.eth.contract(
-            abi=contract_data['abi'],
-            code=code,
-            code_runtime=runtime,
-            source=contract_data.get('source'),
-        )
-
-        deploy_transaction_hash = ContractFactory.deploy(
-            self.transaction,
-            self.arguments,
+        deploy_transaction_hash = deploy_contract(
+            chain=chain,
+            contract_name=self.contract_name,
+            contract_factory=ContractFactory,
+            deploy_transaction=self.transaction,
+            deploy_arguments=self.arguments,
+            link_dependencies=link_dependencies,
         )
 
         if self.timeout is not None:

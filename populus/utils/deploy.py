@@ -5,6 +5,7 @@ from populus.utils.contracts import (
     get_shallow_dependency_graph,
     get_contract_deploy_order,
     get_recursive_contract_dependencies,
+    link_bytecode,
 )
 
 
@@ -29,3 +30,31 @@ def get_deploy_order(contracts_to_deploy, compiled_contracts):
         if contract_name in all_contracts_to_deploy
     ]
     return OrderedDict(deploy_order)
+
+
+def deploy_contract(chain,
+                    contract_name,
+                    contract_factory=None,
+                    deploy_transaction=None,
+                    deploy_arguments=None,
+                    link_dependencies=None):
+    if contract_factory is None:
+        contract_factory = chain.contract_factories[contract_name]
+
+    web3 = chain.web3
+
+    code = link_bytecode(contract_factory.code, **link_dependencies)
+    code_runtime = link_bytecode(contract_factory.code_runtime, **link_dependencies)
+
+    ContractFactory = web3.eth.contract(
+        abi=contract_factory.abi,
+        code=code,
+        code_runtime=code_runtime,
+        source=contract_factory.source,
+    )
+
+    deploy_transaction_hash = ContractFactory.deploy(
+        deploy_transaction,
+        deploy_arguments,
+    )
+    return deploy_transaction_hash

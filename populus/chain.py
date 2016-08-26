@@ -247,9 +247,9 @@ class TestRPCChain(Chain):
     def chain_config(self):
         config = self.project.config.chains[self.chain_name]
         # TODO: how to do this without causing a circular dependency between these properties.
-        #config.update({
-        #    'registrar': self.registrar.address,
-        #})
+        # config.update({
+        #     'registrar': self.registrar.address,
+        # })
         return config
 
     has_registrar = True
@@ -425,9 +425,9 @@ class BaseGethChain(Chain):
         if self.geth.is_mining:
             self.geth.wait_for_dag(600)
         if self.geth.ipc_enabled:
-            self.geth.wait_for_ipc(30)
+            self.geth.wait_for_ipc(60)
         if self.geth.rpc_enabled:
-            self.geth.wait_for_rpc(30)
+            self.geth.wait_for_rpc(60)
 
         return self
 

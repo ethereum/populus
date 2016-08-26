@@ -6,6 +6,9 @@ import click
 
 import gevent
 
+from .deploy import (
+    deploy_contract,
+)
 from .transactions import (
     is_account_locked,
     get_contract_address_from_txn,
@@ -235,16 +238,19 @@ def deploy_contract_and_verify(chain,
                                contract_name,
                                contract_factory=None,
                                deploy_transaction=None,
-                               deploy_arguments=None):
+                               deploy_arguments=None,
+                               link_dependencies=None):
     """
+    This is a *loose* wrapper around `populus.utils.deploy.deploy_contract`
+    that handles the various concerns and logging that need to be present when
+    doing this as a CLI interaction.
+
     Deploy a contract, displaying information about the deploy process as it
     happens.  This also verifies that the deployed contract's bytecode matches
     the expected value.
     """
-    if deploy_transaction is None:
-        deploy_transaction = {}
-    if deploy_arguments is None:
-        deploy_arguments = []
+    if link_dependencies is None:
+        link_dependencies = {}
 
     web3 = chain.web3
 
@@ -259,7 +265,14 @@ def deploy_contract_and_verify(chain,
     # TODO: this needs to do contract linking.
     click.echo("Deploying {0}".format(contract_name))
 
-    deploy_txn_hash = contract_factory.deploy(deploy_transaction, deploy_arguments)
+    deploy_txn_hash = deploy_contract(
+        chain=chain,
+        contract_name=contract_name,
+        contract_factory=contract_factory,
+        deploy_transaction=deploy_transaction,
+        deploy_arguments=deploy_arguments,
+        link_dependencies=link_dependencies,
+    )
     deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
 
     click.echo("Deploy Transaction Sent: {0}".format(deploy_txn_hash))

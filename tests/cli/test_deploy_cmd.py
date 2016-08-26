@@ -26,10 +26,7 @@ def test_deployment_command_with_one_specified_contract(project_dir,
 
     # weak assertion but not sure what to do here.
     assert 'Math' in result.output
-    assert re.search('Math \(0x[0-9a-f]{40}\)', result.output)
-
-    assert 'WithNoArgumentConstructor' in result.output
-    assert re.search('WithNoArgumentConstructor \(0x[0-9a-f]{40}\)', result.output)
+    assert 'WithNoArgumentConstructor' not in result.output
 
 
 @flaky
@@ -50,10 +47,5 @@ def test_deployment_command_with_specified_contracts(project_dir,
 
     # weak assertion but not sure what to do here.
     assert 'Math' in result.output
-    assert re.search('Math \(0x[0-9a-f]{40}\)', result.output)
-
     assert 'WithNoArgumentConstructor' not in result.output
-    assert not re.search('WithNoArgumentConstructor \(0x[0-9a-f]{40}\)', result.output)
-
     assert 'Emitter' in result.output
-    assert re.search('Emitter \(0x[0-9a-f]{40}\)', result.output)

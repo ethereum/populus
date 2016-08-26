@@ -236,7 +236,7 @@ def request_account_unlock(chain, account, timeout):
 
 def deploy_contract_and_verify(chain,
                                contract_name,
-                               contract_factory=None,
+                               base_contract_factory=None,
                                deploy_transaction=None,
                                deploy_arguments=None,
                                link_dependencies=None):
@@ -254,7 +254,7 @@ def deploy_contract_and_verify(chain,
 
     web3 = chain.web3
 
-    if contract_factory is None:
+    if base_contract_factory is None:
         base_contract_factory = chain.contract_factories[contract_name]
 
     if is_account_locked(web3, web3.eth.defaultAccount):

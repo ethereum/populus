@@ -36,15 +36,5 @@ def contracts(chain):
 
 
 @pytest.fixture()
-def deployed_contracts(project, web3):
-    # TODO: it looks like the right approach is to do away with this fixture in
-    # favor of a new API on the chain object itself.
-    # - testrpc: lazy deployment as they are accessed.
-    # - temp: lazy deployment as they are accessed.
-    # - geth-based: load from registrar based on contract name.
-    assert False
-
-
-@pytest.fixture()
 def accounts(web3):
     return web3.eth.accounts

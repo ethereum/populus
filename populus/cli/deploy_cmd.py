@@ -1,20 +1,28 @@
 import click
 
+from collections import OrderedDict
+
 from populus.utils.cli import (
     select_chain,
     show_chain_sync_progress,
     get_unlocked_deploy_from_address,
+    deploy_contract_and_verify,
 )
-
-from populus.deployment import (
-    deploy_contracts,
-    validate_deployed_contracts,
+from populus.utils.deploy import (
+    get_deploy_order,
+)
+from populus.utils.transactions import (
+    wait_for_transaction_receipt,
+)
+from populus.migrations.registrar import (
+    get_contract_from_registrar,
 )
 
 from .main import main
 
 
 def echo_post_deploy_message(web3, deployed_contracts):
+    # TODO: update this message.
     message = (
         "========== Deploy Completed ==========\n"
         "Deployed {n} contracts:"
@@ -70,7 +78,30 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
 
     compiled_contracts = project.compiled_contracts
 
+    if contracts_to_deploy:
+        # validate that we *know* about all of the contracts
+        unknown_contracts = set(contracts_to_deploy).difference(
+            compiled_contracts.keys()
+        )
+        if unknown_contracts:
+            raise click.Abort(
+                "Some contracts specified for deploy were not found in the "
+                "compiled project contracts.  These contracts could not be found "
+                "'{0}'.  Searched these known contracts '{1}'".format(
+                    ', '.join(sorted(unknown_contracts)),
+                    ', '.join(sorted(compiled_contracts.keys())),
+                )
+            )
+    else:
+        # prompt the user to select the desired contracts they want to deploy.
+        # Potentially display the currently deployed status.
+        raise click.Abort(
+            "Not Implemented.  Please specify which contracts you wish to "
+            "deploy"
+        )
+
     chain = project.get_chain(chain_name)
+    deployed_contracts = OrderedDict()
 
     with chain:
         web3 = chain.web3
@@ -78,15 +109,97 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
         if chain_name in {'mainnet', 'morden'}:
             show_chain_sync_progress(chain)
 
-        account = get_unlocked_deploy_from_address(chain)
-        # Configure web3 to now send from our chosen account by default
-        web3.eth.defaultAccount = account
+        if deploy_from is None:
+            deploy_from = get_unlocked_deploy_from_address(chain)
+        elif deploy_from not in web3.eth.accounts:
+            try:
+                deploy_from = web3.eth.accounts[int(deploy_from)]
+            except IndexError:
+                raise click.Abort(
+                    "Unknown deploy_from account: {0}".format(deploy_from)
+                )
 
-        deployed_contracts = deploy_contracts(
-            web3,
+        web3.eth.defaultAccount = deploy_from
+
+        # Get the deploy order.
+        deploy_order = get_deploy_order(
+            contracts_to_deploy,
             compiled_contracts,
-            contracts_to_deploy or None,
-            timeout=120,
         )
-        validate_deployed_contracts(web3, deployed_contracts)
-        echo_post_deploy_message(web3, deployed_contracts)
+
+        # Display Start Message Info.
+        starting_msg = (
+            "Beginning contract deployment.  Deploying {0} total contracts ({1} "
+            "Specified, {2} because of library dependencies)."
+            "\n\n" +
+            (" > ".join(deploy_order.keys()))
+        ).format(
+            len(deploy_order),
+            len(contracts_to_deploy),
+            len(deploy_order) - len(contracts_to_deploy),
+        )
+        click.echo(starting_msg)
+
+        for contract_name, contract_factory in deploy_order.items():
+            link_dependencies = {
+                contract_name: contract.address
+                for contract_name, contract
+                in deployed_contracts.items()
+            }
+
+            # Check if we already have an existing deployed version of that
+            # contract (via the registry).  For each of these, prompt the user
+            # if they would like to use the existing version.
+            if contract_name not in contracts_to_deploy and chain.has_registrar:
+                # TODO: this block should be a standalone cli util.
+                existing_contract = get_contract_from_registrar(
+                    chain=chain,
+                    contract_name=contract_name,
+                    contract_factory=contract_factory,
+                    link_dependencies=link_dependencies,
+                )
+                if existing_contract:
+                    found_existing_contract_prompt = (
+                        "Found existing version of {name} in registrar. "
+                        "Would you like to use the previously deployed "
+                        "contract @ {address}?".format(
+                            name=contract_name,
+                            address=existing_contract.address,
+                        )
+                    )
+                    if click.prompt(found_existing_contract_prompt):
+                        deployed_contracts[contract_name] = existing_contract
+                        continue
+
+            # We don't have an existing version of this contract available so
+            # deploy it.
+            contract = deploy_contract_and_verify(
+                chain,
+                contract_name=contract_name,
+                link_dependencies=link_dependencies,
+            )
+
+            if chain.has_registrar:
+                # TODO: this block should be a standalone cli util.
+                contract_key = 'contract/{name}'.format(name=contract_name)
+                register_txn_hash = chain.registrar.transact().setAddress(
+                    contract_key, contract.address
+                )
+                register_msg = (
+                    "Registering contract '{name}' @ {address} "
+                    "in registrar in txn: {txn_hash} ...".format(
+                        name=contract_name,
+                        address=contract.address,
+                        txn_hash=register_txn_hash,
+                    )
+                )
+                click.echo(register_msg, nl=False)
+                wait_for_transaction_receipt(web3, register_txn_hash, 180)
+                click.echo(' DONE')
+            deployed_contracts[contract_name] = contract
+
+        # TODO: fix this message.
+        success_msg = (
+            "Deployment Successful.",
+        )
+        click.echo(success_msg)

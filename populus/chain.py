@@ -151,6 +151,10 @@ class Chain(object):
         return get_compiled_registrar_contract(self.web3)
 
     @property
+    def has_registrar(self):
+        raise NotImplementedError("Must be implemented by subclasses")
+
+    @property
     def registrar(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
@@ -203,9 +207,13 @@ class ExternalChain(Chain):
     def __enter__(self):
         return self
 
+    @property
+    def has_registrar(self):
+        return 'registrar' in self.chain_config
+
     @cached_property
     def registrar(self):
-        if 'registrar' not in self.chain_config:
+        if not self.has_registrar:
             raise KeyError(
                 "The configuration for the {0} chain does not include a "
                 "registrar.  Please set this value to the address of the "
@@ -228,27 +236,35 @@ class TestRPCChain(Chain):
                 "TesterChain instances must be running to access the web3 "
                 "object."
             )
-        return Web3(self.provider)
+        _web3 = Web3(self.provider)
 
-    @cached_property
+        if 'default_account' in self.chain_config:
+            _web3.eth.defaultAccount = self.chain_config['default_account']
+
+        return _web3
+
+    @property
     def chain_config(self):
         config = self.project.config.chains[self.chain_name]
-        config.update({
-            'registrar': self.registrar.address,
-        })
+        # TODO: how to do this without causing a circular dependency between these properties.
+        # config.update({
+        #     'registrar': self.registrar.address,
+        # })
         return config
+
+    has_registrar = True
 
     @cached_property
     def registrar(self):
-        RegistrarFactory = get_compiled_registrar_contract(self.web3)
-        deploy_txn_hash = RegistrarFactory.deploy()
+        # deploy the registrar
+        deploy_txn_hash = self.RegistrarFactory.deploy()
         registrar_address = get_contract_address_from_txn(
             self.web3,
             deploy_txn_hash,
             1,
         )
-        registrar = RegistrarFactory(address=registrar_address)
-        return registrar
+
+        return self.RegistrarFactory(address=registrar_address)
 
     full_reset = staticmethod(testrpc.full_reset)
     reset = staticmethod(testrpc.evm_reset)
@@ -309,6 +325,12 @@ GETH_KWARGS = {
     'ipc_disable',
     'ipc_path',
     'ipc_api',
+    'ws_enabled',
+    'ws_enabled',
+    'ws_addr',
+    'ws_origins',
+    'ws_port',
+    'ws_api',
     'rpc_enabled',
     'rpc_addr',
     'rpc_port',
@@ -377,8 +399,18 @@ class BaseGethChain(Chain):
     def chain_config(self):
         return self.project.config.chains[self.chain_name]
 
+    @property
+    def has_registrar(self):
+        return 'registrar' in self.chain_config
+
     @cached_property
     def registrar(self):
+        if not self.has_registrar:
+            raise KeyError(
+                "The configuration for the {0} chain does not include a "
+                "registrar.  Please set this value to the address of the "
+                "deployed registrar contract.".format(self.chain_name)
+            )
         return get_compiled_registrar_contract(
             self.web3,
             address=self.chain_config['registrar'],
@@ -393,9 +425,9 @@ class BaseGethChain(Chain):
         if self.geth.is_mining:
             self.geth.wait_for_dag(600)
         if self.geth.ipc_enabled:
-            self.geth.wait_for_ipc(30)
+            self.geth.wait_for_ipc(60)
         if self.geth.rpc_enabled:
-            self.geth.wait_for_rpc(30)
+            self.geth.wait_for_rpc(60)
 
         return self
 
@@ -425,20 +457,19 @@ class TemporaryGethChain(BaseGethChain):
             overrides=self.geth_kwargs,
         )
 
+    has_registrar = True
+
     @cached_property
     def registrar(self):
-        if 'registrar' in self.chain_config:
-            registrar_address = self.chain_config['registrar']
-        else:
-            # TODO: this lazy creation might cause some problems.
-            RegistrarFactory = get_compiled_registrar_contract(self.web3)
-            deploy_txn_hash = RegistrarFactory.deploy()
-            registrar_address = get_contract_address_from_txn(
-                self.web3,
-                deploy_txn_hash,
-                60,
-            )
+        RegistrarFactory = get_compiled_registrar_contract(self.web3)
+        deploy_txn_hash = RegistrarFactory.deploy()
+        registrar_address = get_contract_address_from_txn(
+            self.web3,
+            deploy_txn_hash,
+            60,
+        )
         registrar = RegistrarFactory(address=registrar_address)
+
         return registrar
 
 

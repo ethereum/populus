@@ -1,5 +1,4 @@
 import types
-import functools
 
 from solc import compile_source
 
@@ -12,8 +11,10 @@ from populus.utils.transactions import (
     get_contract_address_from_txn,
 )
 from populus.utils.contracts import (
-    get_contract_link_dependencies,
-    link_contract,
+    get_contract_library_dependencies,
+)
+from populus.utils.deploy import (
+    deploy_contract,
 )
 
 from .registrar import (
@@ -146,47 +147,51 @@ class DeployContract(Operation):
 
     def execute(self, chain, compiled_contracts, **kwargs):
         contract_data = compiled_contracts[self.contract_name]
+        BaseContractFactory = chain.web3.eth.contract(
+            abi=contract_data['abi'],
+            code=contract_data['code'],
+            code_runtime=contract_data['code_runtime'],
+            source=contract_data.get('source'),
+        )
 
         all_known_contract_names = set(self.libraries.keys()).union(
             set(compiled_contracts.keys())
         )
-        link_dependencies = get_contract_link_dependencies(
-            contract_data['code'],
+        library_dependencies = get_contract_library_dependencies(
+            BaseContractFactory.code,
             all_known_contract_names,
         )
 
-        if link_dependencies:
-            # TODO: try to look these values up with the registrar.
-            missing_libraries = set(self.libraries.keys()).difference(link_dependencies)
-            if missing_libraries:
+        registrar = chain.registrar
+
+        def resolve_library_link(library_name):
+            registrar_key = "contract/{0}".format(library_name)
+
+            if library_name in self.libraries:
+                return resolve_if_deferred_value(self.libraries[library_name], chain)
+            elif registrar.call().exists(registrar_key):
+                library_address = registrar.call().getAddress(registrar_key)
+                # TODO: implement validation that this contract address is
+                # in fact the library we want to link against.
+                return library_address
+            else:
                 raise ValueError(
-                    "Missing necessary libraries for linking: {0!r}".format(missing_libraries)
+                    "Unable to find address for library '{0}'".format(library_name)
                 )
-            resolve_fn = functools.partial(
-                resolve_if_deferred_value,
-                chain=chain,
-            )
-            resolved_dependencies = {
-                dependency_name: resolve_fn(value)
-                for dependency_name, value
-                in self.libraries.items()
-            }
-            code = link_contract(contract_data['code'], **resolved_dependencies)
-            runtime = link_contract(contract_data['code_runtime'], **resolved_dependencies)
-        else:
-            code = contract_data.get('code')
-            runtime = contract_data.get('code_runtime')
 
-        ContractFactory = chain.web3.eth.contract(
-            abi=contract_data['abi'],
-            code=code,
-            code_runtime=runtime,
-            source=contract_data.get('source'),
-        )
+        link_dependencies = {
+            dependency_name: resolve_library_link(dependency_name)
+            for dependency_name
+            in library_dependencies
+        }
 
-        deploy_transaction_hash = ContractFactory.deploy(
-            self.transaction,
-            self.arguments,
+        deploy_transaction_hash, contract_factory = deploy_contract(
+            chain=chain,
+            contract_name=self.contract_name,
+            contract_factory=BaseContractFactory,
+            deploy_transaction=self.transaction,
+            deploy_arguments=self.arguments,
+            link_dependencies=link_dependencies,
         )
 
         if self.timeout is not None:
@@ -194,10 +199,18 @@ class DeployContract(Operation):
                 chain.web3, deploy_transaction_hash, timeout=self.timeout,
             )
             if self.verify:
-                code = chain.web3.eth.getCode(contract_address)
-                if force_text(code) != force_text(ContractFactory.code_runtime):
+                code = force_text(chain.web3.eth.getCode(contract_address))
+                expected_code = force_text(contract_factory.code_runtime)
+                if code != expected_code:
                     raise ValueError(
-                        "An error occured during deployment of the contract."
+                        "Bytecode @ {0} does not match expected contract "
+                        "bytecode.\n\n"
+                        "expected : '{1}'\n"
+                        "actual   : '{2}'\n".format(
+                            contract_address,
+                            expected_code,
+                            code,
+                        ),
                     )
             return {
                 'contract-address': contract_address,

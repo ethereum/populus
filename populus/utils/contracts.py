@@ -102,12 +102,25 @@ def expand_shortened_reference_name(name, full_names):
     if len(candidates) == 1:
         return candidates[0]
     elif len(candidates) > 1:
-        raise ValueError("Multiple candidates for name")
+        raise ValueError(
+            "Multiple candidates found trying to expand '{0}'.  Found '{1}'. "
+            "Searched '{2}'".format(
+                name,
+                ','.join(candidates),
+                ','.join(full_names),
+            )
+        )
     else:
-        raise ValueError("No valid names found")
+        raise ValueError(
+            "Unable to expand '{0}'. "
+            "Searched '{1}'".format(
+                name,
+                ','.join(full_names),
+            )
+        )
 
 
-def link_contract(bytecode, **dependencies):
+def link_bytecode(bytecode, **dependencies):
     """
     Given the bytecode for a contract, and it's dependencies in the form of
     {contract_name: address} this functino returns the bytecode with all of the
@@ -124,7 +137,7 @@ def link_contract(bytecode, **dependencies):
     return linked_bytecode
 
 
-def get_contract_link_dependencies(bytecode, full_contract_names):
+def get_contract_library_dependencies(bytecode, full_contract_names):
     """
     Given a contract bytecode and an iterable of all of the known full names of
     contracts, returns a set of the contract names that this contract bytecode
@@ -148,7 +161,10 @@ def get_shallow_dependency_graph(contracts):
     dependency graph of each contracts explicit link dependencies.
     """
     dependencies = {
-        contract_name: get_contract_link_dependencies(contract_data['code'], contracts.keys())
+        contract_name: get_contract_library_dependencies(
+            contract_data['code'],
+            contracts.keys(),
+        )
         for contract_name, contract_data
         in contracts.items()
         if contract_data.get('code') is not None

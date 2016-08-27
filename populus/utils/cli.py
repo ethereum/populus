@@ -6,6 +6,9 @@ import click
 
 import gevent
 
+from .deploy import (
+    deploy_contract,
+)
 from .transactions import (
     is_account_locked,
     get_contract_address_from_txn,
@@ -231,28 +234,45 @@ def request_account_unlock(chain, account, timeout):
         raise click.Abort("Unable to unlock account: `{0}`".format(account))
 
 
-def deploy_contract_and_verify(ContractFactory,
+def deploy_contract_and_verify(chain,
                                contract_name,
+                               base_contract_factory=None,
                                deploy_transaction=None,
-                               deploy_arguments=None):
+                               deploy_arguments=None,
+                               link_dependencies=None):
     """
+    This is a *loose* wrapper around `populus.utils.deploy.deploy_contract`
+    that handles the various concerns and logging that need to be present when
+    doing this as a CLI interaction.
+
     Deploy a contract, displaying information about the deploy process as it
     happens.  This also verifies that the deployed contract's bytecode matches
     the expected value.
     """
-    if deploy_transaction is None:
-        deploy_transaction = {}
-    if deploy_arguments is None:
-        deploy_arguments = []
+    if link_dependencies is None:
+        link_dependencies = {}
 
-    web3 = ContractFactory.web3
+    web3 = chain.web3
+
+    if base_contract_factory is None:
+        base_contract_factory = chain.contract_factories[contract_name]
 
     if is_account_locked(web3, web3.eth.defaultAccount):
-        raise click.Abort("The default `from` address must be unlocked.")
+        deploy_from = select_account(chain)
+        if is_account_locked(web3, deploy_from):
+            request_account_unlock(chain, deploy_from, None)
 
+    # TODO: this needs to do contract linking.
     click.echo("Deploying {0}".format(contract_name))
 
-    deploy_txn_hash = ContractFactory.deploy(deploy_transaction, deploy_arguments)
+    deploy_txn_hash, contract_factory = deploy_contract(
+        chain=chain,
+        contract_name=contract_name,
+        contract_factory=base_contract_factory,
+        deploy_transaction=deploy_transaction,
+        deploy_arguments=deploy_arguments,
+        link_dependencies=link_dependencies,
+    )
     deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
 
     click.echo("Deploy Transaction Sent: {0}".format(deploy_txn_hash))
@@ -283,9 +303,9 @@ def deploy_contract_and_verify(ContractFactory,
     # Verification
     deployed_code = web3.eth.getCode(contract_address)
 
-    if ContractFactory.code_runtime:
+    if contract_factory.code_runtime:
         click.echo("Verifying deployed bytecode...")
-        is_bytecode_match = deployed_code == ContractFactory.code_runtime
+        is_bytecode_match = deployed_code == contract_factory.code_runtime
         if is_bytecode_match:
             click.echo(
                 "Verified contract bytecode @ {0} matches expected runtime "
@@ -297,7 +317,7 @@ def deploy_contract_and_verify(ContractFactory,
                 "expected : '{1}'\n"
                 "actual   : '{2}'\n".format(
                     contract_address,
-                    ContractFactory.code_runtime,
+                    contract_factory.code_runtime,
                     deployed_code,
                 ),
                 err=True,
@@ -318,7 +338,7 @@ def deploy_contract_and_verify(ContractFactory,
             click.echo(
                 "Verified bytecode @ {0} is non-empty".format(contract_address)
             )
-    return ContractFactory(address=contract_address)
+    return contract_factory(address=contract_address)
 
 
 def show_chain_sync_progress(chain):

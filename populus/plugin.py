@@ -1,7 +1,6 @@
 import pytest
 
 from populus.project import Project
-from populus.deployment import deploy_contracts
 
 
 @pytest.fixture()
@@ -34,16 +33,6 @@ def web3(chain):
 @pytest.fixture()
 def contracts(chain):
     return chain.contract_factories
-
-
-@pytest.fixture()
-def deployed_contracts(project, web3):
-    # TODO: This should really just load from the registrar since at this point
-    # the migrations have been run.
-    return deploy_contracts(
-        web3=web3,
-        compiled_contracts=project.compiled_contracts,
-    )
 
 
 @pytest.fixture()

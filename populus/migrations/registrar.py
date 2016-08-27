@@ -1,5 +1,9 @@
 from solc import compile_source
 
+from populus.utils.contracts import (
+    link_bytecode,
+)
+
 
 REGISTRAR_SOURCE = """contract Registrar {
     address public owner;
@@ -118,3 +122,36 @@ def get_compiled_registrar_contract(web3, address=None):
         code_runtime=contract_data['code_runtime'],
         source=REGISTRAR_SOURCE,
     )
+
+
+def get_contract_from_registrar(chain,
+                                contract_name,
+                                contract_factory,
+                                link_dependencies=None):
+    if link_dependencies is None:
+        link_dependencies = {}
+
+    web3 = chain.web3
+    registrar = chain.registrar
+    registrar_key = 'contract/{name}'.format(name=contract_name)
+
+    if not registrar.call().exists(registrar_key):
+        return None
+
+    contract_address = registrar.call().getAddress(registrar_key)
+
+    expected_runtime = link_bytecode(
+        contract_factory.code_runtime,
+        **{
+            contract_name: contract.address
+            for contract_name, contract
+            in link_dependencies.items()
+        }
+    )
+    actual_runtime = web3.eth.getCode(contract_address)
+
+    # If the runtime doesn't match then don't choose it.
+    if actual_runtime != expected_runtime:
+        return None
+
+    return contract_factory(address=contract_address)

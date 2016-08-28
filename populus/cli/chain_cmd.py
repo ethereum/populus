@@ -74,7 +74,7 @@ def chain_run(ctx, chain_name, mine, verbosity):
             pass
 
 
-@chain_cmd.command('configure')
+@chain_cmd.command('config')
 @click.argument('chain_name', nargs=1)
 @click.pass_context
 def chain_configure(ctx, chain_name):

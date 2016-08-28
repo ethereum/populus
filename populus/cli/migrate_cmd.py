@@ -120,16 +120,7 @@ def migrate(ctx, chain_name):
 
 
 @migrate.command('init')
-@click.option(
-    'chain_name',
-    '--chain',
-    '-c',
-    help=(
-        "Specifies the chain that should be initialized. The chains "
-        "mainnet' and 'morden' are pre-configured to connect to the public "
-        "networks.  Other values should be predefined in your populus.ini"
-    ),
-)
+@click.argument('chain_name', nargs=1, required=False)
 @click.pass_context
 def migrate_init(ctx, chain_name):
     """

@@ -20,7 +20,7 @@ selecting a default account that deployment transactions should originate from.
 
 .. code-block:: shell
 
-    $ populus migrate init
+    $ populus chain init local_a
     Accounts
     -----------------
     0 - 0x03c932f52524ea0a47b83e86feacd9f26465f0e1

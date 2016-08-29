@@ -222,29 +222,111 @@ provides the following operation classes.
 
 * ``populus.migrations.operations.SendTransaction(transaction[, timeout=180])``
 
-  Sends the transaction specified by ``transaction`` parameter.  This is
-  expected to be a dictionary containing some set of the standard transaction
-  parameters accepted by ``web3.eth.sendTransaction``.
+  Sends a transaction specified by ``transaction`` parameter.
+  
+  The ``transaction`` parameter should to be a dictionary containing some set
+  of the standard transaction parameters accepted by
+  ``web3.eth.sendTransaction``.
 
   The operation will wait up to the ``timeout`` value for the transaction to be
-  mined unless ``timeout == None`` in which case the operation will continue on
+  mined unless set to ``None`` in which case the operation will continue on
   without waiting.
 
 
 * ``populus.migrations.operations.DeployContract(contract_name[, transaction=None, arguments=None, verify=True, libraries=None, timeout=180)``
 
-  Deployes the contra
+  Deployes the contract designated by ``contract_name`` from the migration's
+  ``compiled_contracts`` property.
 
-* ``populus.migrations.operations.TransactContract``
-* ``populus.migrations.operations.RunPython``
+  If specified, the ``transaction`` parameter should to be a dictionary
+  containing some set of the standard transaction parameters accepted by
+  ``web3.eth.sendTransaction``.  This ``transaction`` may not designate a
+  ``to`` value or a ``data`` value as they will be constructed via the contract
+  method call.
+
+  If specified, the ``arguments`` parameter should be a list of arguments which
+  will be passed in as constructor arguments for the contract.
+
+  When the ``verify`` argument is set to a truthy value (which it is by
+  default) then the contract's bytecode will be verified once the deployment
+  transaction has been mined.  This is done by checking equality between the
+  expected bytecode, and the bytecode returned the contract's address with
+  ``web3.eth.getCode``.
+
+  If specified, the ``libraries`` parameter should be a dictionary which
+  specified any library linking dependencies for this contract.  The keys
+  should be the full names of the the library contracts and the values should
+  be the library addresses.
+
+  The operation will wait up to the ``timeout`` value for the deployment
+  transaction to be mined unless set to ``None`` in which case the
+  operation will continue on without waiting.
 
 
+* ``populus.migrations.operations.TransactContract(contract_address, contract_name, method_name[, arguments=None, transaction=None, timeout=180)``
+
+  Sends a transaction, calling the method named by the ``method_name`` argument
+  on the contract designated by the ``contract_name`` parameter from the
+  migration's ``compiled_contracts`` property at the address indicated by the
+  ``contract_address`` parameter..
+
+  The ``transaction`` parameter behaves the same way as with the
+  ``DeployContract`` operation.
+
+  The ``arguments`` parameter behaves the same way as with the
+  ``DeployContract`` operation.
+
+  The ``timeout`` parameter behaves the same way as with the
+  ``DeployContract`` operation.
+
+
+* ``populus.migrations.operations.RunPython(callback)``
+
+  Executes the provided ``callback`` within the context of the migration.  The
+  ``callback`` should be a function that can be called with the following
+  function signature.
+
+  ``callback(chain, compiled_contracts, **kwargs)``
+
+  .. note:: The ``kwargs`` portion is to maintain compatibility with future changes to the migrations API.
 
 
 Deferred Values
 ---------------
 
-TODO: deferred value stuff.
+A deferred value is a value that will not be resolved until the execution of
+the given operation.  All operation constructor arguments support using a
+deffered value in place of the actual value, in which case it will be resolved
+at execution time of the operation.
+
+Populus provides the following deferred value classes that can be used in
+conjunction with the Registrar contract to look values up from the registrar.
+
+** ``populus.migrations.deferred.Address``
+** ``populus.migrations.deferred.Bytes32``
+** ``populus.migrations.deferred.UInt``
+** ``populus.migrations.deferred.Int``
+** ``populus.migrations.deferred.String``
+** ``populus.migrations.deferred.Bool``
+
+To use one of these classes as a migration argument, you should call the class
+method ``.defer(key='some-registrar-key')``.  One of the more common use cases
+for this is accessing the address of a migration that was deployed in a
+previous migration.  In this case, we can get the latest deployed address of a
+given contract under the key ``'contract/TheContractName'``.
+
+.. code-block:: python
+
+    class Migration(migrations.Migration):
+        ...
+        operations = [
+            migrations.TransactContract(
+                contract_name='TheContractName',
+                contract_address=migrations.Address.defer(key='contract/TheContractName'),
+                method_name='destroy',
+            ),
+        ]
+        ...
 
 
 .. _Directed Acycplic Graph: http://example.com/

@@ -42,6 +42,7 @@ from populus.utils.filesystem import (
     tempdir,
 )
 from populus.utils.contracts import (
+    construct_contract_factories,
     package_contracts,
     get_contract_library_dependencies,
     link_bytecode,
@@ -169,7 +170,10 @@ class Chain(object):
 
     @cached_property
     def contract_factories(self):
-        return package_contracts(self.web3, self.project.compiled_contracts)
+        return construct_contract_factories(
+            self.web3,
+            self.project.compiled_contracts,
+        )
 
     @property
     def RegistrarFactory(self):
@@ -271,8 +275,8 @@ class Chain(object):
     #
     def is_contract_available(self,
                               contract_name,
-                              validate_bytecode=True,
                               link_dependencies=None,
+                              validate_bytecode=True,
                               raise_on_error=False):
         if not self.has_registrar:
             raise NoKnownAddress(
@@ -364,6 +368,15 @@ class Chain(object):
             source=base_contract_factory.source,
         )
         return contract_factory
+
+    @property
+    def deployed_contracts(self):
+        contract_classes = {
+            contract_name: self.get_contract(contract_name)
+            for contract_name in self.contract_factories.keys()
+            if self.is_contract_available(contract_name)
+        }
+        return package_contracts(contract_classes)
 
 
 class ExternalChain(Chain):

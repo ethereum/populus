@@ -261,3 +261,53 @@ set some default values for the chain.
     This chain will default to sending transactions from 0x03c932f52524ea0a47b83e86feacd9f26465f0e1.  Would you like to set a different default account? [y/N]:
     Writing configuration to /Users/piper/sites/populus/populus.ini ...
     Sucess!
+
+
+Access To Contracts
+-------------------
+
+All chain objects present the following API for interacting with your project
+contracts.
+
+** ``Chain.get_contract_factory(contract_name[, link_dependencies=None, validate_bytecode=True])``
+
+    Returns the contract factory for the contract indicated by
+    ``contract_name`` from the chain's ``compiled_contracts``.
+
+    If provided, ``link_dependencies`` should be a dictionary that maps library
+    names to their on chain addresses that will be used during bytecode
+    linking.
+
+    If truthy (the default), ``validate_bytecode`` indicates whether the
+    bytecode for any library dependencies for the given contract should be
+    validated to match the on chain bytecode.
+
+
+** ``Chain.get_contract(contract_name[, link_dependencies=None, validate_bytecode=True])``
+
+    Returns the contract instance indicated by the ``contract_name`` from the
+    chain's ``compiled_contracts``.
+
+    The ``link_dependencies`` argument behaves the same was as specified in the
+    ``get_contract_factory`` method.
+
+    The ``validate_bytecode`` argument behaves the same way as specified in the
+    ``get_contract_factory`` with the added condition that the bytecode for the
+    requested contract will also be checked.
+
+
+** ``Chain.is_contract_available(contract_name[, link_dependencies=None, validate_bytecode=True, raise_on_error=False])``
+
+    Returns ``True`` or ``False`` as to whether the contract indicated by
+    ``contract_name`` from the chain's ``compiled_contracts`` is available
+    through the ``Chain.get_contract`` API.
+
+    The ``link_dependencies`` argument behaves the same was as specified in the
+    ``get_contract_factory`` method.
+
+    The ``validate_bytecode`` argument behaves the same way as specified in the
+    ``get_contract_factory`` with the added condition that the bytecode for the
+    requested contract will also be checked.
+
+    If ``raise_on_error`` is truthy, then the method will raise an exception
+    instead of returning ``False`` for any of the failure cases.

@@ -21,7 +21,21 @@ from .filesystem import (
 )
 
 
-def package_contracts(web3, contracts):
+def package_contracts(contract_classes):
+    _dict = {
+        '__len__': lambda s: len(contract_classes),
+        '__iter__': lambda s: iter(contract_classes.items()),
+        '__contains__': lambda s, k: contract_classes.__contains__(k),
+        '__getitem__': lambda s, k: contract_classes.__getitem__(k),
+        'keys': lambda s: contract_classes.keys(),
+        'values': lambda s: contract_classes.values(),
+    }
+    _dict.update(contract_classes)
+
+    return type('contracts', (object,), _dict)()
+
+
+def construct_contract_factories(web3, contracts):
     constructor_kwargs = {
         contract_name: {
             'code': contract_data.get('code'),
@@ -35,17 +49,7 @@ def package_contracts(web3, contracts):
         name: web3.eth.contract(**contract_data)
         for name, contract_data in constructor_kwargs.items()
     }
-
-    _dict = {
-        '__len__': lambda s: len(contract_classes),
-        '__iter__': lambda s: iter(contract_classes.items()),
-        '__getitem__': lambda s, k: contract_classes.__getitem__(k),
-        'keys': lambda s: contract_classes.keys(),
-        'values': lambda s: contract_classes.values(),
-    }
-    _dict.update(contract_classes)
-
-    return type('contracts', (object,), _dict)()
+    return package_contracts(contract_classes)
 
 
 def load_compiled_contract_json(project_dir):

@@ -36,5 +36,10 @@ def contracts(chain):
 
 
 @pytest.fixture()
+def deployed_contracts(chain):
+    return chain.deployed_contracts
+
+
+@pytest.fixture()
 def accounts(web3):
     return web3.eth.accounts

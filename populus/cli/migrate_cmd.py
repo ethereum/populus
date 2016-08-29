@@ -23,16 +23,7 @@ from .main import main
     'migrate',
     invoke_without_command=True,
 )
-@click.option(
-    'chain_name',
-    '--chain',
-    '-c',
-    help=(
-        "Specifies the chain that should be migrated. The chains "
-        "mainnet' and 'morden' are pre-configured to connect to the public "
-        "networks.  Other values should be predefined in your populus.ini"
-    ),
-)
+@click.argument('chain_name', nargs=1, required=False)
 @click.pass_context
 def migrate(ctx, chain_name):
     """

@@ -121,3 +121,13 @@ def tempdir():
         yield directory
     finally:
         shutil.rmtree(directory)
+
+
+def is_same_path(p1, p2):
+    n_p1 = os.path.abspath(os.path.expanduser(p1))
+    n_p2 = os.path.abspath(os.path.expanduser(p2))
+
+    try:
+        return os.path.samefile(n_p1, n_p2)
+    except FileNotFoundError:
+        return n_p1 == n_p2

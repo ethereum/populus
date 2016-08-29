@@ -154,7 +154,6 @@ class RegistrarValue(DeferredValue):
             ))
 
         if timeout is not None:
-            print("Key:", self.key, "Txn Hash:", set_txn_hash)
             wait_for_transaction_receipt(
                 web3=self.chain.web3,
                 txn_hash=set_txn_hash,

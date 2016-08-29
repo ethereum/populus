@@ -174,7 +174,7 @@ class DeployContract(Operation):
             source=contract_data.get('source'),
         )
 
-        all_known_contract_names = set(libraries.keys).union(
+        all_known_contract_names = set(libraries.keys()).union(
             set(compiled_contracts.keys())
         )
         library_dependencies = get_contract_library_dependencies(

@@ -78,12 +78,11 @@ class SendTransaction(Operation):
     A migration operation that sends a transaction.
     """
     transaction = None
-    timeout = 120
+    timeout = 180
 
-    def __init__(self, transaction, timeout=120):
+    def __init__(self, transaction, timeout=180):
         self.transaction = transaction
-        if timeout is not None:
-            self.timeout = timeout
+        self.timeout = timeout
 
     def execute(self, chain, **kwargs):
         transaction = {
@@ -101,11 +100,11 @@ class SendTransaction(Operation):
 
 
 class DeployContract(Operation):
-    contract = None
+    contract_name = None
     transaction = None
-    timeout = None
+    timeout = 180
     libraries = None
-    verify = None
+    verify = True
 
     def __init__(self,
                  contract_name,
@@ -113,7 +112,7 @@ class DeployContract(Operation):
                  arguments=None,
                  verify=True,
                  libraries=None,
-                 timeout=120):
+                 timeout=180):
         if libraries is None:
             libraries = {}
 

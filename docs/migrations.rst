@@ -180,21 +180,71 @@ our wallet contract.
 Migrations
 ----------
 
-A migration
+Migrations are intended to facilitate both the deployment of simple contracts
+as well as complex constellations of contracts that may require both complex
+deployment logic as well as complex interactions with those contracts after
+they have been deployed.
+
+Each migration consists of the following four pieces of information.
+
+** ``migration_id``
+
+    This is an identifier which will be used by other migrations to handle dependencies.
+
+** ``dependencies``
+
+    A list of the ``migration_id`` values for other migrations that this
+    migration depends on.  When migrations are generated, the latest migration
+    is set as a dependency automatically.
+
+    Complex migratino dependency graphs are allowed as long as the result is a
+    `Directed Acyclic Graph`_.
+
+** ``operations``
+
+    A list of ``populus.migrations.operations.Operation`` objects.  These must
+    be added by the user.
+
+** ``compiled_contracts``
+
+    A python dictionary containing the compiled contract assets.  These are
+    present to freeze the state of the project contracts at the time the
+    migration was generated.
+
 
 
 Operations
 ----------
 
-Each migratino is 
+Operations are units of work that are executed during a migration.  Populus
+provides the following operation classes.
 
 
-* ``populus.migrations.
+* ``populus.migrations.operations.SendTransaction(transaction[, timeout=180])``
 
-TODO: operations stuff
+  Sends the transaction specified by ``transaction`` parameter.  This is
+  expected to be a dictionary containing some set of the standard transaction
+  parameters accepted by ``web3.eth.sendTransaction``.
+
+  The operation will wait up to the ``timeout`` value for the transaction to be
+  mined unless ``timeout == None`` in which case the operation will continue on
+  without waiting.
+
+
+* ``populus.migrations.operations.DeployContract(contract_name[, transaction=None, arguments=None, verify=True, libraries=None, timeout=180)``
+
+  Deployes the contra
+
+* ``populus.migrations.operations.TransactContract``
+* ``populus.migrations.operations.RunPython``
+
+
 
 
 Deferred Values
 ---------------
 
 TODO: deferred value stuff.
+
+
+.. _Directed Acycplic Graph: http://example.com/

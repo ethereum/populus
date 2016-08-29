@@ -87,6 +87,15 @@ exclude_patterns = ['_build']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+
+# Custom solidity lexer
+sys.path.append(os.path.dirname(__file__))
+from pygments.lexer import __all__ as pygments_lexers
+from solidity_lexer import SolidityLexer
+
+
+pygments_lexers.append(SolidityLexer)
+
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 

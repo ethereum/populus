@@ -44,7 +44,7 @@ def test_initializing_local_chain(project_dir, write_project_file):
 
     result = runner.invoke(
         main,
-        ['migrate', 'init'],
+        ['chain', 'init'],
         input=((
             "local_a\n"          # choose chain.
             "{0}\n"              # pick deploy account.
@@ -68,7 +68,7 @@ def test_initializing_with_unlocked_account(project_dir, write_project_file):
 
     result = runner.invoke(
         main,
-        ['migrate', 'init'],
+        ['chain', 'init'],
         input=((
             "local_a\n"          # choose chain.
             "0\n"              # pick deploy account.
@@ -90,7 +90,7 @@ def test_initializing_with_specified_chain(project_dir, write_project_file):
 
     result = runner.invoke(
         main,
-        ['migrate', 'init', '--chain', 'local_a'],
+        ['chain', 'init', 'local_a'],
         input=((
             "0\n"              # pick deploy account.
             "Y\n"                # set account as default
@@ -117,7 +117,7 @@ def test_initializing_no_choices(project_dir, write_project_file):
 
     result = runner.invoke(
         main,
-        ['migrate', 'init', '--chain', 'local_a'],
+        ['chain', 'init', 'local_a'],
     )
 
     assert result.exit_code == 0, result.output + str(result.exception)

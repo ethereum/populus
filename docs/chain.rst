@@ -226,3 +226,38 @@ Example:
             assert success, "Could not unlock test geth coinbase account"
 
             yield web3
+
+
+Configuring Chains
+------------------
+
+Populus can configure your chains for you using the ``$ populus chain config``
+command.  During configuration you will be prompted with a series of questions
+about how populus should interact with the chain, as well as allowing you to
+set some default values for the chain.
+
+.. code-block:: shell
+
+    $ populus chain config local_a
+    Configuring **new** chain: local_a
+    ----------------------------------
+
+
+    Populus can run the blockchain client for you, including connecting to the public main and test networks.
+
+     Should populus manage running this chain? [Y/n]: y
+
+
+    Web3 Provider Choices:
+    1) IPC socket (default)
+    2) RPC via HTTP
+
+    How should populus connect web3.py to this chain? [ipc]:
+
+
+    Will this blockchain be running with a non-standard `geth.ipc`path?
+
+     [y/N]:
+    This chain will default to sending transactions from 0x03c932f52524ea0a47b83e86feacd9f26465f0e1.  Would you like to set a different default account? [y/N]:
+    Writing configuration to /Users/piper/sites/populus/populus.ini ...
+    Sucess!

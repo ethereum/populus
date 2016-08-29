@@ -88,7 +88,7 @@ def test_migrate_cmd(project_dir, write_project_file, MATH):
         project.write_config()
 
     runner = CliRunner()
-    result = runner.invoke(main, ['migrate', '--chain', 'local_a'])
+    result = runner.invoke(main, ['migrate', 'local_a'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
 

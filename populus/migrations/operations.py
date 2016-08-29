@@ -22,7 +22,7 @@ from .registrar import (
 )
 from .deferred import (
     Address,
-    resolve_if_deferred_value,
+    Resolver,
 )
 
 
@@ -78,22 +78,25 @@ class SendTransaction(Operation):
     A migration operation that sends a transaction.
     """
     transaction = None
-    timeout = 120
+    timeout = 180
 
-    def __init__(self, transaction, timeout=120):
+    def __init__(self, transaction, timeout=180):
         self.transaction = transaction
-        if timeout is not None:
-            self.timeout = timeout
+        self.timeout = timeout
 
     def execute(self, chain, **kwargs):
+        resolver = Resolver(chain)
+
         transaction = {
-            key: resolve_if_deferred_value(value, chain)
-            for key, value in self.transaction.items()
+            resolver(key): resolver(value)
+            for key, value in resolver(self.transaction).items()
         }
+        timeout = resolver(self.timeout)
+
         transaction_hash = chain.web3.eth.sendTransaction(transaction)
-        if self.timeout is not None:
+        if timeout is not None:
             wait_for_transaction_receipt(
-                chain.web3, transaction_hash, timeout=self.timeout,
+                chain.web3, transaction_hash, timeout=timeout,
             )
         return {
             'transaction-hash': transaction_hash,
@@ -101,11 +104,11 @@ class SendTransaction(Operation):
 
 
 class DeployContract(Operation):
-    contract = None
+    contract_name = None
     transaction = None
-    timeout = None
+    timeout = 180
     libraries = None
-    verify = None
+    verify = True
 
     def __init__(self,
                  contract_name,
@@ -113,7 +116,7 @@ class DeployContract(Operation):
                  arguments=None,
                  verify=True,
                  libraries=None,
-                 timeout=120):
+                 timeout=180):
         if libraries is None:
             libraries = {}
 
@@ -146,7 +149,24 @@ class DeployContract(Operation):
             self.timeout = timeout
 
     def execute(self, chain, compiled_contracts, **kwargs):
-        contract_data = compiled_contracts[self.contract_name]
+        resolver = Resolver(chain)
+
+        contract_name = resolver(self.contract_name)
+        libraries = {
+            resolver(key): resolver(value)
+            for key, value in resolver(self.libraries).items()
+        }
+        transaction = {
+            resolver(key): resolver(value)
+            for key, value in resolver(self.transaction).items()
+        }
+        arguments = [
+            resolver(arg) for arg in self.arguments
+        ]
+        timeout = resolver(self.timeout)
+        verify = resolver(self.verify)
+
+        contract_data = compiled_contracts[contract_name]
         BaseContractFactory = chain.web3.eth.contract(
             abi=contract_data['abi'],
             code=contract_data['code'],
@@ -154,7 +174,7 @@ class DeployContract(Operation):
             source=contract_data.get('source'),
         )
 
-        all_known_contract_names = set(self.libraries.keys()).union(
+        all_known_contract_names = set(libraries.keys()).union(
             set(compiled_contracts.keys())
         )
         library_dependencies = get_contract_library_dependencies(
@@ -167,8 +187,8 @@ class DeployContract(Operation):
         def resolve_library_link(library_name):
             registrar_key = "contract/{0}".format(library_name)
 
-            if library_name in self.libraries:
-                return resolve_if_deferred_value(self.libraries[library_name], chain)
+            if library_name in libraries:
+                return libraries[library_name]
             elif registrar.call().exists(registrar_key):
                 library_address = registrar.call().getAddress(registrar_key)
                 # TODO: implement validation that this contract address is
@@ -187,18 +207,18 @@ class DeployContract(Operation):
 
         deploy_transaction_hash, contract_factory = deploy_contract(
             chain=chain,
-            contract_name=self.contract_name,
+            contract_name=contract_name,
             contract_factory=BaseContractFactory,
-            deploy_transaction=self.transaction,
-            deploy_arguments=self.arguments,
+            deploy_transaction=transaction,
+            deploy_arguments=arguments,
             link_dependencies=link_dependencies,
         )
 
-        if self.timeout is not None:
+        if timeout is not None:
             contract_address = get_contract_address_from_txn(
-                chain.web3, deploy_transaction_hash, timeout=self.timeout,
+                chain.web3, deploy_transaction_hash, timeout=timeout,
             )
-            if self.verify:
+            if verify:
                 code = force_text(chain.web3.eth.getCode(contract_address))
                 expected_code = force_text(contract_factory.code_runtime)
                 if code != expected_code:
@@ -216,7 +236,7 @@ class DeployContract(Operation):
                 'contract-address': contract_address,
                 'deploy-transaction-hash': deploy_transaction_hash,
                 'canonical-contract-address': Address.defer(
-                    key='/'.join(('contract', self.contract_name)),
+                    key='/'.join(('contract', contract_name)),
                     value=contract_address,
                 ),
             }
@@ -227,20 +247,21 @@ class DeployContract(Operation):
 
 
 class TransactContract(Operation):
+    contract_address = None
     contract_name = None
     method_name = None
     arguments = None
     transaction = None
 
-    timeout = None
+    timeout = 180
 
     def __init__(self,
+                 contract_address,
                  contract_name,
                  method_name,
                  arguments=None,
                  transaction=None,
-                 contract_address=None,
-                 timeout=120):
+                 timeout=180):
         self.contract_address = contract_address
         self.contract_name = contract_name
         self.method_name = method_name
@@ -258,11 +279,19 @@ class TransactContract(Operation):
             self.timeout = timeout
 
     def execute(self, chain, compiled_contracts, **kwargs):
-        contract_name = resolve_if_deferred_value(self.contract_name, chain=chain)
-        contract_address = resolve_if_deferred_value(
-            self.contract_address,
-            chain=chain,
-        )
+        resolver = Resolver(chain)
+
+        contract_address = resolver(self.contract_address)
+        contract_name = resolver(self.contract_name)
+        transaction = {
+            resolver(key): resolver(value)
+            for key, value in resolver(self.transaction).items()
+        }
+        arguments = [
+            resolver(arg) for arg in self.arguments
+        ]
+        method_name = resolver(self.method_name)
+        timeout = resolver(self.timeout)
 
         if not contract_address:
             raise ValueError("cannot transact without an address")
@@ -273,19 +302,16 @@ class TransactContract(Operation):
             abi=contract_data['abi'],
             code=contract_data['code'],
             code_runtime=contract_data['code_runtime'],
-            source=contract_data['source'],
+            source=contract_data.get('source'),
         )
 
-        arguments = [resolve_if_deferred_value(arg, chain=chain) for arg in self.arguments]
-        method_name = resolve_if_deferred_value(self.method_name, chain=chain)
-
-        transactor = contract.transact(self.transaction)
+        transactor = contract.transact(transaction)
         method = getattr(transactor, method_name)
         transaction_hash = method(*arguments)
 
-        if self.timeout is not None:
+        if timeout is not None:
             wait_for_transaction_receipt(
-                chain.web3, transaction_hash, timeout=self.timeout,
+                chain.web3, transaction_hash, timeout=timeout,
             )
 
         return {

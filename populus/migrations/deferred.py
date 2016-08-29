@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import itertools
+import functools
 
 from web3.utils.encoding import (
     decode_hex,
@@ -75,6 +76,10 @@ def resolve_if_deferred_value(value, chain):
         return value(chain).get()
     else:
         return value
+
+
+def Resolver(chain):
+    return functools.partial(resolve_if_deferred_value, chain=chain)
 
 
 ALLOWED_VALUE_TYPES = {
@@ -154,7 +159,6 @@ class RegistrarValue(DeferredValue):
             ))
 
         if timeout is not None:
-            print("Key:", self.key, "Txn Hash:", set_txn_hash)
             wait_for_transaction_receipt(
                 web3=self.chain.web3,
                 txn_hash=set_txn_hash,

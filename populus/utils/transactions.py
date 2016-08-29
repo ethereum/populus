@@ -2,7 +2,7 @@ import random
 import gevent
 
 
-def wait_for_transaction_receipt(web3, txn_hash, timeout=0):
+def wait_for_transaction_receipt(web3, txn_hash, timeout=120):
     with gevent.Timeout(timeout):
         while True:
             txn_receipt = web3.eth.getTransactionReceipt(txn_hash)
@@ -12,14 +12,14 @@ def wait_for_transaction_receipt(web3, txn_hash, timeout=0):
     return txn_receipt
 
 
-def wait_for_block_number(web3, block_number=1, timeout=0):
+def wait_for_block_number(web3, block_number=1, timeout=120):
     with gevent.Timeout(timeout):
         while web3.eth.blockNumber < block_number:
             gevent.sleep(random.random())
     return web3.eth.getBlock(block_number)
 
 
-def get_contract_address_from_txn(web3, txn_hash, timeout=0):
+def get_contract_address_from_txn(web3, txn_hash, timeout=120):
     txn_receipt = wait_for_transaction_receipt(web3, txn_hash, timeout)
 
     return txn_receipt['contractAddress']
@@ -41,7 +41,7 @@ def is_account_locked(web3, account):
         return False
 
 
-def wait_for_unlock(web3, account=None, timeout=0):
+def wait_for_unlock(web3, account=None, timeout=120):
     if account is None:
         account = web3.eth.coinbase
 
@@ -50,13 +50,13 @@ def wait_for_unlock(web3, account=None, timeout=0):
             gevent.sleep(random.random())
 
 
-def wait_for_peers(web3, peer_count=1, timeout=0):
+def wait_for_peers(web3, peer_count=1, timeout=120):
     with gevent.Timeout(timeout):
         while web3.net.peerCount < peer_count:
             gevent.sleep(random.random())
 
 
-def wait_for_syncing(web3, timeout=0):
+def wait_for_syncing(web3, timeout=120):
     start_block = web3.eth.blockNumber
     with gevent.Timeout(timeout):
         while not web3.eth.syncing and web3.eth.blockNumber == start_block:

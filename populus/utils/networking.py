@@ -1,7 +1,12 @@
+import sys
 import random
 
 import gevent
 from gevent import socket
+
+
+if sys.version_info.major == 2:
+    ConnectionRefusedError = socket.error
 
 
 def get_open_port():
@@ -20,7 +25,7 @@ def wait_for_connection(host, port, timeout=30):
             s.timeout = 1
             try:
                 s.connect((host, port))
-            except socket.timoeout:
+            except (socket.timeout, ConnectionRefusedError):
                 gevent.sleep(random.random())
                 continue
             else:

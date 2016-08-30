@@ -210,7 +210,7 @@ class Chain(object):
         )
         return library_dependencies
 
-    def _link_code(self, *bytecodes,
+    def _link_code(self, bytecodes,
                    link_dependencies=None,
                    validate_bytecode=True,
                    raise_on_error=False):
@@ -351,8 +351,7 @@ class Chain(object):
 
         if link_dependencies is not False:
             code, code_runtime = self._link_code(
-                base_contract_factory.code,
-                base_contract_factory.code_runtime,
+                bytecodes=[base_contract_factory.code, base_contract_factory.code_runtime],
                 link_dependencies=link_dependencies,
             )
         else:

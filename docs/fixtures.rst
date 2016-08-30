@@ -57,13 +57,15 @@ Deployed Contracts
 
 * ``deployed_contracts``
 
-.. note:: 
+The deployed contract instances for all of your project contracts.  This data
+is pulled from the data available fromt he registrar contract for the given
+chain.  Only contracts which satisfy all of the following conditions will be
+available in this fixture.
 
-    The functionality and behavior of this fixture is likely to change
-    significantly over the next few releases as it gets integrated with the
-    migrations feature.
-
-The deployed contract instances for all of your project contracts.
+* Address found in the registrar contract
+* All library dependencies are available in the registrar contract.
+* All bytecode for both libraries and the given contract matches that of the
+  latest compiled assets.
 
 
 Accounts

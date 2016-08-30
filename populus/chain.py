@@ -1,3 +1,5 @@
+import itertools
+
 try:
     from contextlib import ExitStack
 except ImportError:
@@ -40,7 +42,10 @@ from populus.utils.filesystem import (
     tempdir,
 )
 from populus.utils.contracts import (
+    construct_contract_factories,
     package_contracts,
+    get_contract_library_dependencies,
+    link_bytecode,
 )
 from populus.utils.chains import (
     get_chaindata_dir,
@@ -118,6 +123,27 @@ class LoggedMainnetGethProcess(LoggingMixin, LiveGethProcess):
         )
 
 
+class ContractError(Exception):
+    """
+    Base Exception class for errors raised by the Chain contract API.
+    """
+    pass
+
+
+class BytecodeMismatchError(ContractError):
+    """
+    Indicates there is a bytecode mismatch.
+    """
+    pass
+
+
+class NoKnownAddress(ContractError):
+    """
+    Raised when the address for a requested contract is not known.
+    """
+    pass
+
+
 class Chain(object):
     """
     Base class for how populus interacts with the blockchain.
@@ -144,7 +170,10 @@ class Chain(object):
 
     @cached_property
     def contract_factories(self):
-        return package_contracts(self.web3, self.project.compiled_contracts)
+        return construct_contract_factories(
+            self.web3,
+            self.project.compiled_contracts,
+        )
 
     @property
     def RegistrarFactory(self):
@@ -163,6 +192,190 @@ class Chain(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
+    #
+    # Utility
+    #
+    def _extract_library_dependencies(self, bytecode, link_dependencies=None):
+        if link_dependencies is None:
+            link_dependencies = {}
+
+        all_known_contract_names = set(link_dependencies.keys()).union(
+            self.contract_factories.keys(),
+        )
+
+        library_dependencies = get_contract_library_dependencies(
+            bytecode,
+            all_known_contract_names,
+        )
+        return library_dependencies
+
+    def _link_code(self, bytecodes,
+                   link_dependencies=None,
+                   validate_bytecode=True,
+                   raise_on_error=False):
+        if link_dependencies is None:
+            link_dependencies = {}
+
+        library_dependencies = set(itertools.chain.from_iterable(
+            self._extract_library_dependencies(bytecode, link_dependencies)
+            for bytecode in bytecodes
+        ))
+
+        # Determine which dependencies would need to be present in the
+        # registrar since they were not explicitely declared via the
+        # `link_dependencies`.
+        registrar_dependencies = set(library_dependencies).difference(
+            link_dependencies.keys()
+        )
+        if registrar_dependencies and not self.has_registrar:
+            raise NoKnownAddress(
+                "Unable to link bytecode.  Addresses for the following link "
+                "dependencies were not provided and this chain does not have a "
+                "registrar.\n\n{0}".format(
+                    ', '.join(registrar_dependencies),
+                )
+            )
+
+        # Loop over all of the dependencies and ensure that they are available,
+        # raising an exception if they are not.
+        for library_name in registrar_dependencies:
+            self.is_contract_available(
+                library_name,
+                link_dependencies=link_dependencies,
+                validate_bytecode=validate_bytecode,
+                raise_on_error=True,
+            )
+
+        registrar_link_dependencies = {
+            library_name: self.get_contract(
+                library_name,
+                link_dependencies=link_dependencies,
+                validate_bytecode=validate_bytecode,
+            ).address for library_name in registrar_dependencies
+        }
+
+        all_link_dependencies = {
+            library_name: library_address
+            for library_name, library_address
+            in itertools.chain(
+                link_dependencies.items(),
+                registrar_link_dependencies.items(),
+            )
+        }
+
+        linked_bytecodes = [
+            link_bytecode(bytecode, **all_link_dependencies)
+            for bytecode in bytecodes
+        ]
+        return linked_bytecodes
+
+    #
+    # Contract API
+    #
+    def is_contract_available(self,
+                              contract_name,
+                              link_dependencies=None,
+                              validate_bytecode=True,
+                              raise_on_error=False):
+        if not self.has_registrar:
+            raise NoKnownAddress(
+                'The `is_contract_available` API is only usable on chains that '
+                'have a registrar contract'
+            )
+        contract_key = 'contract/{name}'.format(name=contract_name)
+
+        if not self.registrar.call().exists(contract_key):
+            if raise_on_error:
+                raise NoKnownAddress(
+                    "Address for contract '{name}' not found in registrar".format(
+                        name=contract_name,
+                    )
+                )
+            return False
+
+        if not validate_bytecode:
+            return True
+
+        try:
+            contract_factory = self.get_contract_factory(
+                contract_name,
+                link_dependencies=link_dependencies,
+            )
+        except (NoKnownAddress, BytecodeMismatchError):
+            if raise_on_error:
+                raise
+            return False
+
+        contract_address = self.registrar.call().getAddress(contract_key)
+
+        chain_bytecode = self.web3.eth.getCode(contract_address)
+
+        is_bytecode_match = chain_bytecode == contract_factory.code_runtime
+        if not is_bytecode_match and raise_on_error:
+            raise BytecodeMismatchError(
+                "Bytecode @ {0} does not match expected contract bytecode.\n\n"
+                "expected : '{1}'\n"
+                "actual   : '{2}'\n".format(
+                    contract_address,
+                    contract_factory.code_runtime,
+                    chain_bytecode,
+                ),
+            )
+        return is_bytecode_match
+
+    def get_contract(self,
+                     contract_name,
+                     link_dependencies=None,
+                     validate_bytecode=True):
+        self.is_contract_available(
+            contract_name,
+            link_dependencies=link_dependencies,
+            validate_bytecode=validate_bytecode,
+            raise_on_error=True,
+        )
+
+        contract_factory = self.get_contract_factory(
+            contract_name,
+            link_dependencies=link_dependencies,
+        )
+        contract_key = 'contract/{name}'.format(name=contract_name)
+        contract_address = self.registrar.call().getAddress(contract_key)
+        contract = contract_factory(address=contract_address)
+        return contract
+
+    def get_contract_factory(self,
+                             contract_name,
+                             link_dependencies=None):
+        base_contract_factory = self.contract_factories[contract_name]
+
+        if link_dependencies is not False:
+            code, code_runtime = self._link_code(
+                bytecodes=[base_contract_factory.code, base_contract_factory.code_runtime],
+                link_dependencies=link_dependencies,
+            )
+        else:
+            code, code_runtime = (
+                base_contract_factory.code,
+                base_contract_factory.code_runtime,
+            )
+
+        contract_factory = self.web3.eth.contract(
+            code=code,
+            code_runtime=code_runtime,
+            abi=base_contract_factory.abi,
+            source=base_contract_factory.source,
+        )
+        return contract_factory
+
+    @property
+    def deployed_contracts(self):
+        contract_classes = {
+            contract_name: self.get_contract(contract_name)
+            for contract_name in self.contract_factories.keys()
+            if self.is_contract_available(contract_name)
+        }
+        return package_contracts(contract_classes)
 
 
 class ExternalChain(Chain):

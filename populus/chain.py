@@ -27,7 +27,7 @@ from populus.utils.functional import (
 )
 from populus.utils.networking import (
     get_open_port,
-    wait_for_http_connection,
+    wait_for_connection,
 )
 from populus.utils.module_loading import (
     import_string,
@@ -506,7 +506,7 @@ class TestRPCChain(Chain):
         testrpc.rpc_configure('net_version', 1)
         testrpc.evm_mine()
 
-        wait_for_http_connection('127.0.0.1', self.port)
+        wait_for_connection('127.0.0.1', self.port)
         self._running = True
         return self
 

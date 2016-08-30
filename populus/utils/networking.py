@@ -1,17 +1,16 @@
+import sys
 import random
 
 import gevent
-from gevent import monkey
+from gevent import socket
 
 
-monkey.patch_socket()
-
-
-import requests  # noqa
+if sys.version_info.major == 2:
+    ConnectionRefusedError = socket.error
 
 
 def get_open_port():
-    s = gevent.socket.socket(gevent.socket.AF_INET, gevent.socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(("", 0))
     s.listen(1)
     port = s.getsockname()[1]
@@ -19,12 +18,14 @@ def get_open_port():
     return port
 
 
-def wait_for_http_connection(host, port, timeout=30):
+def wait_for_connection(host, port, timeout=30):
     with gevent.Timeout(timeout):
         while True:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.timeout = 1
             try:
-                requests.post("http://{0}:{1}".format(host, port))
-            except requests.ConnectionError:
+                s.connect((host, port))
+            except (socket.timeout, ConnectionRefusedError):
                 gevent.sleep(random.random())
                 continue
             else:

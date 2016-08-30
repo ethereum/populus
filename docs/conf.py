@@ -11,9 +11,39 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
-
 import sys
 import os
+
+
+# Mock out dependencies
+from mock import Mock as MagicMock
+
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return Mock()
+
+
+MOCK_MODULES = [
+    'click',
+    'configparser',
+    'contextlib2',
+    'testrpc',
+    'eth_tester_client',
+    'gevent',
+    'geth',
+    'solc',
+    'pysha3',
+    'pytest',
+    'toposort',
+    'watchdog',
+    'web3',
+]
+
+sys.modules.update(
+    (mod_name, Mock()) for mod_name in MOCK_MODULES
+)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -51,7 +81,7 @@ copyright = u'2014, Piper Merriam'
 # built documents.
 #
 # The short X.Y version.
-version = '1.0.0'
+version = '1.0'
 # The full version, including alpha/beta/rc tags.
 release = '1.0.0'
 

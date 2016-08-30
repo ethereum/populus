@@ -1,11 +1,17 @@
+import os
 import itertools
-
 import random
 
 import click
 
 import gevent
 
+from populus.observers import (
+    DirWatcher,
+)
+from populus.compilation import (
+    compile_and_write_contracts,
+)
 from .deploy import (
     deploy_contract,
 )
@@ -455,3 +461,48 @@ def get_unlocked_deploy_from_address(chain):
             request_account_unlock(chain, account, None)
 
     return account
+
+
+def compile_project_contracts(project, optimize=True):
+    click.echo("============ Compiling ==============")
+    click.echo("> Loading source files from: {0}\n".format(project.contracts_dir))
+
+    result = compile_and_write_contracts(project.project_dir, optimize=optimize)
+    contract_source_paths, compiled_sources, output_file_path = result
+
+    click.echo("> Found {0} contract source files".format(
+        len(contract_source_paths)
+    ))
+    for path in contract_source_paths:
+        click.echo("- {0}".format(os.path.relpath(path)))
+    click.echo("")
+    click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
+
+    for contract_name in sorted(compiled_sources.keys()):
+        click.echo("- {0}".format(contract_name))
+
+    click.echo("")
+    click.echo(
+        "> Wrote compiled assets to: {0}".format(
+            os.path.relpath(output_file_path)
+        )
+    )
+
+
+def watch_project_contracts(project, **compile_kwargs):
+    watcher = DirWatcher(project.contracts_dir)
+
+    last_hash = project.get_source_file_hash()
+
+    try:
+        while True:
+            event = watcher.get()
+            if event.name in {'update', 'add', 'create'}:
+                current_hash = project.get_source_file_hash()
+                if current_hash == last_hash:
+                    continue
+                last_hash = current_hash
+                click.echo("Change detected in: {e.path}".format(e=event))
+                compile_project_contracts(project, **compile_kwargs)
+    except KeyboardInterrupt:
+        pass

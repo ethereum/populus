@@ -6,162 +6,91 @@ Deploy
 Introduction
 ------------
 
-Deployment is the process of taking your contract source code and creating a
-new smart contract on an ethereum blockchain.  During deployment, some, or all
-of the following may take place.
+The deployment functionality exposed by Populus is meant for one-off
+deployments of simple contracts.  The deployment process includes some, or all
+of the following steps.
 
-* Compilation of source code.
-* Library linking
-* Derivation of deploy order based on contract dependencies.
+1. Selection of which chain should be deployed to.
+2. Running the given chain.
+3. Compilation of project contracts.
+4. Derivation of library dependencies.
+5. Library linking.
+6. Individual contract deployment.
 
 .. note::
 
-    Deployment currently cannot handle 
+    Deployment currently cannot handle contracts that require constructor arguments.
 
 
-Deploying contracts using a command line client
------------------------------------------------
+Deploying Your First Contract
+-----------------------------
+
+Deployment is handled through the ``$ populus deploy`` command.
+
 
 .. code-block:: shell
 
-    $ populus deploy --help
-    Usage: populus deploy [OPTIONS] [CONTRACTS_TO_DEPLOY]...
+	$ populus deploy --help
+	Usage: populus deploy [OPTIONS] [CONTRACTS_TO_DEPLOY]...
 
-      Deploys the specified contracts via the RPC client.
+      Deploys the specified contracts to a chain.
 
-    Options:
-      --confirm / --no-confirm    Bypass any confirmation prompts
-      -c, --chain TEXT            Specify which chain to deploy to.
-      --compile / --no-compile    Should contracts be compiled
-      --optimize / --no-optimize  Should contracts be compiled with the --optimize
-                                  flag.
-      -h, --help                  Show this message and exit.
-
-
-Running ``$ populus deploy`` will deploy all specifed contracts to either the
-default test chain or to a running JSON-RPC server depending on whether
-``--production`` was specified.
-
-If the ``--dry-run`` flag is specified, then the gas value supplied for each
-contract's deployment will be determined based on how much gas was used during
-the dry run deployment.
-
-When using the ``--production`` flag populus will not run the JSON-RPC for you.
-You are expected to have an RPC server running with an unlocked account.  Doing
-a production deploy without ``--dry-run`` is not advisable.  Doing a dry run
-ensures that all of your contracts are deployable as well as allowing the
-production deployment to supply gas values determined from the dry run
-deployments.
-
-.. note::
-
-    When using libraries, populus will try to link your libraries.  This
-    functionality is experimental and could still have bugs.
-
-Deploying contracts programmatically
-------------------------------------
-
-Below is an example how to use web3 to deploy a contract.
-
-.. code-block:: python
-
-    from typing import Optional, Tuple
-
-    from web3 import Web3
-    from web3.contract import _Contract, construct_contract_class
-
-    from populus.utils.transactions import get_contract_address_from_txn
+	Options:
+	  -d, --deploy-from TEXT  Specifies the account that should be used for
+							  deploys.  You can specify either the full account
+							  address, or the integer 0 based index of the account
+							  in the account list.
+	  -c, --chain TEXT        Specifies the chain that contracts should be
+							  deployed to. The chains mainnet' and 'morden' are
+							  pre-configured to connect to the public networks.
+							  Other values should be predefined in your
+							  populus.ini
+	  -h, --help              Show this message and exit.<Paste>
 
 
-    def deploy_contract(
-            web3: Web3,
-            contract_definition: dict,
-            gas=1500000,
-            timeout=60.0,
-            constructor_arguments: Optional[list]=None,
-            from_account=None) -> Tuple[_Contract, str]:
-        """Deploys a single contract using Web3 client.
+Lets deploy a simple Wallet contract.  First we'll need a contract in our
+project ``./contracts`` directory.
 
-        :param web3: Web3 client instance
+.. code-block:: solidity
 
-        :param contract_definition: Dictionary of describing the contract interface,
-            as read from ``contracts.json`` Contains
+	// ./contracts/Wallet.sol
+	contract Wallet {
+		mapping (address => uint) public balanceOf;
 
-        :param gas: Max gas
+		function deposit() {
+			balanceOf[msg.sender] += 1;
+		}
 
-        :param timeout: How many seconds to wait the transaction to
-            confirm to get the contract address.
+		function withdraw(uint value) {
+			if (balanceOf[msg.sender] < value) throw;
+			balanceOf[msg.sender] -= value;
+			if (!msg.sender.call.value(value)()) throw;
+		}
+	}
 
-        :param constructor_arguments: Arguments passed to the smart contract
-            constructor. Automatically encoded through ABI signature.
+We can deploy this contract to a local test chain like thi.
 
-        :param from_account: Geth account that's balance is used for deployment.
-            By default, the gas is spent from Web3 coinbase account. Account must be unlocked.
+.. code-block:: shell
 
-        :return: Tuple containing Contract proxy object and the transaction hash where it was deployed
+	$ populus deploy Wallet -c local_a
+	Beginning contract deployment.  Deploying 1 total contracts (1 Specified, 0 because of library dependencies).
 
-        :raise gevent.timeout.Timeout: If we can't get our contract in a block within given timeout
-        """
+	Wallet
+	Deploying Wallet
+	Deploy Transaction Sent: 0x29e90f07314db495989f03ca931088e1feb7fb0fc13286c1724f11b2d6b239e7
+	Waiting for confirmation...
 
-        # Check we are passed valid contract definition
-        assert "abi" in contract_definition, \
-            "Please pass a valid contract definition dictionary, got {}".format(contract_definition)
-
-        contract_class = construct_contract_class(
-            web3=web3,
-            abi=contract_definition["abi"],
-            code=contract_definition["code"],
-            code_runtime=contract_definition["code_runtime"],
-            source=contract_definition["source"],
-                )
-
-        if not from_account:
-            from_account = web3.eth.coinbase
-
-        # Set transaction parameters
-        transaction = {
-            "gas": gas,
-            "from": from_account,
-        }
-
-        # Call web3 to deploy the contract
-        txn_hash = contract_class.deploy(transaction, constructor_arguments)
-
-        # Wait until we get confirmation and address
-        address = get_contract_address_from_txn(web3, txn_hash, timeout=timeout)
-
-        # Create Contract proxy object
-        contract = contract_class(
-            address=address,
-            abi=contract_definition["abi"],
-            code=contract_definition["code"],
-            code_runtime=contract_definition["code_runtime"],
-            source=contract_definition["source"])
-
-        return contract, txn_hash
+	Transaction Mined
+	=================
+	Tx Hash      : 0x29e90f07314db495989f03ca931088e1feb7fb0fc13286c1724f11b2d6b239e7
+	Address      : 0xb6fac5cb309da4d984bb6145078104355ece96ca
+	Gas Provided : 267699
+	Gas Used     : 167699
 
 
-Funding deployed contract
--------------------------
+	Verifying deployed bytecode...
+	Verified contract bytecode @ 0xb6fac5cb309da4d984bb6145078104355ece96ca matches expected runtime bytecode
+	Registering contract 'Wallet' @ 0xb6fac5cb309da4d984bb6145078104355ece96ca in registrar in txn: 0xca91ff346d63d9cec452ba94d8b2e650d8169b9b14fdf5ca76f770c1ce3a997f ... DONE
+	Deployment Successful.
 
-Below is an example how to fund a deployed contract.
-This is mainly aimed for testing.
-
-.. code-block:: python
-
-    def send_balance_to_contract(contract: Contract, value: Decimal) -> str:
-        """Send balance from geth coinbase to the contract.
-
-        :param contract: Contract instance with an address
-
-        :param value: How much to send
-
-        :return: Transaction hash of the send operation
-        """
-        web3 = contract.web3
-        tx = {
-            "from": web3.eth.coinbase,
-            "to": contract.address,
-            "value": to_wei(value)
-        }
-        return web3.eth.sendTransaction(tx)
+Above you can see the standard output for a basic deployment.

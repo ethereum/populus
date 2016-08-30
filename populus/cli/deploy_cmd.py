@@ -68,7 +68,7 @@ def echo_post_deploy_message(web3, deployed_contracts):
 @click.pass_context
 def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
     """
-    Deploys the specified contracts via the RPC client.
+    Deploys the specified contracts to a chain.
     """
     project = ctx.obj['PROJECT']
 
@@ -200,6 +200,6 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
 
         # TODO: fix this message.
         success_msg = (
-            "Deployment Successful.",
+            "Deployment Successful."
         )
         click.echo(success_msg)

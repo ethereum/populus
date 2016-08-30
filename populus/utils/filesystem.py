@@ -1,8 +1,13 @@
 import os
+import sys
 import shutil
 import fnmatch
 import tempfile
 import contextlib
+
+
+if sys.version_info.major == 2:
+    FileNotFoundError = OSError
 
 
 def ensure_path_exists(dir_path):

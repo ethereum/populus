@@ -61,12 +61,9 @@ def load_project_migrations(project_dir):
         reload(import_module(migration_base_path))
 
     migration_modules = [
-        import_module(module_path)
+        reload(import_module(module_path))
         for module_path in migration_module_paths
     ]
-
-    for migration_module in migration_modules:
-        reload(migration_module)
 
     migration_classes = [
         getattr(migration_module, 'Migration')

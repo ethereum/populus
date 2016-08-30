@@ -34,7 +34,6 @@ setup(
         "py-solc>=0.4.0",
         "pysha3>=0.3",
         "pytest>=2.7.2",
-        "requests>=2.7.0",
         "toposort>=1.4",
         "watchdog>=0.8.3",
         "web3>=2.0.0",

@@ -15,6 +15,7 @@ from populus.utils.cli import (
     get_unlocked_deploy_from_address,
 )
 from populus.chain import (
+    BaseGethChain,
     reset_chain,
 )
 
@@ -70,10 +71,9 @@ def chain_run(ctx, chain_name, mine, verbosity):
 
     chain = project.get_chain(chain_name)
 
-    # TODO: the chain should implement this method so that it's accessible
-    # on non-geth based backents.
-    chain.geth.register_stdout_callback(click.echo)
-    chain.geth.register_stderr_callback(functools.partial(click.echo, err=True))
+    if isinstance(chain, BaseGethChain):
+        chain.geth.register_stdout_callback(click.echo)
+        chain.geth.register_stderr_callback(functools.partial(click.echo, err=True))
 
     with chain:
         try:

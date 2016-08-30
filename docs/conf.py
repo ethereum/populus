@@ -25,7 +25,21 @@ class Mock(MagicMock):
             return Mock()
 
 
-MOCK_MODULES = ['pygtk', 'gtk', 'gobject', 'argparse', 'numpy', 'pandas']
+MOCK_MODULES = [
+    'click',
+    'configparser',
+    'contextlib2',
+    'testrpc',
+    'eth_tester_client',
+    'gevent',
+    'geth',
+    'solc',
+    'pysha3',
+    'pytest',
+    'toposort',
+    'watchdog',
+    'web3',
+]
 
 sys.modules.update(
     (mod_name, Mock()) for mod_name in MOCK_MODULES
@@ -67,7 +81,7 @@ copyright = u'2014, Piper Merriam'
 # built documents.
 #
 # The short X.Y version.
-version = '1.0.0'
+version = '1.0'
 # The full version, including alpha/beta/rc tags.
 release = '1.0.0'
 

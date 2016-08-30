@@ -16,6 +16,7 @@
   Migrations API.
 - New `populus config`, `populus config:set` and `populus config:unset` commands.
 - New `populus.chain.ExternalChain` object for running external chains.
+- New `Chain` contracts API for accessing previously deployed instances of a contract.
 
 0.8.0
 -----

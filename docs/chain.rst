@@ -295,6 +295,12 @@ contracts.
     ``get_contract_factory`` with the added condition that the bytecode for the
     requested contract will also be checked.
 
+    .. note::
+        
+        When using a ``TestRPCChain`` the ``get_contract`` method will lazily
+        deploy your contracts for you.  This lazy deployment will only work for
+        simple contracts which do not require constructor arguments.
+
 
 ** ``Chain.is_contract_available(contract_name[, link_dependencies=None, validate_bytecode=True, raise_on_error=False])``
 

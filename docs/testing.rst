@@ -123,7 +123,7 @@ with the Web3 instance from the ``web3`` fixture.
 
 
 Accounts
---------
+~~~~~~~~
 
 * ``accounts``
 
@@ -134,3 +134,40 @@ The ``web3.eth.accounts`` property off of the ``web3`` fixture
 
     def test_accounts(web3, accounts):
         assert web3.eth.coinbase == accounts[0]
+
+
+Custom Fixtures
+---------------
+
+The built in fixtures for accessing contracts are useful for simple contracts,
+but this is often not sufficient for more complex contracts.  In these cases you can create you own fixtures to build on top of the ones provided by Populus.
+
+One common case is a contract that needs to be given constructor arguments.
+Lets make a fixture for a token contract that requires a constructor argument
+to set the initial supply.
+
+.. code-block:: python
+
+    import pytest
+
+    from populus.utils.transactions import (
+        get_contract_address_from_txn,
+    )
+
+    @pytest.fixture
+    def token_contract(web3, chain):
+        TokenFactory = chain.get_contract_factory('Token')
+        deploy_txn_hash = TokenFactory.deploy(arguments=[
+            1e18,  # initial token supply
+        )
+        contract_address = get_contract_address_from_txn(web3, deploy_txn_hash)
+        return TokenFactory(address=contract_address)
+
+
+Now, you can use this fixture in your tests the same way you use the built-in
+populus fixtures.
+
+.. code-block:: python
+
+    def test_initial_supply(token_contract):
+        assert token_contract.call().totalSupply() == 1e18

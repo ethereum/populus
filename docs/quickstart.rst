@@ -65,21 +65,20 @@ Populus can initialize your project using the ``$ populus init`` command.
 
     $ populus init
     Created Directory: ./contracts
-    Created Example Contract: ./contracts/Example.sol
+    Created Example Contract: ./contracts/Greeter.sol
     Created Directory: ./tests
-    Created Example Tests: ./tests/test_example.py
+    Created Example Tests: ./tests/test_greeter.py
 
 
 Your project will now have a ``./contracts`` directory with a single Solidity
-source file in it named ``Example.sol``, as well as a ``./tests`` directory
-with a single test file named ``test_example.py``.
+source file in it named ``Greeter.sol``, as well as a ``./tests`` directory
+with a single test file named ``test_greeter.py``.
 
 Compiling your contracts
 ------------------------
 
-Before we compile our project, lets modify the example contract a little to
-make it more interesting.  Modify the ``Example.sol`` file to have the
-following contents.
+Before you compile our project, lets take a look at the ``Greeter`` contract
+that is generated as part of the project initialization.
 
 
 .. code-block:: solidity
@@ -87,11 +86,11 @@ following contents.
     contract Greeter {
         string public greeting;
 
-        function Example() {
+        function Greeter() {
             greeting = "Hello!";
         }
 
-        function changeGreeting(string _greeting) public {
+        function setGreeting(string _greeting) public {
             greeting = _greeting;
         }
 
@@ -100,50 +99,63 @@ following contents.
         }
     }
 
+``Greeter`` is simple contract that is initialized with a default greeting of
+the string ``'Hello!'``.  It exposes the ``greetMe`` function which returns
+whatever string is set as the greeting, as well as a ``setGreeting`` function
+which allows the greeting to be changed.
 
-We can now compile our contract using ``$ populus compile``
+You can now compile the contract using ``$ populus compile``
 
 
 .. code-block:: shell
 
     $ populus compile
     ============ Compiling ==============
-    > Loading contracts from: ./contracts
+    > Loading source files from: ./contracts
+
     > Found 1 contract source files
-    - contracts/Example.sol
+    - contracts/Greeter.sol
 
     > Compiled 1 contracts
     - Greeter
 
-    > Outfile: ./build/contracts.json
+    > Wrote compiled assets to: ./build/contracts.json
 
 
-
-
-Usage
------
-
-See :doc:`usage`.
-
-Tutorial
---------
-
-See :doc:`tutorial`.
-
-Compile
--------
-
-See :doc:`compile`.
-
-Blockchain management
+Testing your contract
 ---------------------
 
-See :doc:`chain`.
+Now that you have a basic contract you'll want to test that it behaves as
+expected.  The project should already have a test module named
+``test_greeter.py`` located in the ``./tests`` directory that looks like the
+following.
 
-DApp development environment
-----------------------------
+.. code-block:: python
 
-See :doc:`devenv`.
+    from populus.utils.transactions import (
+        wait_for_transaction_receipt,
+    )
+
+
+    def test_greeter(web3, chain):
+        greeter = chain.get_contract('Greeter')
+
+        greeting = greeter.call().greetMe()
+        assert greeting == 'Hello!'
+
+
+    def test_custom_greeting(web3, chain):
+        greeter = chain.get_contract('Greeter')
+
+        set_txn_hash = greeter.transact().setGreeting('Guten Tag!')
+        wait_for_transaction_receipt(web3, set_txn_hash)
+
+        greeting = greeter.call().greetMe()
+        assert greeting == 'Guten Tag!'
+
+
+You should see two tests, one that tests the default greeting, and one that
+tests that we can set a custom greeting.
 
 
 .. _Go Ethereum: https://github.com/ethereum/go-ethereum/

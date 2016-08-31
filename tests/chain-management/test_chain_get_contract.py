@@ -3,6 +3,7 @@ import pytest
 from populus.utils.transactions import (
     wait_for_transaction_receipt,
     get_contract_address_from_txn,
+    wait_for_unlock,
 )
 from populus.utils.contracts import (
     link_bytecode,
@@ -15,7 +16,7 @@ from populus import Project
 
 
 @pytest.yield_fixture()
-def testrpc_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
+def temp_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
     write_project_file('contracts/Math.sol', MATH['source'])
     write_project_file(
         'contracts/Multiply13.sol',
@@ -28,16 +29,17 @@ def testrpc_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13
     assert 'Library13' in project.compiled_contracts
     assert 'Multiply13' in project.compiled_contracts
 
-    with project.get_chain('testrpc') as chain:
+    with project.get_chain('temp') as chain:
+        wait_for_unlock(chain.web3, chain.web3.eth.coinbase)
         yield chain
 
 
 @pytest.fixture()
-def math(testrpc_chain):
-    web3 = testrpc_chain.web3
+def math(temp_chain):
+    web3 = temp_chain.web3
 
-    Math = testrpc_chain.contract_factories.Math
-    MATH = testrpc_chain.project.compiled_contracts['Math']
+    Math = temp_chain.contract_factories.Math
+    MATH = temp_chain.project.compiled_contracts['Math']
 
     math_deploy_txn_hash = Math.deploy()
     math_deploy_txn = web3.eth.getTransaction(math_deploy_txn_hash)
@@ -50,11 +52,11 @@ def math(testrpc_chain):
 
 
 @pytest.fixture()
-def library_13(testrpc_chain):
-    web3 = testrpc_chain.web3
+def library_13(temp_chain):
+    web3 = temp_chain.web3
 
-    Library13 = testrpc_chain.contract_factories.Library13
-    LIBRARY_13 = testrpc_chain.project.compiled_contracts['Library13']
+    Library13 = temp_chain.contract_factories.Library13
+    LIBRARY_13 = temp_chain.project.compiled_contracts['Library13']
 
     library_deploy_txn_hash = Library13.deploy()
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
@@ -67,8 +69,8 @@ def library_13(testrpc_chain):
 
 
 @pytest.fixture()
-def multiply_13(testrpc_chain, library_13):
-    chain = testrpc_chain
+def multiply_13(temp_chain, library_13):
+    chain = temp_chain
     web3 = chain.web3
 
     Multiply13 = chain.contract_factories['Multiply13']
@@ -94,19 +96,19 @@ def multiply_13(testrpc_chain, library_13):
 
 
 @pytest.fixture()
-def register_address(testrpc_chain):
+def register_address(temp_chain):
     def _register_address(name, value):
-        register_txn_hash = testrpc_chain.registrar.transact().setAddress(
+        register_txn_hash = temp_chain.registrar.transact().setAddress(
             'contract/{name}'.format(name=name), value,
         )
-        wait_for_transaction_receipt(testrpc_chain.web3, register_txn_hash, 120)
+        wait_for_transaction_receipt(temp_chain.web3, register_txn_hash, 120)
     return _register_address
 
 
-def test_getting_contract_with_no_dependencies(testrpc_chain,
+def test_getting_contract_with_no_dependencies(temp_chain,
                                                math,
                                                register_address):
-    chain = testrpc_chain
+    chain = temp_chain
 
     register_address('Math', math.address)
 
@@ -114,17 +116,17 @@ def test_getting_contract_with_no_dependencies(testrpc_chain,
     assert math.call().multiply7(3) == 21
 
 
-def test_getting_contract_when_not_registered(testrpc_chain):
-    chain = testrpc_chain
+def test_getting_contract_when_not_registered(temp_chain):
+    chain = temp_chain
 
     with pytest.raises(NoKnownAddress):
         chain.get_contract('Math')
 
 
-def test_getting_contract_with_missing_dependency(testrpc_chain,
+def test_getting_contract_with_missing_dependency(temp_chain,
                                                   multiply_13,
                                                   register_address):
-    chain = testrpc_chain
+    chain = temp_chain
 
     register_address('Multiply13', multiply_13.address)
 
@@ -132,11 +134,11 @@ def test_getting_contract_with_missing_dependency(testrpc_chain,
         chain.get_contract('Multiply13')
 
 
-def test_getting_contract_with_bytecode_mismatch(testrpc_chain,
+def test_getting_contract_with_bytecode_mismatch(temp_chain,
                                                  library_13,
                                                  math,
                                                  register_address):
-    chain = testrpc_chain
+    chain = temp_chain
 
     register_address('Math', library_13.address)
 
@@ -144,22 +146,22 @@ def test_getting_contract_with_bytecode_mismatch(testrpc_chain,
         chain.get_contract('Math')
 
 
-def test_get_contract_skipping_bytecode_validation(testrpc_chain,
+def test_get_contract_skipping_bytecode_validation(temp_chain,
                                                    library_13,
                                                    math,
                                                    register_address):
-    chain = testrpc_chain
+    chain = temp_chain
 
     register_address('Math', library_13.address)
 
     math = chain.get_contract('Math', validate_bytecode=False)
 
 
-def test_get_contract_with_bytecode_mismatch_on_dependency(testrpc_chain,
+def test_get_contract_with_bytecode_mismatch_on_dependency(temp_chain,
                                                            multiply_13,
                                                            math,
                                                            register_address):
-    chain = testrpc_chain
+    chain = temp_chain
 
     register_address('Multiply13', multiply_13.address)
     register_address('Library13', math.address)
@@ -168,11 +170,11 @@ def test_get_contract_with_bytecode_mismatch_on_dependency(testrpc_chain,
         chain.get_contract('Multiply13')
 
 
-def test_get_contract_with_dependency(testrpc_chain,
+def test_get_contract_with_dependency(temp_chain,
                                       multiply_13,
                                       library_13,
                                       register_address):
-    chain = testrpc_chain
+    chain = temp_chain
 
     register_address('Multiply13', multiply_13.address)
     register_address('Library13', library_13.address)
@@ -181,11 +183,11 @@ def test_get_contract_with_dependency(testrpc_chain,
     assert multiply_13.call().multiply13(3) == 39
 
 
-def test_get_contract_with_declared_dependency(testrpc_chain,
+def test_get_contract_with_declared_dependency(temp_chain,
                                                multiply_13,
                                                library_13,
                                                register_address):
-    chain = testrpc_chain
+    chain = temp_chain
 
     register_address('Multiply13', multiply_13.address)
 

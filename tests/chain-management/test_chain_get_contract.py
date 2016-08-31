@@ -103,8 +103,9 @@ def register_address(testrpc_chain):
     return _register_address
 
 
-
-def test_getting_contract_with_no_dependencies(testrpc_chain, math, register_address):
+def test_getting_contract_with_no_dependencies(testrpc_chain,
+                                               math,
+                                               register_address):
     chain = testrpc_chain
 
     register_address('Math', math.address)

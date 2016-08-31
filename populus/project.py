@@ -126,14 +126,17 @@ class Project(object):
     _cached_compiled_contracts_hash = None
     _cached_compiled_contracts = None
 
-    @property
-    def compiled_contracts(self):
+    def get_source_file_hash(self):
         source_file_paths = find_project_contracts(self.project_dir)
-        source_hash = hashlib.md5(b''.join(
+        return hashlib.md5(b''.join(
             open(source_file_path, 'rb').read()
             for source_file_path
             in source_file_paths
         )).hexdigest()
+
+    @property
+    def compiled_contracts(self):
+        source_hash = self.get_source_file_hash()
 
         if self._cached_compiled_contracts_hash != source_hash:
             self._cached_compiled_contracts_hash = source_hash

@@ -35,7 +35,6 @@ setup(
         "pysha3>=0.3",
         "pytest>=2.7.2",
         "toposort>=1.4",
-        "watchdog>=0.8.3",
         "web3>=2.1.0",
     ],
     license="MIT",

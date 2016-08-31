@@ -1,16 +1,10 @@
-import os
-import random
-
 import gevent
 
 import click
 
-from populus.compilation import (
-    get_contracts_dir,
-    compile_and_write_contracts,
-)
-from populus.observers import (
-    get_contracts_observer,
+from populus.utils.cli import (
+    compile_project_contracts,
+    watch_project_contracts,
 )
 
 from .main import main
@@ -30,7 +24,8 @@ from .main import main
     is_flag=True,
     help="Enable compile time optimization",
 )
-def compile_contracts(watch, optimize):
+@click.pass_context
+def compile_contracts(ctx, watch, optimize):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -40,35 +35,14 @@ def compile_contracts(watch, optimize):
     Pass in a file path and a contract name separated by a colon(":") to
     specify only named contracts in the specified file.
     """
-    project_dir = os.getcwd()
+    project = ctx.obj['PROJECT']
 
-    click.echo("============ Compiling ==============")
-    click.echo("> Loading contracts from: {0}".format(get_contracts_dir(project_dir)))
-
-    result = compile_and_write_contracts(project_dir, optimize=optimize)
-    contract_source_paths, compiled_sources, output_file_path = result
-
-    click.echo("> Found {0} contract source files".format(
-        len(contract_source_paths)
-    ))
-    for path in contract_source_paths:
-        click.echo("- {0}".format(os.path.relpath(path)))
-    click.echo("")
-    click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
-    for contract_name in sorted(compiled_sources.keys()):
-        click.echo("- {0}".format(contract_name))
-    click.echo("")
-    click.echo("> Outfile: {0}".format(output_file_path))
+    compile_project_contracts(project, optimize=True)
 
     if watch:
-        # The path to watch
-        click.echo("============ Watching ==============")
-
-        observer = get_contracts_observer(project_dir, {'optimize': optimize})
-        observer.start()
-        try:
-            while observer.is_alive():
-                gevent.sleep(random.random())
-        except KeyboardInterrupt:
-            observer.stop()
-        observer.join()
+        thread = gevent.spawn(
+            watch_project_contracts,
+            project=project,
+            optimize=True,
+        )
+        thread.join()

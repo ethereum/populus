@@ -394,7 +394,7 @@ class ExternalChain(Chain):
 
         if provider_class == RPCProvider:
             host = kwargs.pop('host', '127.0.0.1')
-            port = kwargs.pop('port', 8545)
+            port = int(kwargs.pop('port', 8545))
             provider = provider_class(host=host, port=port)
         elif provider_class == IPCProvider:
             ipc_path = kwargs.pop('ipc_path', None)

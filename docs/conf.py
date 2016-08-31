@@ -26,19 +26,9 @@ class Mock(MagicMock):
 
 
 MOCK_MODULES = [
-    'click',
-    'configparser',
-    'contextlib2',
     'testrpc',
     'eth_tester_client',
-    'gevent',
-    'geth',
-    'solc',
-    'pysha3',
-    'pytest',
-    'toposort',
-    'watchdog',
-    'web3',
+    'sha3',
 ]
 
 sys.modules.update(

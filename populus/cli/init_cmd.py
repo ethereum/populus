@@ -9,6 +9,47 @@ from populus.utils.filesystem import (
 from .main import main
 
 
+TEST_FILE_CONTENTS = """from populus.utils.transactions import (
+    wait_for_transaction_receipt,
+)
+
+
+def test_greeter(web3, chain):
+    greeter = chain.get_contract('Greeter')
+
+    greeting = greeter.call().greetMe()
+    assert greeting == 'Hello!'
+
+
+def test_custom_greeting(web3, chain):
+    greeter = chain.get_contract('Greeter')
+
+    set_txn_hash = greeter.transact().setGreeting('Guten Tag!')
+    wait_for_transaction_receipt(web3, set_txn_hash)
+
+    greeting = greeter.call().greetMe()
+    assert greeting == 'Guten Tag!'
+"""
+
+
+GREETER_FILE_CONTENTS = """contract Greeter {
+    string public greeting;
+
+    function Greeter() {
+        greeting = "Hello!";
+    }
+
+    function setGreeting(string _greeting) public {
+        greeting = _greeting;
+    }
+
+    function greetMe() constant returns (string) {
+        return greeting;
+    }
+}
+"""
+
+
 @main.command()
 @click.pass_context
 def init(ctx):
@@ -31,12 +72,10 @@ def init(ctx):
             )
         )
 
-    example_contract_path = os.path.join(project.contracts_dir, 'Example.sol')
+    example_contract_path = os.path.join(project.contracts_dir, 'Greeter.sol')
     if not os.path.exists(example_contract_path):
         with open(example_contract_path, 'w') as example_contract_file:
-            example_contract_file.write(
-                'contract Example {\n    function Example() {\n    }\n}\n'
-            )
+            example_contract_file.write(GREETER_FILE_CONTENTS)
         click.echo("Created Example Contract: ./{0}".format(
             os.path.relpath(example_contract_path)
         ))
@@ -45,10 +84,10 @@ def init(ctx):
     if ensure_path_exists(tests_dir):
         click.echo("Created Directory: ./{0}".format(os.path.relpath(tests_dir)))
 
-    example_tests_path = os.path.join(tests_dir, 'test_example.py')
+    example_tests_path = os.path.join(tests_dir, 'test_greeter.py')
     if not os.path.exists(example_tests_path):
         with open(example_tests_path, 'w') as example_tests_file:
-            example_tests_file.write('def test_it(deployed_contracts):\n    example = deployed_contracts.Example\n    assert example.address\n')  # NOQA
+            example_tests_file.write(TEST_FILE_CONTENTS)
         click.echo("Created Example Tests: ./{0}".format(
             os.path.relpath(example_tests_path)
         ))

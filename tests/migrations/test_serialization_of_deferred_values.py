@@ -10,7 +10,7 @@ from populus.migrations.writer import (
 )
 
 
-class TestDeferred(DeferredValue):
+class Deferred(DeferredValue):
     a = None
     b = None
     c = None
@@ -27,9 +27,9 @@ class TestDeferred(DeferredValue):
 )\n""",
         ),
         (
-            TestDeferred.defer(c=4),
+            Deferred.defer(c=4),
             {__name__},
-            """{module_part}.TestDeferred.defer(
+            """{module_part}.Deferred.defer(
     c=4,
 )\n""".format(module_part=__name__),
         ),

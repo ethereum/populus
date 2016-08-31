@@ -394,6 +394,8 @@ class ExternalChain(Chain):
 
         if provider_class == RPCProvider:
             host = kwargs.pop('host', '127.0.0.1')
+            # TODO: this integer casting needs to be done downstream in
+            # web3.py.
             port = int(kwargs.pop('port', 8545))
             provider = provider_class(host=host, port=port)
         elif provider_class == IPCProvider:

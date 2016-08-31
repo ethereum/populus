@@ -73,6 +73,6 @@ def test_makemigration_works_with_no_contracts(project_dir):
 
     m1 = project.migrations[0]
 
-    assert m1.migration_id == '0001_initial'
+    assert m1.migration_id == '0001_my_first_migration'
     assert m1.dependencies == []
     assert m1.compiled_contracts == {}

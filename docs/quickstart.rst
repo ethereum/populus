@@ -87,20 +87,20 @@ that is generated as part of the project initialization.
         string public greeting;
 
         function Greeter() {
-            greeting = "Hello!";
+            greeting = "Hello";
         }
 
         function setGreeting(string _greeting) public {
             greeting = _greeting;
         }
 
-        function greetMe() constant returns (string) {
+        function greet() constant returns (string) {
             return greeting;
         }
     }
 
 ``Greeter`` is simple contract that is initialized with a default greeting of
-the string ``'Hello!'``.  It exposes the ``greetMe`` function which returns
+the string ``'Hello'``.  It exposes the ``greet`` function which returns
 whatever string is set as the greeting, as well as a ``setGreeting`` function
 which allows the greeting to be changed.
 
@@ -136,22 +136,20 @@ following.
         wait_for_transaction_receipt,
     )
 
-
     def test_greeter(web3, chain):
         greeter = chain.get_contract('Greeter')
 
-        greeting = greeter.call().greetMe()
-        assert greeting == 'Hello!'
-
+        greeting = greeter.call().greet()
+        assert greeting == 'Hello'
 
     def test_custom_greeting(web3, chain):
         greeter = chain.get_contract('Greeter')
 
-        set_txn_hash = greeter.transact().setGreeting('Guten Tag!')
+        set_txn_hash = greeter.transact().setGreeting('Guten Tag')
         wait_for_transaction_receipt(web3, set_txn_hash)
 
-        greeting = greeter.call().greetMe()
-        assert greeting == 'Guten Tag!'
+        greeting = greeter.call().greet()
+        assert greeting == 'Guten Tag'
 
 
 You should see two tests, one that tests the default greeting, and one that

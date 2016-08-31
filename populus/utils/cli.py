@@ -216,7 +216,7 @@ def configure_chain(project, chain_name):
         "Writing configuration to {0} ...".format(project.primary_config_file_path)
     )
     project.write_config()
-    click.echo("Sucess!")
+    click.echo("Success!")
 
 
 def request_account_unlock(chain, account, timeout):

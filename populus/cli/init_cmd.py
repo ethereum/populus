@@ -17,18 +17,18 @@ TEST_FILE_CONTENTS = """from populus.utils.transactions import (
 def test_greeter(web3, chain):
     greeter = chain.get_contract('Greeter')
 
-    greeting = greeter.call().greetMe()
-    assert greeting == 'Hello!'
+    greeting = greeter.call().greet()
+    assert greeting == 'Hello'
 
 
 def test_custom_greeting(web3, chain):
     greeter = chain.get_contract('Greeter')
 
-    set_txn_hash = greeter.transact().setGreeting('Guten Tag!')
+    set_txn_hash = greeter.transact().setGreeting('Guten Tag')
     wait_for_transaction_receipt(web3, set_txn_hash)
 
-    greeting = greeter.call().greetMe()
-    assert greeting == 'Guten Tag!'
+    greeting = greeter.call().greet()
+    assert greeting == 'Guten Tag'
 """
 
 
@@ -36,14 +36,14 @@ GREETER_FILE_CONTENTS = """contract Greeter {
     string public greeting;
 
     function Greeter() {
-        greeting = "Hello!";
+        greeting = 'Hello';
     }
 
     function setGreeting(string _greeting) public {
         greeting = _greeting;
     }
 
-    function greetMe() constant returns (string) {
+    function greet() constant returns (string) {
         return greeting;
     }
 }

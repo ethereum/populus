@@ -1,7 +1,6 @@
 Testing
 =======
 
-.. contents:: :local:
 
 Introduction
 ------------
@@ -10,112 +9,128 @@ The Populus framework provides some powerful utilities for testing your
 contracts.  Testing in Populus is powered by the python testing framework
 ``py.test``.
 
-Your tests can be run against any of the various chains that Populus supports,
-including test chains backed by the go-ethereum client, the eth-testrpc EVM
-backed by the ``pyethereum.tester`` EVM, or even the public ethereum networks
-if you were to so choose.
+All tests are run against an in-memory blockchain from ``pyethereum.tester``.
 
+The convention for tests is to place them in the ``./tests/`` directory in the
+root of your project.  In order for ``py.test`` to find your tests modules
+their module name must start with ``test_``.
 
-Quick Example
--------------
+Running Tests With Pytest
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Lets write a test for the following simple contract.
-
-::
-
-    # ./contracts/Math.sol
-    contract Math {
-            function add(int a, int b) public returns (int result){
-                result = a + b;
-                return result;
-            }
-
-            function multiply7(int a) public returns (int result){
-                result = a * 7;
-                return result;
-            }
-
-            function return13() public returns (int result) {
-                result = 13;
-                return result;
-            }
-    }
-
-While you may locate your tests anywhere you would like, Populus projects
-default to using the ``./tests`` directory.  Test files within this directory
-need to be valid python modules that begin with ``test_`` in order for
-``py.test`` to find them.
-
-::
-
-    # ./tests/test_math.py
-
-    def test_contracts_has_correct_functions(contracts):
-        assert contracts.Math
-        # Check that our contract has all of the expected functions.
-        assert hasattr(contracts.Math, 'add')
-        assert hasattr(contracts.Math, 'multiply7')
-        assert hasattr(contracts.Math, 'return13')
-
-
-    def test_contract_function_return_values(eth_coinbase, deployed_contracts):
-        math = deployed_contracts.Math
-        # Check that our functions compute the expected values.
-        assert math.add.call(11, 12, _from=eth_coinbase) == 23
-        assert math.multiply7.call(11, _from=eth_coinbase) == 77
-        assert math.return13.call(_from=eth_coinbase) == 13
-
-
-The code above declares two tests, ``test_contracts_has_correct_functions`` and
-``test_contract_function_return_values``.  We can run these tests with the
-``test`` command.
-
+To run the full test suite of your project:
 
 .. code-block:: shell
 
-    $ py.test -v
-    =================================== test session starts ===================================
-    platform darwin -- Python 2.7.10 -- py-1.4.30 -- pytest-2.7.2 -- /usr/bin/python
-    rootdir: /path/to/my-project, inifile: pytest.ini
-    plugins: populus, capturelog, timeout
-    collected 2 items
-
-    tests/test_example.py::test_contracts_has_correct_functions PASSED
-    tests/test_example.py::test_contract_function_return_values PASSED
-
-    ================================ 2 passed in 0.82 seconds =================================
-
-In the tests above, you may have noticed the use of the pytest fixtures
-``eth_coinbase``, ``contracts`` and ``deployed_contracts``.  These are provided
-by ``populus`` to help make testing contracts easier.
+    $ py.test tests/
 
 
-Creating new accounts
----------------------
+Or to run a specific test
 
-You might want to create new Geth accounts to test ETH transfers between accounts and your contracts. Populus internally uses `PyGeth <https://github.com/pipermerriam/py-geth>`_ library for Geth account management.
+.. code-block:: shell
 
-Example (Python 3):
+    $ py.test tests/test_greeter.py
+
+
+Fixtures
+--------
+
+The test fixtures provided by populus are what make testing easy.  In order to
+use a fixture in your tests all you have to do add an argument with the same
+name to the signature of your test function.
+ 
+
+
+Project
+~~~~~~~
+
+* ``project``
+
+The ``populus.project.Project`` object for your project.
+
 
 .. code-block:: python
 
-    import pytest
+    def test_project_things(project):
+        # directory things
+        assert project.project_dir == '/path/to/my/project'
 
-    from eth_rpc_client import Client
-    from geth.accounts import create_new_account
-
-
-    @pytest.fixture
-    def target_account(client: Client) -> str:
-        """Create external, non-database Ethereum account, that can be used as a withdrawal target.
-
-        :return: 0x address of the account
-        """
-
-        # We store keystore files in the current working directory
-        # of the test run
-        data_dir = os.getcwd()
-        account = create_new_account(data_dir, password="")
-        return account
+        # raw compiled contract access
+        assert 'MyContract' in project.compiled_contracts
 
 
+Chain
+~~~~~
+
+* ``chain``
+
+The ``'testrpc'`` test chain.
+
+
+.. code-block:: python
+
+    def test_greeter(chain):
+        greeter = chain.get_contract('Greeter')
+
+        assert greeter.call().greet() == "Hello"
+
+    def test_deploying_greeter(chain):
+        GreeterFactory = chain.get_contract_factory('Greeter')
+        deploy_txn_hash = GreeterFactory.deploy()
+        ...
+
+
+Web3
+~~~~
+
+* ``web3``
+
+A Web3.py instance configured to connect to ``chain`` fixture.
+
+.. code-block:: python
+
+    def test_account_balance(web3, chain):
+        initial_balance = web3.eth.getBalance(web3.eth.coinbase)
+        wallet = chain.get_contract('Wallet')
+
+        withdraw_txn_hash = wallet.transact().withdraw(12345)
+        after_balance = web3.eth.getBalance(web3.eth.coinbase)
+
+        assert after_balance - initial_balance == 1234
+
+
+Contracts
+~~~~~~~~~
+
+* ``contracts``
+
+The contract factory classes for your project.  These will all be associated
+with the Web3 instance from the ``web3`` fixture.
+
+.. code-block:: python
+
+    def test_wallet_deployment(web3, contracts):
+        WalletFactory = contracts.Wallet
+
+        deploy_txn_hash = WalletFactory.deploy()
+
+.. note::
+
+    For contracts that have library dependencies, you should use the
+    ``Chain.get_contract_factory(...)`` api.  The contract factories from the
+    ``contracts`` fixture will not be returned with linked bytecode.  The ones
+    from ``Chain.get_contract_factory()`` are returned fully linked.
+
+
+Accounts
+--------
+
+* ``accounts``
+
+The ``web3.eth.accounts`` property off of the ``web3`` fixture
+
+
+.. code-block:: python
+
+    def test_accounts(web3, accounts):
+        assert web3.eth.coinbase == accounts[0]

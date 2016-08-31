@@ -6,13 +6,35 @@ Overview
 Introduction
 ------------
 
-Populus provides `populus` command line command and `populus` package. Besides this, Populus interally uses and exposes
+The primary interface to populus is the command line command ``$ populus``.
 
-* `web3.py <https://github.com/pipermerriam/web3.py>`__
 
-* `py-solc <https://github.com/pipermerriam/py-solc>`__
+Command Line Options
+--------------------
 
-* `py-geth <https://github.com/pipermerriam/py-geth>`__
+.. code-block:: shell
+
+    $ populus
+    Usage: populus [OPTIONS] COMMAND [ARGS]...
+
+      Populus
+
+    Options:
+      -c, --config FILENAME  Specify a populus configuration file to be used.  No
+                             other configuration files will be loaded
+      -h, --help             Show this message and exit.
+
+    Commands:
+      chain          Manage and run ethereum blockchains.
+      compile        Compile project contracts, storing their...
+      config         Print the current project configuration
+      config:set     Sets key/value pairs in the populus.ini...
+      config:unset   Deletes the provided keys from the...
+      deploy         Deploys the specified contracts to a chain.
+      init           Generate project layout with an example...
+      makemigration  Generate an empty migration.
+      migrate        Run project migrations
+
 
 Project Layout
 --------------
@@ -21,89 +43,38 @@ By default Populus expects a project to be layed out as follows.
 
 .. code-block:: shell
 
-    ├── project root
-    │   ├── build
-    │   │   └── contracts.json
-    │   ├── contracts
-    │   |   ├── MyContract.sol
-    |   |   ├── ....
-    │   ├── libraries
-    │   |   ├── MyLibrary.sol
-    |   |   ├── ....
-    │   ├── tests
-    │   |   ├── test_my_contract.py
-    │   |   ├── test_some_other_tests.py
-    |   |   ├── ....
-    │   ├── html
-    │   │   └── index.html
-    │   └── assets
-    │       └── ....
-
-
-Command Line Options
---------------------
-
-.. code-block:: shell
-
-    $ populus --help
-    Usage: populus [OPTIONS] COMMAND [ARGS]...
-
-    Options:
-      --help  Show this message and exit.
-
-    Commands:
-      attach   Enter a python shell with contracts and...
-      chain    Wrapper around `geth`.
-      compile  Compile project contracts, storing their...
-      deploy   Deploy contracts.
-      init     Generate project layout with an example...
-      web      HTML/CSS/JS tooling.
+    └── project root
+        ├── build (automatically created during compilation)
+        │   └── contracts.json
+        ├── contracts
+        |   ├── MyContract.sol
+        |   ├── ....
+        └── tests
+            ├── test_my_contract.py
+            ├── test_some_other_tests.py
+            ├── ....
+            └── ....
 
 
 .. _init:
 
+
 Initialize
 ~~~~~~~~~~
+
+.. code-block:: shell
+
+    $ populus init --help
+    Usage: populus init [OPTIONS]
+
+      Generate project layout with an example contract.
+
+    Options:
+      -h, --help  Show this message and exit.
 
 Running ``$ populus init`` will initialize the current directory with the
 default project layout that populus uses.
 
 * ``./contracts/``
-* ``./contracts/Example.sol``
-* ``./tests/test_examply.py``
-* ``./html/index.html``
-* ``./assets/``
-
-
-Attach
-~~~~~~
-
-Running ``$ populus attach`` with place you in an interactive python shell with
-your contract classes and an RPC client available in the local namespace.
-
-
-.. code-block:: shell
-
-    $ populus attach
-    Python: 2.7.10 (default, Jul 13 2015, 12:05:58)
-
-    Populus: v0.5.2
-
-    Project Path: /path/to/my-project/
-
-    contracts  -> Contract classes
-    client     -> Blockchain client (json-rpc)
-
-    Contracts: Example, AnotherExample
-
-    ... >
-
-Programmatic use
-----------------
-
-You can use and import Python modules from :py:mod:`populus` package.
-
-Gevent asynchronous event loop notice
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Populus and underlying libraries (py-geth, web3.py) use  `gevent <http://www.gevent.org/>`_. gevent is a coroutine -based Python networking library that uses greenlet to provide a high-level synchronous API on top of the libev event loop.
+* ``./contracts/Greeter.sol``
+* ``./tests/test_greeter.py``

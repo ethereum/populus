@@ -11,16 +11,14 @@ Contents
     :maxdepth: 1
 
     quickstart
-    usage
+    overview
     tutorial
     compile
     testing
-    fixtures
     deploy
     migrations
     config
     chain
-    devenv
     modules
 
 

@@ -37,21 +37,21 @@ def library_13(testrpc_chain):
     web3 = testrpc_chain.web3
 
     Library13 = testrpc_chain.contract_factories.Library13
-    LIBRARY_13 = testrpc_chain.project.compiled_contracts['Library13']
 
     library_deploy_txn_hash = Library13.deploy()
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
     library_13_address = get_contract_address_from_txn(web3, library_deploy_txn_hash, 30)
 
-    assert library_deploy_txn['input'] == LIBRARY_13['code']
-    assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
+    assert library_deploy_txn['input'] == Library13.code
+    assert web3.eth.getCode(library_13_address) == Library13.code_runtime
 
     return Library13(address=library_13_address)
 
 
-def test_get_contract_factory_with_no_dependencies(testrpc_chain, MATH):
+def test_get_contract_factory_with_no_dependencies(testrpc_chain):
     chain = testrpc_chain
 
+    MATH = chain.project.compiled_contracts['Math']
     Math = chain.get_contract_factory('Math')
 
     assert Math.code == MATH['code']
@@ -66,9 +66,10 @@ def test_get_contract_factory_with_missing_dependency(testrpc_chain):
 
 
 
-def test_get_contract_factory_with_declared_dependency(testrpc_chain, MULTIPLY_13):
+def test_get_contract_factory_with_declared_dependency(testrpc_chain):
     chain = testrpc_chain
 
+    MULTIPLY_13 = chain.project.compiled_contracts['Multiply13']
     Multiply13 = chain.get_contract_factory(
         'Multiply13',
         link_dependencies={
@@ -84,8 +85,7 @@ def test_get_contract_factory_with_declared_dependency(testrpc_chain, MULTIPLY_1
 
 
 def test_get_contract_factory_with_registrar_dependency(testrpc_chain,
-                                                        library_13,
-                                                        MULTIPLY_13):
+                                                        library_13):
     chain = testrpc_chain
     registrar = chain.registrar
 
@@ -95,6 +95,7 @@ def test_get_contract_factory_with_registrar_dependency(testrpc_chain,
 
     wait_for_transaction_receipt(chain.web3, register_txn_hash)
 
+    MULTIPLY_13 = chain.project.compiled_contracts['Multiply13']
     Multiply13 = chain.get_contract_factory('Multiply13')
 
     expected_code = link_bytecode(MULTIPLY_13['code'], Library13=library_13.address)
@@ -105,8 +106,7 @@ def test_get_contract_factory_with_registrar_dependency(testrpc_chain,
 
 
 def test_with_bytecode_mismatch_in_registrar_dependency(testrpc_chain,
-                                                        library_13,
-                                                        MULTIPLY_13):
+                                                        library_13):
     chain = testrpc_chain
     registrar = chain.registrar
 

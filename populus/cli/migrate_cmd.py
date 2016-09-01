@@ -25,9 +25,9 @@ def migrate(ctx, chain_name):
     project = ctx.obj['PROJECT']
 
     if not project.migrations:
-        raise click.Abort((
+        raise click.ClickException((
             "The project does not appear to have any migrations.  You can use "
-            "the `populus makemigration command to generate project migrations"
+            "the `populus makemigration` command to generate project migrations"
         ))
 
     # Validate the project migrations
@@ -48,10 +48,24 @@ def migrate(ctx, chain_name):
             # registrar contracts.
             # TODO: We can present the use with the option to just initialize
             # the chain right here rather than throwing an error.
-            raise click.Abort((
-                "The chain {0!r} is not ready for migrations.  Please initialize this "
-                "chain with the `populus migrate init` command".format(chain_name)
-            ))
+            initialize_chain_prompt = (
+                "The chain '{0}' is not configured with a registrar contract "
+                "address.  Would you like to deploy one now?".format(
+                    chain_name,
+                )
+            )
+            if click.confirm(initialize_chain_prompt, default=True):
+                from .chain_cmd import chain_init
+                ctx.invoke(chain_init, chain_name=chain_name)
+            else:
+                no_registrar_message = (
+                    "In order to use the migrations functionality, a registrar "
+                    "contract is required.  You can initialize this chain with a "
+                    "registrar using the command `$ populus chain init "
+                    "{name}`".format(name=chain_name)
+                )
+                click.echo(no_registrar_message, err=True)
+                click.exit(1)
 
     with project.get_chain(chain_name) as chain:
         if chain_name in {'mainnet', 'morden'}:
@@ -71,7 +85,8 @@ def migrate(ctx, chain_name):
         )
 
         if not migrations_to_execute:
-            raise click.Abort(("All migrations have been run."))
+            click.echo("All migrations have been run.")
+            ctx.exit(0)
 
         click.echo("Migration operations to perform:")
 

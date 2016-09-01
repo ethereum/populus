@@ -47,7 +47,7 @@ def select_chain(project):
     elif chain_name.isdigit() and int(chain_name) < len(chain_options):
         return sorted(chain_options)[int(chain_name)]
     else:
-        raise click.Abort(
+        raise click.ClickException(
             "Invalid choice: {0}.  Please choose from one of the "
             "provided options.".format(chain_name)
         )
@@ -60,7 +60,7 @@ def select_account(chain):
     """
     all_accounts = chain.web3.eth.accounts
     if not all_accounts:
-        raise click.Abort("No accounts found on chain.")
+        raise click.ClickException("No accounts found on chain.")
     unlocked_accounts = {
         account for account in all_accounts
         if not is_account_locked(chain.web3, account)
@@ -90,7 +90,7 @@ def select_account(chain):
     elif account_choice.isdigit() and int(account_choice) < len(all_accounts):
         return all_accounts[int(account_choice)]
     else:
-        raise click.Abort(
+        raise click.ClickException(
             "Invalid choice: {0}.  Please choose from one of the "
             "provided options.".format(account_choice)
         )
@@ -155,7 +155,10 @@ def configure_chain(project, chain_name):
     elif provider.lower() in {'rpc', '2'}:
         chain_config['provider'] = 'web3.providers.rpc.RPCProvider'
     else:
-        raise click.Abort("Invalid response.  Allowed responses are 1/2/ipc/rpc")
+        unknown_provider_message = (
+            "Invalid response.  Allowed responses are 1/2/ipc/rpc"
+        )
+        raise click.ClickException(unknown_provider_message)
 
     if chain_config['provider'] == 'web3.providers.ipc.IPCProvider':
         custom_ipc_path_msg = (
@@ -224,7 +227,7 @@ def request_account_unlock(chain, account, timeout):
     Present a password prompt to unlock the given account.
     """
     if not is_account_locked(chain.web3, account):
-        raise click.Abort(
+        raise click.ClickException(
             "The account `{0}` is already unlocked".format(account)
         )
 
@@ -237,7 +240,7 @@ def request_account_unlock(chain, account, timeout):
         timeout,
     )
     if not unlock_successful:
-        raise click.Abort("Unable to unlock account: `{0}`".format(account))
+        raise click.ClickException("Unable to unlock account: `{0}`".format(account))
 
 
 def deploy_contract_and_verify(chain,
@@ -328,7 +331,7 @@ def deploy_contract_and_verify(chain,
                 ),
                 err=True,
             )
-            raise click.Abort("Error deploying contract")
+            raise click.ClickException("Error deploying contract")
     else:
         click.echo(
             "No runtime available.  Falling back to verifying non-empty "
@@ -339,7 +342,7 @@ def deploy_contract_and_verify(chain,
                 "Bytecode @ {0} is unexpectedly empty.".format(contract_address),
                 err=True,
             )
-            raise click.Abort("Error deploying contract")
+            raise click.ClickException("Error deploying contract")
         else:
             click.echo(
                 "Verified bytecode @ {0} is non-empty".format(contract_address)
@@ -358,14 +361,14 @@ def show_chain_sync_progress(chain):
         try:
             wait_for_peers(web3, timeout=240)
         except gevent.Timeout:
-            raise click.Abort("Never connected to any peers.")
+            raise click.ClickException("Never connected to any peers.")
 
     if not web3.eth.syncing:
         click.echo("Waiting for synchronization to start.")
         try:
             wait_for_syncing(web3, timeout=240)
         except gevent.Timeout:
-            raise click.Abort("Chain synchronization never started.")
+            raise click.ClickException("Chain synchronization never started.")
 
     starting_block = web3.eth.syncing['startingBlock']
 
@@ -426,7 +429,7 @@ def get_unlocked_deploy_from_address(chain):
     if 'deploy_from' in chain_config:
         account = chain_config['deploy_from']
         if account not in web3.eth.accounts:
-            raise click.Abort(
+            raise click.ClickException(
                 "The chain {0!r} is configured to deploy from account {1!r} "
                 "which was not found in the account list for this chain. "
                 "Please ensure that this account exists.".format(
@@ -506,3 +509,34 @@ def watch_project_contracts(project, **compile_kwargs):
                 compile_project_contracts(project, **compile_kwargs)
     except KeyboardInterrupt:
         pass
+
+
+def select_project_contract(project):
+    contract_names = sorted(project.compiled_contracts.keys())
+    contract_choices = [
+        " {idx}: {name}".format(
+            idx=str(idx).rjust(3),
+            name=name,
+        ) for idx, name
+        in enumerate(contract_names)
+    ]
+    select_contract_message = (
+        "Please select the desired contract:\n\n"
+        "{0}".format(
+            '\n'.join(contract_choices)
+        )
+    )
+    contract_name = click.prompt(select_contract_message)
+    if contract_name in project.compiled_contracts:
+        return contract_name
+    elif contract_name.isdigit() and int(contract_name) < len(contract_names):
+        return contract_names[int(contract_name)]
+    else:
+        bad_choice_message = (
+            "'{0}' is not a valid choice.  Please enter either the numeric "
+            "index of the desired contract or the full name of the "
+            "contract.".format(
+                contract_name,
+            )
+        )
+        raise click.ClickException(bad_choice_message)

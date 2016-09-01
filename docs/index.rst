@@ -19,6 +19,7 @@ Contents
     migrations
     config
     chain
+    release
     modules
 
 

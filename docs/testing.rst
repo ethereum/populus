@@ -59,12 +59,34 @@ The ``populus.project.Project`` object for your project.
         assert 'MyContract' in project.compiled_contracts
 
 
+Unmigrated Chain
+~~~~~~~~~~~~~~~~
+
+* ``unmigrated_chain``
+
+The ``'testrpc'`` test chain.  This chain will not have had migrations run.
+
+
+.. code-block:: python
+
+    def test_greeter(unmigrated_chain):
+        greeter = unmigrated_chain.get_contract('Greeter')
+
+        assert greeter.call().greet() == "Hello"
+
+    def test_deploying_greeter(unmigrated_chain):
+        GreeterFactory = unmigrated_chain.get_contract_factory('Greeter')
+        deploy_txn_hash = GreeterFactory.deploy()
+        ...
+
+
 Chain
 ~~~~~
 
 * ``chain``
 
-The ``'testrpc'`` test chain.
+The same chain from the ``unmigrated_chain`` fixture except it has had all
+migrations run ion it.
 
 
 .. code-block:: python
@@ -78,22 +100,6 @@ The ``'testrpc'`` test chain.
         GreeterFactory = chain.get_contract_factory('Greeter')
         deploy_txn_hash = GreeterFactory.deploy()
         ...
-
-
-Migrated Chain
-~~~~~~~~~~~~~~
-
-* ``migrated_chain``
-
-The same chain from the ``chain`` fixture will all project migrations executed.
-
-
-.. code-block:: python
-
-    def test_greeter(migrated_chain):
-        greeter = migrated_chain.get_contract('Greeter')
-
-        assert greeter.call().greet() == "Hello"
 
 
 Web3

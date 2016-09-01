@@ -14,7 +14,7 @@ def project(request):
 
 
 @pytest.yield_fixture()
-def chain(request, project):
+def unmigrated_chain(request, project):
     # This should probably allow you to specify the test chain to be used based
     # on the `request` object.  It's unclear what the best way to do this is
     # so... punt!
@@ -29,17 +29,17 @@ def chain(request, project):
 
 
 @pytest.fixture()
-def migrated_chain(chain):
+def chain(unmigrated_chain):
     # Determine if we have any migrations to run.
     migrations_to_execute = get_migration_classes_for_execution(
-        chain.project.migrations,
-        chain,
+        unmigrated_chain.project.migrations,
+        unmigrated_chain,
     )
 
     for migration in migrations_to_execute:
         migration.execute()
 
-    return chain
+    return unmigrated_chain
 
 
 @pytest.fixture()

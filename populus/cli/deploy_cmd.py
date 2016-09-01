@@ -7,6 +7,7 @@ from populus.utils.cli import (
     show_chain_sync_progress,
     get_unlocked_deploy_from_address,
     deploy_contract_and_verify,
+    select_project_contract,
 )
 from populus.utils.deploy import (
     get_deploy_order,
@@ -84,7 +85,7 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
             compiled_contracts.keys()
         )
         if unknown_contracts:
-            raise click.Abort(
+            unknown_contracts_message = (
                 "Some contracts specified for deploy were not found in the "
                 "compiled project contracts.  These contracts could not be found "
                 "'{0}'.  Searched these known contracts '{1}'".format(
@@ -92,13 +93,12 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
                     ', '.join(sorted(compiled_contracts.keys())),
                 )
             )
+            click.echo(unknown_contracts_message, err=True)
+            click.exit(1)
     else:
         # prompt the user to select the desired contracts they want to deploy.
         # Potentially display the currently deployed status.
-        raise click.Abort(
-            "Not Implemented.  Please specify which contracts you wish to "
-            "deploy"
-        )
+        contracts_to_deploy = [select_project_contract(project)]
 
     chain = project.get_chain(chain_name)
     deployed_contracts = OrderedDict()
@@ -115,7 +115,7 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
             try:
                 deploy_from = web3.eth.accounts[int(deploy_from)]
             except IndexError:
-                raise click.Abort(
+                raise click.ClickException(
                     "Unknown deploy_from account: {0}".format(deploy_from)
                 )
 

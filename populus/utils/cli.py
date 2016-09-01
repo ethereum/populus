@@ -459,7 +459,7 @@ def get_unlocked_deploy_from_address(chain):
         try:
             # in case the chain is still spinning up, give it a moment to
             # unlock itself.
-            wait_for_unlock(web3, account, 2)
+            wait_for_unlock(web3, account, 5)
         except gevent.Timeout:
             request_account_unlock(chain, account, None)
 

@@ -80,6 +80,22 @@ The ``'testrpc'`` test chain.
         ...
 
 
+Migrated Chain
+~~~~~~~~~~~~~~
+
+* ``migrated_chain``
+
+The same chain from the ``chain`` fixture will all project migrations executed.
+
+
+.. code-block:: python
+
+    def test_greeter(migrated_chain):
+        greeter = migrated_chain.get_contract('Greeter')
+
+        assert greeter.call().greet() == "Hello"
+
+
 Web3
 ~~~~
 

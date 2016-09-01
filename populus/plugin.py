@@ -1,5 +1,8 @@
 import pytest
 
+from populus.migrations.migration import (
+    get_migration_classes_for_execution,
+)
 from populus.project import Project
 
 
@@ -23,6 +26,20 @@ def chain(request, project):
 
     with chain:
         yield chain
+
+
+@pytest.fixture()
+def migrated_chain(chain):
+    # Determine if we have any migrations to run.
+    migrations_to_execute = get_migration_classes_for_execution(
+        chain.project.migrations,
+        chain,
+    )
+
+    for migration in migrations_to_execute:
+        migration.execute()
+
+    return chain
 
 
 @pytest.fixture()

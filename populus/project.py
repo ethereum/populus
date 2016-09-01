@@ -146,8 +146,11 @@ class Project(object):
 
         if self._cached_compiled_contracts_hash != source_hash:
             self._cached_compiled_contracts_hash = source_hash
+            # TODO: the hard coded `optimize=True` should be configurable
+            # somehow.
             _, self._cached_compiled_contracts = compile_project_contracts(
                 project_dir=self.project_dir,
+                optimize=True,
             )
         return self._cached_compiled_contracts
 

@@ -49,7 +49,6 @@ class Migration(object):
             prefix=operation_key,
         )
         for Setter in registrar_setters:
-            print("Key: ", Setter.key)
             Setter(self.chain).set()
 
         # mark the operation as having been completed.

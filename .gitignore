@@ -61,3 +61,6 @@ chains/
 chaindata/
 genesis.json
 keystore/
+
+# Migrations
+migrations/

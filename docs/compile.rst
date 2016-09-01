@@ -1,16 +1,13 @@
 Compile
-~~~~~~~
+=======
 
-Running ``$ populus compile`` will compile all of the contracts found in the
-``./contracts/`` directory as well as all libraries found in the
-``./libraries/`` directory.  The compiled projects are stored in
+Running ``$ populus compile`` will compile all of the project contracts found
+in the ``./contracts/`` directory.  The compiled assets are then written to
 ``./build/contracts.json``.
 
-.. note::
 
-    Currently, populus only supports import statemens for solidity files found
-    in the ``./libraries/`` directory.  These should be in the format ``import
-    "libraries/MyLibrary.sol";``.
+Basic Compilation
+-----------------
 
 Basic usage to compile all of the contracts and libraries in your project can
 be done as follows.
@@ -19,80 +16,128 @@ be done as follows.
 
     $ populus compile
     ============ Compiling ==============
-    > Loading contracts from: /var/projects/my-project/contracts
-    > Found 2 contract source files
-    - mortal.sol
-    - owned.sol
+    > Loading source files from: ./contracts
 
-    > Compiled 3 contracts
-    - Immortal
-    - Mortal
-    - owned
+    > Found 1 contract source files
+    - contracts/Greeter.sol
 
-    > Outfile: /var/projects/my-project/build/contracts.json
+    > Compiled 1 contracts
+    - Greeter
+
+    > Wrote compiled assets to: ./build/contracts.json
 
 
-If you only want to build a sub-set of your contracts you can specify paths to
-source files, or the names of contracts in source files, or a combination of
-the two separated by a ``:``.
+Watching
+--------
 
-* ``$ populus compile Example`` - compiles all contracts named Example.
-* ``$ populus compile contracts/Example.sol`` - compiles all contracts in the
-  specified file.
-* ``$ populus compile contracts/Example.sol:Example`` - compiles all contracts
-  named Example in in the specified file.
-
-
-Additionally, you can pass in ``--watch`` to have Populus watch your contract
-source files and automatically rebuild them when those files change.
+This command can be used with the flag ``--watch`` which will automatically
+recompile your contracts when the source code changes.
 
 .. code-block:: shell
 
     $ populus compile --watch
     ============ Compiling ==============
-    > Loading contracts from: /var/projects/my-project/contracts
-    > Found 2 contract source files
-    - mortal.sol
-    - owned.sol
+    > Loading source files from: ./contracts
 
-    > Compiled 3 contracts
-    - Immortal
-    - Mortal
-    - owned
+    > Found 1 contract source files
+    - contracts/Greeter.sol
 
-    > Outfile: /var/projects/my-project/build/contracts.json
-    ============ Watching ==============
+    > Compiled 1 contracts
+    - Greeter
 
-    # Then you save a file....
+    > Wrote compiled assets to: ./build/contracts.json
+    Change detected in: contracts/Greeter.sol
+    ============ Compiling ==============
+    > Loading source files from: ./contracts
 
-    ============ Detected Change ==============
-    > modified => /var/projects/my-project/contracts/mortal.sol
-    > recompiling...
-    > watching...
+    > Found 1 contract source files
+    - contracts/Greeter.sol
 
+    > Compiled 1 contracts
+    - Greeter
+
+    > Wrote compiled assets to: ./build/contracts.json
+
+
+Build Output
+------------
 
 Output is serialized as ``JSON`` and written to ``build/contracts.json``
-relative to the root of your project.
+relative to the root of your project.  It will be a mapping of your contract
+names to the compiled assets for that contract.
+
 
 .. code-block:: javascript
 
     {
-        "Example": {
-            "code": "0x60606040525b5b600a8060136000396000f30060606040526008565b00",
-            "info": {
-                "abiDefinition": [
-                    {
-                        "inputs": [],
-                        "type": "constructor"
-                    }
-                ],
-                "compilerVersion": "0.9.73",
-                "developerDoc": null,
+        "Greeter": {
+            "abi": [
+                {
+                    "constant": true,
+                    "inputs": [
+                        {
+                            "name": "name",
+                            "type": "bytes"
+                        }
+                    ],
+                    "name": "greet",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "bytes"
+                        }
+                    ],
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_greeting",
+                            "type": "string"
+                        }
+                    ],
+                    "name": "setGreeting",
+                    "outputs": [],
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "greet",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "string"
+                        }
+                    ],
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "greeting",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "string"
+                        }
+                    ],
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "type": "constructor"
+                }
+            ],
+            "code": "0x...",
+            "code_runtime": "0x...",
+            "meta": {
+                "compilerVersion": "0.3.5-9da08ac3",
                 "language": "Solidity",
-                "languageVersion": "0",
-                "source": "contract Example {\n        function Example() {\n        }\n}\n",
-                "userDoc": null
-            }
+                "languageVersion": "0"
+            },
+            "source": null
         }
     }
 

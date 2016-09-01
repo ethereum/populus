@@ -11,6 +11,7 @@ from populus.utils.filesystem import (
     get_compiled_contracts_file_path,
     get_blockchains_dir,
     get_migrations_dir,
+    relpath,
 )
 from populus.utils.chains import (
     get_data_dir,
@@ -61,6 +62,7 @@ class Project(object):
     _config_file_paths = None
 
     @property
+    @relpath
     def primary_config_file_path(self):
         if self._primary_config_file_path is not None:
             return self._primary_config_file_path
@@ -99,6 +101,7 @@ class Project(object):
     # Project
     #
     @property
+    @relpath
     def project_dir(self):
         if self.config.has_option('populus', 'project_dir'):
             return self.config.get('populus', 'project_dir')
@@ -109,10 +112,12 @@ class Project(object):
     # Contracts
     #
     @property
+    @relpath
     def contracts_dir(self):
         return get_contracts_dir(self.project_dir)
 
     @property
+    @relpath
     def build_dir(self):
         if self.config.has_option('populus', 'build_dir'):
             return self.config.get('populus', 'build_dir')
@@ -120,6 +125,7 @@ class Project(object):
             return get_build_dir(self.project_dir)
 
     @property
+    @relpath
     def compiled_contracts_file_path(self):
         return get_compiled_contracts_file_path(self.project_dir)
 
@@ -230,21 +236,27 @@ class Project(object):
                                   **combined_kwargs)
 
     @property
+    @relpath
     def blockchains_dir(self):
         return get_blockchains_dir(self.project_dir)
 
+    @relpath
     def get_blockchain_data_dir(self, chain_name):
         return get_data_dir(self.project_dir, chain_name)
 
+    @relpath
     def get_blockchain_chaindata_dir(self, chain_name):
         return get_chaindata_dir(self.get_blockchain_data_dir(chain_name))
 
+    @relpath
     def get_blockchain_dapp_dir(self, chain_name):
         return get_dapp_dir(self.get_blockchain_data_dir(chain_name))
 
+    @relpath
     def get_blockchain_ipc_path(self, chain_name):
         return get_geth_ipc_path(self.get_blockchain_data_dir(chain_name))
 
+    @relpath
     def get_blockchain_nodekey_path(self, chain_name):
         return get_nodekey_path(self.get_blockchain_data_dir(chain_name))
 
@@ -252,12 +264,17 @@ class Project(object):
     # Migrations
     #
     @property
+    @relpath
     def migrations_dir(self):
         return get_migrations_dir(self.project_dir)
 
     @property
     def migration_files(self):
-        return list(sorted(find_project_migrations(self.project_dir)))
+        return list((
+            os.path.relpath(migration_file_path)
+            for migration_file_path
+            in sorted(find_project_migrations(self.project_dir))
+        ))
 
     @property
     def migrations(self):

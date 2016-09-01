@@ -33,6 +33,7 @@ from populus.utils.module_loading import (
     import_string,
 )
 from populus.utils.transactions import (
+    wait_for_transaction_receipt,
     get_contract_address_from_txn,
 )
 from populus.utils.filesystem import (
@@ -140,6 +141,14 @@ class BytecodeMismatchError(ContractError):
 class NoKnownAddress(ContractError):
     """
     Raised when the address for a requested contract is not known.
+    """
+    pass
+
+
+class UnknownContract(ContractError):
+    """
+    Raised when the requested contract name is not found in the compiled
+    contracts.
     """
     pass
 
@@ -328,6 +337,14 @@ class Chain(object):
                      contract_name,
                      link_dependencies=None,
                      validate_bytecode=True):
+        if contract_name not in self.contract_factories:
+            raise UnknownContract(
+                "No contract found with the name '{0}'.\n\n"
+                "Available contracts are: {1}".format(
+                    contract_name,
+                    ', '.join((name for name in self.contract_factories.keys())),
+                )
+            )
         self.is_contract_available(
             contract_name,
             link_dependencies=link_dependencies,
@@ -347,11 +364,22 @@ class Chain(object):
     def get_contract_factory(self,
                              contract_name,
                              link_dependencies=None):
+        if contract_name not in self.contract_factories:
+            raise UnknownContract(
+                "No contract found with the name '{0}'.\n\n"
+                "Available contracts are: {1}".format(
+                    contract_name,
+                    ', '.join((name for name in self.contract_factories.keys())),
+                )
+            )
         base_contract_factory = self.contract_factories[contract_name]
 
         if link_dependencies is not False:
             code, code_runtime = self._link_code(
-                bytecodes=[base_contract_factory.code, base_contract_factory.code_runtime],
+                bytecodes=[
+                    base_contract_factory.code,
+                    base_contract_factory.code_runtime,
+                ],
                 link_dependencies=link_dependencies,
             )
         else:
@@ -521,6 +549,58 @@ class TestRPCChain(Chain):
             self.provider.thread.kill()
         finally:
             self._running = False
+
+    def get_contract(self, contract_name, link_dependencies=None, *args, **kwargs):
+        if contract_name not in self.contract_factories:
+            raise UnknownContract(
+                "No contract found with the name '{0}'.\n\n"
+                "Available contracts are: {1}".format(
+                    contract_name,
+                    ', '.join((name for name in self.contract_factories.keys())),
+                )
+            )
+
+        registrar = self.registrar
+        contract_key = "contract/{name}".format(name=contract_name)
+        if not registrar.call().exists(contract_key):
+            # First dig down into the dependency tree to make the library
+            # dependencies available.
+            contract_bytecode = self.contract_factories[contract_name].code
+            contract_dependencies = self._extract_library_dependencies(
+                contract_bytecode, link_dependencies,
+            )
+            for dependency in contract_dependencies:
+                self.get_contract(
+                    dependency,
+                    link_dependencies=link_dependencies,
+                    *args,
+                    **kwargs
+                )
+
+            # Then get the factory and deploy it.
+            contract_factory = self.get_contract_factory(
+                contract_name,
+                link_dependencies=kwargs.get('link_dependencies'),
+            )
+            deploy_txn_hash = contract_factory.deploy()
+            contract_address = get_contract_address_from_txn(
+                self.web3,
+                deploy_txn_hash,
+            )
+
+            # Then register the address with the registrar so that the super
+            # method will be able to get and return it.
+            register_txn_hash = registrar.transact().setAddress(
+                contract_key,
+                contract_address,
+            )
+            wait_for_transaction_receipt(self.web3, register_txn_hash)
+        return super(TestRPCChain, self).get_contract(
+            contract_name,
+            link_dependencies=link_dependencies,
+            *args,
+            **kwargs
+        )
 
 
 GETH_KWARGS = {

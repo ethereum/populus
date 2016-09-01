@@ -1,7 +1,8 @@
 Populus
 =======
 
-Populus is a framework for developing applications for Ethereum.
+Populus is a smart contract development framework for the Ethereum blockchain.
+
 
 Contents
 --------
@@ -9,17 +10,15 @@ Contents
 .. toctree::
     :maxdepth: 1
 
-    populus.overview
-    usage
+    quickstart
+    overview
     tutorial
     compile
     testing
-    fixtures
     deploy
     migrations
     config
     chain
-    devenv
     modules
 
 

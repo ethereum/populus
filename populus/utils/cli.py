@@ -216,7 +216,7 @@ def configure_chain(project, chain_name):
         "Writing configuration to {0} ...".format(project.primary_config_file_path)
     )
     project.write_config()
-    click.echo("Sucess!")
+    click.echo("Success!")
 
 
 def request_account_unlock(chain, account, timeout):
@@ -465,7 +465,7 @@ def get_unlocked_deploy_from_address(chain):
 
 def compile_project_contracts(project, optimize=True):
     click.echo("============ Compiling ==============")
-    click.echo("> Loading source files from: {0}\n".format(project.contracts_dir))
+    click.echo("> Loading source files from: ./{0}\n".format(project.contracts_dir))
 
     result = compile_and_write_contracts(project.project_dir, optimize=optimize)
     contract_source_paths, compiled_sources, output_file_path = result
@@ -483,7 +483,7 @@ def compile_project_contracts(project, optimize=True):
 
     click.echo("")
     click.echo(
-        "> Wrote compiled assets to: {0}".format(
+        "> Wrote compiled assets to: ./{0}".format(
             os.path.relpath(output_file_path)
         )
     )

@@ -4,6 +4,7 @@ import shutil
 import fnmatch
 import tempfile
 import contextlib
+import functools
 
 
 if sys.version_info.major == 2:
@@ -136,3 +137,11 @@ def is_same_path(p1, p2):
         return os.path.samefile(n_p1, n_p2)
     except FileNotFoundError:
         return n_p1 == n_p2
+
+
+def relpath(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        path = fn(*args, **kwargs)
+        return os.path.relpath(path)
+    return wrapper

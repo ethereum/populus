@@ -44,12 +44,12 @@ def chain(unmigrated_chain):
 
 @pytest.fixture()
 def web3(unmigrated_chain):
-    return chain.web3
+    return unmigrated_chain.web3
 
 
 @pytest.fixture()
 def contracts(unmigrated_chain):
-    return chain.contract_factories
+    return unmigrated_chain.contract_factories
 
 
 @pytest.fixture()

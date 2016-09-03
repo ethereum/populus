@@ -35,7 +35,7 @@ setup(
         "pysha3>=0.3",
         "pytest>=2.7.2",
         "toposort>=1.4",
-        "web3>=2.1.1",
+        "web3>=2.2.0",
     ],
     license="MIT",
     zip_safe=False,

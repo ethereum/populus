@@ -1,9 +1,5 @@
 import pytest
 
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-)
-
 from populus.migrations import (
     Address,
     Bytes32,
@@ -32,7 +28,7 @@ def test_registrar_value_getting(web3, chain, RegistrarValueClass, value,
                                  setter):
     registrar = chain.registrar
     set_txn = getattr(registrar.transact(), setter)('k', value)
-    wait_for_transaction_receipt(web3, set_txn, timeout=30)
+    chain.wait.for_receipt(set_txn, timeout=30)
 
     value_proxy = RegistrarValueClass(chain, key='k')
     assert value_proxy.get() == value

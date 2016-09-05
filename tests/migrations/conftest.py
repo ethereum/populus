@@ -82,12 +82,9 @@ def Math(web3, MATH):
 
 
 @pytest.fixture()
-def math(web3, Math):
-    from populus.utils.transactions import (
-        get_contract_address_from_txn,
-    )
+def math(chain, web3, Math):
     deploy_txn_hash = Math.deploy({'gas': 200000})
-    contract_address = get_contract_address_from_txn(web3, deploy_txn_hash, timeout=30)
+    contract_address = chain.wait.for_contract_address(deploy_txn_hash, timeout=30)
 
     # sanity
     assert web3.eth.getCode(contract_address) == Math.code_runtime

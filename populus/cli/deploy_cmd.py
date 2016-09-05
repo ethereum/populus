@@ -12,9 +12,6 @@ from populus.utils.cli import (
 from populus.utils.deploy import (
     get_deploy_order,
 )
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-)
 from populus.migrations.registrar import (
     get_contract_from_registrar,
 )
@@ -194,7 +191,7 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
                     )
                 )
                 click.echo(register_msg, nl=False)
-                wait_for_transaction_receipt(web3, register_txn_hash, 180)
+                chain.wait.for_receipt(register_txn_hash, timeout=180)
                 click.echo(' DONE')
             deployed_contracts[contract_name] = contract
 

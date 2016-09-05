@@ -7,11 +7,6 @@ from flaky import flaky
 from populus.utils.networking import (
     get_open_port,
 )
-from populus.utils.transactions import (
-    wait_for_peers,
-    wait_for_block_number,
-    wait_for_syncing,
-)
 from populus.utils.cli import (
     show_chain_sync_progress,
 )
@@ -78,7 +73,7 @@ def test_show_chain_sync_progress():
                 node_port=sync_node_info['ports']['listener'],
             )
 
-            wait_for_block_number(main_chain.web3, BLOCK_DELTA, BLOCK_DELTA * 4)
+            chain.wait.for_block_number(BLOCK_DELTA, timeout=BLOCK_DELTA * 4)
 
             main_chain_start_block = main_chain.web3.eth.blockNumber
             sync_chain_start_block = sync_chain.web3.eth.blockNumber
@@ -90,7 +85,7 @@ def test_show_chain_sync_progress():
             sync_chain.web3.admin.addPeer(main_enode)
             main_chain.web3.admin.addPeer(sync_enode)
 
-            wait_for_peers(sync_chain.web3, timeout=60)
+            chain.wait.for_peers(timeout=60)
 
             result = runner.invoke(wrapper, [])
 

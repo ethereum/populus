@@ -2,7 +2,7 @@ from geth.accounts import create_new_account
 
 from web3.utils.string import force_text
 
-from populus.utils.transactions import (
+from populus.utils.accounts import (
     is_account_locked,
 )
 

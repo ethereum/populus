@@ -1,7 +1,4 @@
 from populus.project import Project
-from populus.utils.transactions import (
-    wait_for_unlock,
-)
 
 
 def test_external_rpc_chain(project_dir, write_project_file):
@@ -35,7 +32,7 @@ def test_external_ipc_chain(project_dir, write_project_file):
 
     with project.get_chain('temp') as chain:
         web3 = chain.web3
-        wait_for_unlock(web3, timeout=30)
+        chain.wait.for_unlock(timeout=30)
         registrar = chain.registrar
 
         ini_contents = '\n'.join((

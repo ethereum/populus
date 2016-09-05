@@ -13,9 +13,6 @@ from populus.utils.types import (
     is_hex_address,
     is_hex_transaction_hash,
 )
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-)
 
 
 class DeferredValue(object):
@@ -159,11 +156,7 @@ class RegistrarValue(DeferredValue):
             ))
 
         if timeout is not None:
-            wait_for_transaction_receipt(
-                web3=self.chain.web3,
-                txn_hash=set_txn_hash,
-                timeout=timeout,
-            )
+            self.chain.wait.for_receipt(set_txn_hash, timeout=timeout)
 
         return set_txn_hash
 

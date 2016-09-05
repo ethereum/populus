@@ -13,10 +13,6 @@ from populus.migrations.registrar import (
 from populus.migrations.writer import (
     write_migration,
 )
-from populus.utils.transactions import (
-    get_contract_address_from_txn,
-    wait_for_unlock,
-)
 
 from populus.cli import main
 
@@ -77,13 +73,11 @@ def test_migrate_cmd(project_dir, write_project_file, MATH):
     assert len(project.migrations) == 2
 
     with project.get_chain('local_a') as chain:
-        wait_for_unlock(chain.web3, chain.web3.eth.coinbase, 30)
+        chain.wait.for_unlock(chain.web3.eth.coinbase, timeout=30)
         project.config.set('chain:local_a', 'deploy_from', chain.web3.eth.coinbase)
         RegistrarFactory = get_compiled_registrar_contract(web3=chain.web3)
         deploy_transaction_hash = RegistrarFactory.deploy()
-        registrar_address = get_contract_address_from_txn(
-            chain.web3, deploy_transaction_hash, 60,
-        )
+        registrar_address = chain.wait.for_contract_address(deploy_transaction_hash, timeout=60)
         project.config.set('chain:local_a', 'registrar', registrar_address)
         project.write_config()
 

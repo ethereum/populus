@@ -15,12 +15,8 @@ from populus.compilation import (
 from .deploy import (
     deploy_contract,
 )
-from .transactions import (
+from .accounts import (
     is_account_locked,
-    get_contract_address_from_txn,
-    wait_for_syncing,
-    wait_for_peers,
-    wait_for_unlock,
 )
 
 
@@ -287,9 +283,8 @@ def deploy_contract_and_verify(chain,
     click.echo("Deploy Transaction Sent: {0}".format(deploy_txn_hash))
     click.echo("Waiting for confirmation...")
 
-    contract_address = get_contract_address_from_txn(
-        web3=web3,
-        txn_hash=deploy_txn_hash,
+    contract_address = chain.wait.for_contract_address(
+        deploy_txn_hash,
         timeout=180,
     )
     deploy_receipt = web3.eth.getTransactionReceipt(deploy_txn_hash)
@@ -359,14 +354,14 @@ def show_chain_sync_progress(chain):
     if not web3.net.peerCount:
         click.echo("Waiting for peer connections.")
         try:
-            wait_for_peers(web3, timeout=240)
+            chain.wait.for_peers(timeout=240)
         except gevent.Timeout:
             raise click.ClickException("Never connected to any peers.")
 
     if not web3.eth.syncing:
         click.echo("Waiting for synchronization to start.")
         try:
-            wait_for_syncing(web3, timeout=240)
+            chain.wait.for_syncing(timeout=240)
         except gevent.Timeout:
             raise click.ClickException("Chain synchronization never started.")
 
@@ -459,7 +454,7 @@ def get_unlocked_deploy_from_address(chain):
         try:
             # in case the chain is still spinning up, give it a moment to
             # unlock itself.
-            wait_for_unlock(web3, account, 5)
+            chain.wait.for_unlock(account, timeout=5)
         except gevent.Timeout:
             request_account_unlock(chain, account, None)
 

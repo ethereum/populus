@@ -9,23 +9,18 @@ from populus.utils.filesystem import (
 from .main import main
 
 
-TEST_FILE_CONTENTS = """from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-)
-
-
-def test_greeter(web3, chain):
+TEST_FILE_CONTENTS = """def test_greeter(chain):
     greeter = chain.get_contract('Greeter')
 
     greeting = greeter.call().greet()
     assert greeting == 'Hello'
 
 
-def test_custom_greeting(web3, chain):
+def test_custom_greeting(chain):
     greeter = chain.get_contract('Greeter')
 
     set_txn_hash = greeter.transact().setGreeting('Guten Tag')
-    wait_for_transaction_receipt(web3, set_txn_hash)
+    chain.wait.for_receipt(set_txn_hash)
 
     greeting = greeter.call().greet()
     assert greeting == 'Guten Tag'

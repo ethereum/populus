@@ -6,10 +6,6 @@ from web3.utils.string import (
     force_text,
 )
 
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-    get_contract_address_from_txn,
-)
 from populus.utils.contracts import (
     get_contract_library_dependencies,
 )
@@ -95,9 +91,7 @@ class SendTransaction(Operation):
 
         transaction_hash = chain.web3.eth.sendTransaction(transaction)
         if timeout is not None:
-            wait_for_transaction_receipt(
-                chain.web3, transaction_hash, timeout=timeout,
-            )
+            chain.wait.for_receipt(transaction_hash, timeout=timeout)
         return {
             'transaction-hash': transaction_hash,
         }
@@ -215,8 +209,9 @@ class DeployContract(Operation):
         )
 
         if timeout is not None:
-            contract_address = get_contract_address_from_txn(
-                chain.web3, deploy_transaction_hash, timeout=timeout,
+            contract_address = chain.wait.for_contract_address(
+                deploy_transaction_hash,
+                timeout=timeout,
             )
             if verify:
                 code = force_text(chain.web3.eth.getCode(contract_address))
@@ -310,9 +305,7 @@ class TransactContract(Operation):
         transaction_hash = method(*arguments)
 
         if timeout is not None:
-            wait_for_transaction_receipt(
-                chain.web3, transaction_hash, timeout=timeout,
-            )
+            chain.wait.for_receipt(transaction_hash, timeout=timeout)
 
         return {
             'transaction-hash': transaction_hash,

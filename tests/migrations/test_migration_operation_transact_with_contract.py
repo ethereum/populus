@@ -1,9 +1,6 @@
 from populus.migrations import (
     TransactContract,
 )
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-)
 
 
 def test_transact_contract_operation(web3, chain, math, MATH):
@@ -22,7 +19,7 @@ def test_transact_contract_operation(web3, chain, math, MATH):
         compiled_contracts={'Math': MATH},
         transaction={'gas': 200000},
     )['transaction-hash']
-    wait_for_transaction_receipt(web3, transact_txn_hash, timeout=30)
+    chain.wait.for_receipt(transact_txn_hash, timeout=30)
 
     after_value = math.call().counter()
 

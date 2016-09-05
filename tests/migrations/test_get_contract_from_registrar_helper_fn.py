@@ -2,11 +2,6 @@ import pytest
 
 from populus import Project
 
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-    get_contract_address_from_txn,
-)
-
 from populus.migrations.registrar import get_contract_from_registrar
 
 
@@ -40,7 +35,7 @@ def math(deploy_chain):
 
     math_deploy_txn_hash = Math.deploy()
     math_deploy_txn = web3.eth.getTransaction(math_deploy_txn_hash)
-    math_13_address = get_contract_address_from_txn(web3, math_deploy_txn_hash, 30)
+    math_13_address = chain.wait.for_contract_address(math_deploy_txn_hash, timeout=30)
 
     assert math_deploy_txn['input'] == MATH['code']
     assert web3.eth.getCode(math_13_address) == MATH['code_runtime']
@@ -57,7 +52,7 @@ def library_13(deploy_chain):
 
     library_deploy_txn_hash = Library13.deploy()
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
-    library_13_address = get_contract_address_from_txn(web3, library_deploy_txn_hash, 30)
+    library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
 
     assert library_deploy_txn['input'] == LIBRARY_13['code']
     assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
@@ -84,7 +79,7 @@ def test_getting_contract_that_is_in_registrar(deploy_chain, library_13):
     registrar = chain.registrar
 
     register_txn = registrar.transact().setAddress('contract/Library13', library_13.address)
-    wait_for_transaction_receipt(web3, register_txn, 30)
+    chain.wait.for_receipt(register_txn, timeout=30)
 
     actual = get_contract_from_registrar(
         chain=chain,
@@ -103,7 +98,7 @@ def test_getting_contract_that_is_in_registrar_with_bytecode_mismatch(deploy_cha
 
     # register the wrong address.
     register_txn = registrar.transact().setAddress('contract/Library13', math.address)
-    wait_for_transaction_receipt(web3, register_txn, 30)
+    chain.wait.for_receipt(register_txn, timeout=30)
 
     actual = get_contract_from_registrar(
         chain=chain,
@@ -124,7 +119,7 @@ def test_getting_contract_that_is_in_registrar_with_empty_bytecode(deploy_chain)
         'contract/Library13',
         '0xd3cda913deb6f67967b99d67acdfa1712c293601',
     )
-    wait_for_transaction_receipt(web3, register_txn, 30)
+    chain.wait.for_receipt(register_txn, timeout=30)
 
     actual = get_contract_from_registrar(
         chain=chain,

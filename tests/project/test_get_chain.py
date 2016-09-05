@@ -1,8 +1,5 @@
 from flaky import flaky
 
-from populus.utils.transactions import (
-    wait_for_block_number,
-)
 from populus.chain import (
     TESTNET_BLOCK_1_HASH,
     MAINNET_BLOCK_1_HASH,
@@ -45,7 +42,7 @@ def test_project_morden_chain(project_dir):
         web3 = running_morden_chain.web3
         assert web3.version.node.startswith('Geth')
 
-        wait_for_block_number(web3, 1, 180)
+        running_morden_chain.wait.for_block_number(block_number=1, timeout=180)
 
         block_1 = web3.eth.getBlock(1)
         assert block_1['hash'] == TESTNET_BLOCK_1_HASH
@@ -65,7 +62,7 @@ def test_project_local_chain_ipc(project_dir, write_project_file):
         web3 = running_local_chain.web3
         assert web3.version.node.startswith('Geth')
 
-        wait_for_block_number(web3, 1, 180)
+        running_local_chain.wait.for_block_number(block_number=1, timeout=180)
 
         block_1 = web3.eth.getBlock(1)
         assert block_1['hash'] != MAINNET_BLOCK_1_HASH
@@ -87,7 +84,7 @@ def test_project_local_chain_rpc(project_dir, write_project_file):
         web3 = running_local_chain.web3
         assert web3.version.node.startswith('Geth')
 
-        wait_for_block_number(web3, 1, 180)
+        running_local_chain.wait.for_block_number(block_number=1, timeout=180)
 
         block_1 = web3.eth.getBlock(1)
         assert block_1['hash'] != MAINNET_BLOCK_1_HASH

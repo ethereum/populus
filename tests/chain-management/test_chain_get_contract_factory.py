@@ -37,7 +37,7 @@ def library_13(testrpc_chain):
 
     library_deploy_txn_hash = Library13.deploy()
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
-    library_13_address = chain.wait.for_receipt(library_deploy_txn_hash, timeout=30)
+    library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
 
     assert library_deploy_txn['input'] == Library13.code
     assert web3.eth.getCode(library_13_address) == Library13.code_runtime

@@ -317,3 +317,43 @@ contracts.
 
     If ``raise_on_error`` is truthy, then the method will raise an exception
     instead of returning ``False`` for any of the failure cases.
+
+Waiting for Things
+------------------
+
+Each chain object exposes the following API through a property ``chain.wait``
+
+
+** ``chain.wait.for_contract_address(txn_hash, timeout=120)``
+    
+    Blocks for up to ``timeout`` seconds returning the contract address from the
+    transaction receipt for the given ``txn_hash``.
+
+
+** ``chain.wait.for_receipt(txn_hash, timeout=120)``
+
+    Blocks for up to ``timeout`` seconds returning the transaction receipt for
+    the given ``txn_hash``.
+
+
+** ``chain.wait.for_block_number(block_number=1, timeout=120)``
+
+    Blocks for up to ``timeout`` seconds waiting until the highest block on the
+    current chain is at least ``block_number``.
+
+
+** ``chain.wait.for_unlock(account=web3.eth.coinbase, timeout=120)``
+
+    Blocks for up to ``timeout`` seconds waiting until the account specified by
+    ``account`` is unlocked.  If ``account`` is not provided,
+    ``web3.eth.coinbase`` will be used.
+
+** ``chain.wait.for_peers(timeout=120)``
+
+    Blocks for up to ``timeout`` seconds waiting for the client to have at
+    least 1 peer connection.
+
+
+** ``chain.wait.for_syncing(timeout=120)``
+
+    Blocks for up to ``timeout`` seconds waiting the chain to begin syncing.

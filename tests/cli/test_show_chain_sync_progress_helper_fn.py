@@ -85,7 +85,7 @@ def test_show_chain_sync_progress():
             sync_chain.web3.admin.addPeer(main_enode)
             main_chain.web3.admin.addPeer(sync_enode)
 
-            chain.wait.for_peers(timeout=60)
+            sync_chain.wait.for_peers(timeout=60)
 
             result = runner.invoke(wrapper, [])
 

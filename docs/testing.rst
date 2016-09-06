@@ -172,17 +172,13 @@ to set the initial supply.
 
     import pytest
 
-    from populus.utils.transactions import (
-        get_contract_address_from_txn,
-    )
-
     @pytest.fixture
-    def token_contract(web3, chain):
+    def token_contract(chain):
         TokenFactory = chain.get_contract_factory('Token')
         deploy_txn_hash = TokenFactory.deploy(arguments=[
             1e18,  # initial token supply
         )
-        contract_address = get_contract_address_from_txn(web3, deploy_txn_hash)
+        contract_address = chain.wait.for_contract_address(deploy_txn_hash)
         return TokenFactory(address=contract_address)
 
 

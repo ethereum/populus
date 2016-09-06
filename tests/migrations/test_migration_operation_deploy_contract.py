@@ -4,10 +4,6 @@ from populus.migrations import (
     DeployContract,
     Address,
 )
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-    get_contract_address_from_txn,
-)
 
 
 def test_deploy_contract_operation_on_math_contract(web3, chain, MATH):
@@ -18,7 +14,7 @@ def test_deploy_contract_operation_on_math_contract(web3, chain, MATH):
         compiled_contracts={'Math': MATH},
     )
     deploy_txn_hash = operation_receipt['deploy-transaction-hash']
-    contract_address = get_contract_address_from_txn(web3, deploy_txn_hash, timeout=30)
+    contract_address = chain.wait.for_contract_address(deploy_txn_hash, timeout=30)
 
     code = web3.eth.getCode(contract_address)
 
@@ -38,7 +34,7 @@ def test_deploy_contract_operation_with_arguments(web3, chain,
         compiled_contracts={'WithConstructorArguments': WITH_CONSTRUCTOR_ARGUMENTS},
     )
     deploy_txn_hash = operation_receipt['deploy-transaction-hash']
-    contract_address = get_contract_address_from_txn(web3, deploy_txn_hash, timeout=30)
+    contract_address = chain.wait.for_contract_address(deploy_txn_hash, timeout=30)
 
     code = web3.eth.getCode(contract_address)
 

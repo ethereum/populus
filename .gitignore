@@ -63,4 +63,4 @@ genesis.json
 keystore/
 
 # Migrations
-migrations/
+./migrations/

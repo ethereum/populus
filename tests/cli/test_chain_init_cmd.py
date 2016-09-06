@@ -9,10 +9,6 @@ from web3.utils.string import force_text
 
 from populus.project import Project
 
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-    wait_for_unlock,
-)
 from populus.utils.filesystem import (
     get_contracts_dir,
 )
@@ -34,13 +30,13 @@ def test_initializing_local_chain(project_dir, write_project_file):
     )
 
     with chain:
-        wait_for_unlock(chain.web3, chain.web3.eth.coinbase, 30)
-        funding_txn = chain.web3.eth.sendTransaction({
+        chain.wait.for_unlock(chain.web3.eth.coinbase, timeout=30)
+        funding_txn_hash = chain.web3.eth.sendTransaction({
             'from': chain.web3.eth.coinbase,
             'to': deploy_from,
             'value': int(chain.web3.toWei(10, 'ether')),
         })
-        wait_for_transaction_receipt(chain.web3, funding_txn, 60)
+        chain.wait.for_receipt(funding_txn_hash, timeout=60)
 
     result = runner.invoke(
         main,

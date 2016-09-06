@@ -32,9 +32,8 @@ from populus.utils.networking import (
 from populus.utils.module_loading import (
     import_string,
 )
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-    get_contract_address_from_txn,
+from populus.utils.wait import (
+    Wait,
 )
 from populus.utils.filesystem import (
     remove_file_if_exists,
@@ -172,6 +171,10 @@ class Chain(object):
     @property
     def web3(self):
         raise NotImplementedError("Must be implemented by subclasses")
+
+    @property
+    def wait(self):
+        return Wait(self.web3)
 
     @property
     def chain_config(self):
@@ -501,11 +504,7 @@ class TestRPCChain(Chain):
     def registrar(self):
         # deploy the registrar
         deploy_txn_hash = self.RegistrarFactory.deploy()
-        registrar_address = get_contract_address_from_txn(
-            self.web3,
-            deploy_txn_hash,
-            1,
-        )
+        registrar_address = self.wait.for_contract_address(deploy_txn_hash)
 
         return self.RegistrarFactory(address=registrar_address)
 
@@ -583,10 +582,7 @@ class TestRPCChain(Chain):
                 link_dependencies=kwargs.get('link_dependencies'),
             )
             deploy_txn_hash = contract_factory.deploy()
-            contract_address = get_contract_address_from_txn(
-                self.web3,
-                deploy_txn_hash,
-            )
+            contract_address = self.wait.for_contract_address(deploy_txn_hash)
 
             # Then register the address with the registrar so that the super
             # method will be able to get and return it.
@@ -594,7 +590,7 @@ class TestRPCChain(Chain):
                 contract_key,
                 contract_address,
             )
-            wait_for_transaction_receipt(self.web3, register_txn_hash)
+            self.wait.for_receipt(register_txn_hash)
         return super(TestRPCChain, self).get_contract(
             contract_name,
             link_dependencies=link_dependencies,
@@ -758,11 +754,7 @@ class TemporaryGethChain(BaseGethChain):
     def registrar(self):
         RegistrarFactory = get_compiled_registrar_contract(self.web3)
         deploy_txn_hash = RegistrarFactory.deploy()
-        registrar_address = get_contract_address_from_txn(
-            self.web3,
-            deploy_txn_hash,
-            60,
-        )
+        registrar_address = self.wait.for_contract_address(deploy_txn_hash)
         registrar = RegistrarFactory(address=registrar_address)
 
         return registrar

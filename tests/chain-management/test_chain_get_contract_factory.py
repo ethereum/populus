@@ -1,9 +1,5 @@
 import pytest
 
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-    get_contract_address_from_txn,
-)
 from populus.utils.contracts import (
     link_bytecode,
 )
@@ -34,13 +30,14 @@ def testrpc_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13
 
 @pytest.fixture()
 def library_13(testrpc_chain):
-    web3 = testrpc_chain.web3
+    chain= testrpc_chain
+    web3 = chain.web3
 
-    Library13 = testrpc_chain.contract_factories.Library13
+    Library13 = chain.contract_factories.Library13
 
     library_deploy_txn_hash = Library13.deploy()
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
-    library_13_address = get_contract_address_from_txn(web3, library_deploy_txn_hash, 30)
+    library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
 
     assert library_deploy_txn['input'] == Library13.code
     assert web3.eth.getCode(library_13_address) == Library13.code_runtime
@@ -93,7 +90,7 @@ def test_get_contract_factory_with_registrar_dependency(testrpc_chain,
         'contract/Library13', library_13.address,
     )
 
-    wait_for_transaction_receipt(chain.web3, register_txn_hash)
+    chain.wait.for_receipt(register_txn_hash)
 
     MULTIPLY_13 = chain.project.compiled_contracts['Multiply13']
     Multiply13 = chain.get_contract_factory('Multiply13')
@@ -116,7 +113,7 @@ def test_with_bytecode_mismatch_in_registrar_dependency(testrpc_chain,
         'contract/Library13', '0xd3cda913deb6f67967b99d67acdfa1712c293601'
     )
 
-    wait_for_transaction_receipt(chain.web3, register_txn_hash)
+    chain.wait.for_receipt(register_txn_hash)
 
     with pytest.raises(BytecodeMismatchError):
         chain.get_contract_factory('Multiply13')

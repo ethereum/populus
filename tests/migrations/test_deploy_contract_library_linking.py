@@ -5,10 +5,6 @@ from populus.migrations import (
     DeployContract,
     Address,
 )
-from populus.utils.transactions import (
-    wait_for_transaction_receipt,
-    get_contract_address_from_txn,
-)
 from populus.utils.contracts import (
     link_bytecode,
 )
@@ -37,14 +33,15 @@ def deploy_chain(prepared_project):
 
 @pytest.fixture()
 def library_13(deploy_chain):
-    web3 = deploy_chain.web3
+    chain = deploy_chain
+    web3 = chain.web3
 
-    Library13 = deploy_chain.contract_factories.Library13
-    LIBRARY_13 = deploy_chain.project.compiled_contracts['Library13']
+    Library13 = chain.contract_factories.Library13
+    LIBRARY_13 = chain.project.compiled_contracts['Library13']
 
     library_deploy_txn_hash = Library13.deploy()
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
-    library_13_address = get_contract_address_from_txn(web3, library_deploy_txn_hash, 30)
+    library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
 
     assert library_deploy_txn['input'] == LIBRARY_13['code']
     assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
@@ -56,7 +53,7 @@ def library_13(deploy_chain):
 def verify_multiply_13_linked(library_13, deploy_chain):
     chain = deploy_chain
     project = chain.project
-    web3 = deploy_chain.web3
+    web3 = chain.web3
 
     LIBRARY_13 = project.compiled_contracts['Library13']
 
@@ -77,7 +74,7 @@ def verify_multiply_13_linked(library_13, deploy_chain):
 
         deploy_txn_hash = operation_receipt['deploy-transaction-hash']
         deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
-        contract_address = get_contract_address_from_txn(web3, deploy_txn_hash, timeout=30)
+        contract_address = chain.wait.for_contract_address(deploy_txn_hash, timeout=30)
 
         expected_code = link_bytecode(
             MULTIPLY_13['code'],
@@ -118,14 +115,15 @@ def test_deployment_linking_with_provided_address(library_13,
 def test_deployment_linking_with_provided_registrar_value(deploy_chain,
                                                           library_13,
                                                           verify_multiply_13_linked):
-    web3 = deploy_chain.web3
-    registrar = deploy_chain.registrar
+    chain = deploy_chain
+    web3 = chain.web3
+    registrar = chain.registrar
 
     set_library_addr_txn_hash = registrar.transact().setAddress(
         'a-custom-key',
         library_13.address,
     )
-    wait_for_transaction_receipt(web3, set_library_addr_txn_hash, 30)
+    chain.wait.for_receipt(set_library_addr_txn_hash, timeout=30)
 
     deploy_operation = DeployContract(
         'Multiply13',
@@ -141,14 +139,15 @@ def test_deployment_linking_with_provided_registrar_value(deploy_chain,
 def test_deployment_linking_with_auto_lookup_from_registrar(deploy_chain,
                                                             library_13,
                                                             verify_multiply_13_linked):
-    web3 = deploy_chain.web3
-    registrar = deploy_chain.registrar
+    chain = deploy_chain
+    web3 = chain.web3
+    registrar = chain.registrar
 
     set_library_addr_txn_hash = registrar.transact().setAddress(
         'contract/Library13',
         library_13.address,
     )
-    wait_for_transaction_receipt(web3, set_library_addr_txn_hash, 30)
+    chain.wait.for_receipt(set_library_addr_txn_hash, timeout=30)
 
     deploy_operation = DeployContract(
         'Multiply13',

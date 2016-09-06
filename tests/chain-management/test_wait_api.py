@@ -50,8 +50,9 @@ def test_wait_for_contract_address(project_dir, chain_name, MATH_CODE, MATH_RUNT
 
         txn_hash = web3.eth.sendTransaction({
             'data': MATH_CODE,
+            'gas': 2000000,
         })
-        contract_address = chain.wait.for_receipt(txn_hash)
+        contract_address = chain.wait.for_contract_address(txn_hash)
 
         chain_code = web3.eth.getCode(contract_address)
         assert chain_code == MATH_RUNTIME

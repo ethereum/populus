@@ -73,7 +73,7 @@ class Wait(object):
 
         return wait_for_transaction_receipt(self.web3, txn_hash, timeout)
 
-    def for_block_number(self, block_number=empty, timeout=empty):
+    def for_block(self, block_number=empty, timeout=empty):
         kwargs = {}
         if block_number is not empty:
             kwargs['block_number'] = block_number

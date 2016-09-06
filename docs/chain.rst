@@ -336,7 +336,7 @@ Each chain object exposes the following API through a property ``chain.wait``
     the given ``txn_hash``.
 
 
-** ``chain.wait.for_block_number(block_number=1, timeout=120)``
+** ``chain.wait.for_block(block_number=1, timeout=120)``
 
     Blocks for up to ``timeout`` seconds waiting until the highest block on the
     current chain is at least ``block_number``.

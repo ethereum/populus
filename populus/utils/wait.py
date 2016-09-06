@@ -22,7 +22,9 @@ def wait_for_block_number(web3, block_number=1, timeout=120):
         while web3.eth.blockNumber < block_number:
             if isinstance(web3.currentProvider, TestRPCProvider):
                 web3._requestManager.request_blocking("evm_mine", [])
-            gevent.sleep(random.random())
+                gevent.sleep(0)
+            else:
+                gevent.sleep(random.random())
     return web3.eth.getBlock(block_number)
 
 

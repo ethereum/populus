@@ -73,7 +73,7 @@ def test_show_chain_sync_progress():
                 node_port=sync_node_info['ports']['listener'],
             )
 
-            chain.wait.for_block_number(BLOCK_DELTA, timeout=BLOCK_DELTA * 4)
+            main_chain.wait.for_block_number(BLOCK_DELTA, timeout=BLOCK_DELTA * 4)
 
             main_chain_start_block = main_chain.web3.eth.blockNumber
             sync_chain_start_block = sync_chain.web3.eth.blockNumber

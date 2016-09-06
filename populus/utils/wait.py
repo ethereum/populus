@@ -1,14 +1,9 @@
 import random
 import gevent
 
+from web3.providers.rpc import TestRPCProvider
+
 from .empty import empty
-
-
-def get_contract_address_from_txn(web3, txn_hash, timeout=120):
-    from .wait import wait_for_transaction_receipt
-    txn_receipt = wait_for_transaction_receipt(web3, txn_hash, timeout)
-
-    return txn_receipt['contractAddress']
 
 
 def wait_for_transaction_receipt(web3, txn_hash, timeout=120):
@@ -22,8 +17,11 @@ def wait_for_transaction_receipt(web3, txn_hash, timeout=120):
 
 
 def wait_for_block_number(web3, block_number=1, timeout=120):
+
     with gevent.Timeout(timeout):
         while web3.eth.blockNumber < block_number:
+            if isinstance(web3.currentProvider, TestRPCProvider):
+                web3._requestManager.request_blocking("evm_mine", [])
             gevent.sleep(random.random())
     return web3.eth.getBlock(block_number)
 
@@ -62,10 +60,8 @@ class Wait(object):
             self.timeout = timeout
 
     def for_contract_address(self, txn_hash, timeout=empty):
-        if timeout is empty:
-            timeout = self.timeout
-
-        return get_contract_address_from_txn(self.web3, txn_hash, timeout=timeout)
+        txn_receipt = self.for_receipt(txn_hash, timeout=timeout)
+        return txn_receipt['contractAddress']
 
     def for_receipt(self, txn_hash, timeout=empty):
         if timeout is empty:

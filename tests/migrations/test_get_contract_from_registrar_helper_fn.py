@@ -28,10 +28,11 @@ def deploy_chain(prepared_project):
 
 @pytest.fixture()
 def math(deploy_chain):
-    web3 = deploy_chain.web3
+    chain = deploy_chain
+    web3 = chain.web3
 
-    Math = deploy_chain.contract_factories.Math
-    MATH = deploy_chain.project.compiled_contracts['Math']
+    Math = chain.contract_factories.Math
+    MATH = chain.project.compiled_contracts['Math']
 
     math_deploy_txn_hash = Math.deploy()
     math_deploy_txn = web3.eth.getTransaction(math_deploy_txn_hash)
@@ -45,10 +46,11 @@ def math(deploy_chain):
 
 @pytest.fixture()
 def library_13(deploy_chain):
-    web3 = deploy_chain.web3
+    chain = deploy_chain
+    web3 = chain.web3
 
-    Library13 = deploy_chain.contract_factories.Library13
-    LIBRARY_13 = deploy_chain.project.compiled_contracts['Library13']
+    Library13 = chain.contract_factories.Library13
+    LIBRARY_13 = chain.project.compiled_contracts['Library13']
 
     library_deploy_txn_hash = Library13.deploy()
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
@@ -73,8 +75,8 @@ def test_getting_contract_that_does_not_exist_in_registrar(deploy_chain):
 
 
 def test_getting_contract_that_is_in_registrar(deploy_chain, library_13):
-    project = deploy_chain.project
     chain = deploy_chain
+    project = chain.project
     web3 = chain.web3
     registrar = chain.registrar
 
@@ -91,8 +93,8 @@ def test_getting_contract_that_is_in_registrar(deploy_chain, library_13):
 
 
 def test_getting_contract_that_is_in_registrar_with_bytecode_mismatch(deploy_chain, math):
-    project = deploy_chain.project
     chain = deploy_chain
+    project = chain.project
     web3 = chain.web3
     registrar = chain.registrar
 
@@ -109,8 +111,8 @@ def test_getting_contract_that_is_in_registrar_with_bytecode_mismatch(deploy_cha
 
 
 def test_getting_contract_that_is_in_registrar_with_empty_bytecode(deploy_chain):
-    project = deploy_chain.project
     chain = deploy_chain
+    project = chain.project
     web3 = chain.web3
     registrar = chain.registrar
 

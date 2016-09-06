@@ -348,10 +348,10 @@ Each chain object exposes the following API through a property ``chain.wait``
     ``account`` is unlocked.  If ``account`` is not provided,
     ``web3.eth.coinbase`` will be used.
 
-** ``chain.wait.for_peers(timeout=120)``
+** ``chain.wait.for_peers(peer_count=1, timeout=120)``
 
     Blocks for up to ``timeout`` seconds waiting for the client to have at
-    least 1 peer connection.
+    least ``peer_count`` peer connections.
 
 
 ** ``chain.wait.for_syncing(timeout=120)``

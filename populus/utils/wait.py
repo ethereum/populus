@@ -65,13 +65,13 @@ class Wait(object):
         if timeout is empty:
             timeout = self.timeout
 
-        return get_contract_address_from_txn(self.web3, txn_hash, timeout)
+        return get_contract_address_from_txn(self.web3, txn_hash, timeout=timeout)
 
     def for_receipt(self, txn_hash, timeout=empty):
         if timeout is empty:
             timeout = self.timeout
 
-        return wait_for_transaction_receipt(self.web3, txn_hash, timeout)
+        return wait_for_transaction_receipt(self.web3, txn_hash, timeout=timeout)
 
     def for_block(self, block_number=empty, timeout=empty):
         kwargs = {}
@@ -90,12 +90,15 @@ class Wait(object):
             timeout = self.timeout
         return wait_for_unlock(self.web3, timeout=timeout, **kwargs)
 
-    def for_peers(self, timeout=empty):
+    def for_peers(self, peer_count=empty, timeout=empty):
+        kwargs = {}
+        if peer_count is not empty:
+            kwargs['peer_count'] = peer_count
         if timeout is empty:
             timeout = self.timeout
-        return wait_for_peers(self.web3, timeout)
+        return wait_for_peers(self.web3, timeout=timeout, **kwargs)
 
     def for_syncing(self, timeout=empty):
         if timeout is empty:
             timeout = self.timeout
-        return wait_for_syncing(self.web3, timeout)
+        return wait_for_syncing(self.web3, timeout=timeout)

@@ -1,5 +1,5 @@
-Chain management
-================
+Chains
+======
 
 .. contents:: :local:
 

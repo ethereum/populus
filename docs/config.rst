@@ -1,10 +1,10 @@
 Configuration
--------------
+=============
 
 .. contents:: :local:
 
 Introduction
-^^^^^^^^^^^^
+------------
 
 Populus supports configuration via a configuration file.  By default, this file
 is located at the root of your project and named ``populus.ini``.
@@ -28,7 +28,7 @@ Local project configuration will always supercede global configuration.
 
 
 Configuration via CLI
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 
 The configuration file can be easily modified using the following CLI commands.
 
@@ -81,13 +81,13 @@ The configuration file can be easily modified using the following CLI commands.
 
 
 Configuration Options
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 
 The following configuration options are recognized by populus.
 
 
 Project Level Configuration
----------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All project level configuration must be declared under the ``[populus]``
 section of the config file.
@@ -99,7 +99,7 @@ section of the config file.
 
 
 Chain Level Configuration
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Configuration for individual chains should be done under
 ``[chain:my-chain-name]`` sections.

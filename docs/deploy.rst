@@ -10,12 +10,12 @@ The deployment functionality exposed by Populus is meant for one-off
 deployments of simple contracts.  The deployment process includes some, or all
 of the following steps.
 
-1. Selection of which chain should be deployed to.
-2. Running the given chain.
-3. Compilation of project contracts.
-4. Derivation of library dependencies.
-5. Library linking.
-6. Individual contract deployment.
+#. Selection of which chain should be deployed to.
+#. Running the given chain.
+#. Compilation of project contracts.
+#. Derivation of library dependencies.
+#. Library linking.
+#. Individual contract deployment.
 
 .. note::
 
@@ -68,6 +68,7 @@ project ``./contracts`` directory.
 		}
 	}
 
+
 We can deploy this contract to a local test chain like thi.
 
 .. code-block:: shell
@@ -93,4 +94,5 @@ We can deploy this contract to a local test chain like thi.
 	Registering contract 'Wallet' @ 0xb6fac5cb309da4d984bb6145078104355ece96ca in registrar in txn: 0xca91ff346d63d9cec452ba94d8b2e650d8169b9b14fdf5ca76f770c1ce3a997f ... DONE
 	Deployment Successful.
 
-Above you can see the standard output for a basic deployment.
+
+Above you can see the output for a basic deployment.

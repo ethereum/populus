@@ -17,6 +17,7 @@ Contents
     testing
     deploy
     migrations
+    project
     config
     chain
     release

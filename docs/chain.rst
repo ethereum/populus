@@ -3,6 +3,10 @@ Chain management
 
 .. contents:: :local:
 
+.. py:module:: populus.chain
+.. py:currentmodule:: populus.chain
+
+
 Introduction
 ------------
 
@@ -33,7 +37,7 @@ Local Chains
 ^^^^^^^^^^^^
 
 Local chains can be setup within your ``populus.ini`` file.  Each local chain
-stores its chain data in the ``Project.blockchains_dir`` and persists it's data
+stores its chain data in the :py:attribute::`populus.Project.blockchains_dir` and persists it's data
 between runs.
 
 Local chains are backed by the go-ethereum ``geth`` client.
@@ -84,9 +88,9 @@ The ``$ populus chain`` command handles running chains from the command line.
 Running programatically from code
 ---------------------------------
 
-The ``Project.get_chain(chain_name, *chain_args, **chain_kwargs)`` method
-returns a ``populus.chain.Chain`` instance that can be used within your code to
-run any populus chain.
+The :py:method::`populus.Project.get_chain(chain_name, *chain_args,
+**chain_kwargs)` method returns a :py:class::`populus.chain.Chain` instance
+that can be used within your code to run any populus chain.
 
 Lets look at a basic example of using the ``temp`` chain.
 
@@ -266,10 +270,12 @@ set some default values for the chain.
 Access To Contracts
 -------------------
 
+.. py:class:: Chain
+
 All chain objects present the following API for interacting with your project
 contracts.
 
-** ``Chain.get_contract_factory(contract_name[, link_dependencies=None, validate_bytecode=True])``
+.. py:method:: Chain.get_contract_factory(contract_name, link_dependencies=None, validate_bytecode=True)
 
     Returns the contract factory for the contract indicated by
     ``contract_name`` from the chain's ``compiled_contracts``.
@@ -283,7 +289,7 @@ contracts.
     validated to match the on chain bytecode.
 
 
-** ``Chain.get_contract(contract_name[, link_dependencies=None, validate_bytecode=True])``
+.. py:method:: Chain.get_contract(contract_name, link_dependencies=None, validate_bytecode=True)
 
     Returns the contract instance indicated by the ``contract_name`` from the
     chain's ``compiled_contracts``.
@@ -302,7 +308,7 @@ contracts.
         simple contracts which do not require constructor arguments.
 
 
-** ``Chain.is_contract_available(contract_name[, link_dependencies=None, validate_bytecode=True, raise_on_error=False])``
+.. py:method:: Chain.is_contract_available(contract_name, link_dependencies=None, validate_bytecode=True, raise_on_error=False)
 
     Returns ``True`` or ``False`` as to whether the contract indicated by
     ``contract_name`` from the chain's ``compiled_contracts`` is available
@@ -318,42 +324,44 @@ contracts.
     If ``raise_on_error`` is truthy, then the method will raise an exception
     instead of returning ``False`` for any of the failure cases.
 
+
 Waiting for Things
 ------------------
 
 Each chain object exposes the following API through a property ``chain.wait``
 
 
-** ``chain.wait.for_contract_address(txn_hash, timeout=120)``
-    
+.. py:method:: Chain.wait.for_contract_address(txn_hash, timeout=120)
+
     Blocks for up to ``timeout`` seconds returning the contract address from the
     transaction receipt for the given ``txn_hash``.
 
 
-** ``chain.wait.for_receipt(txn_hash, timeout=120)``
+.. py:method:: Chain.wait.for_receipt(txn_hash, timeout=120)
 
     Blocks for up to ``timeout`` seconds returning the transaction receipt for
     the given ``txn_hash``.
 
 
-** ``chain.wait.for_block(block_number=1, timeout=120)``
+.. py:method:: Chain.wait.for_block(block_number=1, timeout=120)
 
     Blocks for up to ``timeout`` seconds waiting until the highest block on the
     current chain is at least ``block_number``.
 
 
-** ``chain.wait.for_unlock(account=web3.eth.coinbase, timeout=120)``
+.. py:method:: Chain.wait.for_unlock(account=web3.eth.coinbase, timeout=120)
 
     Blocks for up to ``timeout`` seconds waiting until the account specified by
     ``account`` is unlocked.  If ``account`` is not provided,
     ``web3.eth.coinbase`` will be used.
 
-** ``chain.wait.for_peers(peer_count=1, timeout=120)``
+
+.. py:method:: Chain.wait.for_peers(peer_count=1, timeout=120)
 
     Blocks for up to ``timeout`` seconds waiting for the client to have at
     least ``peer_count`` peer connections.
 
 
-** ``chain.wait.for_syncing(timeout=120)``
+.. py:method:: Chain.wait.for_syncing(timeout=120)
 
     Blocks for up to ``timeout`` seconds waiting the chain to begin syncing.

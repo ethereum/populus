@@ -3,6 +3,9 @@ Migrations
 
 .. contents:: :local:
 
+.. py:module:: populus.migrations
+.. py:currentmodule:: populus.migrations
+
 Introduction
 ------------
 
@@ -158,6 +161,7 @@ Then we need to specify the details of the transaction that should be sent.
 			)
 		]
 
+
 In order to be able to reference values that you may not be able to know ahead
 of time, populus uses a special class for deferring the resolution of those
 values.  In the migration shown above, the address of the ``Wallet`` contract
@@ -180,18 +184,21 @@ our wallet contract.
 Migrations
 ----------
 
-Migrations are intended to facilitate both the deployment of simple contracts
-as well as complex constellations of contracts that may require both complex
-deployment logic as well as complex interactions with those contracts after
-they have been deployed.
+.. py:class:: Migration
 
-Each migration consists of the following four pieces of information.
+    Migrations are intended to facilitate both the deployment of simple contracts
+    as well as complex constellations of contracts that may require both complex
+    deployment logic as well as complex interactions with those contracts after
+    they have been deployed.
 
-** ``migration_id``
+    Each migration consists of the following four pieces of information.
 
-    This is an identifier which will be used by other migrations to handle dependencies.
+.. py:attribute:: Migration.migration_id
 
-** ``dependencies``
+    This is an identifier which will be used by other migrations to handle
+    dependencies.
+
+.. py:attribute:: Migration.dependencies
 
     A list of the ``migration_id`` values for other migrations that this
     migration depends on.  When migrations are generated, the latest migration
@@ -200,14 +207,14 @@ Each migration consists of the following four pieces of information.
     Complex migratino dependency graphs are allowed as long as the result is a
     `Directed Acyclic Graph`_.
 
-** ``operations``
+.. py:attribute:: Migration.operations
 
     A list of ``populus.migrations.operations.Operation`` objects.  These must
     be added by the user.
 
-** ``compiled_contracts``
+.. py:attribute:: Migration.compiled_contracts
 
-    A python dictionary containing the compiled contract assets.  These are
+    A dictionary containing the compiled contract assets.  These are
     present to freeze the state of the project contracts at the time the
     migration was generated.
 
@@ -216,11 +223,12 @@ Each migration consists of the following four pieces of information.
 Operations
 ----------
 
+
 Operations are units of work that are executed during a migration.  Populus
 provides the following operation classes.
 
 
-* ``populus.migrations.operations.SendTransaction(transaction[, timeout=180])``
+.. py:class:: SendTransaction(transaction, timeout=180)
 
   Sends a transaction specified by ``transaction`` parameter.
   
@@ -233,7 +241,7 @@ provides the following operation classes.
   without waiting.
 
 
-* ``populus.migrations.operations.DeployContract(contract_name[, transaction=None, arguments=None, verify=True, libraries=None, timeout=180)``
+.. py:class:: DeployContract(contract_name, transaction=None, arguments=None, verify=True, libraries=None, timeout=180)
 
   Deployes the contract designated by ``contract_name`` from the migration's
   ``compiled_contracts`` property.
@@ -263,7 +271,7 @@ provides the following operation classes.
   operation will continue on without waiting.
 
 
-* ``populus.migrations.operations.TransactContract(contract_address, contract_name, method_name[, arguments=None, transaction=None, timeout=180)``
+.. py:class:: TransactContract(contract_address, contract_name, method_name, arguments=None, transaction=None, timeout=180)
 
   Sends a transaction, calling the method named by the ``method_name`` argument
   on the contract designated by the ``contract_name`` parameter from the
@@ -280,7 +288,7 @@ provides the following operation classes.
   ``DeployContract`` operation.
 
 
-* ``populus.migrations.operations.RunPython(callback)``
+.. py:class: RunPython(callback)
 
   Executes the provided ``callback`` within the context of the migration.  The
   ``callback`` should be a function that can be called with the following
@@ -302,12 +310,36 @@ at execution time of the operation.
 Populus provides the following deferred value classes that can be used in
 conjunction with the Registrar contract to look values up from the registrar.
 
-** ``populus.migrations.deferred.Address``
-** ``populus.migrations.deferred.Bytes32``
-** ``populus.migrations.deferred.UInt``
-** ``populus.migrations.deferred.Int``
-** ``populus.migrations.deferred.String``
-** ``populus.migrations.deferred.Bool``
+.. py:class:: Address(key)
+
+    Resolves to a 20 byte hexidecimal encoded address from the given registrar
+    ``key``
+
+
+.. py:class:: Bytes32(key)
+
+    Resolves to a 32 byte string from the given registrar ``key``
+
+
+.. py:class:: UInt(key)
+
+    Resolves to an integer (strictly positive) from the givent registrar ``key``
+
+
+.. py:class:: Int(key)
+
+    Resolves to an integer (possibly negative) from the givent registrar ``key``
+
+
+.. py:class:: String(key)
+
+    Resolves to an string value from the givent registrar ``key``
+
+
+.. py:class:: Bool(key)
+
+    Resolves to an boolean value from the givent registrar ``key``
+
 
 To use one of these classes as a migration argument, you should call the class
 method ``.defer(key='some-registrar-key')``.  One of the more common use cases

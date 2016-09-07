@@ -46,7 +46,7 @@ Project
 
 * ``project``
 
-The ``populus.project.Project`` object for your project.
+The :ref:`Project` object for your project.
 
 
 .. code-block:: python

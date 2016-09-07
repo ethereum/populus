@@ -13,7 +13,7 @@ def test_wait_for_block(project_dir, chain_name):
         web3 = chain.web3
 
         start_block = web3.eth.blockNumber
-        chain.wait.for_block(start_block + 3, timeout=20)
+        chain.wait.for_block(start_block + 3, timeout=60)
 
         assert web3.eth.blockNumber >= start_block + 3
 

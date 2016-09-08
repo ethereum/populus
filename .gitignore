@@ -63,4 +63,5 @@ genesis.json
 keystore/
 
 # Migrations
-./migrations/
+migrations/
+!populus/migrations/

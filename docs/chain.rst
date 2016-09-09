@@ -288,6 +288,18 @@ contracts.
     bytecode for any library dependencies for the given contract should be
     validated to match the on chain bytecode.
 
+    If your project has no project migrations then the data used for these
+    contract factories will come directly from the compiled project contracts.
+
+    If your project has migrations then the data used to build your contract
+    factories will be populutated as follows.:
+
+        #. The newest migration that has been run which deploys the requested
+           contract.
+        #. The newest migration which contains this contract in it's
+           ``compiled_contracts`` property
+        #. The compiled project contracts.
+
 
 .. py:method:: Chain.get_contract(contract_name, link_dependencies=None, validate_bytecode=True)
 

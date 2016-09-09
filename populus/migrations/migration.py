@@ -1,6 +1,9 @@
 import itertools
+import functools
 
 from toposort import toposort
+
+from web3.utils.types import is_string
 
 from .deferred import (
     generate_registrar_value_setters,
@@ -150,3 +153,110 @@ def get_migration_classes_for_execution(migration_classes, chain):
     ]
 
     return migrations_to_run
+
+
+def get_contract_data_from_most_recent_deployment_migration(migration_classes,
+                                                            contract_name):
+    """
+    Returns the migration class in which the given contract was deployed.
+    """
+    from .operations import DeployContract
+
+    sorted_migration_classes = sort_migrations(migration_classes, flatten=True)
+
+    for migration_class in reversed(sorted_migration_classes):
+        for operation in reversed(migration_class.operations):
+            if not isinstance(operation, DeployContract):
+                continue
+
+            if operation.contract_registrar_name is not None:
+                op_contract_name = operation.contract_registrar_name
+            else:
+                op_contract_name = operation.contract_name
+
+            if not is_string(op_contract_name):
+                raise TypeError(
+                    "Unexpectedly encountered non-string contract name while "
+                    "parsing migraton '{0}':  Got {1} of type {2}".format(
+                        migration_classes.migraton_id,
+                        op_contract_name,
+                        type(op_contract_name),
+                    )
+                )
+
+            if op_contract_name == contract_name:
+                return migration_class.compiled_contracts[operation.contract_name]
+    else:
+        # No migrations found which deploy `contract_name`
+        return None
+
+
+def get_compiled_contracts_from_migrations(migration_classes, chain):
+    from .operations import DeployContract
+
+    # Gather the `migration_id` for all of the migrations that have not been
+    # run.
+    unmigrated_migration_ids = {
+        migration.migration_id
+        for migration
+        in get_migration_classes_for_execution(
+            migration_classes,
+            chain,
+        )
+    }
+
+    # Use the set of not-executed migrations to figure out which migrations
+    # have already been run.
+    migrated_migration_classes = [
+        migration_class
+        for migration_class
+        in migration_classes
+        if migration_class.migration_id not in unmigrated_migration_ids
+    ]
+
+    # Create a dictionary of all contract data combined from the
+    # `compiled_contracts` property of all migration classes that have been
+    # executed.
+    contract_data_from_migrations = functools.reduce(
+        lambda a, b: dict(b, **a),  # merge `a` and `b` with `a` taking priority.
+        (m.compiled_contracts for m in reversed(migrated_migration_classes)),
+        {},
+    )
+
+    # Create a dictionary that contains all known contract data with data from
+    # newest migrations being preferred over older migrations and falling back
+    # to live project contract data last.
+    default_contract_data = dict(
+        chain.project.compiled_contracts,
+        **contract_data_from_migrations
+    )
+
+    # All known contract names from all migations including
+    all_contract_names = set(itertools.chain.from_iterable((
+        migration_class.compiled_contracts.keys()
+        for migration_class in migrated_migration_classes
+    ))).union((
+        operation.contract_registrar_name or operation.contract_name
+        for migration_class in migrated_migration_classes
+        for operation in migration_class.operations
+        if isinstance(operation, DeployContract)
+    ))
+
+    # Now we gather the contract data for each contract from the migration in
+    # which it was last deployed.
+    contract_data_from_last_deployment = {k: v for k, v in {
+        contract_name: get_contract_data_from_most_recent_deployment_migration(
+            migrated_migration_classes,
+            contract_name,
+        ) for contract_name in all_contract_names
+    }.items() if v is not None}
+
+    # Merge the contract_data from deployed contracts with the full set of
+    # contract data, preferring the contract_data from the deployment
+    # migration.  This is our set of contract data.
+    compiled_contracts = dict(
+        default_contract_data,
+        **contract_data_from_last_deployment
+    )
+
+    return compiled_contracts

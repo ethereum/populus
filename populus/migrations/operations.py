@@ -99,6 +99,7 @@ class SendTransaction(Operation):
 
 class DeployContract(Operation):
     contract_name = None
+    contract_registrar_name = None
     transaction = None
     timeout = 180
     libraries = None
@@ -110,11 +111,13 @@ class DeployContract(Operation):
                  arguments=None,
                  verify=True,
                  libraries=None,
-                 timeout=180):
+                 timeout=180,
+                 contract_registrar_name=None):
         if libraries is None:
             libraries = {}
 
         self.contract_name = contract_name
+        self.contract_registrar_name = contract_registrar_name
         self.libraries = libraries
 
         if timeout is None and verify:
@@ -146,6 +149,7 @@ class DeployContract(Operation):
         resolver = Resolver(chain)
 
         contract_name = resolver(self.contract_name)
+        contract_registrar_name = resolver(self.contract_registrar_name)
         libraries = {
             resolver(key): resolver(value)
             for key, value in resolver(self.libraries).items()
@@ -228,10 +232,11 @@ class DeployContract(Operation):
                         ),
                     )
             return {
-                'contract-address': contract_address,
                 'deploy-transaction-hash': deploy_transaction_hash,
                 'canonical-contract-address': Address.defer(
-                    key='/'.join(('contract', contract_name)),
+                    key='contract/{name}'.format(
+                        name=contract_registrar_name or contract_name,
+                    ),
                     value=contract_address,
                 ),
             }

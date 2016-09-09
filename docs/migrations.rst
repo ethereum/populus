@@ -241,7 +241,7 @@ provides the following operation classes.
   without waiting.
 
 
-.. py:class:: DeployContract(contract_name, transaction=None, arguments=None, verify=True, libraries=None, timeout=180)
+.. py:class:: DeployContract(contract_name, transaction=None, arguments=None, verify=True, libraries=None, timeout=180, contract_registrar_name=None)
 
   Deployes the contract designated by ``contract_name`` from the migration's
   ``compiled_contracts`` property.
@@ -269,6 +269,11 @@ provides the following operation classes.
   The operation will wait up to the ``timeout`` value for the deployment
   transaction to be mined unless set to ``None`` in which case the
   operation will continue on without waiting.
+
+  Upon successful deployment a record will be written to the chain registrar
+  contract under the string ``contract/{contract_name}``.  If
+  ``contract_registrar_name`` is provided, then this name will be used in place
+  of the ``contract_name``.
 
 
 .. py:class:: TransactContract(contract_address, contract_name, method_name, arguments=None, transaction=None, timeout=180)

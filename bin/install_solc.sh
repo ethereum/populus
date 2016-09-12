@@ -13,7 +13,7 @@ if [ ! -e solc/solc ] ; then
     tar -zxvf ../solc.tar.gz
     cd solidity-0.3.6
     ./scripts/install_deps.sh
-    mkdir build
+    mkdir -p build
     cd build
     cmake .. && make
     ln -s solc/solc ../../../solc/solc-0.3.6

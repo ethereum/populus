@@ -28,6 +28,8 @@ install:
   - travis_retry pip install setuptools --upgrade
   - travis_retry pip install tox
 before_script:
+  - ls -lah $TRAVIS_BUILD_DIR/solc-versions/solc-0.3.6/
+  - ./solc-versions/solc-0.3.6/solc --version
   - mkdir -p $HOME/.ethash
   - geth makedag 0 $HOME/.ethash
 script:

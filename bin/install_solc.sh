@@ -6,7 +6,7 @@
 set -e
 set -u
 
-if [ ! -e solc-versions/solc-0.3.6/build/solc/solc ] ; then
+if [ ! -e solc-versions/solidity-0.3.6/build/solc/solc ] ; then
     wget -O solc.tar.gz "https://github.com/ethereum/solidity/archive/v0.3.6.tar.gz"
     install -d solc-versions
     cd solc-versions

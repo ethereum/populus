@@ -55,6 +55,9 @@ from populus.utils.chains import (
     get_geth_logfile_path,
 )
 
+from populus.migrations.migration import (
+    get_compiled_contracts_from_migrations,
+)
 from populus.migrations.registrar import (
     get_compiled_registrar_contract,
 )
@@ -182,9 +185,17 @@ class Chain(object):
 
     @cached_property
     def contract_factories(self):
+        if self.project.migrations:
+            compiled_contracts = get_compiled_contracts_from_migrations(
+                self.project.migrations,
+                self,
+            )
+        else:
+            compiled_contracts = self.project.compiled_contracts
+
         return construct_contract_factories(
             self.web3,
-            self.project.compiled_contracts,
+            compiled_contracts,
         )
 
     @property

@@ -39,7 +39,7 @@ def math(temp_chain):
 
     math_deploy_txn_hash = Math.deploy()
     math_deploy_txn = web3.eth.getTransaction(math_deploy_txn_hash)
-    math_address = chain.wait.for_contract_address(math_deploy_txn_hash, timeout=30)
+    math_address = chain.wait.for_contract_address(math_deploy_txn_hash)
 
     assert math_deploy_txn['input'] == MATH['code']
     assert web3.eth.getCode(math_address) == MATH['code_runtime']
@@ -57,7 +57,7 @@ def library_13(temp_chain):
 
     library_deploy_txn_hash = Library13.deploy()
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
-    library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
+    library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash)
 
     assert library_deploy_txn['input'] == LIBRARY_13['code']
     assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
@@ -84,7 +84,7 @@ def multiply_13(temp_chain, library_13):
 
     multiply_13_deploy_txn_hash = LinkedMultiply13.deploy()
     multiply_13_deploy_txn = web3.eth.getTransaction(multiply_13_deploy_txn_hash)
-    multiply_13_address = chain.wait.for_contract_address(multiply_13_deploy_txn_hash, timeout=30)
+    multiply_13_address = chain.wait.for_contract_address(multiply_13_deploy_txn_hash)
 
     assert multiply_13_deploy_txn['input'] == LinkedMultiply13.code
     assert web3.eth.getCode(multiply_13_address) == LinkedMultiply13.code_runtime
@@ -100,7 +100,7 @@ def register_address(temp_chain):
         register_txn_hash = temp_chain.registrar.transact().setAddress(
             'contract/{name}'.format(name=name), value,
         )
-        chain.wait.for_receipt(register_txn_hash, timeout=120)
+        chain.wait.for_receipt(register_txn_hash)
     return _register_address
 
 

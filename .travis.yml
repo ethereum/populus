@@ -6,7 +6,7 @@ sudo: required
 before_install:
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
-  - travis_retry sudo apt-get install -y solc
+  #- travis_retry sudo apt-get install -y solc
   - travis_retry sudo apt-get install -y ethereum
   - mkdir -p $HOME/.ethash
   - geth makedag 0 $HOME/.ethash
@@ -18,9 +18,12 @@ env:
     - TOX_ENV=flake8
   global:
     - CHAIN_SYNC_BLOCK_DELTA=100
+    - SOLC_BINARY=./solc/solc-0.3.6
 cache:
   - pip: true
   - directories:
+    - solc/solc-0.3.6
+    - solc/solidity-0.3.6/build
     - $HOME/.ethash
     - .tox/py27/.hypothesis
     - .tox/py34/.hypothesis

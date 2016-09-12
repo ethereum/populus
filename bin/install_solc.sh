@@ -16,7 +16,7 @@ if [ ! -e solc/solc ] ; then
     mkdir -p build
     cd build
     cmake .. && make
-    ln -s solc/solc ../../../solc/solc-0.3.6
+    ln -s $PWD/solc ../../../solc/solc-0.3.6
     echo "Geth installed at $PWD/solc"
 else
     echo "Geth already installed at $PWD/solc/solc"

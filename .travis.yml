@@ -18,7 +18,7 @@ env:
     - TOX_ENV=flake8
   global:
     - CHAIN_SYNC_BLOCK_DELTA=100
-    - SOLC_BINARY="$TRAVIS_BUILD_DIR/solc-versions/solc-0.3.6/solc/solc"
+    - SOLC_BINARY="$TRAVIS_BUILD_DIR/solc-versions/solc-0.3.6/solc"
 cache:
   - pip: true
   - directories:

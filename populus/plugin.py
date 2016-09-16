@@ -5,12 +5,24 @@ from populus.migrations.migration import (
 )
 from populus.project import Project
 
+POPULUS_PROJECT_HASH = "populus/project_code_hash"
+POPULUS_PROJECT_CODE = "populus/project_code"
+
 
 @pytest.fixture(scope="session")
 def project(request):
     # This should probably be configurable using the `request` fixture but it's
     # unclear what needs to be configurable.
-    return Project()
+    code = request.config.cache.get(POPULUS_PROJECT_CODE, None)
+    code_hash = request.config.cache.get(POPULUS_PROJECT_HASH, None)
+    project = Project()
+    if code is not None and code_hash is not None:
+        project._cached_compiled_contracts_hash = code_hash
+        project._cached_compiled_contracts = code
+    request.config.cache.set(POPULUS_PROJECT_CODE, project.compiled_contracts)
+    request.config.cache.set(POPULUS_PROJECT_HASH, project._cached_compiled_contracts_hash)
+
+    return project
 
 
 @pytest.yield_fixture()

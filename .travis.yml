@@ -32,6 +32,6 @@ before_script:
   - mkdir -p $HOME/.ethash
   - geth makedag 0 $HOME/.ethash
 script:
-  - tox -e $TOX_ENV
+  - tox -e $TOX_ENV --recreate
 after_script:
   - cat .tox/$TOX_ENV/log/*.log

@@ -6,7 +6,7 @@ from populus.migrations.migration import (
 from populus.project import Project
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def project(request):
     # This should probably be configurable using the `request` fixture but it's
     # unclear what needs to be configurable.

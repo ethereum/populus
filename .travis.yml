@@ -18,7 +18,6 @@ cache:
     - $TRAVIS_BUILD_DIR/solc-versions/solc-0.3.6/
     - $TRAVIS_BUILD_DIR/solc-versions/solidity-0.3.6/build/
     - $HOME/.ethash/
-    - .tox/
 before_install:
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
@@ -33,6 +32,6 @@ before_script:
   - mkdir -p $HOME/.ethash
   - geth makedag 0 $HOME/.ethash
 script:
-  - tox -e $TOX_ENV
+  - tox -e $TOX_ENV --recreate
 after_script:
   - cat .tox/$TOX_ENV/log/*.log

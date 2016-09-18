@@ -32,6 +32,7 @@ setup(
         "gevent>=1.1.2",
         "py-geth>=1.1.0",
         "py-solc>=0.5.0",
+        "pylru>=1.0.9",
         "pysha3>=0.3",
         "pytest>=2.7.2",
         "toposort>=1.4",

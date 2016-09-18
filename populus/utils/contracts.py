@@ -27,6 +27,7 @@ def package_contracts(contract_classes):
         '__iter__': lambda s: iter(contract_classes.items()),
         '__contains__': lambda s, k: contract_classes.__contains__(k),
         '__getitem__': lambda s, k: contract_classes.__getitem__(k),
+        '__setitem__': lambda s, k, v: contract_classes.__setitem__(k, v),
         'keys': lambda s: contract_classes.keys(),
         'values': lambda s: contract_classes.values(),
     }

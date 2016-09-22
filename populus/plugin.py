@@ -5,22 +5,21 @@ from populus.migrations.migration import (
 )
 from populus.project import Project
 
-POPULUS_PROJECT_MTIME = "populus/project_mtime"
-POPULUS_PROJECT_CODE = "populus/project_code"
+CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
+CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
 
 
 @pytest.fixture(scope="session")
 def project(request):
     # This should probably be configurable using the `request` fixture but it's
     # unclear what needs to be configurable.
-    code = request.config.cache.get(POPULUS_PROJECT_CODE, None)
-    code_mtime = request.config.cache.get(POPULUS_PROJECT_MTIME, None)
-    project = Project()
-    if code is not None and code_mtime is not None:
-        project._cached_compiled_contracts_mtime = code_mtime
-        project._cached_compiled_contracts = code
-    request.config.cache.set(POPULUS_PROJECT_CODE, project.compiled_contracts)
-    request.config.cache.set(POPULUS_PROJECT_MTIME, project._cached_compiled_contracts_mtime)
+
+    # use pytest cache to preset the sessions project to recently compiled contracts
+    contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
+    mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
+    project = Project(cached_contracts=contracts, contracts_mtime=mtime)
+    request.config.cache.set(CACHE_KEY_CONTRACTS, project.compiled_contracts)
+    request.config.cache.set(CACHE_KEY_MTIME, project.get_source_modification_time())
 
     return project
 

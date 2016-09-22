@@ -5,7 +5,7 @@ from populus.migrations.migration import (
 )
 from populus.project import Project
 
-POPULUS_PROJECT_HASH = "populus/project_code_hash"
+POPULUS_PROJECT_MTIME = "populus/project_mtime"
 POPULUS_PROJECT_CODE = "populus/project_code"
 
 
@@ -14,13 +14,13 @@ def project(request):
     # This should probably be configurable using the `request` fixture but it's
     # unclear what needs to be configurable.
     code = request.config.cache.get(POPULUS_PROJECT_CODE, None)
-    code_hash = request.config.cache.get(POPULUS_PROJECT_HASH, None)
+    code_mtime = request.config.cache.get(POPULUS_PROJECT_MTIME, None)
     project = Project()
-    if code is not None and code_hash is not None:
-        project._cached_compiled_contracts_hash = code_hash
+    if code is not None and code_mtime is not None:
+        project._cached_compiled_contracts_mtime = code_mtime
         project._cached_compiled_contracts = code
     request.config.cache.set(POPULUS_PROJECT_CODE, project.compiled_contracts)
-    request.config.cache.set(POPULUS_PROJECT_HASH, project._cached_compiled_contracts_hash)
+    request.config.cache.set(POPULUS_PROJECT_MTIME, project._cached_compiled_contracts_mtime)
 
     return project
 

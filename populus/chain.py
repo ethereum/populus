@@ -5,6 +5,8 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
+from pylru import lrucache
+
 from testrpc import testrpc
 
 from web3.utils.types import is_string
@@ -163,10 +165,12 @@ class Chain(object):
     """
     project = None
     chain_name = None
+    _factory_cache = None
 
     def __init__(self, project, chain_name):
         self.project = project
         self.chain_name = chain_name
+        self._factory_cache = lrucache(128)
 
     #
     # Required Public API
@@ -378,6 +382,9 @@ class Chain(object):
     def get_contract_factory(self,
                              contract_name,
                              link_dependencies=None):
+        cache_key = (contract_name,) + tuple(sorted((link_dependencies or {}).items()))
+        if cache_key in self._factory_cache:
+            return self._factory_cache[cache_key]
         if contract_name not in self.contract_factories:
             raise UnknownContract(
                 "No contract found with the name '{0}'.\n\n"
@@ -386,6 +393,7 @@ class Chain(object):
                     ', '.join((name for name in self.contract_factories.keys())),
                 )
             )
+
         base_contract_factory = self.contract_factories[contract_name]
 
         if link_dependencies is not False:
@@ -408,6 +416,7 @@ class Chain(object):
             abi=base_contract_factory.abi,
             source=base_contract_factory.source,
         )
+        self._factory_cache[cache_key] = contract_factory
         return contract_factory
 
     @property
@@ -560,7 +569,14 @@ class TestRPCChain(Chain):
         finally:
             self._running = False
 
-    def get_contract(self, contract_name, link_dependencies=None, *args, **kwargs):
+    def get_contract(self,
+                     contract_name,
+                     link_dependencies=None,
+                     deploy_transaction=None,
+                     deploy_args=None,
+                     deploy_kwargs=None,
+                     *args,
+                     **kwargs):
         if contract_name not in self.contract_factories:
             raise UnknownContract(
                 "No contract found with the name '{0}'.\n\n"
@@ -592,7 +608,11 @@ class TestRPCChain(Chain):
                 contract_name,
                 link_dependencies=kwargs.get('link_dependencies'),
             )
-            deploy_txn_hash = contract_factory.deploy()
+            deploy_txn_hash = contract_factory.deploy(
+                transaction=deploy_transaction,
+                args=deploy_args,
+                kwargs=deploy_kwargs,
+            )
             contract_address = self.wait.for_contract_address(deploy_txn_hash)
 
             # Then register the address with the registrar so that the super

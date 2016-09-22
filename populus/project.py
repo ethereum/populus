@@ -129,7 +129,7 @@ class Project(object):
     def compiled_contracts_file_path(self):
         return get_compiled_contracts_file_path(self.project_dir)
 
-    _cached_compiled_contracts_hash = None
+    _cached_compiled_contracts_stat = None
     _cached_compiled_contracts = None
 
     def get_source_file_hash(self):
@@ -142,10 +142,10 @@ class Project(object):
 
     @property
     def compiled_contracts(self):
-        source_hash = self.get_source_file_hash()
+        source_stat = os.stat(self.contracts_dir)
 
-        if self._cached_compiled_contracts_hash != source_hash:
-            self._cached_compiled_contracts_hash = source_hash
+        if self._cached_compiled_contracts_stat != source_stat:
+            self._cached_compiled_contracts_stat = source_stat
             # TODO: the hard coded `optimize=True` should be configurable
             # somehow.
             _, self._cached_compiled_contracts = compile_project_contracts(

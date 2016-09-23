@@ -54,7 +54,8 @@ class Project(object):
 
     def __init__(self, config_file_paths=None, cached_contracts=None, contracts_mtime=None):
         """
-        :param cached_contracts: if supplied with contracts_mtime will become the Project's cache for compiled contracts
+        :param cached_contracts: if supplied with contracts_mtime will become the
+        Project's cache for compiled contracts
         :param contracts_mtime: last modification of supplied contracts
         :return:
         """
@@ -159,8 +160,9 @@ class Project(object):
     @property
     def compiled_contracts(self):
         source_mtime = self.get_source_modification_time()
+        no_cached = self._cached_compiled_contracts_mtime is None
 
-        if self._cached_compiled_contracts_mtime is None or self._cached_compiled_contracts_mtime < source_mtime:
+        if no_cached or self._cached_compiled_contracts_mtime < source_mtime:
             self._cached_compiled_contracts_mtime = source_mtime
             # TODO: the hard coded `optimize=True` should be configurable
             # somehow.

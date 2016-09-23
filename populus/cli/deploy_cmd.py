@@ -137,12 +137,13 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
         )
         click.echo(starting_msg)
 
-        for contract_name, contract_factory in deploy_order.items():
+        for contract_name, _ in deploy_order.items():
             link_dependencies = {
                 contract_name: contract.address
                 for contract_name, contract
                 in deployed_contracts.items()
             }
+            contract_factory = chain.contract_factories[contract_name]
 
             # Check if we already have an existing deployed version of that
             # contract (via the registry).  For each of these, prompt the user

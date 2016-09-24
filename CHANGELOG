@@ -1,3 +1,9 @@
+1.1.0
+-----
+
+- Bugfix for `$ populus deploy` command.
+- version bump for web3 dependency
+
 1.0.0
 -----
 

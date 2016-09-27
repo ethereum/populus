@@ -52,17 +52,8 @@ class Project(object):
     #: Instance of :class:`populus.utils.Config`, a subclass of ConfigParser
     config = None
 
-    def __init__(self, config_file_paths=None, cached_contracts=None, contracts_mtime=None):
-        """
-        :param cached_contracts: if supplied with contracts_mtime will become the
-        Project's cache for compiled contracts
-        :param contracts_mtime: last modification of supplied contracts
-        :return:
-        """
+    def __init__(self, config_file_paths=None):
         self.load_config(config_file_paths)
-        if cached_contracts is not None and contracts_mtime is not None:
-            self._cached_compiled_contracts_mtime = contracts_mtime
-            self._cached_compiled_contracts = cached_contracts
 
     #
     # Config
@@ -160,6 +151,15 @@ class Project(object):
     def compiled_contracts_stale(self):
         no_cached = self._cached_compiled_contracts_mtime is None
         return no_cached or self._cached_compiled_contracts_mtime < self.get_source_modification_time()
+
+    def fill_contracts_cache(self, contracts, contracts_mtime):
+        """
+        :param contracts: become the Project's cache for compiled contracts
+        :param contracts_mtime: last modification of supplied contracts
+        :return:
+        """
+        self._cached_compiled_contracts_mtime = contracts_mtime
+        self._cached_compiled_contracts = contracts
 
     @property
     def compiled_contracts(self):

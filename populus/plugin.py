@@ -17,7 +17,8 @@ def project(request):
     # use pytest cache to preset the sessions project to recently compiled contracts
     contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
     mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
-    project = Project(cached_contracts=contracts, contracts_mtime=mtime)
+    project = Project()
+    project.fill_contracts_cache(contracts, mtime)
     request.config.cache.set(CACHE_KEY_CONTRACTS, project.compiled_contracts)
     request.config.cache.set(CACHE_KEY_MTIME, project.get_source_modification_time())
 

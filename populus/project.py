@@ -157,13 +157,14 @@ class Project(object):
             in source_file_paths
         ) if len(source_file_paths) > 0 else None
 
+    def compiled_contracts_stale(self):
+        no_cached = self._cached_compiled_contracts_mtime is None
+        return no_cached or self._cached_compiled_contracts_mtime < self.get_source_modification_time()
+
     @property
     def compiled_contracts(self):
-        source_mtime = self.get_source_modification_time()
-        no_cached = self._cached_compiled_contracts_mtime is None
-
-        if no_cached or self._cached_compiled_contracts_mtime < source_mtime:
-            self._cached_compiled_contracts_mtime = source_mtime
+        if self.compiled_contracts_stale():
+            self._cached_compiled_contracts_mtime = self.get_source_modification_time()
             # TODO: the hard coded `optimize=True` should be configurable
             # somehow.
             _, self._cached_compiled_contracts = compile_project_contracts(

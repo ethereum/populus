@@ -142,11 +142,7 @@ def get_contract_from_registrar(chain,
 
     expected_runtime = link_bytecode(
         contract_factory.code_runtime,
-        **{
-            contract_name: contract.address
-            for contract_name, contract
-            in link_dependencies.items()
-        }
+        **link_dependencies,
     )
     actual_runtime = web3.eth.getCode(contract_address)
 

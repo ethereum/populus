@@ -61,6 +61,5 @@ chaindata/
 genesis.json
 keystore/
 
-# Migrations
-migrations/
-!populus/migrations/
+# pytest
+.cache/

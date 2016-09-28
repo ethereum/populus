@@ -83,7 +83,7 @@ def Math(web3, MATH):
 
 @pytest.fixture()
 def math(chain, web3, Math):
-    deploy_txn_hash = Math.deploy({'gas': 200000})
+    deploy_txn_hash = Math.deploy()
     contract_address = chain.wait.for_contract_address(deploy_txn_hash, timeout=30)
 
     # sanity

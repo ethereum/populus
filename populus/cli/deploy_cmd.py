@@ -90,8 +90,7 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
                     ', '.join(sorted(compiled_contracts.keys())),
                 )
             )
-            click.echo(unknown_contracts_message, err=True)
-            click.exit(1)
+            raise click.ClickException(unknown_contracts_message)
     else:
         # prompt the user to select the desired contracts they want to deploy.
         # Potentially display the currently deployed status.

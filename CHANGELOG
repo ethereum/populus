@@ -1,3 +1,10 @@
+1.2.0
+-----
+
+- All function in the `chain.wait` api now take a `poll_interval` parameter
+  which controls how aggressively they will poll for changes.
+- The `project` fixture now caches the compiled contracts across test runs.
+
 1.1.0
 -----
 

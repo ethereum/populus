@@ -340,40 +340,44 @@ contracts.
 Waiting for Things
 ------------------
 
-Each chain object exposes the following API through a property ``chain.wait``
+Each chain object exposes the following API through a property ``chain.wait``.
+The ``timeout`` parameter determines how long this will block before raising a
+``gevent.Timeout`` exception.  The ``poll_interval`` determines how long it
+should wait between polling.  If ``poll_interval == None`` then
+``random.random()`` will be used to determine the poling interval.
 
 
-.. py:method:: Chain.wait.for_contract_address(txn_hash, timeout=120)
+.. py:method:: Chain.wait.for_contract_address(txn_hash, timeout=120, poll_interval=None)
 
     Blocks for up to ``timeout`` seconds returning the contract address from the
     transaction receipt for the given ``txn_hash``.
 
 
-.. py:method:: Chain.wait.for_receipt(txn_hash, timeout=120)
+.. py:method:: Chain.wait.for_receipt(txn_hash, timeout=120, poll_interval=None)
 
     Blocks for up to ``timeout`` seconds returning the transaction receipt for
     the given ``txn_hash``.
 
 
-.. py:method:: Chain.wait.for_block(block_number=1, timeout=120)
+.. py:method:: Chain.wait.for_block(block_number=1, timeout=120, poll_interval=None)
 
     Blocks for up to ``timeout`` seconds waiting until the highest block on the
     current chain is at least ``block_number``.
 
 
-.. py:method:: Chain.wait.for_unlock(account=web3.eth.coinbase, timeout=120)
+.. py:method:: Chain.wait.for_unlock(account=web3.eth.coinbase, timeout=120, poll_interval=None)
 
     Blocks for up to ``timeout`` seconds waiting until the account specified by
     ``account`` is unlocked.  If ``account`` is not provided,
     ``web3.eth.coinbase`` will be used.
 
 
-.. py:method:: Chain.wait.for_peers(peer_count=1, timeout=120)
+.. py:method:: Chain.wait.for_peers(peer_count=1, timeout=120, poll_interval=None)
 
     Blocks for up to ``timeout`` seconds waiting for the client to have at
     least ``peer_count`` peer connections.
 
 
-.. py:method:: Chain.wait.for_syncing(timeout=120)
+.. py:method:: Chain.wait.for_syncing(timeout=120, poll_interval=None)
 
     Blocks for up to ``timeout`` seconds waiting the chain to begin syncing.

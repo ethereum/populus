@@ -1,3 +1,8 @@
+1.2.1
+-----
+
+- Support legacy JSON-RPC spec for `eth_getTransactionReceipt` in wait API.
+
 1.2.0
 -----
 

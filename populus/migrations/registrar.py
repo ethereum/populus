@@ -29,7 +29,7 @@ REGISTRAR_V3_SOURCE_PATH = os.path.join(BASE_DIR, 'RegistrarV3.sol')
 REGISTRAR_V4_SOURCE_PATH = os.path.join(BASE_DIR, 'RegistrarV4.sol')
 
 
-def get_compiled_registrar_contract(web3, address=None):
+def get_compiled_registrar_contract():
     if is_solc_03x():
         compiled_contracts = compile_files([REGISTRAR_V3_SOURCE_PATH])
     elif is_solc_04x():
@@ -40,11 +40,16 @@ def get_compiled_registrar_contract(web3, address=None):
             "are supported".format(get_solc_version())
         )
     contract_data = compiled_contracts['Registrar']
+    return contract_data
+
+
+def get_registrar(web3, address=None):
+    registrar_contract_data = get_compiled_registrar_contract()
     return web3.eth.contract(
         address=address,
-        abi=contract_data['abi'],
-        code=contract_data['code'],
-        code_runtime=contract_data['code_runtime'],
+        abi=registrar_contract_data['abi'],
+        code=registrar_contract_data['code'],
+        code_runtime=registrar_contract_data['code_runtime'],
     )
 
 

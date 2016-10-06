@@ -8,7 +8,7 @@ from click.testing import CliRunner
 from populus.project import Project
 from populus import migrations
 from populus.migrations.registrar import (
-    get_compiled_registrar_contract,
+    get_registrar,
 )
 from populus.migrations.writer import (
     write_migration,
@@ -75,7 +75,7 @@ def test_migrate_cmd(project_dir, write_project_file, MATH):
     with project.get_chain('local_a') as chain:
         chain.wait.for_unlock(chain.web3.eth.coinbase, timeout=30)
         project.config.set('chain:local_a', 'deploy_from', chain.web3.eth.coinbase)
-        RegistrarFactory = get_compiled_registrar_contract(web3=chain.web3)
+        RegistrarFactory = get_registrar(web3=chain.web3)
         deploy_transaction_hash = RegistrarFactory.deploy()
         registrar_address = chain.wait.for_contract_address(deploy_transaction_hash, timeout=60)
         project.config.set('chain:local_a', 'registrar', registrar_address)

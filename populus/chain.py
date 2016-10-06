@@ -61,7 +61,7 @@ from populus.migrations.migration import (
     get_compiled_contracts_from_migrations,
 )
 from populus.migrations.registrar import (
-    get_compiled_registrar_contract,
+    get_registrar,
 )
 
 
@@ -204,7 +204,7 @@ class Chain(object):
 
     @property
     def RegistrarFactory(self):
-        return get_compiled_registrar_contract(self.web3)
+        return get_registrar(self.web3)
 
     @property
     def has_registrar(self):
@@ -485,7 +485,7 @@ class ExternalChain(Chain):
                 "registrar.  Please set this value to the address of the "
                 "deployed registrar contract.".format(self.chain_name)
             )
-        return get_compiled_registrar_contract(
+        return get_registrar(
             self.web3,
             address=self.chain_config['registrar'],
         )
@@ -733,7 +733,7 @@ class BaseGethChain(Chain):
                 "registrar.  Please set this value to the address of the "
                 "deployed registrar contract.".format(self.chain_name)
             )
-        return get_compiled_registrar_contract(
+        return get_registrar(
             self.web3,
             address=self.chain_config['registrar'],
         )
@@ -783,7 +783,7 @@ class TemporaryGethChain(BaseGethChain):
 
     @cached_property
     def registrar(self):
-        RegistrarFactory = get_compiled_registrar_contract(self.web3)
+        RegistrarFactory = get_registrar(self.web3)
         deploy_txn_hash = RegistrarFactory.deploy()
         registrar_address = self.wait.for_contract_address(deploy_txn_hash)
         registrar = RegistrarFactory(address=registrar_address)

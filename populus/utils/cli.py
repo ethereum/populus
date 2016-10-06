@@ -365,7 +365,6 @@ def show_chain_sync_progress(chain):
         except gevent.Timeout:
             raise click.ClickException("Chain synchronization never started.")
 
-    return
     starting_block = web3.eth.syncing['startingBlock']
 
     while True:

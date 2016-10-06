@@ -6,8 +6,5 @@ include requirements.txt
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
-include populus/assets/js/web3.js
-include populus/assets/js/web3.js.map
-include populus/templates/index.html
-include populus/default_blockchain_password
-include populus/genesis-test.json
+include populus/migrations/RegistrarV3.sol
+include populus/migrations/RegistrarV4.sol

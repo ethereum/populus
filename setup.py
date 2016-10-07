@@ -31,7 +31,7 @@ setup(
         "ethereum-tester-client>=1.1.0",
         "gevent>=1.1.2",
         "py-geth>=1.1.0",
-        "py-solc>=0.5.0",
+        "py-solc>=0.6.0",
         "pylru>=1.0.9",
         "pysha3>=0.3",
         "pytest>=2.7.2",

@@ -1,7 +1,5 @@
 import types
 
-from solc import compile_source
-
 from web3.utils.string import (
     force_text,
 )
@@ -14,7 +12,7 @@ from populus.utils.deploy import (
 )
 
 from .registrar import (
-    REGISTRAR_SOURCE,
+    get_compiled_registrar_contract,
 )
 from .deferred import (
     Address,
@@ -326,7 +324,9 @@ class DeployRegistrar(DeployContract):
 
     def execute(self, chain, **kwargs):
         kwargs.pop('compiled_contracts', None)
-        compiled_contracts = compile_source(REGISTRAR_SOURCE)
+        compiled_contracts = {
+            'Registrar': get_compiled_registrar_contract(),
+        }
         return super(DeployRegistrar, self).execute(
             chain=chain,
             compiled_contracts=compiled_contracts,

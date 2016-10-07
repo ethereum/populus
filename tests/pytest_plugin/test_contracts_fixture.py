@@ -11,4 +11,4 @@ def test_contracts_fixture(request, project_dir, write_project_file, MATH):
     assert contracts.Math
     assert len(contracts.Math.code) > 2
     assert len(contracts.Math.code_runtime) > 2
-    assert contracts.Math.abi == MATH['abi']
+    assert len(contracts.Math.abi) == len(MATH['abi'])

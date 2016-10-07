@@ -1,5 +1,5 @@
 from populus.migrations.registrar import (
-    get_compiled_registrar_contract,
+    get_registrar,
 )
 from populus.migrations import (
     DeployRegistrar,
@@ -12,6 +12,6 @@ def test_deploy_registrar_operation(web3, chain):
 
     assert registrar_address
 
-    registrar = get_compiled_registrar_contract(web3, registrar_address)
+    registrar = get_registrar(web3, registrar_address)
 
     assert registrar

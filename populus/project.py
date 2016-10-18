@@ -114,7 +114,11 @@ class Project(object):
     @property
     @relpath
     def contracts_dir(self):
-        return get_contracts_dir(self.project_dir)
+        if self.config.has_option('populus', 'contracts_dir'):
+            s = self.config.get('populus', 'contracts_dir')
+            return s
+        else:
+            return get_contracts_dir(self.project_dir)
 
     @property
     @relpath

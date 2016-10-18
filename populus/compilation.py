@@ -2,7 +2,6 @@ import os
 import json
 
 from populus.utils.filesystem import (
-    get_contracts_dir,
     get_compiled_contracts_file_path,
     recursive_find_files,
 )
@@ -14,8 +13,8 @@ from solc.exceptions import (
 )
 
 
-def find_project_contracts(project_dir):
-    contracts_dir = get_contracts_dir(project_dir)
+def find_project_contracts(project_dir, contracts_rel_dir):
+    contracts_dir = os.path.join(project_dir, contracts_rel_dir)
 
     return tuple(
         os.path.relpath(p) for p in recursive_find_files(contracts_dir, "*.sol")
@@ -35,9 +34,9 @@ def write_compiled_sources(project_dir, compiled_sources):
     return compiled_contract_path
 
 
-def compile_project_contracts(project_dir, **compiler_kwargs):
+def compile_project_contracts(project_dir, contracts_dir, **compiler_kwargs):
     compiler_kwargs.setdefault('output_values', ['bin', 'bin-runtime', 'abi'])
-    contract_source_paths = find_project_contracts(project_dir)
+    contract_source_paths = find_project_contracts(project_dir, contracts_dir)
     try:
         compiled_sources = compile_files(contract_source_paths, **compiler_kwargs)
     except ContractsNotFound:
@@ -46,9 +45,10 @@ def compile_project_contracts(project_dir, **compiler_kwargs):
     return contract_source_paths, compiled_sources
 
 
-def compile_and_write_contracts(project_dir, **compiler_kwargs):
+def compile_and_write_contracts(project_dir, contracts_dir, **compiler_kwargs):
     contract_source_paths, compiled_sources = compile_project_contracts(
         project_dir,
+        contracts_dir,
         **compiler_kwargs
     )
 

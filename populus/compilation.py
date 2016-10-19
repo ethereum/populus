@@ -4,6 +4,7 @@ import json
 from populus.utils.filesystem import (
     get_compiled_contracts_file_path,
     recursive_find_files,
+    DEFAULT_CONTRACTS_DIR
 )
 from solc import (
     compile_files,
@@ -13,7 +14,7 @@ from solc.exceptions import (
 )
 
 
-def find_project_contracts(project_dir, contracts_rel_dir):
+def find_project_contracts(project_dir, contracts_rel_dir=DEFAULT_CONTRACTS_DIR):
     contracts_dir = os.path.join(project_dir, contracts_rel_dir)
 
     return tuple(

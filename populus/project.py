@@ -115,8 +115,7 @@ class Project(object):
     @relpath
     def contracts_dir(self):
         if self.config.has_option('populus', 'contracts_dir'):
-            s = self.config.get('populus', 'contracts_dir')
-            return s
+            return self.config.get('populus', 'contracts_dir')
         else:
             return get_contracts_dir(self.project_dir)
 
@@ -137,7 +136,7 @@ class Project(object):
     _cached_compiled_contracts = None
 
     def get_source_file_hash(self):
-        source_file_paths = find_project_contracts(self.project_dir)
+        source_file_paths = find_project_contracts(self.project_dir, self.contracts_dir)
         return hashlib.md5(b''.join(
             open(source_file_path, 'rb').read()
             for source_file_path
@@ -145,7 +144,7 @@ class Project(object):
         )).hexdigest()
 
     def get_source_modification_time(self):
-        source_file_paths = find_project_contracts(self.project_dir)
+        source_file_paths = find_project_contracts(self.project_dir, self.contracts_dir)
         return max(
             os.path.getmtime(source_file_path)
             for source_file_path
@@ -173,6 +172,7 @@ class Project(object):
             # somehow.
             _, self._cached_compiled_contracts = compile_project_contracts(
                 project_dir=self.project_dir,
+                contracts_dir=self.contracts_dir,
                 optimize=True,
             )
         return self._cached_compiled_contracts

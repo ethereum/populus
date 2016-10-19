@@ -48,11 +48,11 @@ def remove_dir_if_exists(path):
     return False
 
 
-CONTRACTS_DIR = "./contracts/"
+DEFAULT_CONTRACTS_DIR = "./contracts/"
 
 
 def get_contracts_dir(project_dir):
-    contracts_dir = os.path.join(project_dir, CONTRACTS_DIR)
+    contracts_dir = os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)
     return os.path.abspath(contracts_dir)
 
 

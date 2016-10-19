@@ -56,7 +56,7 @@ def get_default_datadir_path(testnet=False):
     elif sys.platform.startswith('linux'):
         return os.path.expanduser(os.path.join(
             "~",
-            "ethereum",
+            ".ethereum",
             testnet,
         ))
     elif sys.platform == 'win32':

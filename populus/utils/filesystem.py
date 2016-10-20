@@ -5,6 +5,7 @@ import fnmatch
 import tempfile
 import contextlib
 import functools
+import errno
 
 
 if sys.version_info.major == 2:
@@ -46,6 +47,16 @@ def remove_dir_if_exists(path):
         shutil.rmtree(path)
         return True
     return False
+
+
+def mkdir(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
 
 
 DEFAULT_CONTRACTS_DIR = "./contracts/"

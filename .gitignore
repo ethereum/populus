@@ -61,5 +61,9 @@ chaindata/
 genesis.json
 keystore/
 
+# Test remnants
+logs/
+migrations/
+
 # pytest
 .cache/

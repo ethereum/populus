@@ -5,6 +5,7 @@ import fnmatch
 import tempfile
 import contextlib
 import functools
+import errno
 
 
 if sys.version_info.major == 2:
@@ -48,11 +49,21 @@ def remove_dir_if_exists(path):
     return False
 
 
-CONTRACTS_DIR = "./contracts/"
+def mkdir(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+
+DEFAULT_CONTRACTS_DIR = "./contracts/"
 
 
 def get_contracts_dir(project_dir):
-    contracts_dir = os.path.join(project_dir, CONTRACTS_DIR)
+    contracts_dir = os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)
     return os.path.abspath(contracts_dir)
 
 

@@ -495,7 +495,7 @@ def testrpc_fn_proxy(fn_name):
         from testrpc import testrpc
         fn = getattr(testrpc, fn_name)
         return fn(*args, **kwargs)
-    inner.__name__ = fn_name
+    inner.__func__.__name__ = fn_name
     return inner
 
 

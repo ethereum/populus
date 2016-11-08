@@ -1,3 +1,8 @@
+1.4.1
+-----
+
+- Stop-gap fix for race-condition error from upstream: https://github.com/pipermerriam/web3.py/issues/80
+
 1.4.0
 -----
 

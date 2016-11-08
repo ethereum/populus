@@ -7,8 +7,6 @@ except ImportError:
 
 from pylru import lrucache
 
-from testrpc import testrpc
-
 from web3.utils.types import is_string
 
 from web3.providers.rpc import TestRPCProvider
@@ -491,6 +489,16 @@ class ExternalChain(Chain):
         )
 
 
+def testrpc_fn_proxy(fn_name):
+    @staticmethod
+    def inner(*args, **kwargs):
+        from testrpc import testrpc
+        fn = getattr(testrpc, fn_name)
+        return fn(*args, **kwargs)
+    inner.__func__.__name__ = fn_name
+    return inner
+
+
 class TestRPCChain(Chain):
     provider = None
     port = None
@@ -528,19 +536,21 @@ class TestRPCChain(Chain):
 
         return self.RegistrarFactory(address=registrar_address)
 
-    full_reset = staticmethod(testrpc.full_reset)
-    reset = staticmethod(testrpc.evm_reset)
+    full_reset = testrpc_fn_proxy('full_reset')
+    reset = testrpc_fn_proxy('evm_reset')
 
     @staticmethod
     def snapshot(*args, **kwargs):
+        from testrpc import testrpc
         return int(testrpc.evm_snapshot(*args, **kwargs), 16)
 
-    revert = staticmethod(testrpc.evm_revert)
-    mine = staticmethod(testrpc.evm_mine)
+    revert = testrpc_fn_proxy('evm_revert')
+    mine = testrpc_fn_proxy('evm_mine')
 
     _running = False
 
     def __enter__(self):
+        from testrpc import testrpc
         if self._running:
             raise ValueError("The TesterChain is already running")
 

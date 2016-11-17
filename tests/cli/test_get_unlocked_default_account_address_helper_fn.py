@@ -1,5 +1,4 @@
 import pytest
-from flaky import flaky
 import click
 from click.testing import CliRunner
 
@@ -10,7 +9,7 @@ from web3.utils.string import (
 )
 
 from populus.project import Project
-from populus.utils.chains import (
+from populus.utils.geth import (
     get_geth_ipc_path,
     get_data_dir as get_local_chain_datadir,
 )
@@ -40,7 +39,6 @@ def second_account(local_chain):
     return force_text(account)
 
 
-@flaky
 def test_get_unlocked_default_account_address_with_no_config(local_chain, second_account):
     project = local_chain.project
 
@@ -61,7 +59,6 @@ def test_get_unlocked_default_account_address_with_no_config(local_chain, second
         assert project.config['chains.local.web3.eth.default_account'] == second_account
 
 
-@flaky
 def test_helper_fn_with_unlocked_pre_configured_account(local_chain, second_account):
     project = local_chain.project
 
@@ -86,7 +83,6 @@ def test_helper_fn_with_unlocked_pre_configured_account(local_chain, second_acco
         assert project.config['chains.local.web3.eth.default_account'] == web3.eth.coinbase
 
 
-@flaky
 def test_helper_fn_with_locked_pre_configured_account(local_chain, second_account):
     project = local_chain.project
     project.config['chains.local.web3.eth.default_account'] = second_account

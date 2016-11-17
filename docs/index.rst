@@ -20,6 +20,7 @@ Contents
     project
     config
     chain
+    packaging
     release
     modules
     API Documentation <populus>

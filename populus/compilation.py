@@ -1,5 +1,5 @@
-import os
 import json
+import itertools
 
 from solc import (
     compile_files,
@@ -10,47 +10,41 @@ from solc.exceptions import (
 )
 
 from populus.utils.filesystem import (
-    get_compiled_contracts_file_path,
-    recursive_find_files,
-    DEFAULT_CONTRACTS_DIR
+    ensure_file_exists,
 )
-from populus.utils.compile import (
+
+from populus.utils.compiling import (
+    get_compiled_contracts_asset_path,
+    compute_project_compilation_arguments,
     normalize_contract_data,
     get_contract_meta,
 )
 
 
-def find_project_contracts(project_dir, contracts_rel_dir=DEFAULT_CONTRACTS_DIR):
-    contracts_dir = os.path.join(project_dir, contracts_rel_dir)
-
-    return tuple(
-        os.path.relpath(p) for p in recursive_find_files(contracts_dir, "*.sol")
-    )
+DEFAULT_OUTPUT_VALUES = ['bin', 'bin-runtime', 'abi', 'devdoc', 'userdoc']
 
 
-def write_compiled_sources(project_dir, compiled_sources):
-    compiled_contract_path = get_compiled_contracts_file_path(project_dir)
-
-    with open(compiled_contract_path, 'w') as outfile:
-        outfile.write(
-            json.dumps(compiled_sources,
-                       sort_keys=True,
-                       indent=4,
-                       separators=(',', ': '))
-        )
-    return compiled_contract_path
-
-
-def compile_project_contracts(project_dir, contracts_dir, compiler_settings=None):
+def compile_project_contracts(project, compiler_settings=None):
     if compiler_settings is None:
         compiler_settings = {}
 
-    compiler_settings.setdefault('output_values', ['bin', 'bin-runtime', 'abi'])
-    contract_source_paths = find_project_contracts(project_dir, contracts_dir)
+    compiler_settings.setdefault('output_values', DEFAULT_OUTPUT_VALUES)
+
+    result = compute_project_compilation_arguments(
+        project.contracts_source_dir,
+        project.installed_packages_dir,
+    )
+    project_source_paths, package_source_paths, import_remappings = result
+    all_source_paths = tuple(itertools.chain(project_source_paths, package_source_paths))
+
     try:
-        compiled_contracts = compile_files(contract_source_paths, **compiler_settings)
+        compiled_contracts = compile_files(
+            all_source_paths,
+            import_remappings=import_remappings,
+            **compiler_settings
+        )
     except ContractsNotFound:
-        return contract_source_paths, {}
+        return project_source_paths, {}
 
     solc_version = get_solc_version()
     contract_meta = get_contract_meta(compiler_settings, solc_version)
@@ -61,15 +55,19 @@ def compile_project_contracts(project_dir, contracts_dir, compiler_settings=None
         in compiled_contracts.items()
     }
 
-    return contract_source_paths, normalized_compiled_contracts
+    return project_source_paths, normalized_compiled_contracts
 
 
-def compile_and_write_contracts(project_dir, contracts_dir, compiler_settings=None):
-    contract_source_paths, compiled_sources = compile_project_contracts(
-        project_dir,
-        contracts_dir,
-        compiler_settings=compiler_settings,
-    )
+def write_compiled_sources(chain_metadata_dir, contract_data):
+    compiled_contracts_asset_path = get_compiled_contracts_asset_path(chain_metadata_dir)
+    ensure_file_exists(compiled_contracts_asset_path)
 
-    output_file_path = write_compiled_sources(project_dir, compiled_sources)
-    return contract_source_paths, compiled_sources, output_file_path
+    with open(compiled_contracts_asset_path, 'w') as compiled_contracts_asset_file:
+        json.dump(
+            contract_data,
+            compiled_contracts_asset_file,
+            sort_keys=True,
+            indent=2,
+            separators=(',', ': '),
+        )
+    return compiled_contracts_asset_path

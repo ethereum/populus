@@ -7,6 +7,11 @@
       },
       "web3": {
         "$ref": "web3.GethIPC"
+      },
+      "contract_backends": {
+        "JSONFile": {
+            "$ref": "contracts.backends.JSONFile"
+        }
       }
     },
     "ropsten": {
@@ -15,6 +20,11 @@
       },
       "web3": {
         "$ref": "web3.GethIPC"
+      },
+      "contract_backends": {
+        "JSONFile": {
+            "$ref": "contracts.backends.JSONFile"
+        }
       }
     },
     "temp": {
@@ -23,6 +33,11 @@
       },
       "web3": {
         "$ref": "web3.GethIPC"
+      },
+      "contract_backends": {
+        "Memory": {
+            "$ref": "contracts.backends.Memory"
+        }
       }
     },
     "tester": {
@@ -31,6 +46,11 @@
       },
       "web3": {
         "$ref": "web3.Tester"
+      },
+      "contract_backends": {
+        "Memory": {
+            "$ref": "contracts.backends.Memory"
+        }
       }
     },
     "testrpc": {
@@ -39,6 +59,30 @@
       },
       "web3": {
         "$ref": "web3.TestRPC"
+      },
+      "contract_backends": {
+        "Memory": {
+            "$ref": "contracts.backends.Memory"
+        }
+      }
+    }
+  },
+  "contracts": {
+    "backends": {
+      "InstalledPackages": {
+        "class": "populus.providers.backends.installed_packages.InstalledPackagesProviderBackend",
+        "priority": 20
+      },
+      "JSONFile": {
+        "class": "populus.contracts.backends.filesystem.JSONFileRegistrar",
+        "priority": 10,
+        "settings": {
+          "file_path": "./registrar.json"
+        }
+      },
+      "Memory": {
+        "class": "populus.contracts.backends.memory.MemoryBackend",
+        "priority": 40
       }
     }
   },
@@ -46,6 +90,36 @@
     "contracts_dir": "./contracts",
     "settings": {
       "optimize": true
+    }
+  },
+  "packaging": {
+    "backends": {
+      "IPFSBackend": {
+        "class": "populus.packages.backends.ipfs.IPFSPackageBackend",
+        "priority": 30,
+        "settings": {
+          "host": "https://ipfs.infura.io",
+          "port": 5001
+        }
+      },
+      "LocalFilesystemLockfileBackend": {
+        "class": "populus.packages.backends.lockfile.LocalFilesystemLockfileBackend",
+        "priority": 20
+      },
+      "LocalManifestBackend": {
+        "class": "populus.packages.backends.manifest.LocalManifestBackend",
+        "priority": 10
+      },
+      "RopstenPackageIndexBackend": {
+        "class": "populus.packages.backends.index.PackageIndexBackend",
+        "priority": 40,
+        "settings": {
+          "web3-for-install": {
+            "$ref": "web3.InfuraRopsten"
+          },
+          "package_index_address": "0xbab799ff7d9e13a50696a8bebb7a1b77ae519586"
+        }
+      }
     }
   },
   "web3": {

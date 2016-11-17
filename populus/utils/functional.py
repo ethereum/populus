@@ -2,6 +2,11 @@ import collections
 import functools
 import itertools
 
+from eth_utils import (
+    to_tuple,
+    compose,
+)
+
 from .string import (
     normalize_class_name,
 )
@@ -46,6 +51,13 @@ def to_object(class_name, bases=None):
     return outer
 
 
+def star_apply(fn):
+    @functools.wraps(fn)
+    def inner(args):
+        return fn(*args)
+    return inner
+
+
 def apply_to_return_value(callback):
     def outer(fn):
         @functools.wraps(fn)
@@ -57,6 +69,7 @@ def apply_to_return_value(callback):
 
 
 chain_return = apply_to_return_value(itertools.chain.from_iterable)
+star_zip_return = compose(apply_to_return_value(star_apply(zip)), to_tuple)
 to_set = apply_to_return_value(set)
 
 

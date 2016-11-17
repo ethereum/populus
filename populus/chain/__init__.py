@@ -1,9 +1,3 @@
-from populus.contracts.exceptions import (  # noqa: F401
-    NoKnownAddress,
-    UnknownContract,
-    BytecodeMismatch,
-)
-
 from .geth import (  # noqa: F401
     BaseGethChain,
     LocalGethChain,

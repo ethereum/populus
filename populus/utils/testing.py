@@ -42,6 +42,15 @@ def update_project_config(*key_value_pairs):
     return outer
 
 
+def load_example_package(example_package_name):
+    def outer(fn):
+        if not hasattr(fn, '_populus_packages_to_load'):
+            fn._populus_packages_to_load = []
+        fn._populus_packages_to_load.append(example_package_name)
+        return fn
+    return outer
+
+
 DEFAULT_TESTS_DIR = "./tests/"
 
 

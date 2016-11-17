@@ -31,9 +31,16 @@ from populus.config.versions import (
 
 
 NEW_V4_PATHS = {
-    'compilation.backends.SolcCombinedJSON',
+    'chains.mainnet.contracts.backends.InstalledPackages',
+    'chains.ropsten.contracts.backends.InstalledPackages',
+    'chains.temp.contracts.backends.InstalledPackages',
+    'chains.tester.contracts.backends.InstalledPackages',
+    'chains.testrpc.contracts.backends.InstalledPackages',
     'compilation.backend',
+    'compilation.backends.SolcCombinedJSON',
     'compilation.import_remappings',
+    'contracts.backends.InstalledPackages',
+    'packaging',
 }
 
 MOVED_V3_PATHS = {

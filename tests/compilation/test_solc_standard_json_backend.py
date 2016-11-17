@@ -105,3 +105,65 @@ def test_compiling_example_greeter_contract(project):
     _, compiled_contracts = compile_project_contracts(project)
 
     assert 'Greeter' in compiled_contracts
+
+
+@pytest.mark.skipif(
+    not solc_supports_standard_json_interface(),
+    reason="Solc compiler does not support standard json compilation",
+)
+@load_example_package('owned')
+def test_compiling_with_single_installed_package(project):
+    source_paths, contract_data = compile_project_contracts(project)
+
+    assert 'owned' in contract_data
+
+
+@pytest.mark.skipif(
+    not solc_supports_standard_json_interface(),
+    reason="Solc compiler does not support standard json compilation",
+)
+@load_example_package('owned')
+@load_example_package('standard-token')
+def test_compiling_with_multiple_installed_packages(project):
+    source_paths, contract_data = compile_project_contracts(project)
+
+    assert 'owned' in contract_data
+    assert 'Token' in contract_data
+    assert 'StandardToken' in contract_data
+
+
+@pytest.mark.skipif(
+    not solc_supports_standard_json_interface(),
+    reason="Solc compiler does not support standard json compilation",
+)
+@load_example_package('transferable')
+def test_compiling_with_nested_installed_packages(project):
+    source_paths, contract_data = compile_project_contracts(project)
+
+    assert 'owned' in contract_data
+    assert 'transferable' in contract_data
+
+
+@pytest.mark.skipif(
+    not solc_supports_standard_json_interface(),
+    reason="Solc compiler does not support standard json compilation",
+)
+@load_example_package('transferable')
+def test_compiling_with_nested_installed_packages(project):
+    source_paths, contract_data = compile_project_contracts(project)
+
+    assert 'owned' in contract_data
+    assert 'transferable' in contract_data
+
+
+@pytest.mark.skipif(
+    not solc_supports_standard_json_interface(),
+    reason="Solc compiler does not support standard json compilation",
+)
+@load_example_package('owned')
+@load_test_contract_fixture('UsesOwned.sol')
+def test_compiling_with_import_from_package(project):
+    source_paths, contract_data = compile_project_contracts(project)
+
+    assert 'UsesOwned' in contract_data
+    assert 'owned' in contract_data

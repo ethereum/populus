@@ -13,6 +13,9 @@
     "contracts": {
       "$ref": "#/definitions/ContractsConfig"
     },
+    "packaging": {
+      "$ref": "#/definitions/PackagingConfig"
+    },
     "version": {
       "type": "string",
       "enum": ["4"]
@@ -47,6 +50,23 @@
             {"$ref": "#/definitions/Reference"},
             {"$ref": "#/definitions/Web3Config"}
           ]
+        },
+        "contracts": {
+          "title": "Configuration for the contract backends this chain will use",
+          "type": "object",
+          "required": ["backends"],
+          "properties": {
+            "backends": {
+              "patternProperties": {
+                "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+                  "anyOf": [
+                    {"$ref": "#/definitions/Reference"},
+                    {"$ref": "#/definitions/ContractBackendConfig"}
+                  ]
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -86,12 +106,10 @@
       "title": "Configuration for a compiler backend",
       "type": "object",
       "properties": {
-        "class": {
-          "$ref": "#/definitions/PythonImportPath"
-        },
         "settings": {
-          "title": "Configuration key-value pairs to be passed into the compiler backend",
-          "type": "object"
+          "anyOf": [
+            {"$ref": "#/definitions/SolcCompilerSettings"}
+          ]
         }
       }
     },
@@ -131,6 +149,38 @@
       "title": "An Ethereum address",
       "type": "string",
       "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "PackageBackendConfig": {
+      "title": "Configuration for a package backend",
+      "type": "object",
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "priority": {
+          "title": "The priority of this backend",
+          "type": "integer"
+        },
+        "settings": {
+          "title": "Backend specific settings",
+          "type": "object"
+        }
+      }
+    },
+    "PackagingConfig": {
+      "title": "Configuration for package installation and management",
+      "type": "object",
+      "properties": {
+        "backends": {
+          "title": "Global configurations for project backends which can be used by project chains",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+              "$ref": "#/definitions/PackageBackendConfig"
+            }
+          }
+        }
+      }
     },
     "ProjectChainsConfig": {
       "title": "The configuration for each chain declared by this project",

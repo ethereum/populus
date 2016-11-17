@@ -12,6 +12,9 @@ from .filesystem import (
 from .string import (
     normalize_class_name,
 )
+from .packaging import (
+    is_package_name,
+)
 
 
 def is_project_contract(contracts_source_dir, contract_data):
@@ -20,6 +23,10 @@ def is_project_contract(contracts_source_dir, contract_data):
 
 def is_test_contract(tests_dir, contract_data):
     return is_under_path(tests_dir, contract_data['source_path'])
+
+
+def is_dependency_contract(project_installed_packages_dir, contract_data):
+    return is_under_path(project_installed_packages_dir, contract_data['source_path'])
 
 
 def package_contracts(contract_factories):
@@ -112,6 +119,40 @@ CONTRACT_NAME_REGEX = '^[_a-zA-Z][_a-zA-Z0-9]*$'
 
 def is_contract_name(value):
     return bool(re.match(CONTRACT_NAME_REGEX, value))
+
+
+def is_dependency_contract_name(value):
+    dependency_name, _, contract_name = value.partition(':')
+    if not is_package_name(dependency_name):
+        return False
+    elif not is_contract_name(contract_name):
+        return False
+    else:
+        return True
+
+
+@to_dict
+def map_contracts_to_source_location(compiled_contract_data, source_locations):
+    source_locations_by_depth = sorted(source_locations, reverse=True)
+    contracts_by_source_path = {
+        contract_name: contract_data['source_path']
+        for contract_name, contract_data
+        in compiled_contract_data.items()
+    }
+    for contract_name, contract_source_path in contracts_by_source_path.items():
+        for source_location in source_locations_by_depth:
+            if is_under_path(source_location, contract_source_path):
+                yield (contract_name, source_location)
+                break
+        else:
+            raise ValueError(
+                "Contract `{0}` from source path `{1}` could not be mapped to "
+                "any of the following source locations:\n- {2}".format(
+                    contract_name,
+                    contract_source_path,
+                    '\n- '.join(source_locations_by_depth),
+                )
+            )
 
 
 EMPTY_BYTECODE_VALUES = {None, "0x"}

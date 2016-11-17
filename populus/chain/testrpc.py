@@ -19,6 +19,8 @@ class TestRPCChain(BaseChain):
         config['provider.settings.port'] = self.rpc_port
         return config
 
+    _running = None
+
     def __enter__(self):
         if self._running:
             raise ValueError("The TesterChain is already running")

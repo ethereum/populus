@@ -129,11 +129,12 @@ def configure_chain(project, chain_name):
     click.echo('-' * len(start_msg))
 
     if is_existing_chain:
+        # TODO: this should probably show flattened out config keys
         current_configuration_msg = "\n".join(itertools.chain((
             "Current Configuration",
         ), (
             "  {key} = {value}".format(key=key, value=value)
-            for key, value in chain_config.items()
+            for key, value in chain_config.items()  # TODO: Config.items() doesn't exist.
         )))
         click.echo(current_configuration_msg)
 
@@ -214,7 +215,7 @@ def configure_chain(project, chain_name):
             "Populus needs to connect to the chain.  Press [Enter] when the "
             "chain is ready for populus"
         )
-        click.prompt(is_chain_ready_msg)
+        click.prompt(is_chain_ready_msg, default='')
 
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3
@@ -268,11 +269,15 @@ def deploy_contract_and_verify(chain,
     Deploy a contract, displaying information about the deploy process as it
     happens.  This also verifies that the deployed contract's bytecode matches
     the expected value.
+
+    TODO: the `ContractFactory` keyword here is special in that it is only
+    present so that this can be used to deploy the `Registrar`.  It seems like
+    the `Registrar` should just be merged into the available contract
+    factories, or even be a *special* contract in which case it should be given
+    a different name.
     """
     web3 = chain.web3
-
-    if ContractFactory is None:
-        ContractFactory = chain.provider.get_contract_factory(contract_name)
+    provider = chain.store.provider
 
     if is_account_locked(web3, web3.eth.defaultAccount or web3.eth.coinbase):
         try:
@@ -282,6 +287,9 @@ def deploy_contract_and_verify(chain,
             if is_account_locked(web3, default_account):
                 request_account_unlock(chain, default_account, None)
             web3.eth.defaultAccount = default_account
+
+    if ContractFactory is None:
+        ContractFactory = provider.get_contract_factory(contract_name)
 
     click.echo("Deploying {0}".format(contract_name))
 
@@ -320,6 +328,7 @@ def deploy_contract_and_verify(chain,
     deployed_bytecode = web3.eth.getCode(contract_address)
 
     if ContractFactory.bytecode_runtime:
+        click.echo("Verifying deployed bytecode...")
         verify_contract_bytecode(web3, ContractFactory, contract_address)
         click.echo("Verified contract bytecode @ {0}".format(contract_address))
     else:
@@ -454,15 +463,13 @@ def get_unlocked_default_account_address(chain):
 
 def compile_contracts(project, compiler_settings=None):
     click.echo("============ Compiling ==============")
-    click.echo("> Loading source files from: ./{0}\n".format(project.contracts_dir))
+    click.echo("> Loading source files from: ./{0}\n".format(
+        project.contracts_source_dir,
+    ))
 
     contract_source_paths, compiled_sources = compile_project_contracts(
         project,
         compiler_settings=compiler_settings,
-    )
-    output_file_path = write_compiled_sources(
-        project.compiled_contracts_asset_path,
-        compiled_sources,
     )
 
     click.echo("> Found {0} contract source files".format(
@@ -476,10 +483,15 @@ def compile_contracts(project, compiler_settings=None):
     for contract_name in sorted(compiled_sources.keys()):
         click.echo("- {0}".format(contract_name))
 
+    build_asset_path = write_compiled_sources(
+        project.compiled_contracts_asset_path,
+        compiled_sources,
+    )
+
     click.echo("")
     click.echo(
         "> Wrote compiled assets to: ./{0}".format(
-            os.path.relpath(output_file_path)
+            os.path.relpath(build_asset_path)
         )
     )
 

@@ -10,6 +10,10 @@ from populus.utils.contracts import (
 
 
 def compute_deploy_order(dependency_graph):
+    """
+    Given a dictionary that maps contract names to their link dependencies,
+    determine the overall dependency ordering for that set of contracts.
+    """
     return toposort.toposort_flatten(dependency_graph)
 
 

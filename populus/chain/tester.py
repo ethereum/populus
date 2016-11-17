@@ -18,6 +18,8 @@ class TesterChain(BaseChain):
         self.rpc_methods.rpc_configure('net_version', 1)
         self.rpc_methods.evm_mine()
 
+        self.rpc_methods = self.web3.currentProvider.rpc_methods
+
         return self
 
     def __exit__(self, *exc_info):

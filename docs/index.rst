@@ -19,6 +19,8 @@ Contents
     project
     config
     chain
+    contracts
+    packaging
     release
     modules
     API Documentation <populus>

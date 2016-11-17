@@ -1,12 +1,16 @@
 import os
 
-from populus.utils.compile import (
-    get_project_source_paths,
+from populus import Project
+from populus.utils.filesystem import (
+    mkdir,
+    find_solidity_source_files,
+    is_same_path,
 )
 
 
-def test_gets_correct_files_default_dir(project, write_project_file):
-    file_names = get_project_source_paths(project.contracts_source_dir)
+def test_gets_correct_files_default_dir(project_dir, write_project_file):
+    project = Project()
+    file_names = find_solidity_source_files(project.contracts_source_dir)
 
     should_match = {
         'contracts/SolidityContract.sol',
@@ -27,5 +31,5 @@ def test_gets_correct_files_default_dir(project, write_project_file):
 
     for file_name in file_names:
         assert os.path.exists(file_name)
-        assert os.path.basename(file_name) in should_match
-        assert os.path.basename(file_name) not in should_not_match
+        assert any(is_same_path(file_name, path) for path in should_match)
+        assert not any(is_same_path(file_name, path) for path in should_not_match)

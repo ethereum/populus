@@ -2,6 +2,10 @@ import itertools
 
 from pylru import lrucache
 
+from populus.utils.linking import (
+    link_bytecode,
+    find_link_references,
+)
 from populus.utils.contracts import (
     get_shallow_dependency_graph,
     get_recursive_contract_dependencies,
@@ -9,10 +13,6 @@ from populus.utils.contracts import (
 )
 from populus.utils.deploy import (
     compute_deploy_order,
-)
-from populus.utils.linking import (
-    link_bytecode,
-    find_link_references,
 )
 
 from .exceptions import (
@@ -62,7 +62,7 @@ class Provider(object):
         if not self.are_contract_dependencies_available(contract_identifier):
             return False
 
-        ContractFactory = self.get_contract_factory(contract_identifier)
+        ContractFactory = self.get_contract_factory(contract_name)
         try:
             verify_contract_bytecode(self.chain.web3, ContractFactory, contract_address)
         except (BytecodeMismatch, ValueError):

@@ -14,11 +14,6 @@ from populus.utils.compile import (
 from populus.utils.filesystem import (
     is_same_path,
 )
-from populus.utils.geth import (
-    get_data_dir,
-    get_chaindata_dir,
-    get_geth_ipc_path,
-)
 
 
 @pytest.mark.skipif(sys.version_info.major == 2, reason="warning assertions are broken in py27")
@@ -44,15 +39,3 @@ def test_project_directory_properties(project_dir):
     assert is_same_path(project.base_blockchain_storage_dir, base_blockchain_storage_dir)
     with pytest.warns(DeprecationWarning):
         assert is_same_path(project.blockchains_dir, base_blockchain_storage_dir)
-
-    data_dir = get_data_dir(project_dir, 'some-test-chain-name')
-    with pytest.warns(DeprecationWarning):
-        assert is_same_path(project.get_blockchain_data_dir('some-test-chain-name'), data_dir)
-
-    chaindata_dir = get_chaindata_dir(data_dir)
-    with pytest.warns(DeprecationWarning):
-        assert is_same_path(project.get_blockchain_chaindata_dir('some-test-chain-name'), chaindata_dir)
-
-    geth_ipc_path = get_geth_ipc_path(data_dir)
-    with pytest.warns(DeprecationWarning):
-        assert is_same_path(project.get_blockchain_ipc_path('some-test-chain-name'), geth_ipc_path)

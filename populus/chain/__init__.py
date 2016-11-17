@@ -10,7 +10,6 @@ from .geth import (  # noqa: F401
     MainnetChain,
     TemporaryGethChain,
     TestnetChain,
-    reset_chain,
 )
 from .external import (  # noqa: F401
     ExternalChain,
@@ -20,4 +19,16 @@ from .tester import (  # noqa: F401
 )
 from .testrpc import (  # noqa: F401
     TestRPCChain,
+)
+
+
+__all__ = (
+    "TestRPCChain",
+    "TesterChain",
+    "BaseGethChain",
+    "TemporaryGethChain",
+    "LocalGethChain",
+    "MainnetChain",
+    "TestnetChain",
+    "ExternalChain",
 )

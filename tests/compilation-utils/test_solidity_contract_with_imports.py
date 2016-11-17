@@ -4,9 +4,10 @@ import json
 
 import os
 
+from populus import Project
+
 from populus.compilation import (
     compile_project_contracts,
-    write_compiled_sources,
 )
 
 
@@ -46,17 +47,8 @@ def test_compilation(project, write_project_file):
     write_project_file('contracts/ContractB.sol', CONTRACT_B_SOURCE)
     write_project_file('contracts/ContractC.sol', CONTRACT_C_SOURCE)
 
-    _, compiled_sources = compile_project_contracts(
-        project,
-    )
-    output_file_path = write_compiled_sources(
-        project.compiled_contracts_asset_path,
-        compiled_sources,
-    )
+    source_paths, compiled_sources = compile_project_contracts(project)
 
-    with open(output_file_path) as outfile:
-        compiled_contract_data = json.load(outfile)
-
-    assert 'A' in compiled_contract_data
-    assert 'B' in compiled_contract_data
-    assert 'C' in compiled_contract_data
+    assert 'A' in compiled_sources
+    assert 'B' in compiled_sources
+    assert 'C' in compiled_sources

@@ -1,0 +1,4 @@
+{
+  "class": "populus.packages.backends.lockfile.LocalFilesystemLockfileBackend",
+  "priority": 20
+}

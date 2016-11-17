@@ -1,6 +1,5 @@
 import os
-import sys
-import datetime
+import re
 
 from web3 import (
     Web3,
@@ -10,107 +9,27 @@ from web3 import (
     TestRPCProvider,
 )
 
+from .formatting import (
+    add_0x_prefix,
+    remove_0x_prefix,
+)
+from .six import (
+    parse,
+)
+from .types import (
+    is_integer,
+)
 from .module_loading import (
     import_string,
 )
-from .filesystem import (
-    get_blockchains_dir,
-)
 
 
-def get_data_dir(project_dir, chain_name):
-    blockchains_dir = get_blockchains_dir(project_dir)
-    return os.path.join(blockchains_dir, chain_name)
+BASE_BLOCKCHAIN_STORAGE_DIR = "./chains"
 
 
-CHAINDATA_DIR = './chaindata'
-
-
-def get_chaindata_dir(data_dir):
-    return os.path.join(data_dir, CHAINDATA_DIR)
-
-
-DAPP_DIR = './dapp'
-
-
-def get_dapp_dir(data_dir):
-    return os.path.join(data_dir, DAPP_DIR)
-
-
-NODEKEY_FILENAME = 'nodekey'
-
-
-def get_nodekey_path(data_dir):
-    return os.path.join(data_dir, NODEKEY_FILENAME)
-
-
-IPC_FILENAME = 'geth.ipc'
-
-
-def get_geth_ipc_path(data_dir):
-    return os.path.join(data_dir, IPC_FILENAME)
-
-
-def get_default_datadir_path(testnet=False):
-    if testnet:
-        testnet = "testnet"
-    else:
-        testnet = ""
-
-    if sys.platform == 'darwin':
-        return os.path.expanduser(os.path.join(
-            "~",
-            "Library",
-            "Ethereum",
-            testnet,
-        ))
-    elif sys.platform.startswith('linux'):
-        return os.path.expanduser(os.path.join(
-            "~",
-            ".ethereum",
-            testnet,
-        ))
-    elif sys.platform == 'win32':
-        return os.path.expanduser(os.path.join(
-            "~",
-            "AppData",
-            "Roaming",
-            "Ethereum",
-        ))
-    else:
-        raise ValueError(
-            "Unsupported platform '{0}'.  Only darwin/linux2/win32 are "
-            "supported.".format(sys.platform)
-        )
-
-
-def get_default_ipc_path(testnet=False):
-    data_dir = get_default_datadir_path(testnet=testnet)
-
-    if sys.platform == 'darwin' or sys.platform.startswith('linux'):
-        return os.path.join(data_dir, "geth.ipc")
-    elif sys.platform == 'win32':
-        return os.path.expanduser(os.path.join(
-            "~",
-            "AppData",
-            "Roaming",
-            "Ethereum",
-        ))
-    else:
-        raise ValueError(
-            "Unsupported platform '{0}'.  Only darwin/linux2/win32 are "
-            "supported.".format(sys.platform)
-        )
-
-
-def get_geth_logfile_path(project_dir, prefix, suffix):
-    logs_dir = os.path.join(project_dir, 'logs')
-    logfile_name = datetime.datetime.now().strftime(
-        'geth-%Y%m%d-%H%M%S-{prefix}-{suffix}.log'.format(
-            prefix=prefix, suffix=suffix,
-        ),
-    )
-    return os.path.join(logs_dir, logfile_name)
+def get_base_blockchain_storage_dir(project_dir):
+    base_blochcain_storage_dir = os.path.join(project_dir, BASE_BLOCKCHAIN_STORAGE_DIR)
+    return base_blochcain_storage_dir
 
 
 def setup_web3_from_config(web3_config):
@@ -148,3 +67,120 @@ def setup_chain_from_config(project, chain_name, chain_config):
     ChainClass = import_string(chain_class_import_path)
     chain = ChainClass(project, chain_name, chain_config)
     return chain
+
+
+BLOCK_OR_TRANSACTION_HASH_REGEX = "^(?:0x)?[a-zA-Z0-9]{64}$"
+
+
+def is_block_or_transaction_hash(value):
+    return bool(re.match(BLOCK_OR_TRANSACTION_HASH_REGEX, value))
+
+
+BLOCK = 'block'
+TRANSACTION = 'transaction'
+
+
+def create_BIP122_uri(chain_id, resource_type, resource_identifier):
+    """
+    See: https://github.com/bitcoin/bips/blob/master/bip-0122.mediawiki
+    """
+    if resource_type not in {BLOCK, TRANSACTION}:
+        raise ValueError("Invalid resource_type.  Must be one of 'block' or 'transaction'")
+    elif not is_block_or_transaction_hash(resource_identifier):
+        raise ValueError("Invalid resource_identifier.  Must be a hex encoded 32 byte value")
+    elif not is_block_or_transaction_hash(chain_id):
+        raise ValueError("Invalid chain_id.  Must be a hex encoded 32 byte value")
+
+    return parse.urlunsplit([
+        'blockchain',
+        remove_0x_prefix(chain_id),
+        "{0}/{1}".format(resource_type, remove_0x_prefix(resource_identifier)),
+        '',
+        '',
+    ])
+
+
+def create_block_uri(chain_id, block_identifier):
+    if is_integer(block_identifier):
+        return create_BIP122_uri(chain_id, 'block', str(block_identifier))
+    else:
+        return create_BIP122_uri(chain_id, 'block', remove_0x_prefix(block_identifier))
+
+
+def create_transaction_uri(chain_id, transaction_hash):
+    return create_BIP122_uri(chain_id, 'transaction', transaction_hash)
+
+
+def get_chain_id(web3):
+    return web3.eth.getBlock(0)['hash']
+
+
+def get_chain_definition(web3):
+    """
+    Return the blockchain URI that
+    """
+    chain_id = get_chain_id(web3)
+    latest_block_hash = web3.eth.getBlock('latest')['hash']
+
+    return create_block_uri(chain_id, latest_block_hash)
+
+
+BIP122_URL_REGEX = (
+    "^"
+    "blockchain://"
+    "(?P<chain_id>[a-zA-Z0-9]{64})"
+    "/"
+    "(?P<resource_type>block|transaction)"
+    "/"
+    "(?P<resource_hash>[a-zA-Z0-9]{64})"
+    "$"
+)
+
+
+def is_BIP122_uri(value):
+    return bool(re.match(BIP122_URL_REGEX, value))
+
+
+def parse_BIP122_uri(blockchain_uri):
+    match = re.match(BIP122_URL_REGEX, blockchain_uri)
+    if match is None:
+        raise ValueError("Invalid URI format: '{0}'".format(blockchain_uri))
+    chain_id, resource_type, resource_hash = match.groups()
+    return (
+        add_0x_prefix(chain_id),
+        resource_type,
+        add_0x_prefix(resource_hash),
+    )
+
+
+def is_BIP122_block_uri(value):
+    if not is_BIP122_uri(value):
+        return False
+    _, resource_type, _ = parse_BIP122_uri(value)
+    return resource_type == BLOCK
+
+
+def is_BIP122_transaction_uri(value):
+    if not is_BIP122_uri(value):
+        return False
+    _, resource_type, _ = parse_BIP122_uri(value)
+    return resource_type == TRANSACTION
+
+
+def check_if_chain_matches_chain_uri(web3, blockchain_uri):
+    chain_id, resource_type, resource_hash = parse_BIP122_uri(blockchain_uri)
+    genesis_block = web3.eth.getBlock('earliest')
+    if genesis_block['hash'] != chain_id:
+        return False
+
+    if resource_type == BLOCK:
+        resource = web3.eth.getBlock(resource_hash)
+    elif resource_type == TRANSACTION:
+        resource = web3.eth.getTransaction(resource_hash)
+    else:
+        raise ValueError("Unsupported resource type: {0}".format(resource_type))
+
+    if resource['hash'] == resource_hash:
+        return True
+    else:
+        return False

@@ -1,4 +1,6 @@
 import os
+import collections
+import operator
 
 import anyconfig
 
@@ -14,6 +16,10 @@ from .mappings import (
 )
 from .module_loading import (
     import_string,
+)
+from .functional import (
+    compose,
+    cast_return_to_ordered_dict,
 )
 
 
@@ -88,3 +94,41 @@ class ClassImportPath(object):
                 "Unsupported type.  Must be either a string import path or a "
                 "chain class"
             )
+
+
+@cast_return_to_ordered_dict
+def sort_prioritized_configs(backend_configs, master_config):
+    resolved_backend_configs = tuple(
+        (
+            backend_name,
+            resolve_config(backend_configs.get_config(backend_name), master_config),
+        )
+        for backend_name
+        in backend_configs
+    )
+    backends_with_conflicting_priorities = tuple((
+        backend_name
+        for backend_name, count
+        in collections.Counter((
+            (backend_name, config['priority'])
+            for backend_name, config
+            in resolved_backend_configs
+        )).items()
+        if count > 1
+    ))
+    if backends_with_conflicting_priorities:
+        raise ValueError(
+            "The following package backends have conflicting priority "
+            "values.  '{0}'.  Ensure that all priority values are unique "
+            "across all backends.".format(
+                ', '.join((backends_with_conflicting_priorities))
+            )
+        )
+
+    return sorted(
+        resolved_backend_configs,
+        key=compose(*(
+            operator.itemgetter(1),
+            operator.itemgetter('priority'),
+        )),
+    )

@@ -3,6 +3,7 @@ import collections
 
 from eth_utils import (
     to_dict,
+    to_tuple,
 )
 
 
@@ -45,3 +46,13 @@ def deep_merge_dicts(*dicts):
 
 def noop(*args, **kwargs):
     pass
+
+
+@to_tuple
+def get_duplicates(values):
+    return (
+        value
+        for key, value
+        in collections.Counter(values).items()
+        if value > 1
+    )

@@ -1,8 +1,7 @@
-import itertools
 import collections
 
 from eth_utils import (
-    to_dict,
+    to_tuple,
 )
 
 
@@ -28,20 +27,15 @@ class cached_property(object):
         return res
 
 
-@to_dict
-def deep_merge_dicts(*dicts):
-    for key in set(itertools.chain(*(_dict.keys() for _dict in dicts))):
-        values = tuple((_dict[key] for _dict in dicts if key in _dict))
-        if isinstance(values[-1], collections.Mapping):
-            yield key, deep_merge_dicts(*(
-                _dict[key]
-                for _dict
-                in dicts
-                if isinstance(_dict.get(key), collections.Mapping)
-            ))
-        else:
-            yield key, values[-1]
-
-
 def noop(*args, **kwargs):
     pass
+
+
+@to_tuple
+def get_duplicates(values):
+    return (
+        value
+        for key, value
+        in collections.Counter(values).items()
+        if value > 1
+    )

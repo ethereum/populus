@@ -42,6 +42,17 @@ POPULUS_CONFIG_DEFAULTS = {
     #
     ('compilation',),
     #
+    # Contract Backends
+    #
+    ('contracts.backends.InstalledPackages',),
+    ('contracts.backends.JSONFile',),
+    ('contracts.backends.Memory',),
+    # Packaging
+    ('packaging.backends.LocalManifestBackend',),
+    ('packaging.backends.LocalFilesystemLockfileBackend',),
+    ('packaging.backends.IPFSBackend',),
+    ('packaging.backends.RopstenPackageIndexBackend',),
+    #
     # Chains
     #
     # Temp Geth Chains

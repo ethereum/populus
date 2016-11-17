@@ -1,7 +1,5 @@
 import click
 
-from collections import OrderedDict
-
 from populus.utils.cli import (
     select_chain,
     show_chain_sync_progress,
@@ -10,9 +8,6 @@ from populus.utils.cli import (
 )
 from populus.utils.deploy import (
     get_deploy_order,
-)
-from populus.migrations.registrar import (
-    get_contract_from_registrar,
 )
 
 from .main import main
@@ -63,7 +58,9 @@ def deploy(ctx, chain_name, contracts_to_deploy):
     if not chain_name:
         chain_name = select_chain(project)
 
-    compiled_contracts = project.compiled_contracts
+    chain = project.get_chain(chain_name)
+
+    compiled_contracts = chain.compiled_contract_data
 
     if contracts_to_deploy:
         # validate that we *know* about all of the contracts
@@ -83,12 +80,12 @@ def deploy(ctx, chain_name, contracts_to_deploy):
     else:
         # prompt the user to select the desired contracts they want to deploy.
         # Potentially display the currently deployed status.
-        contracts_to_deploy = [select_project_contract(project)]
-
-    chain = project.get_chain(chain_name)
-    deployed_contracts = OrderedDict()
+        contracts_to_deploy = [select_project_contract(chain)]
 
     with chain:
+        provider = chain.store.provider
+        registrar = chain.store.registrar
+
         if chain_name in {'mainnet', 'morden'}:
             show_chain_sync_progress(chain)
 
@@ -112,63 +109,44 @@ def deploy(ctx, chain_name, contracts_to_deploy):
         click.echo(starting_msg)
 
         for contract_name, _ in deploy_order.items():
-            link_dependencies = {
-                contract_name: contract.address
-                for contract_name, contract
-                in deployed_contracts.items()
-            }
-            contract_factory = chain.contract_factories[contract_name]
+            if not provider.are_contract_factory_dependencies_available(contract_name):
+                raise ValueError(
+                    "Something is wrong with the deploy order.  Some "
+                    "dependencies for {0} are not "
+                    "available.".format(contract_name)
+                )
 
             # Check if we already have an existing deployed version of that
             # contract (via the registry).  For each of these, prompt the user
             # if they would like to use the existing version.
-            if contract_name not in contracts_to_deploy and chain.has_registrar:
+            if provider.is_contract_available(contract_name):
                 # TODO: this block should be a standalone cli util.
-                existing_contract = get_contract_from_registrar(
-                    chain=chain,
-                    contract_name=contract_name,
-                    contract_factory=contract_factory,
-                    link_dependencies=link_dependencies,
-                )
-                if existing_contract:
-                    found_existing_contract_prompt = (
-                        "Found existing version of {name} in registrar. "
-                        "Would you like to use the previously deployed "
-                        "contract @ {address}?".format(
-                            name=contract_name,
-                            address=existing_contract.address,
-                        )
+                # TODO: this block needs to use the `Provider` API
+                existing_contract_instance = provider.get_contract(contract_name)
+                found_existing_contract_prompt = (
+                    "Found existing version of {name} in registrar. "
+                    "Would you like to use the previously deployed "
+                    "contract @ {address}?".format(
+                        name=contract_name,
+                        address=existing_contract_instance.address,
                     )
-                    if click.prompt(found_existing_contract_prompt):
-                        deployed_contracts[contract_name] = existing_contract
-                        continue
+                )
+                if click.prompt(found_existing_contract_prompt, default=True):
+                    provider.set_static_link_value(
+                        contract_name,
+                        existing_contract_instance.address,
+                    )
+                    continue
 
             # We don't have an existing version of this contract available so
             # deploy it.
-            contract = deploy_contract_and_verify(
+            contract_instance = deploy_contract_and_verify(
                 chain,
                 contract_name=contract_name,
-                link_dependencies=link_dependencies,
             )
 
-            if chain.has_registrar:
-                # TODO: this block should be a standalone cli util.
-                contract_key = 'contract/{name}'.format(name=contract_name)
-                register_txn_hash = chain.registrar.transact().setAddress(
-                    contract_key, contract.address
-                )
-                register_msg = (
-                    "Registering contract '{name}' @ {address} "
-                    "in registrar in txn: {txn_hash} ...".format(
-                        name=contract_name,
-                        address=contract.address,
-                        txn_hash=register_txn_hash,
-                    )
-                )
-                click.echo(register_msg, nl=False)
-                chain.wait.for_receipt(register_txn_hash, timeout=180)
-                click.echo(' DONE')
-            deployed_contracts[contract_name] = contract
+            # Store the contract address for linking of subsequent deployed contracts.
+            registrar.set_contract_address(contract_name, contract_instance.address)
 
         # TODO: fix this message.
         success_msg = (

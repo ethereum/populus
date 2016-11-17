@@ -1,0 +1,8 @@
+{
+  "class": "populus.packages.backends.ipfs.IPFSPackageBackend",
+  "priority": 30,
+  "settings": {
+    "host": "https://ipfs.infura.io",
+    "port": 5001
+  }
+}

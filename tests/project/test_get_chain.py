@@ -3,13 +3,13 @@ import pytest
 from flaky import flaky
 
 from populus.chain import (
-    TESTNET_BLOCK_1_HASH,
-    MAINNET_BLOCK_1_HASH,
+    ROPSTEN_BLOCK_0_HASH,
+    MAINNET_BLOCK_0_HASH,
 )
 from populus.project import (
     Project,
 )
-from populus.utils.chains import (
+from populus.utils.geth import (
     get_geth_ipc_path,
     get_data_dir as get_local_chain_datadir,
 )
@@ -57,7 +57,7 @@ def test_project_temp_chain(project_dir):
 def test_project_morden_chain(project_dir):
     project = Project()
 
-    chain = project.get_chain('morden')
+    chain = project.get_chain('ropsten')
 
     with chain as running_morden_chain:
         web3 = running_morden_chain.web3
@@ -65,8 +65,8 @@ def test_project_morden_chain(project_dir):
 
         running_morden_chain.wait.for_block(block_number=1, timeout=180)
 
-        block_1 = web3.eth.getBlock(1)
-        assert block_1['hash'] == TESTNET_BLOCK_1_HASH
+        block_0 = web3.eth.getBlock(0)
+        assert block_0['hash'] == ROPSTEN_BLOCK_0_HASH
 
 
 @flaky
@@ -87,10 +87,10 @@ def test_project_local_chain_ipc(project_dir):
 
         running_local_chain.wait.for_block(block_number=1, timeout=180)
 
-        block_1 = web3.eth.getBlock(1)
-        assert block_1['hash'] != MAINNET_BLOCK_1_HASH
-        assert block_1['hash'] != TESTNET_BLOCK_1_HASH
-        assert block_1['miner'] == web3.eth.coinbase
+        block_0 = web3.eth.getBlock(0)
+        assert block_0['hash'] != MAINNET_BLOCK_0_HASH
+        assert block_0['hash'] != ROPSTEN_BLOCK_0_HASH
+        assert block_0['miner'] == web3.eth.coinbase
 
 
 @flaky
@@ -110,7 +110,7 @@ def test_project_local_chain_rpc(project_dir):
 
         running_local_chain.wait.for_block(block_number=1, timeout=180)
 
-        block_1 = web3.eth.getBlock(1)
-        assert block_1['hash'] != MAINNET_BLOCK_1_HASH
-        assert block_1['hash'] != TESTNET_BLOCK_1_HASH
-        assert block_1['miner'] == web3.eth.coinbase
+        block_0 = web3.eth.getBlock(0)
+        assert block_0['hash'] != MAINNET_BLOCK_0_HASH
+        assert block_0['hash'] != ROPSTEN_BLOCK_0_HASH
+        assert block_0['miner'] == web3.eth.coinbase

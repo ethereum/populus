@@ -4,13 +4,10 @@ import random
 
 import click
 
-from .deploy import (
-    deploy_contract,
-)
 from .accounts import (
     is_account_locked,
 )
-from .chains import (
+from .geth import (
     get_data_dir as get_local_chain_datadir,
     get_geth_ipc_path,
 )
@@ -23,7 +20,8 @@ from .compat import (
 )
 
 from populus.compilation import (
-    compile_and_write_contracts,
+    compile_project_contracts,
+    write_compiled_sources,
 )
 from populus.config import (
     Config,
@@ -126,11 +124,12 @@ def configure_chain(project, chain_name):
     click.echo('-' * len(start_msg))
 
     if is_existing_chain:
+        # TODO: this should probably show flattened out config keys
         current_configuration_msg = "\n".join(itertools.chain((
             "Current Configuration",
         ), (
             "  {key} = {value}".format(key=key, value=value)
-            for key, value in chain_config.items()
+            for key, value in chain_config.items()  # TODO: Config.items() doesn't exist.
         )))
         click.echo(current_configuration_msg)
 
@@ -203,13 +202,16 @@ def configure_chain(project, chain_name):
 
     # Save config so that we can spin this chain up.
     project.config['chains'][chain_name] = chain_config
+    project.write_config()
+    project.load_config()
 
-    if chain_config.get('is_external', False):
+    is_external_config_key = 'chains.{0}.is_external'.format(chain_name)
+    if project.config.get(is_external_config_key, False):
         is_chain_ready_msg = (
             "Populus needs to connect to the chain.  Press [Enter] when the "
             "chain is ready for populus"
         )
-        click.confirm(is_chain_ready_msg)
+        click.prompt(is_chain_ready_msg, default='')
 
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3
@@ -251,10 +253,10 @@ def request_account_unlock(chain, account, timeout):
 
 def deploy_contract_and_verify(chain,
                                contract_name,
-                               base_contract_factory=None,
+                               ContractFactory=None,
                                deploy_transaction=None,
-                               deploy_arguments=None,
-                               link_dependencies=None):
+                               deploy_args=None,
+                               deploy_kwargs=None):
     """
     This is a *loose* wrapper around `populus.utils.deploy.deploy_contract`
     that handles the various concerns and logging that need to be present when
@@ -263,14 +265,15 @@ def deploy_contract_and_verify(chain,
     Deploy a contract, displaying information about the deploy process as it
     happens.  This also verifies that the deployed contract's bytecode matches
     the expected value.
+
+    TODO: the `ContractFactory` keyword here is special in that it is only
+    present so that this can be used to deploy the `Registrar`.  It seems like
+    the `Registrar` should just be merged into the available contract
+    factories, or even be a *special* contract in which case it should be given
+    a different name.
     """
-    if link_dependencies is None:
-        link_dependencies = {}
-
     web3 = chain.web3
-
-    if base_contract_factory is None:
-        base_contract_factory = chain.contract_factories[contract_name]
+    provider = chain.store.provider
 
     if is_account_locked(web3, web3.eth.defaultAccount):
         try:
@@ -281,16 +284,16 @@ def deploy_contract_and_verify(chain,
                 request_account_unlock(chain, default_account, None)
             web3.eth.defaultAccount = default_account
 
+    if ContractFactory is None:
+        ContractFactory = provider.get_contract_factory(contract_name)
+
     # TODO: this needs to do contract linking.
     click.echo("Deploying {0}".format(contract_name))
 
-    deploy_txn_hash, contract_factory = deploy_contract(
-        chain=chain,
-        contract_name=contract_name,
-        contract_factory=base_contract_factory,
-        deploy_transaction=deploy_transaction,
-        deploy_arguments=deploy_arguments,
-        link_dependencies=link_dependencies,
+    deploy_txn_hash = ContractFactory.deploy(
+        transaction=deploy_transaction,
+        args=deploy_args,
+        kwargs=deploy_kwargs,
     )
     deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
 
@@ -321,9 +324,9 @@ def deploy_contract_and_verify(chain,
     # Verification
     deployed_code = web3.eth.getCode(contract_address)
 
-    if contract_factory.code_runtime:
+    if ContractFactory.code_runtime:
         click.echo("Verifying deployed bytecode...")
-        is_bytecode_match = deployed_code == contract_factory.code_runtime
+        is_bytecode_match = deployed_code == ContractFactory.code_runtime
         if is_bytecode_match:
             click.echo(
                 "Verified contract bytecode @ {0} matches expected runtime "
@@ -335,7 +338,7 @@ def deploy_contract_and_verify(chain,
                 "expected : '{1}'\n"
                 "actual   : '{2}'\n".format(
                     contract_address,
-                    contract_factory.code_runtime,
+                    ContractFactory.code_runtime,
                     deployed_code,
                 ),
                 err=True,
@@ -356,7 +359,7 @@ def deploy_contract_and_verify(chain,
             click.echo(
                 "Verified bytecode @ {0} is non-empty".format(contract_address)
             )
-    return contract_factory(address=contract_address)
+    return ContractFactory(address=contract_address)
 
 
 def show_chain_sync_progress(chain):
@@ -471,16 +474,17 @@ def get_unlocked_default_account_address(chain):
     return account
 
 
-def compile_project_contracts(project, compiler_settings=None):
+def compile_contracts(project, compiler_settings=None):
     click.echo("============ Compiling ==============")
-    click.echo("> Loading source files from: ./{0}\n".format(project.contracts_dir))
+    click.echo("> Loading source files from: ./{0}\n".format(
+        project.contracts_source_dir,
+    ))
 
-    result = compile_and_write_contracts(
-        project.project_dir,
-        project.contracts_dir,
+    result = compile_project_contracts(
+        project,
         compiler_settings=compiler_settings,
     )
-    contract_source_paths, compiled_sources, output_file_path = result
+    contract_source_paths, compiled_sources = result
 
     click.echo("> Found {0} contract source files".format(
         len(contract_source_paths)
@@ -493,10 +497,15 @@ def compile_project_contracts(project, compiler_settings=None):
     for contract_name in sorted(compiled_sources.keys()):
         click.echo("- {0}".format(contract_name))
 
+    build_asset_path = write_compiled_sources(
+        project.compiled_contracts_asset_path,
+        compiled_sources,
+    )
+
     click.echo("")
     click.echo(
         "> Wrote compiled assets to: ./{0}".format(
-            os.path.relpath(output_file_path)
+            os.path.relpath(build_asset_path)
         )
     )
 
@@ -519,7 +528,7 @@ def watch_project_contracts(project, compiler_settings):
 
 
 def select_project_contract(project):
-    contract_names = sorted(project.compiled_contracts.keys())
+    contract_names = sorted(project.compiled_contract_data.keys())
     contract_choices = [
         " {idx}: {name}".format(
             idx=str(idx).rjust(3),
@@ -529,12 +538,12 @@ def select_project_contract(project):
     ]
     select_contract_message = (
         "Please select the desired contract:\n\n"
-        "{0}".format(
+        "{0}\n\n".format(
             '\n'.join(contract_choices)
         )
     )
     contract_name = click.prompt(select_contract_message)
-    if contract_name in project.compiled_contracts:
+    if contract_name in project.compiled_contract_data:
         return contract_name
     elif contract_name.isdigit() and int(contract_name) < len(contract_names):
         return contract_names[int(contract_name)]

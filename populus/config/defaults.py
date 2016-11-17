@@ -42,6 +42,11 @@ POPULUS_CONFIG_DEFAULTS = {
     #
     ('compilation',),
     #
+    # Packaging
+    #
+    ('packaging.backends', 'packaging.backends.config.json'),
+    ('packaging.publishing', 'packaging.backends.config.json'),
+    #
     # Chains
     #
     # Temp Geth Chains

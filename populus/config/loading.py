@@ -2,6 +2,7 @@ import anyconfig
 
 from populus.utils.config import (
     get_ini_config_file_path,
+    get_config_schema_path,
 )
 
 
@@ -27,3 +28,9 @@ def write_config(project_dir, config, write_path):
         )
 
     return write_path
+
+
+def load_config_schema():
+    config_schema_path = get_config_schema_path()
+    config_schema = anyconfig.load(config_schema_path)
+    return config_schema

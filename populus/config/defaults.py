@@ -8,8 +8,8 @@ from populus import ASSETS_DIR
 from populus.utils.functional import (
     cast_return_to_tuple,
 )
-from populus.utils.chains import (
-    get_default_ipc_path as get_geth_default_ipc_path,
+from populus.utils.geth import (
+    get_geth_default_ipc_path,
 )
 from populus.utils.config import (
     get_nested_key,
@@ -43,22 +43,38 @@ POPULUS_CONFIG_DEFAULTS = {
     #
     ('compilation', anyconfig.MS_DICTS),
     #
+    # Contract Backends
+    #
+    ('contracts.backends.InstalledPackages',),
+    ('contracts.backends.JSONFile',),
+    ('contracts.backends.Memory',),
+    # Packaging
+    ('packaging.backends.LocalManifestBackend',),
+    ('packaging.backends.LocalFilesystemLockfileBackend',),
+    ('packaging.backends.IPFSBackend',),
+    ('packaging.backends.RopstenPackageIndexBackend',),
+    #
     # Chains
     #
     # Temp Geth Chains
     ('chains.temp.web3',),
+    ('chains.temp.contracts.backends',),
     ('chains.temp.chain',),
     # Mainnet
     ('chains.mainnet.web3',),
+    ('chains.mainnet.contracts.backends',),
     ('chains.mainnet.chain',),
     # Ropsten
     ('chains.ropsten.web3',),
+    ('chains.ropsten.contracts.backends',),
     ('chains.ropsten.chain',),
     # TestRPC
     ('chains.testrpc.web3',),
+    ('chains.testrpc.contracts.backends',),
     ('chains.testrpc.chain',),
     # Tester
     ('chains.tester.web3',),
+    ('chains.tester.contracts.backends',),
     ('chains.tester.chain',),
     #
     # Web3 Presets

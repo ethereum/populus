@@ -3,7 +3,7 @@ import gevent
 import click
 
 from populus.utils.cli import (
-    compile_project_contracts,
+    compile_contracts,
     watch_project_contracts,
 )
 
@@ -25,7 +25,7 @@ from .main import main
     help="Enable compile time optimization",
 )
 @click.pass_context
-def compile_contracts(ctx, watch, optimize):
+def compile_cmd(ctx, watch, optimize):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -37,12 +37,12 @@ def compile_contracts(ctx, watch, optimize):
     """
     project = ctx.obj['PROJECT']
 
-    compile_project_contracts(project, optimize=True)
+    compile_contracts(project, optimize=optimize)
 
     if watch:
         thread = gevent.spawn(
             watch_project_contracts,
             project=project,
-            optimize=True,
+            optimize=optimize,
         )
         thread.join()

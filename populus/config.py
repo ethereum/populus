@@ -16,6 +16,8 @@ from populus.utils.config import (
     has_nested_key,
     set_nested_key,
     pop_nested_key,
+)
+from populus.utils.config import (
     get_empty_config,
     flatten_config_items,
     get_ini_config_file_path,
@@ -189,6 +191,15 @@ def set_geth_ropsten_ipc_path(config):
 
 
 POPULUS_CONFIG_DEFAULTS = {
+    #
+    # Compilation
+    #
+    ('compilation', 'compilation.config.json', anyconfig.MS_DICTS),
+    #
+    # Packaging
+    #
+    ('packaging.backends', 'packaging.backends.config.json'),
+    ('packaging.publishing', 'packaging.backends.config.json'),
     #
     # Chains
     #

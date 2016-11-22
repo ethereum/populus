@@ -82,7 +82,7 @@ def reset_chain(data_dir):
 
 
 class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
-    def __init__(self, project_dir, blockchains_dir, chain_name, overrides):
+    def __init__(self, project_dir, blockchains_dir, chain_name, overrides, genesis_data):
         stdout_logfile_path = get_geth_logfile_path(
             project_dir,
             chain_name,
@@ -99,6 +99,7 @@ class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
             base_dir=blockchains_dir,
             stdout_logfile_path=stdout_logfile_path,
             stderr_logfile_path=stderr_logfile_path,
+            genesis_data=genesis_data
         )
 
 
@@ -677,7 +678,7 @@ class BaseGethChain(Chain):
     geth = None
     provider_class = None
 
-    def __init__(self, project, chain_name, provider=IPCProvider, **geth_kwargs):
+    def __init__(self, project, chain_name, provider=IPCProvider, genesis_data=None, **geth_kwargs):
         super(BaseGethChain, self).__init__(project, chain_name)
 
         if geth_kwargs is None:
@@ -698,6 +699,7 @@ class BaseGethChain(Chain):
             key: value
             for key, value in geth_kwargs.items() if key in GETH_KWARGS
         }
+        self.genesis_data = genesis_data
         self.geth = self.get_geth_process_instance()
 
     _web3 = None
@@ -774,6 +776,7 @@ class LocalGethChain(BaseGethChain):
             blockchains_dir=self.project.blockchains_dir,
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
+            genesis_data=self.genesis_data
         )
 
 
@@ -787,6 +790,7 @@ class TemporaryGethChain(BaseGethChain):
             blockchains_dir=blockchains_dir,
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
+            genesis_data=self.genesis_data
         )
 
     has_registrar = True

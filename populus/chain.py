@@ -489,16 +489,6 @@ class ExternalChain(Chain):
         )
 
 
-def testrpc_fn_proxy(fn_name):
-    @staticmethod
-    def inner(*args, **kwargs):
-        from testrpc import testrpc
-        fn = getattr(testrpc, fn_name)
-        return fn(*args, **kwargs)
-    inner.__func__.__name__ = fn_name
-    return inner
-
-
 class TestRPCChain(Chain):
     provider = None
     port = None
@@ -536,21 +526,27 @@ class TestRPCChain(Chain):
 
         return self.RegistrarFactory(address=registrar_address)
 
-    full_reset = testrpc_fn_proxy('full_reset')
-    reset = testrpc_fn_proxy('evm_reset')
+    #
+    # Proxied RPC methods
+    #
+    def full_reset(self, *args, **kwargs):
+        return self.rpc_methods.full_reset(*args, **kwargs)
 
-    @staticmethod
-    def snapshot(*args, **kwargs):
-        from testrpc import testrpc
-        return int(testrpc.evm_snapshot(*args, **kwargs), 16)
+    def reset(self, *args, **kwargs):
+        return self.rpc_methods.evm_reset(*args, **kwargs)
 
-    revert = testrpc_fn_proxy('evm_revert')
-    mine = testrpc_fn_proxy('evm_mine')
+    def snapshot(self, *args, **kwargs):
+        return int(self.rpc_methods.evm_snapshot(*args, **kwargs), 16)
+
+    def revert(self, *args, **kwargs):
+        return self.rpc_methods.evm_revert(*args, **kwargs)
+
+    def mine(self, *args, **kwargs):
+        return self.rpc_methods.evm_mine(*args, **kwargs)
 
     _running = False
 
     def __enter__(self):
-        from testrpc import testrpc
         if self._running:
             raise ValueError("The TesterChain is already running")
 
@@ -558,12 +554,13 @@ class TestRPCChain(Chain):
             self.port = get_open_port()
 
         self.provider = TestRPCProvider(port=self.port)
+        self.rpc_methods = self.provider.server.application.rpc_methods
 
-        testrpc.full_reset()
-        testrpc.rpc_configure('eth_mining', False)
-        testrpc.rpc_configure('eth_protocolVersion', '0x3f')
-        testrpc.rpc_configure('net_version', 1)
-        testrpc.evm_mine()
+        self.rpc_methods.full_reset()
+        self.rpc_methods.rpc_configure('eth_mining', False)
+        self.rpc_methods.rpc_configure('eth_protocolVersion', '0x3f')
+        self.rpc_methods.rpc_configure('net_version', 1)
+        self.rpc_methods.evm_mine()
 
         wait_for_connection('127.0.0.1', self.port)
         self._running = True

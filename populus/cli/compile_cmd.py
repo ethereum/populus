@@ -51,9 +51,5 @@ def compile_contracts(ctx, watch, optimize):
     compile_project_contracts(project, **solc_options)
 
     if watch:
-        thread = gevent.spawn(
-            watch_project_contracts,
-            project=project,
-            **solc_options,
-        )
+        thread = gevent.spawn(watch_project_contracts, project=project, **solc_options)
         thread.join()

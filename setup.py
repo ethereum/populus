@@ -37,6 +37,7 @@ setup(
         "pytest>=2.7.2",
         "toposort>=1.4",
         "web3>=2.7.0",
+        "rlp==0.4.6",  # https://github.com/ethereum/pyethereum/issues/421
     ],
     license="MIT",
     zip_safe=False,

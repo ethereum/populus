@@ -1,3 +1,5 @@
+import os
+
 import gevent
 
 import click
@@ -40,7 +42,7 @@ def compile_contracts(ctx, watch, optimize):
     project = ctx.obj['PROJECT']
 
     substitutions = {
-        "project_dir": project.project_dir
+        "project_dir": os.path.abspath(project.project_dir)
     }
 
     solc_options = parse_solc_options_from_config(project.config, substitutions)

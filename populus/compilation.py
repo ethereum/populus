@@ -14,6 +14,21 @@ from solc.exceptions import (
 )
 
 
+def parse_solc_options_from_config(config):
+    """Get [solc] option section parsed out.
+
+    :param config: py:class:`populus.config.Config` instance.
+
+    :return: dict of kwargs options to be passed to :py:func:`solc.wrapper.solc_wrapper`
+    """
+
+    options = {}
+
+    remappings = config.get("solc", "remappings", None)
+    if remappings:
+        import pdb ; pdb.set_trace()
+
+
 def find_project_contracts(project_dir, contracts_rel_dir=DEFAULT_CONTRACTS_DIR):
     contracts_dir = os.path.join(project_dir, contracts_rel_dir)
 

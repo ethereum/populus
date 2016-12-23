@@ -7,6 +7,8 @@ from populus.utils.cli import (
     watch_project_contracts,
 )
 
+from populus.compilation import parse_solc_options_from_config
+
 from .main import main
 
 
@@ -37,12 +39,15 @@ def compile_contracts(ctx, watch, optimize):
     """
     project = ctx.obj['PROJECT']
 
-    compile_project_contracts(project, optimize=True)
+    solc_options = parse_solc_options_from_config(project.config)
+    solc_options["optimize"] = optimize
+
+    compile_project_contracts(project, **solc_options)
 
     if watch:
         thread = gevent.spawn(
             watch_project_contracts,
             project=project,
-            optimize=True,
+            **solc_options,
         )
         thread.join()

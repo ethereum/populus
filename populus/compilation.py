@@ -14,19 +14,32 @@ from solc.exceptions import (
 )
 
 
-def parse_solc_options_from_config(config):
-    """Get [solc] option section parsed out.
+def parse_solc_options_from_config(config, substitutions, section_name="solc"):
+    """Parse out [solc] config section.
 
     :param config: py:class:`populus.config.Config` instance.
+
+    :param substitutions: Dictionary of variable substitutions in path.
+        Example ``{"project_dir": "/foobar"}
+
+    :param section_name: Alternative solc config section name
 
     :return: dict of kwargs options to be passed to :py:func:`solc.wrapper.solc_wrapper`
     """
 
+    if not config.has_section("solc"):
+        # No special solc options given
+        return {}
+
     options = {}
 
-    remappings = config.get("solc", "remappings", None)
+    remappings = config.get(section_name, "remappings")
     if remappings:
-        import pdb ; pdb.set_trace()
+        remappings = remappings.split()
+        remappings = [r.strip().format(**substitutions) for r in remappings if r.strip()]
+        options["remappings"] = remappings
+
+    return options
 
 
 def find_project_contracts(project_dir, contracts_rel_dir=DEFAULT_CONTRACTS_DIR):

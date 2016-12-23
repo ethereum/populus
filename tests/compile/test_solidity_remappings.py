@@ -1,12 +1,13 @@
-import pytest
 import textwrap
 import json
 
 import os
 
+from populus.utils.config import Config
 from populus.utils.filesystem import DEFAULT_CONTRACTS_DIR
 from populus.compilation import (
     compile_and_write_contracts,
+    parse_solc_options_from_config,
 )
 
 
@@ -16,41 +17,45 @@ project_dir = os.path.join(BASE_DIR, 'projects', 'test-01')
 
 
 CONTRACT_A_SOURCE = textwrap.dedent(("""
-    import "contracts/ContractB.sol";
-    import "contracts/ContractC.sol";
+    import "foobaz/ContractB.sol";
 
-    contract A is C {
-        function A() {
-            B.doit();
-        }
+    contract A is B {
     }
 """))
 
 
 CONTRACT_B_SOURCE = textwrap.dedent(("""
-    library B {
+    contract B {
         function doit() {}
     }
 """))
 
 
-CONTRACT_C_SOURCE = textwrap.dedent(("""
-    contract C {
-        function C() {}
-    }
-"""))
+REMAPPINGS = """
+foobaz={project_dir}/foobar
+"""
 
 
-def test_compilation(project_dir, write_project_file):
+def test_compile_with_remappings(project_dir, write_project_file):
+
+    config = Config()
+    config.add_section("solc")
+    config.set("solc", "remappings", REMAPPINGS)
+
     write_project_file('contracts/ContractA.sol', CONTRACT_A_SOURCE)
-    write_project_file('contracts/ContractB.sol', CONTRACT_B_SOURCE)
-    write_project_file('contracts/ContractC.sol', CONTRACT_C_SOURCE)
+    write_project_file('foobar/ContractB.sol', CONTRACT_B_SOURCE)
 
-    source_paths, compiled_sources, outfile_path = compile_and_write_contracts(project_dir, DEFAULT_CONTRACTS_DIR)
+    substitutions = {
+        "project_dir": project_dir
+    }
+
+    compiler_kwargs = parse_solc_options_from_config(config, substitutions)
+
+    source_paths, compiled_sources, outfile_path = \
+        compile_and_write_contracts(project_dir, DEFAULT_CONTRACTS_DIR, **compiler_kwargs)
 
     with open(outfile_path) as outfile:
         compiled_contract_data = json.load(outfile)
 
     assert 'A' in compiled_contract_data
     assert 'B' in compiled_contract_data
-    assert 'C' in compiled_contract_data

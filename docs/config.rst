@@ -13,7 +13,7 @@ In addition to a local project configuration file, populus supports a *global*
 configuration file which should be located in your user's ``$HOME`` directory.
 Local project configuration will always supercede global configuration.
 
-.. code-block::
+.. code-block:: ini
 
     [populus]
     # project level configuration values would be set here.
@@ -170,7 +170,7 @@ Each chain allows configuration via the following options.
 Here is an example configuration file.
 
 
-.. code-block::
+.. code-block:: ini
 
     [populus]
     default_chain=morden
@@ -187,3 +187,28 @@ Here is an example configuration file.
     [chain:local_test]
     provider=web3.providers.ipc.IPCProvider
     ipc_path=/some/other/path/geth.ipc
+
+Solidity compiler options
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Solidity compiler options are in ``[solc]`` sections of the configuration file.
+These options allow you to fine tune the smart contract compilation proces.
+
+* ``remappings``:
+
+    This option allows you to specify Solidity import path remappings. You can use
+    optional `{project_dir}` substitution.
+    `More information about this Solidity feature <http://solidity.readthedocs.io/en/develop/layout-of-source-files.html#paths>`_.
+
+
+.. code-block:: ini
+
+    # Define where Zeppelin project (https://github.com/OpenZeppelin/zeppelin-solidity/)
+    # contracts are located
+    [solc]
+    remappings =
+        zeppelin={project_dir}/zeppelin
+
+
+For low level information compiler options,
+see :py:func:`populus.compilation.parse_solc_options_from_config`.

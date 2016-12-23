@@ -39,7 +39,11 @@ def compile_contracts(ctx, watch, optimize):
     """
     project = ctx.obj['PROJECT']
 
-    solc_options = parse_solc_options_from_config(project.config)
+    substitutions = {
+        "project_dir": project.project_dir
+    }
+
+    solc_options = parse_solc_options_from_config(project.config, substitutions)
     solc_options["optimize"] = optimize
 
     compile_project_contracts(project, **solc_options)

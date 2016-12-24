@@ -212,3 +212,40 @@ These options allow you to fine tune the smart contract compilation proces.
 
 For low level information compiler options,
 see :py:func:`populus.compilation.parse_solc_options_from_config`.
+
+Configuring project for tests
+-----------------------------
+
+py.test tests do not read ``populus.ini`` configuration file.
+
+py.test tests run with a ``project`` fixture that is used by ``chain`` fixture.
+If you want to customize ``project``, e.g. to override compiler options,
+you can do it as following.
+
+.. code-block:: python
+
+    import os
+
+    import pytest
+
+    from populus.plugin import create_project
+    from populus.utils.config import Config
+
+
+    @pytest.fixture(scope="module")
+    def project(request):
+        """Create a Populus project to run tests with custom import remappings."""
+        config = Config()
+        config.add_section("solc")
+
+        # Set path mapping for Zeppelin sol files
+        remappings = "zeppelin=" + os.path.join(os.path.abspath(os.getcwd()), "zeppelin")
+        config.set("solc", "remappings", remappings)
+        return create_project(request, config)
+
+
+    def test_create_contract(chain):
+        milestones = chain.get_contract('TestableMilestonePriced')
+        assert milestones.call().getMilestonesCount() == 0
+        assert milestones.call().milestonesSealed == False
+

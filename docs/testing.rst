@@ -75,9 +75,20 @@ The ``'testrpc'`` test chain.  This chain will not have had migrations run.
         assert greeter.call().greet() == "Hello"
 
     def test_deploying_greeter(unmigrated_chain):
+    
         GreeterFactory = unmigrated_chain.get_contract_factory('Greeter')
+        
+        # Manually deploy a contract
         deploy_txn_hash = GreeterFactory.deploy()
-        ...
+
+        # Wait for the transaction deploying the contract to be mined (~12s)
+        deployed_address = chain.wait.for_contract_address(deploy_txn_hash)
+
+        # Create a Contract proxy object to a deployed 
+        # contract with a specific address. 
+        # This proxy object contains Python call()
+        # and transact() ABI wrappers.
+        greeter = GreeterFactory(address=deployed_address)
 
 
 Chain

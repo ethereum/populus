@@ -174,7 +174,7 @@ class Project(object):
         :return: dict of kwargs options to be passed to :py:func:`solc.wrapper.solc_wrapper`
         """
         substitutions = {
-            "project_dir": self.project_dir,
+            "project_dir": os.path.abspath(self.project_dir),  # solc wants absolute path
         }
         return parse_solc_options_from_config(self.config, substitutions)
 
@@ -187,6 +187,7 @@ class Project(object):
             # somehow.
 
             options = self.solc_options
+
             if not "optimize" in options:
                 options["optimize"] = True
 

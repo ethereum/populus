@@ -461,14 +461,14 @@ def get_unlocked_deploy_from_address(chain):
     return account
 
 
-def compile_project_contracts(project, optimize=True):
+def compile_project_contracts(project, **solc_options):
     click.echo("============ Compiling ==============")
     click.echo("> Loading source files from: ./{0}\n".format(project.contracts_dir))
 
     result = compile_and_write_contracts(
         project.project_dir,
         project.contracts_dir,
-        optimize=optimize
+        **solc_options
     )
     contract_source_paths, compiled_sources, output_file_path = result
 

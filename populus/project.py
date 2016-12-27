@@ -35,6 +35,7 @@ from populus.migrations.loading import (
 from populus.compilation import (
     find_project_contracts,
     compile_project_contracts,
+    parse_solc_options_from_config,
 )
 
 from populus.chain import (
@@ -165,15 +166,35 @@ class Project(object):
         self._cached_compiled_contracts = contracts
 
     @property
+    def solc_options(self):
+        """Return Solidity compiler options for this project
+
+        Extract options from solc config section.
+
+        :return: dict of kwargs options to be passed to :py:func:`solc.wrapper.solc_wrapper`
+        """
+        substitutions = {
+            "project_dir": os.path.abspath(self.project_dir),  # solc wants absolute path
+        }
+        return parse_solc_options_from_config(self.config, substitutions)
+
+    @property
     def compiled_contracts(self):
+
         if self.compiled_contracts_stale():
             self._cached_compiled_contracts_mtime = self.get_source_modification_time()
             # TODO: the hard coded `optimize=True` should be configurable
             # somehow.
+
+            options = self.solc_options
+
+            if not "optimize" in options:
+                options["optimize"] = True
+
             _, self._cached_compiled_contracts = compile_project_contracts(
                 project_dir=self.project_dir,
                 contracts_dir=self.contracts_dir,
-                optimize=True,
+                **options,
             )
         return self._cached_compiled_contracts
 

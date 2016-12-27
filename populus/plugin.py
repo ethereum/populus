@@ -9,20 +9,32 @@ CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
 CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
 
 
-@pytest.fixture(scope="session")
-def project(request):
-    # This should probably be configurable using the `request` fixture but it's
-    # unclear what needs to be configurable.
+def create_project(request, config=None):
+    """py.test helper to create a Populus project to run.
 
+    Caches compild contracts per run.
+
+    :param config: :py:class:`populus.config.Config` instance
+
+    :return: :py:class:`populus.project.Project`
+    """
     # use pytest cache to preset the sessions project to recently compiled contracts
     contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
     mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
     project = Project()
+    project.config = config
     project.fill_contracts_cache(contracts, mtime)
     request.config.cache.set(CACHE_KEY_CONTRACTS, project.compiled_contracts)
     request.config.cache.set(CACHE_KEY_MTIME, project.get_source_modification_time())
 
     return project
+
+
+@pytest.fixture(scope="session")
+def project(request):
+    # This should probably be configurable using the `request` fixture but it's
+    # unclear what needs to be configurable.
+    return create_project(request, None)
 
 
 @pytest.yield_fixture()

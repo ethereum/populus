@@ -13,7 +13,7 @@ In addition to a local project configuration file, populus supports a *global*
 configuration file which should be located in your user's ``$HOME`` directory.
 Local project configuration will always supercede global configuration.
 
-.. code-block::
+.. code-block:: ini
 
     [populus]
     # project level configuration values would be set here.
@@ -170,7 +170,7 @@ Each chain allows configuration via the following options.
 Here is an example configuration file.
 
 
-.. code-block::
+.. code-block:: ini
 
     [populus]
     default_chain=morden
@@ -187,3 +187,65 @@ Here is an example configuration file.
     [chain:local_test]
     provider=web3.providers.ipc.IPCProvider
     ipc_path=/some/other/path/geth.ipc
+
+Solidity compiler options
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Solidity compiler options are in ``[solc]`` sections of the configuration file.
+These options allow you to fine tune the smart contract compilation proces.
+
+* ``remappings``:
+
+    This option allows you to specify Solidity import path remappings. You can use
+    optional `{project_dir}` substitution.
+    `More information about this Solidity feature <http://solidity.readthedocs.io/en/develop/layout-of-source-files.html#paths>`_.
+
+
+.. code-block:: ini
+
+    # Define where Zeppelin project (https://github.com/OpenZeppelin/zeppelin-solidity/)
+    # contracts are located
+    [solc]
+    remappings =
+        zeppelin={project_dir}/zeppelin
+
+
+For low level information compiler options,
+see :py:func:`populus.compilation.parse_solc_options_from_config`.
+
+Configuring project for tests
+-----------------------------
+
+py.test tests do not read ``populus.ini`` configuration file.
+
+py.test tests run with a ``project`` fixture that is used by ``chain`` fixture.
+If you want to customize ``project``, e.g. to override compiler options,
+you can do it as following.
+
+.. code-block:: python
+
+    import os
+
+    import pytest
+
+    from populus.plugin import create_project
+    from populus.utils.config import Config
+
+
+    @pytest.fixture(scope="module")
+    def project(request):
+        """Create a Populus project to run tests with custom import remappings."""
+        config = Config()
+        config.add_section("solc")
+
+        # Set path mapping for Zeppelin sol files
+        remappings = "zeppelin=" + os.path.join(os.path.abspath(os.getcwd()), "zeppelin")
+        config.set("solc", "remappings", remappings)
+        return create_project(request, config)
+
+
+    def test_create_contract(chain):
+        milestones = chain.get_contract('TestableMilestonePriced')
+        assert milestones.call().getMilestonesCount() == 0
+        assert milestones.call().milestonesSealed == False
+

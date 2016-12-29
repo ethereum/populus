@@ -24,7 +24,12 @@ CONFIG_FILENAMES = [
 
 
 TESTRPC_DEFAULTS = {
-    'provider': 'web3.providers.rpc.TestRPCProvider',
+    'provider': 'web3.providers.tester.TestRPCProvider',
+}
+
+
+TESTER_DEFAULTS = {
+    'provider': 'web3.providers.tester.EthereumTesterProvider',
 }
 
 MAINNET_DEFAULTS = {
@@ -50,6 +55,7 @@ class Config(configparser.ConfigParser):
             'mainnet': copy.deepcopy(MAINNET_DEFAULTS),
             'morden': copy.deepcopy(MORDEN_DEFAULTS),
             'testrpc': copy.deepcopy(TESTRPC_DEFAULTS),
+            'tester': copy.deepcopy(TESTER_DEFAULTS),
             'temp': {},
         }
         declared_chains = {

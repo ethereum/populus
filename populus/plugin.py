@@ -30,11 +30,7 @@ def unmigrated_chain(request, project):
     # This should probably allow you to specify the test chain to be used based
     # on the `request` object.  It's unclear what the best way to do this is
     # so... punt!
-    chain = project.get_chain('testrpc')
-
-    # TODO: this should run migrations.  If `testrpc` it should be snapshotted.
-    # In the future we should be able to snapshot the `geth` chains too and
-    # save them for faster test runs.
+    chain = project.get_chain('tester')
 
     with chain:
         yield chain

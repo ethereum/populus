@@ -1,5 +1,7 @@
 import pytest
 
+from ethereum.tester import TransactionFailed
+
 from populus.migrations import (
     DeployContract,
     Address,
@@ -54,7 +56,7 @@ def test_deploy_contract_failure_during_deployment(web3, chain, THROWER):
         arguments=[True],
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TransactionFailed):
         deploy_contract_operation.execute(
             chain=chain,
             compiled_contracts={'Thrower': THROWER},

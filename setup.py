@@ -4,10 +4,7 @@ import os
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from distutils.core import setup, find_packages
+from setuptools import setup, find_packages
 
 
 readme = open(os.path.join(DIR, 'README.md')).read()
@@ -27,16 +24,15 @@ setup(
         "click>=6.6",
         "configparser==3.5.0",
         "contextlib2>=0.5.4",
-        "eth-testrpc>=0.8.0",
-        "ethereum-tester-client>=1.1.0",
-        "gevent>=1.1.2",
-        "py-geth>=1.1.0",
+        "eth-testrpc>=0.9.3",
+        "gevent>=1.1.2,<1.2.0",  # https://github.com/gevent/gevent/issues/916
+        "py-geth>=1.5.0",
         "py-solc>=0.6.0",
         "pylru>=1.0.9",
         "pysha3>=0.3",
         "pytest>=2.7.2",
         "toposort>=1.4",
-        "web3>=2.7.0",
+        "web3>=3.4.0",
     ],
     license="MIT",
     zip_safe=False,

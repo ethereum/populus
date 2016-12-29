@@ -1,3 +1,5 @@
+import pytest
+
 from flaky import flaky
 
 from populus.chain import (
@@ -11,6 +13,17 @@ from populus.project import (
 
 @flaky
 def test_project_tester_chain(project_dir):
+    project = Project()
+
+    chain = project.get_chain('tester')
+
+    with chain as running_tester_chain:
+        web3 = running_tester_chain.web3
+        assert web3.version.node.startswith('TestRPC')
+
+
+@flaky
+def test_project_testrpc_chain(project_dir):
     project = Project()
 
     chain = project.get_chain('testrpc')
@@ -32,7 +45,8 @@ def test_project_temp_chain(project_dir):
         assert web3.version.node.startswith('Geth')
 
 
-@flaky
+#@flaky
+@pytest.mark.skip("Morden no longer exists")
 def test_project_morden_chain(project_dir):
     project = Project()
 

@@ -4,7 +4,7 @@ from populus import Project
 
 
 @pytest.mark.parametrize(
-    'chain_name', ('temp', 'testrpc'),
+    'chain_name', ('temp', 'testrpc', 'tester'),
 )
 def test_wait_for_block(project_dir, chain_name):
     project = Project()
@@ -19,7 +19,7 @@ def test_wait_for_block(project_dir, chain_name):
 
 
 @pytest.mark.parametrize(
-    'chain_name', ('temp', 'testrpc'),
+    'chain_name', ('temp', 'testrpc', 'tester'),
 )
 def test_wait_for_receipt(project_dir, chain_name):
     project = Project()
@@ -38,7 +38,7 @@ def test_wait_for_receipt(project_dir, chain_name):
 
 
 @pytest.mark.parametrize(
-    'chain_name', ('temp', 'testrpc'),
+    'chain_name', ('temp', 'testrpc', 'tester'),
 )
 def test_wait_for_contract_address(project_dir, chain_name, MATH_CODE, MATH_RUNTIME):
     project = Project()

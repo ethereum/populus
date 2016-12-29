@@ -7,7 +7,7 @@ from populus import Project
 
 
 @pytest.yield_fixture()
-def testrpc_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
+def tester_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
     write_project_file('contracts/Math.sol', MATH['source'])
     write_project_file(
         'contracts/Multiply13.sol',
@@ -20,13 +20,13 @@ def testrpc_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13
     assert 'Library13' in project.compiled_contracts
     assert 'Multiply13' in project.compiled_contracts
 
-    with project.get_chain('testrpc') as chain:
+    with project.get_chain('tester') as chain:
         yield chain
 
 
 @pytest.fixture()
-def math(testrpc_chain):
-    chain = testrpc_chain
+def math(tester_chain):
+    chain = tester_chain
     web3 = chain.web3
 
     Math = chain.contract_factories.Math
@@ -43,8 +43,8 @@ def math(testrpc_chain):
 
 
 @pytest.fixture()
-def library_13(testrpc_chain):
-    chain = testrpc_chain
+def library_13(tester_chain):
+    chain = tester_chain
     web3 = chain.web3
 
     Library13 = chain.contract_factories.Library13
@@ -61,8 +61,8 @@ def library_13(testrpc_chain):
 
 
 @pytest.fixture()
-def multiply_13(testrpc_chain, library_13):
-    chain = testrpc_chain
+def multiply_13(tester_chain, library_13):
+    chain = tester_chain
     web3 = chain.web3
 
     Multiply13 = chain.contract_factories['Multiply13']
@@ -88,19 +88,19 @@ def multiply_13(testrpc_chain, library_13):
 
 
 @pytest.fixture()
-def register_address(testrpc_chain):
-    chain = testrpc_chain
+def register_address(tester_chain):
+    chain = tester_chain
 
     def _register_address(name, value):
-        register_txn_hash = testrpc_chain.registrar.transact().setAddress(
+        register_txn_hash = tester_chain.registrar.transact().setAddress(
             'contract/{name}'.format(name=name), value,
         )
         chain.wait.for_receipt(register_txn_hash, timeout=120)
     return _register_address
 
 
-def test_contract_availability_with_no_dependencies(testrpc_chain, math, register_address):
-    chain = testrpc_chain
+def test_contract_availability_with_no_dependencies(tester_chain, math, register_address):
+    chain = tester_chain
 
     register_address('Math', math.address)
 
@@ -108,17 +108,17 @@ def test_contract_availability_with_no_dependencies(testrpc_chain, math, registe
     assert is_available is True
 
 
-def test_contract_availability_when_not_registered(testrpc_chain):
-    chain = testrpc_chain
+def test_contract_availability_when_not_registered(tester_chain):
+    chain = tester_chain
 
     is_available = chain.is_contract_available('Math')
     assert is_available is False
 
 
-def test_contract_availability_with_missing_dependency(testrpc_chain,
+def test_contract_availability_with_missing_dependency(tester_chain,
                                                        multiply_13,
                                                        register_address):
-    chain = testrpc_chain
+    chain = tester_chain
 
     register_address('Multiply13', multiply_13.address)
 
@@ -126,11 +126,11 @@ def test_contract_availability_with_missing_dependency(testrpc_chain,
     assert is_available is False
 
 
-def test_contract_availability_with_bytecode_mismatch(testrpc_chain,
+def test_contract_availability_with_bytecode_mismatch(tester_chain,
                                                       library_13,
                                                       math,
                                                       register_address):
-    chain = testrpc_chain
+    chain = tester_chain
 
     register_address('Math', library_13.address)
 
@@ -138,11 +138,11 @@ def test_contract_availability_with_bytecode_mismatch(testrpc_chain,
     assert is_available is False
 
 
-def test_contract_availability_skipping_bytecode_validation(testrpc_chain,
+def test_contract_availability_skipping_bytecode_validation(tester_chain,
                                                             library_13,
                                                             math,
                                                             register_address):
-    chain = testrpc_chain
+    chain = tester_chain
 
     register_address('Math', library_13.address)
 
@@ -150,11 +150,11 @@ def test_contract_availability_skipping_bytecode_validation(testrpc_chain,
     assert is_available is True
 
 
-def test_contract_availability_with_bytecode_mismatch_on_dependency(testrpc_chain,
+def test_contract_availability_with_bytecode_mismatch_on_dependency(tester_chain,
                                                                     multiply_13,
                                                                     math,
                                                                     register_address):
-    chain = testrpc_chain
+    chain = tester_chain
 
     register_address('Multiply13', multiply_13.address)
     register_address('Library13', math.address)
@@ -163,11 +163,11 @@ def test_contract_availability_with_bytecode_mismatch_on_dependency(testrpc_chai
     assert is_available is False
 
 
-def test_contract_availability_with_dependency(testrpc_chain,
+def test_contract_availability_with_dependency(tester_chain,
                                                multiply_13,
                                                library_13,
                                                register_address):
-    chain = testrpc_chain
+    chain = tester_chain
 
     register_address('Multiply13', multiply_13.address)
     register_address('Library13', library_13.address)
@@ -176,11 +176,11 @@ def test_contract_availability_with_dependency(testrpc_chain,
     assert is_available is True
 
 
-def test_contract_availability_with_declared_dependency(testrpc_chain,
+def test_contract_availability_with_declared_dependency(tester_chain,
                                                         multiply_13,
                                                         library_13,
                                                         register_address):
-    chain = testrpc_chain
+    chain = tester_chain
 
     register_address('Multiply13', multiply_13.address)
 

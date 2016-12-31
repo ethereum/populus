@@ -7,6 +7,10 @@ from click.testing import CliRunner
 
 from populus.project import Project
 from populus import migrations
+from populus.utils.chains import (
+    get_geth_ipc_path,
+    get_data_dir as get_local_chain_datadir,
+)
 from populus.migrations.registrar import (
     get_registrar,
 )
@@ -65,24 +69,27 @@ def test_migrate_cmd(project_dir, write_project_file, MATH):
     with open(migration_0002_path, 'w') as migration_0002:
         write_migration(migration_0002, MigrationB)
 
-    write_project_file('populus.ini', '[chain:local_a]')
-
     project = Project()
+    project.config['chains.local.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
+    project.config['chains.local.web3.provider.settings.ipc_path'] = (
+        get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local'))
+    )
+    project.write_config()
 
     # sanity
     assert len(project.migrations) == 2
 
-    with project.get_chain('local_a') as chain:
+    with project.get_chain('local') as chain:
         chain.wait.for_unlock(chain.web3.eth.coinbase, timeout=30)
-        project.config.set('chain:local_a', 'deploy_from', chain.web3.eth.coinbase)
+        project.config['chains.local.web3.eth.default_account'] = chain.web3.eth.coinbase
         RegistrarFactory = get_registrar(web3=chain.web3)
         deploy_transaction_hash = RegistrarFactory.deploy()
         registrar_address = chain.wait.for_contract_address(deploy_transaction_hash, timeout=60)
-        project.config.set('chain:local_a', 'registrar', registrar_address)
+        project.config['chains.local.registrar'] = registrar_address
         project.write_config()
 
     runner = CliRunner()
-    result = runner.invoke(main, ['migrate', 'local_a'])
+    result = runner.invoke(main, ['migrate', 'local'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
 

@@ -12,7 +12,7 @@ from populus.utils.cli import (
     configure_chain,
     deploy_contract_and_verify,
     show_chain_sync_progress,
-    get_unlocked_deploy_from_address,
+    get_unlocked_default_account_address,
 )
 from populus.chain import (
     BaseGethChain,
@@ -112,31 +112,23 @@ def chain_init(ctx, chain_name):
     if not chain_name:
         chain_name = select_chain(project)
 
-    chain_section_name = "chain:{0}".format(chain_name)
-
-    if chain_name == 'testrpc':
+    if chain_name in {'testrpc', 'tester', 'temp'}:
         ctx.abort("Cannot initialize the {0!r} chain".format(chain_name))
 
-    # The `mainnet` and `morden` chains have default configurations.  If the
-    # user is working on one of these chains then we need to add the section
-    # header so that we can write new config to it.
-    if not project.config.has_section(chain_section_name):
-        project.config.add_section(chain_section_name)
+    if chain_name not in project.config['chains']:
+        ctx.forward(chain_configure)
 
     chain = project.get_chain(chain_name)
 
-    if 'registrar' not in chain.chain_config:
+    if not chain.has_registrar:
         # We need to deploy the registrar
         with chain:
             web3 = chain.web3
 
-            if chain_name in {'mainnet', 'morden'}:
+            if chain_name in {'mainnet', 'ropsten'}:
                 show_chain_sync_progress(chain)
 
-            account = get_unlocked_deploy_from_address(chain)
-
-            # Configure web3 to now send from our chosen account by default
-            web3.eth.defaultAccount = account
+            web3.eth.defaultAccount = get_unlocked_default_account_address(chain)
 
             # Deploy the registrar
             RegistrarFactory = chain.RegistrarFactory
@@ -144,15 +136,11 @@ def chain_init(ctx, chain_name):
                                                    contract_name='Registrar',
                                                    base_contract_factory=RegistrarFactory)
 
-            # TODO: set the value in the registrar.
-
             # Write the registrar address to the chain config
-            project.config.set(chain_section_name, 'registrar', registrar.address)
-            config_file_path = project.write_config()
+            project.config['chains.{0}.registrar'.format(chain_name)] = registrar.address
+            project.write_config()
 
-            click.echo("Wrote updated chain configuration to {0!r}".format(
-                config_file_path,
-            ))
+            click.echo("Wrote updated chain configuration to")
 
     click.echo("The '{0}' blockchain is ready for migrations.".format(
         chain_name

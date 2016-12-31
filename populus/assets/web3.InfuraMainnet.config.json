@@ -1,0 +1,13 @@
+{
+    "provider": {
+        "class": "web3.providers.rpc.RPCProvider",
+        "settings": {
+            "rpc_host": "mainnet.infura.io",
+            "rpc_port": 443,
+            "use_ssl": true
+        }
+    },
+    "eth": {
+        "default_account": "0x0000000000000000000000000000000000000001"
+    }
+}

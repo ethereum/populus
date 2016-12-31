@@ -1,0 +1,6 @@
+{
+    "contracts_source_dir": "./contracts",
+    "settings": {
+        "optimize": true
+    }
+}

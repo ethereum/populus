@@ -22,8 +22,8 @@ setup(
     include_package_data=True,
     py_modules=['populus'],
     install_requires=[
+        "anyconfig>=0.7.0",
         "click>=6.6",
-        "configparser==3.5.0",
         "contextlib2>=0.5.4",
         "eth-testrpc>=0.9.3",
         "gevent>=1.1.2,<1.2.0",  # https://github.com/gevent/gevent/issues/916

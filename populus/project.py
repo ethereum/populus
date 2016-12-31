@@ -1,10 +1,6 @@
 import os
 import hashlib
 
-from web3.utils.string import (
-    is_string,
-)
-
 from populus.utils.filesystem import (
     get_contracts_dir,
     get_build_dir,
@@ -20,11 +16,7 @@ from populus.utils.chains import (
     get_geth_ipc_path,
     get_nodekey_path,
 )
-from populus.utils.config import (
-    load_config,
-    get_config_paths,
-    PRIMARY_CONFIG_FILENAME,
-)
+
 from populus.migrations.migration import (
     sort_migrations,
 )
@@ -36,7 +28,12 @@ from populus.compilation import (
     find_project_contracts,
     compile_project_contracts,
 )
-
+from populus.config import (
+    load_config as _load_config,
+    write_config as _write_config,
+    load_default_config_info,
+    Config,
+)
 from populus.chain import (
     TestRPCChain,
     EthereumTesterChain,
@@ -49,65 +46,49 @@ from populus.chain import (
 
 
 class Project(object):
+    _project_config = None
+    _default_config_info = None
+    _config_file_path = None
 
-    #: Instance of :class:`populus.utils.Config`, a subclass of ConfigParser
-    config = None
-
-    def __init__(self, config_file_paths=None):
-        self.load_config(config_file_paths)
+    def __init__(self, config_file_path=None):
+        self._config_file_path = config_file_path
+        self.load_config()
 
     #
     # Config
     #
-    _primary_config_file_path = None
-    _config_file_paths = None
+    def write_config(self, write_path=None):
+        return _write_config(
+            self.project_dir,
+            self.config.config_for_write,
+            write_path=write_path,
+        )
 
-    @property
-    @relpath
-    def primary_config_file_path(self):
-        if self._primary_config_file_path is not None:
-            return self._primary_config_file_path
-        return os.path.join(self.project_dir, PRIMARY_CONFIG_FILENAME)
+    def load_config(self, config_file_path=None):
+        if config_file_path is None:
+            config_file_path = self._config_file_path
 
-    @primary_config_file_path.setter
-    def primary_config_file_path(self, value):
-        self._primary_config_file_path = value
-
-    def write_config(self, destination_path=None):
-        if destination_path is None:
-            destination_path = self.primary_config_file_path
-
-        with open(destination_path, 'w') as config_file:
-            self.config.write(config_file)
-
-        return destination_path
-
-    def load_config(self, config_file_paths=None):
-        self._config_file_paths = config_file_paths
-
-        if not config_file_paths:
-            config_file_paths = get_config_paths(os.getcwd())
-        else:
-            self.primary_config_file_path = config_file_paths[0]
-
-        if is_string(config_file_paths):
-            config_file_paths = [config_file_paths]
-
-        self.config = load_config(config_file_paths)
+        self._config = None
+        self._project_config = _load_config(config_file_path)
+        self._default_config_info = load_default_config_info()
 
     def reload_config(self):
-        self.load_config(self._config_file_paths)
+        self.load_config()
+
+    _config = None
+
+    @property
+    def config(self):
+        if self._config is None:
+            self._config = Config(self._config, self._default_config_info)
+        return self._config
 
     #
     # Project
     #
     @property
-    @relpath
     def project_dir(self):
-        if self.config.has_option('populus', 'project_dir'):
-            return self.config.get('populus', 'project_dir')
-        else:
-            return os.getcwd()
+        return self.config.get('populus.project_dir', os.getcwd())
 
     #
     # Contracts
@@ -115,16 +96,16 @@ class Project(object):
     @property
     @relpath
     def contracts_dir(self):
-        if self.config.has_option('populus', 'contracts_dir'):
-            return self.config.get('populus', 'contracts_dir')
+        if 'compilation.contracts_dir' in self.config:
+            return self.config['compilation.contracts_dir']
         else:
             return get_contracts_dir(self.project_dir)
 
     @property
     @relpath
     def build_dir(self):
-        if self.config.has_option('populus', 'build_dir'):
-            return self.config.get('populus', 'build_dir')
+        if 'compilation.build_dir' in self.config:
+            return self.config['compilation.build_dir']
         else:
             return get_build_dir(self.project_dir)
 
@@ -181,6 +162,19 @@ class Project(object):
     #
     # Local Blockchains
     #
+    def get_chain_config(self, chain_name):
+        chain_config_key = 'chains.{chain_name}'.format(chain_name=chain_name)
+
+        if chain_config_key in self.config:
+            return self.config.get_config(chain_config_key)
+        else:
+            raise KeyError(
+                "Unknown chain: {0!r} - Must be one of {1!r}".format(
+                    chain_name,
+                    sorted(self.config.get('chains', {}).keys()),
+                )
+            )
+
     def get_chain(self, chain_name, *chain_args, **chain_kwargs):
         """
         Returns a context manager that runs a chain within the context of the
@@ -236,34 +230,23 @@ class Project(object):
         elif chain_name == 'temp':
             return TemporaryGethChain(self, 'temp', *chain_args, **chain_kwargs)
 
-        try:
-            chain_config = self.config.chains[chain_name]
-        except KeyError:
-            raise KeyError(
-                "Unknown chain: {0!r} - Must be one of {1!r}".format(
-                    chain_name,
-                    sorted(self.config.chains.keys()),
-                )
-            )
+        chain_config = self.get_chain_config(chain_name)
 
-        combined_kwargs = dict(**chain_config)
-        combined_kwargs.update(chain_kwargs)
-
-        if chain_config.get('is_external'):
+        if chain_config.get('is_external', False):
             # TODO: the chain_kwargs is really currently required to contain a
             # `web3` instance.  This isn't quite congruent with the current
             # API.
-            return ExternalChain(self, chain_name, *chain_args, **combined_kwargs)
+            return ExternalChain(self, chain_name, *chain_args, **chain_kwargs)
 
         if chain_name == 'morden':
-            return MordenChain(self, 'morden', *chain_args, **combined_kwargs)
+            return MordenChain(self, 'morden', *chain_args, **chain_kwargs)
         elif chain_name == 'mainnet':
-            return MainnetChain(self, 'mainnet', *chain_args, **combined_kwargs)
+            return MainnetChain(self, 'mainnet', *chain_args, **chain_kwargs)
         else:
             return LocalGethChain(self,
                                   chain_name=chain_name,
                                   *chain_args,
-                                  **combined_kwargs)
+                                  **chain_kwargs)
 
     @property
     @relpath

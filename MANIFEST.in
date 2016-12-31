@@ -8,3 +8,4 @@ recursive-exclude * *.py[co]
 
 include populus/migrations/RegistrarV3.sol
 include populus/migrations/RegistrarV4.sol
+include populus/assets/*

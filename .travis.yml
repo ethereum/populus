@@ -22,7 +22,7 @@ cache:
   - pip: true
   - directories:
     - $HOME/.ethash/
-    - $TRAVIS_BUILD_DIR/.tox
+    - $TRAVIS_BUILD_DIR/.tox --recreate
 before_install:
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update

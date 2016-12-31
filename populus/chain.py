@@ -1,4 +1,5 @@
 import itertools
+import copy
 
 try:
     from contextlib import ExitStack
@@ -7,12 +8,7 @@ except ImportError:
 
 from pylru import lrucache
 
-from web3.utils.types import is_string
-
 from web3 import (
-    Web3,
-    RPCProvider,
-    IPCProvider,
     TestRPCProvider,
     EthereumTesterProvider,
 )
@@ -30,8 +26,8 @@ from populus.utils.networking import (
     get_open_port,
     wait_for_connection,
 )
-from populus.utils.module_loading import (
-    import_string,
+from populus.utils.config import (
+    resolve_config,
 )
 from populus.utils.wait import (
     Wait,
@@ -54,6 +50,7 @@ from populus.utils.chains import (
     get_nodekey_path,
     get_geth_ipc_path,
     get_geth_logfile_path,
+    setup_web3_from_config,
 )
 
 from populus.migrations.migration import (
@@ -172,19 +169,33 @@ class Chain(object):
         self._factory_cache = lrucache(128)
 
     #
-    # Required Public API
+    # Config
     #
     @property
+    def config(self):
+        return self.project.get_chain_config(self.chain_name)
+
+    #
+    # Required Public API
+    #
+    def get_web3_config(self):
+        web3_config = self.config.get_config('web3')
+
+        return resolve_config(web3_config, self.project.config)
+
+    @property
+    def web3_config(self):
+        return self.get_web3_config()
+
+    @cached_property
     def web3(self):
-        raise NotImplementedError("Must be implemented by subclasses")
+        if not self._running:
+            raise ValueError("Chain must be running prior to accessing web3")
+        return setup_web3_from_config(self.web3_config)
 
     @property
     def wait(self):
         return Wait(self.web3)
-
-    @property
-    def chain_config(self):
-        raise NotImplementedError("Must be implemented by subclasses")
 
     @cached_property
     def contract_factories(self):
@@ -213,8 +224,13 @@ class Chain(object):
     def registrar(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
+    #
+    # Running the chain
+    #
+    _running = None
+
     def __enter__(self):
-        raise NotImplementedError("Must be implemented by subclasses")
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
@@ -433,48 +449,12 @@ class ExternalChain(Chain):
     Chain class to represent an externally running blockchain that is not
     locally managed.  This class only houses a pre-configured web3 instance.
     """
-    def __init__(self, project, chain_name, *args, **kwargs):
-        super(ExternalChain, self).__init__(project, chain_name)
-
-        provider_import_path = kwargs.pop(
-            'provider',
-            'web3.providers.ipc.IPCProvider',
-        )
-        provider_class = import_string(provider_import_path)
-
-        if provider_class == RPCProvider:
-            host = kwargs.pop('host', '127.0.0.1')
-            # TODO: this integer casting needs to be done downstream in
-            # web3.py.
-            port = int(kwargs.pop('port', 8545))
-            provider = provider_class(host=host, port=port)
-        elif provider_class == IPCProvider:
-            ipc_path = kwargs.pop('ipc_path', None)
-            provider = provider_class(ipc_path=ipc_path)
-        else:
-            raise NotImplementedError(
-                "Only the IPCProvider and RPCProvider provider classes are "
-                "currently supported for external chains."
-            )
-
-        self._web3 = Web3(provider)
-
-    @property
-    def chain_config(self):
-        return self.project.config.chains[self.chain_name]
-
-    @property
-    def web3(self):
-        if 'default_account' in self.chain_config:
-            self._web3.eth.defaultAccount = self.chain_config['default_account']
-        return self._web3
-
     def __enter__(self):
         return self
 
     @property
     def has_registrar(self):
-        return 'registrar' in self.chain_config
+        return 'registrar' in self.config
 
     @cached_property
     def registrar(self):
@@ -486,7 +466,7 @@ class ExternalChain(Chain):
             )
         return get_registrar(
             self.web3,
-            address=self.chain_config['registrar'],
+            address=self.config['registrar'],
         )
 
 
@@ -501,29 +481,6 @@ def testrpc_fn_proxy(fn_name):
 class BaseTesterChain(Chain):
     provider = None
     port = None
-
-    @cached_property
-    def web3(self):
-        if self.provider is None or not self._running:
-            raise ValueError(
-                "TesterChain instances must be running to access the web3 "
-                "object."
-            )
-        _web3 = Web3(self.provider)
-
-        if 'default_account' in self.chain_config:
-            _web3.eth.defaultAccount = self.chain_config['default_account']
-
-        return _web3
-
-    @property
-    def chain_config(self):
-        config = self.project.config.chains[self.chain_name]
-        # TODO: how to do this without causing a circular dependency between these properties.
-        # config.update({
-        #     'registrar': self.registrar.address,
-        # })
-        return config
 
     has_registrar = True
 
@@ -543,8 +500,6 @@ class BaseTesterChain(Chain):
 
     revert = testrpc_fn_proxy('evm_revert')
     mine = testrpc_fn_proxy('evm_mine')
-
-    _running = False
 
     def get_contract(self,
                      contract_name,
@@ -697,65 +652,26 @@ GETH_KWARGS = {
 
 class BaseGethChain(Chain):
     geth = None
-    provider_class = None
 
-    def __init__(self, project, chain_name, provider=IPCProvider, **geth_kwargs):
+    def __init__(self, project, chain_name, **kwargs):
         super(BaseGethChain, self).__init__(project, chain_name)
-
-        if geth_kwargs is None:
-            geth_kwargs = {}
-
-        if is_string(provider):
-            provider = import_string(provider)
 
         # context manager shenanigans
         self.stack = ExitStack()
 
-        self.provider_class = provider
         self.extra_kwargs = {
             key: value
-            for key, value in geth_kwargs.items() if key not in GETH_KWARGS
+            for key, value in kwargs.items() if key not in GETH_KWARGS
         }
         self.geth_kwargs = {
             key: value
-            for key, value in geth_kwargs.items() if key in GETH_KWARGS
+            for key, value in kwargs.items() if key in GETH_KWARGS
         }
         self.geth = self.get_geth_process_instance()
 
-    _web3 = None
-
-    @property
-    def web3(self):
-        if not self.geth.is_running:
-            raise ValueError(
-                "Underlying geth process doesn't appear to be running"
-            )
-
-        if self._web3 is None:
-            if issubclass(self.provider_class, IPCProvider):
-                provider = IPCProvider(self.geth.ipc_path)
-            elif issubclass(self.provider_class, RPCProvider):
-                provider = RPCProvider(port=self.geth.rpc_port)
-            else:
-                raise NotImplementedError(
-                    "Unsupported provider class {0!r}.  Must be one of "
-                    "IPCProvider or RPCProvider"
-                )
-            _web3 = Web3(provider)
-
-            if 'default_account' in self.chain_config:
-                _web3.eth.defaultAccount = self.chain_config['default_account']
-
-            self._web3 = _web3
-        return self._web3
-
-    @property
-    def chain_config(self):
-        return self.project.config.chains[self.chain_name]
-
     @property
     def has_registrar(self):
-        return 'registrar' in self.chain_config
+        return 'registrar' in self.config
 
     @cached_property
     def registrar(self):
@@ -767,7 +683,7 @@ class BaseGethChain(Chain):
             )
         return get_registrar(
             self.web3,
-            address=self.chain_config['registrar'],
+            address=self.config['registrar'],
         )
 
     def get_geth_process_instance(self):
@@ -783,10 +699,13 @@ class BaseGethChain(Chain):
         if self.geth.rpc_enabled:
             self.geth.wait_for_rpc(60)
 
+        self._running = True
+
         return self
 
     def __exit__(self, *exc_info):
         self.stack.close()
+        self._running = False
 
 
 class LocalGethChain(BaseGethChain):
@@ -810,6 +729,12 @@ class TemporaryGethChain(BaseGethChain):
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
         )
+
+    def get_web3_config(self):
+        base_config = super(TemporaryGethChain, self).get_web3_config()
+        config = copy.deepcopy(base_config)
+        config['provider.settings.ipc_path'] = self.geth.ipc_path
+        return config
 
     has_registrar = True
 

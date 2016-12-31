@@ -40,7 +40,7 @@ def test_deployment_command_with_specified_contracts(project_dir,
     write_project_file('./contracts/Emitter.sol', EMITTER['source'])
     runner = CliRunner()
     result = runner.invoke(main, [
-        'deploy', 'Math', 'Emitter', '--chain', 'testrpc', '--deploy-from', '0'
+        'deploy', 'Math', 'Emitter', '--chain', 'testrpc',
     ])
 
     assert result.exit_code == 0, result.output + str(result.exception)
@@ -62,7 +62,7 @@ def test_deployment_command_with_prompt_for_contracts(project_dir,
     write_project_file('./contracts/Emitter.sol', EMITTER['source'])
     runner = CliRunner()
     result = runner.invoke(main, [
-        'deploy', '--chain', 'testrpc', '--deploy-from', '0',
+        'deploy', '--chain', 'testrpc',
     ], input='Math\n')
 
     assert result.exit_code == 0, result.output + str(result.exception)

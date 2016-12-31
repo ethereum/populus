@@ -3,6 +3,10 @@ import click
 from click.testing import CliRunner
 
 from populus.project import Project
+from populus.utils.chains import (
+    get_geth_ipc_path,
+    get_data_dir as get_local_chain_datadir,
+)
 from populus.utils.cli import (
     select_chain,
 )
@@ -30,26 +34,21 @@ from populus.utils.cli import (
     ),
 )
 def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expected):
-    write_project_file('populus.ini', '\n'.join((
-        "[chain:local_a]",  # 0
-        "",
-        "[chain:local_b]",  # 1
-        "",
-        "[chain:local_c]",  # 2
-        "",
-        "[chain:mainnet]",  # 3
-        "",
-        "[chain:morden]",   # 4
-        "",
-        "[chain:tester]",  # 5
-        "",
-        "[chain:testrpc]",  # 5
-    )))
     project = Project()
+    project.config['chains.local_a.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
+    project.config['chains.local_a.web3.provider.settings.ipc_path'] = (
+        get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_a'))
+    )
+    project.config['chains.local_b.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
+    project.config['chains.local_b.web3.provider.settings.ipc_path'] = (
+        get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_b'))
+    )
+    project.config['chains.local_c.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
+    project.config['chains.local_c.web3.provider.settings.ipc_path'] = (
+        get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_c'))
+    )
+    project.write_config()
 
-    assert 'local_a' in project.config.chains
-    assert 'local_b' in project.config.chains
-    assert 'local_c' in project.config.chains
 
     @click.command()
     def wrapper():
@@ -69,8 +68,8 @@ def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expecte
 def test_cli_select_chain_helper_select_invalid_options(project_dir, stdin):
     project = Project()
 
-    assert 'local_a' not in project.config.chains
-    assert len(project.config.chains) < 20
+    assert 'local_a' not in project.config['chains']
+    assert len(project.config['chains']) < 20
 
     @click.command()
     def wrapper():

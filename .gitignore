@@ -63,7 +63,7 @@ keystore/
 
 # Test remnants
 logs/
-migrations/
+./migrations/
 
 # pytest
 .cache/

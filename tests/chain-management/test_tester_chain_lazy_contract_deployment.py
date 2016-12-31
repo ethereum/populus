@@ -5,7 +5,7 @@ from populus.chain import UnknownContract
 
 
 @pytest.yield_fixture()
-def testrpc_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
+def tester_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
     write_project_file('contracts/Math.sol', MATH['source'])
     write_project_file(
         'contracts/Multiply13.sol',
@@ -18,19 +18,19 @@ def testrpc_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13
     assert 'Library13' in project.compiled_contracts
     assert 'Multiply13' in project.compiled_contracts
 
-    with project.get_chain('testrpc') as chain:
+    with project.get_chain('tester') as chain:
         yield chain
 
 
 @pytest.fixture()
-def register_address(testrpc_chain):
-    chain = testrpc_chain
+def register_address(tester_chain):
+    chain = tester_chain
     def _register_address(name, value):
         if name.startswith('contract/'):
             contract_key = name
         else:
             contract_key = 'contract/{name}'.format(name=name)
-        register_txn_hash = testrpc_chain.registrar.transact().setAddress(
+        register_txn_hash = tester_chain.registrar.transact().setAddress(
             contract_key, value,
         )
         chain.wait.for_receipt(register_txn_hash, timeout=120)
@@ -38,8 +38,8 @@ def register_address(testrpc_chain):
 
 
 @pytest.fixture()
-def math(testrpc_chain):
-    chain = testrpc_chain
+def math(tester_chain):
+    chain = tester_chain
     web3 = chain.web3
 
     Math = chain.contract_factories.Math
@@ -56,8 +56,8 @@ def math(testrpc_chain):
 
 
 @pytest.fixture()
-def library_13(testrpc_chain):
-    chain = testrpc_chain
+def library_13(tester_chain):
+    chain = tester_chain
     web3 = chain.web3
 
     Library13 = chain.contract_factories.Library13
@@ -73,15 +73,15 @@ def library_13(testrpc_chain):
     return Library13(address=library_13_address)
 
 
-def test_unknown_contract(testrpc_chain):
-    chain = testrpc_chain
+def test_unknown_contract(tester_chain):
+    chain = tester_chain
 
     with pytest.raises(UnknownContract):
         chain.get_contract('NotAKnownContract')
 
 
-def test_it_uses_existing_address(testrpc_chain, math, register_address):
-    chain = testrpc_chain
+def test_it_uses_existing_address(tester_chain, math, register_address):
+    chain = tester_chain
 
     register_address('contract/Math', math.address)
     # sanity check
@@ -91,8 +91,8 @@ def test_it_uses_existing_address(testrpc_chain, math, register_address):
     assert actual_math.address == math.address
 
 
-def test_it_lazily_deploys_contract(testrpc_chain):
-    chain = testrpc_chain
+def test_it_lazily_deploys_contract(tester_chain):
+    chain = tester_chain
 
     math = chain.get_contract('Math')
     assert math.address
@@ -100,16 +100,16 @@ def test_it_lazily_deploys_contract(testrpc_chain):
     assert 'Math' in chain.deployed_contracts
 
 
-def test_it_handles_library_dependencies(testrpc_chain):
-    chain = testrpc_chain
+def test_it_handles_library_dependencies(tester_chain):
+    chain = tester_chain
 
     multiply_13 = chain.get_contract('Multiply13')
     assert multiply_13.call().multiply13(3) == 39
 
 
-def test_it_uses_existing_library_dependencies(testrpc_chain, library_13,
+def test_it_uses_existing_library_dependencies(tester_chain, library_13,
                                                register_address):
-    chain = testrpc_chain
+    chain = tester_chain
 
     register_address('contract/Library13', library_13.address)
     # sanity check

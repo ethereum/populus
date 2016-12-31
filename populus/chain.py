@@ -9,11 +9,12 @@ from pylru import lrucache
 
 from web3.utils.types import is_string
 
-from web3.providers.rpc import TestRPCProvider
 from web3 import (
     Web3,
     RPCProvider,
     IPCProvider,
+    TestRPCProvider,
+    EthereumTesterProvider,
 )
 
 from geth import (
@@ -490,16 +491,14 @@ class ExternalChain(Chain):
 
 
 def testrpc_fn_proxy(fn_name):
-    @staticmethod
-    def inner(*args, **kwargs):
-        from testrpc import testrpc
-        fn = getattr(testrpc, fn_name)
+    def inner(self, *args, **kwargs):
+        fn = getattr(self.rpc_methods, fn_name)
         return fn(*args, **kwargs)
-    inner.__func__.__name__ = fn_name
+    inner.__name__ = fn_name
     return inner
 
 
-class TestRPCChain(Chain):
+class BaseTesterChain(Chain):
     provider = None
     port = None
 
@@ -539,45 +538,13 @@ class TestRPCChain(Chain):
     full_reset = testrpc_fn_proxy('full_reset')
     reset = testrpc_fn_proxy('evm_reset')
 
-    @staticmethod
-    def snapshot(*args, **kwargs):
-        from testrpc import testrpc
-        return int(testrpc.evm_snapshot(*args, **kwargs), 16)
+    def snapshot(self, *args, **kwargs):
+        return int(self.rpc_methods.evm_snapshot(*args, **kwargs), 16)
 
     revert = testrpc_fn_proxy('evm_revert')
     mine = testrpc_fn_proxy('evm_mine')
 
     _running = False
-
-    def __enter__(self):
-        from testrpc import testrpc
-        if self._running:
-            raise ValueError("The TesterChain is already running")
-
-        if self.port is None:
-            self.port = get_open_port()
-
-        self.provider = TestRPCProvider(port=self.port)
-
-        testrpc.full_reset()
-        testrpc.rpc_configure('eth_mining', False)
-        testrpc.rpc_configure('eth_protocolVersion', '0x3f')
-        testrpc.rpc_configure('net_version', 1)
-        testrpc.evm_mine()
-
-        wait_for_connection('127.0.0.1', self.port)
-        self._running = True
-        return self
-
-    def __exit__(self, *exc_info):
-        if not self._running:
-            raise ValueError("The TesterChain is not running")
-        try:
-            self.provider.server.stop()
-            self.provider.server.close()
-            self.provider.thread.kill()
-        finally:
-            self._running = False
 
     def get_contract(self,
                      contract_name,
@@ -632,12 +599,67 @@ class TestRPCChain(Chain):
                 contract_address,
             )
             self.wait.for_receipt(register_txn_hash)
-        return super(TestRPCChain, self).get_contract(
+        return super(BaseTesterChain, self).get_contract(
             contract_name,
             link_dependencies=link_dependencies,
             *args,
             **kwargs
         )
+
+
+class TestRPCChain(BaseTesterChain):
+    def __enter__(self):
+        if self._running:
+            raise ValueError("The TesterChain is already running")
+
+        if self.port is None:
+            self.port = get_open_port()
+
+        self.provider = TestRPCProvider(port=self.port)
+        self.rpc_methods = self.provider.server.application.rpc_methods
+
+        self.rpc_methods.full_reset()
+        self.rpc_methods.rpc_configure('eth_mining', False)
+        self.rpc_methods.rpc_configure('eth_protocolVersion', '0x3f')
+        self.rpc_methods.rpc_configure('net_version', 1)
+        self.rpc_methods.evm_mine()
+
+        wait_for_connection('127.0.0.1', self.port)
+        self._running = True
+        return self
+
+    def __exit__(self, *exc_info):
+        if not self._running:
+            raise ValueError("The TesterChain is not running")
+        try:
+            self.provider.server.stop()
+            self.provider.server.close()
+            self.provider.thread.kill()
+        finally:
+            self._running = False
+
+
+class EthereumTesterChain(BaseTesterChain):
+    def __enter__(self):
+        if self._running:
+            raise ValueError("The TesterChain is already running")
+
+        self.provider = EthereumTesterProvider()
+        self.rpc_methods = self.provider.rpc_methods
+
+        self.rpc_methods.full_reset()
+        self.rpc_methods.rpc_configure('eth_mining', False)
+        self.rpc_methods.rpc_configure('eth_protocolVersion', '0x3f')
+        self.rpc_methods.rpc_configure('net_version', 1)
+        self.rpc_methods.evm_mine()
+
+        self._running = True
+        return self
+
+    def __exit__(self, *exc_info):
+        if not self._running:
+            raise ValueError("The TesterChain is not running")
+        self._running = False
 
 
 GETH_KWARGS = {

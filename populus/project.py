@@ -39,6 +39,7 @@ from populus.compilation import (
 
 from populus.chain import (
     TestRPCChain,
+    EthereumTesterChain,
     TemporaryGethChain,
     MordenChain,
     MainnetChain,
@@ -188,6 +189,7 @@ class Project(object):
         Support pre-configured chain names:
 
         - 'testrpc': Chain backed by an ephemeral eth-testrpc chain.
+        - 'tester': Chain backed by an ephemeral ethereum.tester chain.
         - 'temp': Chain backed by geth running a local chain in a temporary
           directory that will be automatically deleted when the chain shuts down.
         - 'mainnet': Chain backed by geth running against the public mainnet.
@@ -229,6 +231,8 @@ class Project(object):
         """
         if chain_name == 'testrpc':
             return TestRPCChain(self, 'testrpc', *chain_args, **chain_kwargs)
+        elif chain_name == 'tester':
+            return EthereumTesterChain(self, 'tester', *chain_args, **chain_kwargs)
         elif chain_name == 'temp':
             return TemporaryGethChain(self, 'temp', *chain_args, **chain_kwargs)
 

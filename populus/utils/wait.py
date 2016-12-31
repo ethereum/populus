@@ -1,9 +1,16 @@
 import random
 import gevent
 
-from web3.providers.rpc import TestRPCProvider
+from web3.providers.tester import (
+    TestRPCProvider,
+    EthereumTesterProvider,
+)
 
 from .empty import empty
+
+
+def is_tester_web3(web3):
+    return isinstance(web3.currentProvider, (TestRPCProvider, EthereumTesterProvider))
 
 
 def wait_for_transaction_receipt(web3, txn_hash, timeout=120, poll_interval=None):
@@ -23,7 +30,7 @@ def wait_for_block_number(web3, block_number=1, timeout=120, poll_interval=None)
 
     with gevent.Timeout(timeout):
         while web3.eth.blockNumber < block_number:
-            if isinstance(web3.currentProvider, TestRPCProvider):
+            if is_tester_web3(web3):
                 web3._requestManager.request_blocking("evm_mine", [])
                 gevent.sleep(0)
             else:

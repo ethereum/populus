@@ -43,7 +43,7 @@ def migrate(ctx, chain_name):
     if 'registrar' not in chain_config:
         # TODO: this should be a property of the chain object itself.
         # Something like `chain.is_ready_for_migrations`.
-        if chain_name not in {'testrpc', 'temp'}:
+        if chain_name not in {'tester', 'testrpc', 'temp'}:
             # ignore `testrpc` and `temp` because they lazily create their
             # registrar contracts.
             # TODO: We can present the use with the option to just initialize

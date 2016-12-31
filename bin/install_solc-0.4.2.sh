@@ -6,20 +6,11 @@
 set -e
 set -u
 
-if [ ! -e solc-versions/solidity-0.4.2/build/solc/solc ] ; then
-    wget -O solc.tar.gz "https://github.com/ethereum/solidity/archive/v0.4.2.tar.gz"
-    install -d solc-versions
-    cd solc-versions
-    tar -zxvf ../solc.tar.gz
-    cd solidity-0.4.2
-    ./scripts/install_deps.sh
-    echo "af6afb0415761b53721f89c7f65064807f41cbd3" > commit_hash.txt
-    mkdir -p build
-    cd build
-    cmake .. && make
-    ln -fs $PWD/solc/solc ../../../solc-versions/solc-0.4.2
-    chmod +x ../../../solc-versions/solc-0.4.2
-    echo "Geth installed at $PWD/solc-0.4.2"
-else
-    echo "Geth already installed at $PWD/solc/solc-0.4.2"
-fi
+mkdir -p solc-versions/solc-0.4.2
+cd solc-versions/solc-0.4.2
+git clone --recurse-submodules --branch v0.4.2 --depth 50 https://github.com/ethereum/solidity.git
+./solidity/scripts/install_deps.sh
+wget https://github.com/ethereum/solidity/releases/download/v0.4.2/solidity-ubuntu-trusty.zip
+unzip solidity-ubuntu-trusty.zip
+echo "Solidity installed at $TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2/solc"
+tree $TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2

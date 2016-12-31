@@ -15,15 +15,17 @@ from populus.utils.cli import (
         ('1\n', '~~local_b~~'),
         ('2\n', '~~local_c~~'),
         ('3\n', '~~mainnet~~'),
-        ('4\n', '~~morden~~'),
+        #('4\n', '~~morden~~'),
         ('5\n', '~~temp~~'),
-        ('6\n', '~~testrpc~~'),
+        ('6\n', '~~tester~~'),
+        ('7\n', '~~testrpc~~'),
         ('local_a\n', '~~local_a~~'),
         ('local_b\n', '~~local_b~~'),
         ('local_c\n', '~~local_c~~'),
         ('mainnet\n', '~~mainnet~~'),
-        ('morden\n', '~~morden~~'),
+        #('morden\n', '~~morden~~'),
         ('temp\n', '~~temp~~'),
+        ('tester\n', '~~tester~~'),
         ('testrpc\n', '~~testrpc~~'),
     ),
 )
@@ -38,6 +40,8 @@ def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expecte
         "[chain:mainnet]",  # 3
         "",
         "[chain:morden]",   # 4
+        "",
+        "[chain:tester]",  # 5
         "",
         "[chain:testrpc]",  # 5
     )))

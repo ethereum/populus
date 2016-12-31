@@ -5,42 +5,39 @@ dist: trusty
 sudo: required
 env:
   matrix:
-    - TOX_ENV=py27 SOLC_BINARY="$TRAVIS_BUILD_DIR/solc-versions/solc-0.3.6/solc"
-    - TOX_ENV=py34 SOLC_BINARY="$TRAVIS_BUILD_DIR/solc-versions/solc-0.3.6/solc"
-    - TOX_ENV=py35 SOLC_BINARY="$TRAVIS_BUILD_DIR/solc-versions/solc-0.3.6/solc"
-    - TOX_ENV=py35 SOLC_BINARY="$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1/solc"
-    - TOX_ENV=py35 SOLC_BINARY="$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2/solc"
-    - TOX_ENV=flake8
+    # Solc 0.4.6 py35
+    - TOX_ENV=py27 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    # Solc 0.4.6 py34
+    - TOX_ENV=py34 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    # Solc 0.4.6 py35
+    - TOX_ENV=py35 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    # Solc 0.4.1 py35
+    - TOX_ENV=py35 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.1.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1
+    # Solc 0.4.2 py35
+    - TOX_ENV=py35 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.2.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2
+    - TOX_ENV=flake8 SOLC_BINARY=ls SOLC_INSTALL_SCRIPT=/bin/ls
   global:
     - CHAIN_SYNC_BLOCK_DELTA=100
 cache:
   - pip: true
   - directories:
-    - $TRAVIS_BUILD_DIR/solc-versions/solc-0.3.6
-    - $TRAVIS_BUILD_DIR/solc-versions/solidity-0.3.6/build
-    - $TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1
-    - $TRAVIS_BUILD_DIR/solc-versions/solidity-0.4.1/build
-    - $TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2
-    - $TRAVIS_BUILD_DIR/solc-versions/solidity-0.4.2/build
     - $HOME/.ethash/
+    - $TRAVIS_BUILD_DIR/.tox
 before_install:
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
 install:
-  - ./bin/install_solc-0.3.6.sh
-  - ./bin/install_solc-0.4.1.sh
-  - ./bin/install_solc-0.4.2.sh
+  - sudo apt-get install -y tree unzip
+  - /.$SOLC_INSTALL_SCRIPT
   - travis_retry sudo apt-get install -y ethereum
   - travis_retry pip install setuptools --upgrade
   - travis_retry pip install tox
 before_script:
-  - ./solc-versions/solc-0.3.6/solc --version
-  - ./solc-versions/solc-0.4.1/solc --version
-  - ./solc-versions/solc-0.4.2/solc --version
+  - $SOLC_BINARY --version
   - mkdir -p $HOME/.ethash
   - geth makedag 0 $HOME/.ethash
 script:
   - env
-  - tox -e $TOX_ENV --recreate
+  - tox -e $TOX_ENV
 after_script:
   - cat .tox/$TOX_ENV/log/*.log

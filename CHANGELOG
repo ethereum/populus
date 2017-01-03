@@ -1,3 +1,9 @@
+1.4.2
+-----
+
+- Upstream version bumps for web3 and ethtestrpc
+- Change to use new web3.providers.tester.EthereumTesterProvider for test fixtures.
+
 1.4.1
 -----
 

@@ -9,4 +9,4 @@ pylru>=1.0.9
 pysha3>=0.3
 pytest>=2.7.2
 toposort>=1.4
-web3>=3.4.0
+web3>=3.4.4

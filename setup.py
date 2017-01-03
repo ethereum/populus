@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 import os
 
-DIR = os.path.dirname(os.path.abspath(__file__))
-
 from setuptools import setup, find_packages
+
+
+DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 readme = open(os.path.join(DIR, 'README.md')).read()
@@ -12,7 +13,7 @@ readme = open(os.path.join(DIR, 'README.md')).read()
 
 setup(
     name='populus',
-    version="1.4.1",
+    version="1.4.2",
     description="""Ethereum Development Framework""",
     long_description=readme,
     author='Piper Merriam',
@@ -32,7 +33,7 @@ setup(
         "pysha3>=0.3",
         "pytest>=2.7.2",
         "toposort>=1.4",
-        "web3>=3.4.0",
+        "web3>=3.4.4",
     ],
     license="MIT",
     zip_safe=False,

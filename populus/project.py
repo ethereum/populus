@@ -163,7 +163,7 @@ class Project(object):
     @cast_return_to_ordered_dict
     def get_package_backend_config(self):
         package_backend_config = self.config.get_config('packaging.backends')
-        return sort_prioritized_configs(package_backend_config)
+        return sort_prioritized_configs(package_backend_config, self.config)
 
     @cached_property
     @cast_return_to_ordered_dict

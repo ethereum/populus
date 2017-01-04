@@ -7,7 +7,7 @@ import click
 from .accounts import (
     is_account_locked,
 )
-from .chains import (
+from .geth import (
     get_data_dir as get_local_chain_datadir,
     get_geth_ipc_path,
 )
@@ -21,10 +21,10 @@ from .compat import (
 
 from populus.compilation import (
     compile_project_contracts,
+    write_compiled_sources,
 )
 from populus.config import (
     Config,
-    write_compiled_sources,
 )
 
 
@@ -499,7 +499,7 @@ def compile_contracts(project, optimize=True):
 
 
 def watch_project_contracts(project, **compile_kwargs):
-    watcher = DirWatcher(project.contracts_dir)
+    watcher = DirWatcher(project.contracts_source_dir)
 
     def callback(file_path, event_name):
         if event_name in {'modified', 'created'}:

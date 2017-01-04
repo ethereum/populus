@@ -6,8 +6,8 @@ from populus.utils.packaging import (
     find_solidity_source_files,
     find_package_source_files,
     find_installed_package_locations,
-    extract_dependency_name_from_package_base_dir,
-    recursive_find_installed_package_base_dirs,
+    extract_dependency_name_from_base_dir,
+    recursive_find_installed_dependency_base_dirs,
 )
 from populus.utils.functional import (
     compose,
@@ -59,9 +59,9 @@ def compute_project_compilation_arguments(contracts_source_dir, root_installed_p
     # by regex.
     project_installed_package_locations = dict(
         (
-            extract_dependency_name_from_package_base_dir(package_base_dir),
-            package_base_dir,
-        ) for package_base_dir
+            extract_dependency_name_from_base_dir(dependency_base_dir),
+            dependency_base_dir,
+        ) for dependency_base_dir
         in find_installed_package_locations(root_installed_packages_dir)
     )
 
@@ -70,17 +70,17 @@ def compute_project_compilation_arguments(contracts_source_dir, root_installed_p
         project_installed_package_locations,
     )
 
-    all_installed_package_base_dirs = recursive_find_installed_package_base_dirs(
+    all_installed_dependency_base_dirs = recursive_find_installed_dependency_base_dirs(
         root_installed_packages_dir,
     )
 
-    if all_installed_package_base_dirs:
+    if all_installed_dependency_base_dirs:
         package_source_paths, package_import_remappings = map(
             compose(itertools.chain.from_iterable, tuple),
             zip(*(
-                compute_installed_package_compilation_arguments(package_base_dir)
-                for package_base_dir
-                in all_installed_package_base_dirs
+                compute_installed_package_compilation_arguments(dependency_base_dir)
+                for dependency_base_dir
+                in all_installed_dependency_base_dirs
             )),
         )
     else:
@@ -94,9 +94,9 @@ def compute_project_compilation_arguments(contracts_source_dir, root_installed_p
     return project_source_paths, package_source_paths, all_import_remappings
 
 
-def compute_installed_package_compilation_arguments(package_base_dir):
-    package_source_paths = find_package_source_files(package_base_dir)
-    package_installed_packages_dir = get_installed_packages_dir(package_base_dir)
+def compute_installed_package_compilation_arguments(dependency_base_dir):
+    package_source_paths = find_package_source_files(dependency_base_dir)
+    package_installed_packages_dir = get_installed_packages_dir(dependency_base_dir)
 
     if not os.path.exists(package_installed_packages_dir):
         package_installed_package_locations = {}

@@ -14,10 +14,10 @@ from populus.utils.filesystem import (
 )
 from populus.utils.packaging import (
     get_installed_packages_dir,
-    get_package_base_dir,
+    get_dependency_base_dir,
     get_release_lockfile_path,
     get_root_identifier_lockfile_path,
-    get_resolved_identifier_lockfile_path,
+    get_translated_identifier_lockfile_path,
     compute_translated_identifier_tree,
     flatten_translated_identifier_tree,
     recursively_resolve_package_data,
@@ -81,13 +81,13 @@ def write_package_files(installed_packages_dir, package_data):
         dependency_name = package_meta['dependency_name']
 
         # Compute the location the package should be installed to.
-        package_base_dir = get_package_base_dir(
+        dependency_base_dir = get_dependency_base_dir(
             installed_packages_dir,
             dependency_name,
         )
 
         # Setup a temporary location to write files.
-        temp_install_location = get_package_base_dir(
+        temp_install_location = get_dependency_base_dir(
             temporary_dir,
             dependency_name,
         )
@@ -121,16 +121,16 @@ def write_package_files(installed_packages_dir, package_data):
         with open(root_identifier_lockfile_path, 'w') as root_identifier_lockfile_file:
             root_identifier_lockfile_file.write(package_meta['root_identifier'])
 
-        # Write the `resolved_identifier.lock` lockfile
-        resolved_identifier_lockfile_path = get_resolved_identifier_lockfile_path(
+        # Write the `translated_identifier.lock` lockfile
+        translated_identifier_lockfile_path = get_translated_identifier_lockfile_path(
             temp_install_location,
         )
-        with open(resolved_identifier_lockfile_path, 'w') as resolved_identifier_lockfile_file:
-            resolved_identifier_lockfile_file.write(package_meta['resolved_identifier'])
+        with open(translated_identifier_lockfile_path, 'w') as translated_identifier_lockfile_file:
+            translated_identifier_lockfile_file.write(package_meta['translated_identifier'])
 
         # Now recursively write dependency packages.
         installed_packages_dir_for_dependencies = get_installed_packages_dir(
-            package_base_dir,
+            dependency_base_dir,
         )
         write_installed_packages(
             installed_packages_dir_for_dependencies,
@@ -139,5 +139,5 @@ def write_package_files(installed_packages_dir, package_data):
 
         # Upon successful writing of all dependencies move the fully installed
         # package dir to the real installed_packages location.
-        remove_dir_if_exists(package_base_dir)
-        shutil.move(temp_install_location, package_base_dir)
+        remove_dir_if_exists(dependency_base_dir)
+        shutil.move(temp_install_location, dependency_base_dir)

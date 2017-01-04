@@ -55,10 +55,28 @@ def setup_web3_from_config(web3_config):
     return web3
 
 
+BLOCK_OR_TRANSACTION_HASH_REGEX = "^(?:0x)?[a-zA-Z0-9]{64}$"
+
+
+def is_block_or_transaction_hash(value):
+    return bool(re.match(BLOCK_OR_TRANSACTION_HASH_REGEX, value))
+
+
+BLOCK = 'block'
+TRANSACTION = 'transaction'
+
+
 def create_BIP122_uri(chain_id, resource_type, resource_identifier):
     """
     See: https://github.com/bitcoin/bips/blob/master/bip-0122.mediawiki
     """
+    if resource_type not in {BLOCK, TRANSACTION}:
+        raise ValueError("Invalid resource_type.  Must be one of 'block' or 'transaction'")
+    elif not is_block_or_transaction_hash(resource_identifier):
+        raise ValueError("Invalid resource_identifier.  Must be a hex encoded 32 byte value")
+    elif not is_block_or_transaction_hash(chain_id):
+        raise ValueError("Invalid chain_id.  Must be a hex encoded 32 byte value")
+
     return parse.urlunsplit([
         'blockchain',
         remove_0x_prefix(chain_id),
@@ -119,10 +137,6 @@ def parse_BIP122_uri(blockchain_uri):
         resource_type,
         add_0x_prefix(resource_hash),
     )
-
-
-BLOCK = 'block'
-TRANSACTION = 'transaction'
 
 
 def is_BIP122_block_uri(value):

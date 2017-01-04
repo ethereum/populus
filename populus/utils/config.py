@@ -173,6 +173,15 @@ def get_nested_key(config, key):
     return getter_fn(config)
 
 
+def has_nested_key(config, key):
+    try:
+        get_nested_key(config, key)
+    except KeyError:
+        return False
+    else:
+        return True
+
+
 def pop_nested_key(config, key):
     key_head, _, key_tail = key.rpartition('.')
 

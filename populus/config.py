@@ -13,6 +13,7 @@ from populus.utils.chains import (
 )
 from populus.utils.config import (
     get_nested_key,
+    has_nested_key,
     set_nested_key,
     pop_nested_key,
     get_empty_config,
@@ -187,20 +188,29 @@ def set_geth_ropsten_ipc_path(config):
 
 
 POPULUS_CONFIG_DEFAULTS = {
-    ('compilation', 'compilation.config.json', anyconfig.MS_DICTS),
+    #
+    # Chains
+    #
+    # Temp Geth Chains
+    ('chains.temp.web3',),
+    ('chains.temp.contracts.backends',),
     # Mainnet
-    ('chains.mainnet.web3', 'chains.mainnet.web3.config.json'),
+    ('chains.mainnet.web3',),
+    ('chains.mainnet.contracts.backends',),
     # Ropsten
-    ('chains.ropsten.web3', 'chains.ropsten.web3.config.json'),
+    ('chains.ropsten.web3',),
+    ('chains.ropsten.contracts.backends',),
     # TestRPC
-    ('chains.testrpc.web3', 'chains.testrpc.web3.config.json'),
+    ('chains.testrpc.web3',),
+    ('chains.testrpc.contracts.backends',),
     # Tester
-    ('chains.tester.web3', 'chains.tester.web3.config.json'),
-    # Temp
-    ('chains.temp.web3', 'chains.temp.web3.config.json'),
-    # Web3 Configs
-    ('web3.InfuraRopsten', 'web3.InfuraRopsten.config.json'),
-    ('web3.InfuraMainnet', 'web3.InfuraMainnet.config.json'),
+    ('chains.tester.web3',),
+    ('chains.tester.contracts.backends',),
+    #
+    # Web3 Presets
+    #
+    ('web3.InfuraRopsten',),
+    ('web3.InfuraMainnet',),
     (
         'web3.GethMainnet',
         'web3.GethMainnet.config.json',
@@ -213,20 +223,21 @@ POPULUS_CONFIG_DEFAULTS = {
         anyconfig.MS_NO_REPLACE,
         set_geth_ropsten_ipc_path,
     ),
-    (
-        'web3.GethEphemeral',
-        'web3.GethEphemeral.config.json',
-        anyconfig.MS_NO_REPLACE,
-    ),
-    ('web3.TestRPC', 'web3.TestRPC.config.json'),
-    ('web3.Tester', 'web3.Tester.config.json'),
+    ('web3.GethEphemeral',),
+    ('web3.TestRPC',),
+    ('web3.Tester',),
 }
 
 
 @cast_return_to_tuple
 def load_default_config_info(config_defaults=POPULUS_CONFIG_DEFAULTS):
     for config_value in config_defaults:
-        if len(config_value) == 2:
+        if len(config_value) == 1:
+            write_path = config_value[0]
+            config_file_name = "{0}.config.json".format(write_path)
+            merge_strategy = anyconfig.MS_NO_REPLACE
+            callback = None
+        elif len(config_value) == 2:
             write_path, config_file_name = config_value
             merge_strategy = anyconfig.MS_NO_REPLACE
             callback = None
@@ -253,10 +264,8 @@ def apply_default_configs(config, default_configs):
     merged_config = copy.deepcopy(config)
 
     for write_path, default_config, merge_strategy in default_configs:
-        if write_path not in merged_config:
-            set_nested_key(merged_config, write_path, default_config)
-        else:
-            sub_config = copy.deepcopy(merged_config[write_path])
+        if has_nested_key(merged_config, write_path):
+            sub_config = copy.deepcopy(get_nested_key(merged_config, write_path))
             sub_config_with_merge_rules = anyconfig.to_container(
                 sub_config,
                 ac_merge=merge_strategy,
@@ -264,6 +273,8 @@ def apply_default_configs(config, default_configs):
             sub_config_with_merge_rules.update(default_config)
 
             set_nested_key(merged_config, write_path, sub_config_with_merge_rules)
+        else:
+            set_nested_key(merged_config, write_path, default_config)
 
     return merged_config
 

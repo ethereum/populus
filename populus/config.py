@@ -18,6 +18,7 @@ from populus.utils.config import (
     get_empty_config,
     flatten_config_items,
     get_ini_config_file_path,
+    resolve_config,
 )
 
 
@@ -26,7 +27,12 @@ class empty(object):
 
 
 class Config(object):
-    def __init__(self, config=None, default_config_info=None):
+    parent = None
+    default_config_info = None
+    config_for_read = None
+    config_for_write = None
+
+    def __init__(self, config=None, default_config_info=None, parent=None):
         if config is None:
             config = get_empty_config()
         else:
@@ -41,6 +47,18 @@ class Config(object):
             self.default_config_info,
         )
 
+    def get_master_config(self):
+        if self.parent is None:
+            return self
+        else:
+            return self.parent.get_master_config()
+
+    def resolve(self, value):
+        if isinstance(value, dict):
+            return resolve_config(value, self.get_master_config())
+        else:
+            return value
+
     def get(self, key, default=None):
         try:
             return get_nested_key(self.config_for_read, key)
@@ -49,9 +67,9 @@ class Config(object):
 
     def get_config(self, key, defaults=None):
         try:
-            return type(self)(self[key], defaults)
+            return type(self)(self.resolve(self[key]), defaults, parent=self)
         except KeyError:
-            return type(self)(get_empty_config(), defaults)
+            return type(self)(get_empty_config(), defaults, parent=self)
 
     def pop(self, key, default=empty):
         try:
@@ -133,6 +151,9 @@ class Config(object):
             return False
         else:
             return True
+
+    def __iter__(self):
+        return iter(self.keys())
 
     def __copy__(self):
         return type(self)(

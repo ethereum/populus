@@ -92,7 +92,7 @@ def test_project_local_chain_ipc(project_dir):
 @flaky
 def test_project_local_chain_rpc(project_dir):
     project = Project()
-    project.config['chains.local.web3.provider.class'] = 'web3.providers.ipc.RPCProvider'
+    project.config['chains.local.web3.provider.class'] = 'web3.providers.rpc.RPCProvider'
     project.write_config()
 
     chain = project.get_chain('local')

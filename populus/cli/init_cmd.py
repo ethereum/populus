@@ -62,6 +62,8 @@ def init(ctx):
         project_config_file_path = get_default_project_config_file_path(
             project.project_dir,
         )
+    else:
+        project_config_file_path = project.config_file_path
 
     if not os.path.exists(project_config_file_path):
         ensure_file_exists(project_config_file_path)

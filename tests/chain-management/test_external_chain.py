@@ -32,7 +32,7 @@ def test_external_ipc_chain(project_dir, write_project_file):
 
         project.config['chains.external.is_external'] = True
         project.config['chains.external.registrar'] = registrar.address
-        project.config['chains.external.web3.provider.class'] = 'web3.providers.rpc.IPCProvider'
+        project.config['chains.external.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
         project.config['chains.external.web3.provider.settings.ipc_path'] = chain.geth.ipc_path
         project.write_config()
 

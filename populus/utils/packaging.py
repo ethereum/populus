@@ -707,6 +707,21 @@ def find_installed_package_locations(installed_packages_dir):
                 yield dependency_base_dir
 
 
+@cast_return_to_tuple
+def recursive_find_installed_dependency_base_dirs(installed_packages_dir):
+    """
+    Return a tuple of all filesystem paths directly under the given
+    `installed_packages_dir` that look like dependency base dirs including all
+    sub dependencies.
+    """
+    installed_package_locations = find_installed_package_locations(installed_packages_dir)
+    for package_base_dir in installed_package_locations:
+        yield package_base_dir
+        sub_base_dirs = recursive_find_installed_dependency_base_dirs(package_base_dir)
+        for sub_package_base_dir in sub_base_dirs:
+            yield sub_package_base_dir
+
+
 @cast_return_to_dict
 def extract_build_dependendencies_from_installed_packages(installed_packages_dir):
     """

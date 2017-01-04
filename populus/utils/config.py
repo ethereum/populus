@@ -203,9 +203,12 @@ def pop_nested_key(config, key):
 @cast_return_to_ordered_dict
 def sort_prioritized_configs(backend_configs, master_config):
     resolved_backend_configs = tuple(
-        (backend_name, resolve_config(config, master_config))
-        for backend_name, config
-        in backend_configs.items()
+        (
+            backend_name,
+            resolve_config(backend_configs.get_config(backend_name), master_config),
+        )
+        for backend_name
+        in backend_configs
     )
     backends_with_conflicting_priorities = tuple((
         backend_name

@@ -9,7 +9,7 @@ import gevent
 from .accounts import (
     is_account_locked,
 )
-from .chains import (
+from .geth import (
     get_data_dir as get_local_chain_datadir,
     get_geth_ipc_path,
 )
@@ -19,6 +19,8 @@ from populus.observers import (
 )
 from populus.config import (
     Config,
+)
+from populus.compilation import (
     compile_project_contracts,
     write_compiled_sources,
 )
@@ -496,7 +498,7 @@ def compile_contracts(project, optimize=True):
 
 def watch_project_contracts(chain, **compile_kwargs):
     project = chain.project
-    watcher = DirWatcher(project.contracts_dir)
+    watcher = DirWatcher(project.contracts_source_dir)
 
     last_hash = project.get_source_file_hash()
 

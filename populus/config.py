@@ -196,10 +196,16 @@ POPULUS_CONFIG_DEFAULTS = {
     #
     ('compilation', 'compilation.config.json', anyconfig.MS_DICTS),
     #
-    # Packaging
+    # Contract Backends
     #
-    ('packaging.backends', 'packaging.backends.config.json'),
-    ('packaging.publishing', 'packaging.backends.config.json'),
+    ('contracts.backends.InstalledPackages',),
+    ('contracts.backends.JSONFile',),
+    ('contracts.backends.Memory',),
+    # Packaging
+    ('packaging.backends.LocalManifestBackend',),
+    ('packaging.backends.LocalFilesystemLockfileBackend',),
+    ('packaging.backends.IPFSBackend',),
+    ('packaging.backends.RopstenPackageIndexBackend',),
     #
     # Chains
     #

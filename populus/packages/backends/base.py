@@ -66,14 +66,14 @@ class BasePackageBackend(object):
         """
         raise NotImplementedError("Must be implemented by subclasses")
 
-    def can_publish_release_lockfile(self, release_lockfile):
+    def can_publish_release_lockfile(self, release_lockfile, release_lockfile_uri):
         """
         Returns `True` or `False` as to whether this backend can publish this
         release lockfile.
         """
         return False
 
-    def publish_release_lockfile(self, release_lockfile):
+    def publish_release_lockfile(self, release_lockfile, release_lockfile_uri):
         """
         Publishes the release lockfile.
         """

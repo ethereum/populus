@@ -46,7 +46,7 @@ class IPFSPackageBackend(BasePackageBackend):
             return True
         return False
 
-    def resolve_package_release_lockfile(self, package_identifier):
+    def resolve_to_release_lockfile(self, package_identifier):
         ipfs_path = extract_ipfs_path_from_uri(package_identifier)
         lockfile_contents = self.ipfs_client.cat(ipfs_path)
         release_lockfile = json.loads(force_text(lockfile_contents))

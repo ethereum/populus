@@ -281,8 +281,8 @@ def is_exact_version(value):
 
 def is_local_project_package_identifier(project_dir, package_identifier):
     """
-    Returns boolean whether the value is the path to the manifest file for the
-    current project.
+    Returns boolean whether the value is the filesystem path to this project
+    directory.
     """
     if not os.path.exists(package_identifier):
         return False
@@ -338,6 +338,9 @@ def parse_package_identifier(value):
     comparison and the version number for that comparison.  Both
     version_comparison and version may be `None`
     """
+    if is_aliased_package_identifier(value):
+        _, _, value = value.partition(':')
+
     match = re.match(PACKAGE_IDENTIFIER_REGEX, value)
     if match is None:
         raise ValueError("Unsupported package identifier format: {0}".format(value))
@@ -373,6 +376,22 @@ def construct_package_identifier(dependency_name, dependency_identifier):
             )
     else:
         raise ValueError("Unsupported Identifier: '{0}'".format(dependency_identifier))
+
+
+def construct_dependency_identifier(dependency_name, root_identifier, translated_identifier):
+    if is_direct_package_identifier(root_identifier):
+        package_name, comparison, version = parse_package_identifier(root_identifier)
+        if package_name == dependency_name:
+            if comparison == '==':
+                return version
+            else:
+                return ''.join((comparison, version))
+        else:
+            return root_identifier
+    elif is_ipfs_uri(root_identifier):
+        return root_identifier
+    else:
+        raise ValueError("Unsupported root identifier: {0}".format(root_identifier))
 
 
 def extract_dependency_name_from_identifier_lineage(package_identifier_lineage,
@@ -422,12 +441,10 @@ def extract_root_identifier(package_identifier_lineage):
     """
     for identifier in package_identifier_lineage:
         if is_package_name(identifier):
-            return identifier
+            continue
         elif is_direct_package_identifier(identifier):
             return identifier
         elif is_ipfs_uri(identifier):
-            return identifier
-        elif is_filesystem_release_lockfile_path(identifier):
             return identifier
     else:
         raise ValueError("No valid root identifiers found in package identifier lineage")
@@ -653,7 +670,7 @@ def filter_versions(comparison, version_target, all_versions):
         version
         for version
         in all_versions
-        if is_version_match(version, version_target)
+        if is_version_match(version, comparison, version_target)
     }
 
 

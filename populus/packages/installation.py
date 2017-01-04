@@ -21,10 +21,11 @@ from populus.utils.packaging import (
     compute_translated_identifier_tree,
     flatten_translated_identifier_tree,
     recursively_resolve_package_data,
+    construct_dependency_identifier,
 )
 
 
-def install_project_packages(project, package_identifiers):
+def install_project_dependencies(project, package_identifiers):
     """
     1. Recursively resolve all dependencies.
     2. Filter out any dependencies that are already met.
@@ -141,3 +142,35 @@ def write_package_files(installed_packages_dir, package_data):
         # package dir to the real installed_packages location.
         remove_dir_if_exists(dependency_base_dir)
         shutil.move(temp_install_location, dependency_base_dir)
+
+
+def update_project_dependencies(project, installed_dependencies):
+    if not project.has_package_manifest:
+        raise ValueError("Cannot update dependencies on project without manifest")
+
+    package_manifest = project.package_manifest
+    package_manifest.setdefault('dependencies', {})
+
+    for package_data in installed_dependencies:
+        package_meta = package_data['meta']
+
+        dependency_name = package_meta['dependency_name']
+        root_identifier = package_meta['root_identifier']
+        translated_identifier = package_meta['translated_identifier']
+
+        dependency_identifier = construct_dependency_identifier(
+            dependency_name,
+            root_identifier,
+            translated_identifier,
+        )
+
+        package_manifest['dependencies'][dependency_name] = dependency_identifier
+
+    with open(project.package_manifest_path, 'w') as package_manifest_file:
+        json.dump(
+            package_manifest,
+            package_manifest_file,
+            sort_keys=True,
+            indent=2,
+            separators=(',', ': '),
+        )

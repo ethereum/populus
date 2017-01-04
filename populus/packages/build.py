@@ -1,10 +1,12 @@
 import os
+import itertools
 
 from populus.utils.linking import (
     find_link_references,
 )
 from populus.utils.functional import (
     cast_return_to_dict,
+    cast_return_to_ordered_dict,
 )
 from populus.utils.chains import (
     get_chain_definition,
@@ -74,7 +76,7 @@ def build_base_release_lockfile_data(project):
         build_dependencies = {
             dependency_name: dependency_identifier
             for dependency_name, dependency_identifier
-            in installed_dependencies
+            in installed_dependencies.items()
             if dependency_name in project.dependencies
         }
         # TODO: if a dependency was installed directly via an IPFS URI then it
@@ -176,10 +178,11 @@ def construct_contract_type_object(project,
         yield 'abi', contract_data['abi']
 
     if 'userdoc' or 'devdoc' in contract_data:
-        natspec = dict(
-            **contract_data.get('userdoc', {}),
-            **contract_data.get('devdoc', {})
-        )
+        # TODO: this needs to be a deep merge.
+        natspec = dict(itertools.chain(
+            contract_data.get('userdoc', {}).items(),
+            contract_data.get('devdoc', {}).items(),
+        ))
         yield 'natspec', natspec
 
     if 'runtime_bytecode' in contract_data or 'bytecode' in contract_data:
@@ -191,3 +194,10 @@ def construct_contract_type_object(project,
             },
         }
         yield 'compiler', compiler_info
+
+
+@cast_return_to_ordered_dict
+def get_publishable_backends(release_lockfile, release_lockfile_uri, package_backends):
+    for backend_name, backend in package_backends.items():
+        if backend.can_publish_release_lockfile(release_lockfile, release_lockfile_uri):
+            yield backend_name, backend

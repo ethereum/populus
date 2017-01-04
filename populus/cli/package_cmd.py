@@ -9,15 +9,19 @@ from populus.utils.packaging import (
     SUPPORTED_PACKAGE_MANIFEST_VERSIONS,
     validate_package_manifest,
     get_lockfile_build_path,
+    validate_release_lockfile,
 )
 
 from populus.packages.build import (
     build_base_release_lockfile_data,
     construct_deployments_object,
     construct_contract_type_object,
+    persist_package_file,
+    get_publishable_backends,
 )
 from populus.packages.installation import (
-    install_project_packages,
+    install_project_dependencies,
+    update_project_dependencies,
 )
 
 from .main import main
@@ -140,14 +144,13 @@ def package_install(ctx, package_identifiers, save):
     if not package_identifiers:
         package_identifiers = ('.',)
 
-    packages_installed = install_project_packages(project, package_identifiers)
+    installed_dependencies = install_project_dependencies(project, package_identifiers)
     click.echo("Installed Packages: {0}".format(', '.join((
-        package_data['meta']['package_name'] for package_data in packages_installed
+        package_data['meta']['package_name'] for package_data in installed_dependencies
     ))))
 
     if save:
-        # TODO: save this to the `epm.json` file.
-        pass
+        update_project_dependencies(project, installed_dependencies)
 
 
 @package_cmd.command('build')
@@ -297,21 +300,46 @@ def package_build(ctx,
 
 
 @package_cmd.command('publish')
-@click.option(
-    '--release-lockfile',
-    '-f',
+@click.argument(
+    'release_lockfile_path',
     type=click.Path(
         exists=True,
         file_okay=True,
         dir_okay=False,
     ),
+    nargs=1,
 )
 @click.option('--wait-for-sync/--no-wait-for-sync', default=True)
 @click.pass_context
-def package_publish(ctx):
+def package_publish(ctx, release_lockfile_path, wait_for_sync):
     """
     Create a release.
     """
     project = ctx.obj['PROJECT']
 
-    assert False
+    if release_lockfile_path is None:
+        # TODO: select from `./build` dir
+        raise NotImplementedError("Not implemented")
+
+    with open(release_lockfile_path) as release_lockfile_file:
+        release_lockfile = json.load(release_lockfile_file)
+
+    validate_release_lockfile(release_lockfile)
+
+    package_backends = project.package_backends
+
+    release_lockfile_uri = persist_package_file(release_lockfile_path, package_backends)
+    publishable_backends = get_publishable_backends(
+        release_lockfile,
+        release_lockfile_uri,
+        package_backends,
+    )
+
+    if not publishable_backends:
+        raise ValueError("TODO: handle this gracefully")
+    elif len(publishable_backends) > 1:
+        raise ValueError("TODO: handle this gracefully")
+    else:
+        backend_name, backend = tuple(publishable_backends.items())[0]
+        click.echo("Publishing to {0}".format(backend_name))
+        backend.publish_release_lockfile(release_lockfile, release_lockfile_uri)

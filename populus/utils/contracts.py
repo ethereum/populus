@@ -1,5 +1,6 @@
 import itertools
 import os
+import re
 
 from web3.utils.types import (
     is_string,
@@ -78,3 +79,10 @@ def get_recursive_contract_dependencies(contract_name, dependency_graph):
         for dep in direct_dependencies
     ))
     return set(itertools.chain(direct_dependencies, sub_dependencies))
+
+
+CONTRACT_NAME_REGEX = '^[_a-zA-Z][_a-zA-Z0-9]*$'
+
+
+def is_contract_name(value):
+    return bool(re.match(CONTRACT_NAME_REGEX, value))

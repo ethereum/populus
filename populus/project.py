@@ -8,7 +8,7 @@ from populus.utils.filesystem import (
 from populus.utils.packaging import (
     get_project_package_manifest_path,
     get_installed_packages_dir,
-    extract_dependency_name_from_package_base_dir,
+    extract_dependency_name_from_base_dir,
     find_installed_package_locations,
 )
 from populus.utils.config import (
@@ -151,10 +151,10 @@ class Project(object):
     @property
     @cast_return_to_dict
     def installed_package_locations(self):
-        for package_base_dir in find_installed_package_locations(self.installed_packages_dir):
+        for dependency_base_dir in find_installed_package_locations(self.installed_packages_dir):
             yield (
-                extract_dependency_name_from_package_base_dir(package_base_dir),
-                package_base_dir,
+                extract_dependency_name_from_base_dir(dependency_base_dir),
+                dependency_base_dir,
             )
 
     #

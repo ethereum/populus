@@ -17,8 +17,6 @@ from populus.utils.config import (
     pop_nested_key,
     get_empty_config,
     flatten_config_items,
-    find_project_config_file_path,
-    get_default_project_config_file_path,
     get_ini_config_file_path,
 )
 
@@ -254,16 +252,8 @@ def load_config(config_file_path):
     return config
 
 
-def write_config(project_dir, config, write_path=None):
-    if write_path is None:
-        try:
-            write_path = find_project_config_file_path(project_dir)
-        except ValueError:
-            write_path = get_default_project_config_file_path(project_dir)
-
-    ini_config_file_path = get_ini_config_file_path(project_dir)
-
-    if write_path == ini_config_file_path:
+def write_config(project_dir, config, write_path):
+    if write_path == get_ini_config_file_path(project_dir):
         raise ValueError(
             "The INI configuration format has been deprecated.  Please convert "
             "your configuration file to either `populus.yml` or `populus.json`"

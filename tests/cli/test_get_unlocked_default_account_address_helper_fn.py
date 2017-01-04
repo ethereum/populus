@@ -77,7 +77,9 @@ def test_helper_fn_with_unlocked_pre_configured_account(local_chain):
         expected = "~~{0}~~".format(web3.eth.coinbase)
         assert expected in result.output
 
+        print("Before ARST:", project.config)
         project.reload_config()
+        print("After ARST:", project.config)
         assert project.config['chains.local.web3.eth.default_account'] == web3.eth.coinbase
 
 

@@ -16,6 +16,10 @@ from populus.utils.chains import (
     get_geth_ipc_path,
     get_nodekey_path,
 )
+from populus.utils.config import (
+    get_default_project_config_file_path,
+    find_project_config_file_path,
+)
 
 from populus.migrations.migration import (
     sort_migrations,
@@ -31,7 +35,6 @@ from populus.compilation import (
 from populus.config import (
     load_config as _load_config,
     write_config as _write_config,
-    find_project_config_file_path,
     load_default_config_info,
     Config,
 )
@@ -64,12 +67,19 @@ class Project(object):
     _project_config = None
     _default_config_info = None
 
-    def write_config(self, write_path=None):
-        return _write_config(
+    def write_config(self):
+        if self.config_file_path is None:
+            config_file_path = get_default_project_config_file_path(self.project_dir)
+        else:
+            config_file_path = self.config_file_path
+
+        self.config_file_path = _write_config(
             self.project_dir,
             self.config.config_for_write,
-            write_path=write_path,
+            write_path=config_file_path,
         )
+
+        return self.config_file_path
 
     def load_config(self):
         self._config_cache = None

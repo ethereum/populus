@@ -14,6 +14,7 @@ from .accounts import (
 )
 from .chains import (
     get_data_dir as get_local_chain_datadir,
+    get_geth_ipc_path,
 )
 
 from populus.observers import (
@@ -171,9 +172,8 @@ def configure_chain(project, chain_name):
             ipc_path = click.prompt(ipc_path_msg)
             chain_config['web3.providers.settings.ipc_path'] = ipc_path
         elif chain_name not in {"mainnet", "ropsten"}:
-            chain_config['web3.providers.settings.ipc_path'] = get_local_chain_datadir(
-                project.project_dir,
-                chain_name,
+            chain_config['web3.providers.settings.ipc_path'] = get_geth_ipc_path(
+                get_local_chain_datadir(project.project_dir, chain_name),
             )
     elif chain_config['web3.provider.class'] == 'web3.providers.rpc.RPCProvider':
         custom_rpc_host = (
@@ -214,9 +214,7 @@ def configure_chain(project, chain_name):
             default_account_key = 'chains.{0}.web3.eth.default_account'.format(chain_name)
             project.config[default_account_key] = default_account
 
-    click.echo(
-        "Writing configuration to {0} ...".format(project.primary_config_file_path)
-    )
+    click.echo("Writing project configuration ...")
     project.write_config()
     click.echo("Success!")
 

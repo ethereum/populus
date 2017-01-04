@@ -95,7 +95,7 @@ def test_project_local_chain_rpc(project_dir):
     project.config['chains.local.web3.provider.class'] = 'web3.providers.ipc.RPCProvider'
     project.write_config()
 
-    chain = project.get_chain('custom-chain')
+    chain = project.get_chain('local')
 
     with chain as running_local_chain:
         web3 = running_local_chain.web3

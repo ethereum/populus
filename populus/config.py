@@ -71,6 +71,13 @@ class Config(object):
 
         return value
 
+    def setdefault(self, key, value):
+        try:
+            return self[key]
+        except KeyError:
+            self[key] = value
+            return value
+
     @cast_return_to_tuple
     def keys(self, flatten=False):
         for key, _ in self.items(flatten=flatten):
@@ -87,9 +94,11 @@ class Config(object):
 
     def update(self, other, **kwargs):
         if isinstance(other, type(self)):
-            other = other.config_for_read
-        self.config_for_write.update(copy.deepcopy(other), **kwargs)
-        self.config_for_read.update(copy.deepcopy(other), **kwargs)
+            self.config_for_read.update(copy.deepcopy(other.config_for_read), **kwargs)
+            self.config_for_write.update(copy.deepcopy(other.config_for_write), **kwargs)
+        else:
+            self.config_for_read.update(copy.deepcopy(other), **kwargs)
+            self.config_for_write.update(copy.deepcopy(other), **kwargs)
 
     def __str__(self):
         return str(self.config_for_read)
@@ -112,8 +121,12 @@ class Config(object):
         return get_nested_key(self.config_for_read, key)
 
     def __setitem__(self, key, value):
-        set_nested_key(self.config_for_read, key, value)
-        return set_nested_key(self.config_for_write, key, value)
+        if isinstance(value, type(self)):
+            set_nested_key(self.config_for_read, key, value.config_for_read)
+            return set_nested_key(self.config_for_write, key, value.config_for_write)
+        else:
+            set_nested_key(self.config_for_read, key, value)
+            return set_nested_key(self.config_for_write, key, value)
 
     def __contains__(self, key):
         try:
@@ -137,15 +150,21 @@ class Config(object):
 
 
 def set_geth_mainnet_ipc_path(config):
-    _config = Config(config)
-    _config['provider.settings.ipc_path'] = get_geth_default_ipc_path(testnet=False)
-    return _config.config_for_write
+    set_nested_key(
+        config,
+        'provider.settings.ipc_path',
+        get_geth_default_ipc_path(testnet=False),
+    )
+    return config
 
 
 def set_geth_ropsten_ipc_path(config):
-    _config = Config(config)
-    _config['provider.settings.ipc_path'] = get_geth_default_ipc_path(testnet=True)
-    return _config.config_for_write
+    set_nested_key(
+        config,
+        'provider.settings.ipc_path',
+        get_geth_default_ipc_path(testnet=True),
+    )
+    return config
 
 
 POPULUS_CONFIG_DEFAULTS = {
@@ -230,19 +249,9 @@ def apply_default_configs(config, default_configs):
     return merged_config
 
 
-def load_config(config_file_path=None):
-    if config_file_path is None:
-        try:
-            config_file_path = find_project_config_file_path()
-        except ValueError:
-            pass
-
-    if config_file_path:
-        project_config = anyconfig.load(config_file_path)
-    else:
-        project_config = get_empty_config()
-
-    return project_config
+def load_config(config_file_path):
+    config = anyconfig.load(config_file_path)
+    return config
 
 
 def write_config(project_dir, config, write_path=None):

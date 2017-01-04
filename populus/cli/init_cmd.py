@@ -58,9 +58,7 @@ def init(ctx):
     Generate project layout with an example contract.
     """
     project = ctx.obj['PROJECT']
-    if project._config_file_path is not None:
-        project_config_file_path = project._config_file_path
-    else:
+    if project._config_file_path is None:
         project_config_file_path = get_default_project_config_file_path(
             project.project_dir,
         )

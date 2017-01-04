@@ -60,6 +60,11 @@ docs/populus.utils.rst
 genesis.json
 /chains/
 
+# Config
+/populus.ini
+/populus.json
+/populus.yml
+
 # Test remnants
 /logs/
 /migrations/

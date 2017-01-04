@@ -444,7 +444,7 @@ def get_unlocked_default_account_address(chain):
             )
         )
         if click.confirm(set_as_default_account_msg):
-            config['chains.{chain_name}.web3.eth.default_account'.format(chain_name)] = account
+            config['chains.{0}.web3.eth.default_account'.format(chain_name)] = account
             project.write_config()
             click.echo("Wrote updated chain configuration")
 

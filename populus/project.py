@@ -31,6 +31,7 @@ from populus.compilation import (
 from populus.config import (
     load_config as _load_config,
     write_config as _write_config,
+    find_project_config_file_path,
     load_default_config_info,
     Config,
 )
@@ -46,17 +47,23 @@ from populus.chain import (
 
 
 class Project(object):
-    _project_config = None
-    _default_config_info = None
-    _config_file_path = None
-
     def __init__(self, config_file_path=None):
-        self._config_file_path = config_file_path
+        if config_file_path is None:
+            try:
+                config_file_path = find_project_config_file_path()
+            except ValueError:
+                pass
+        self.config_file_path = config_file_path
         self.load_config()
 
     #
     # Config
     #
+    config_file_path = None
+
+    _project_config = None
+    _default_config_info = None
+
     def write_config(self, write_path=None):
         return _write_config(
             self.project_dir,
@@ -64,24 +71,24 @@ class Project(object):
             write_path=write_path,
         )
 
-    def load_config(self, config_file_path=None):
-        if config_file_path is None:
-            config_file_path = self._config_file_path
+    def load_config(self):
+        self._config_cache = None
 
-        self._config = None
-        self._project_config = _load_config(config_file_path)
+        if self.config_file_path:
+            self._project_config = _load_config(self.config_file_path)
+
         self._default_config_info = load_default_config_info()
 
     def reload_config(self):
         self.load_config()
 
-    _config = None
+    _config_cache = None
 
     @property
     def config(self):
-        if self._config is None:
-            self._config = Config(self._config, self._default_config_info)
-        return self._config
+        if self._config_cache is None:
+            self._config_cache = Config(self._project_config, self._default_config_info)
+        return self._config_cache
 
     #
     # Project

@@ -230,10 +230,11 @@ class Chain(object):
     _running = None
 
     def __enter__(self):
+        self._running = True
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
+        self._running = False
 
     #
     # Utility

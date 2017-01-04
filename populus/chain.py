@@ -26,9 +26,6 @@ from populus.utils.networking import (
     get_open_port,
     wait_for_connection,
 )
-from populus.utils.config import (
-    resolve_config,
-)
 from populus.utils.wait import (
     Wait,
 )
@@ -180,8 +177,7 @@ class Chain(object):
     #
     def get_web3_config(self):
         web3_config = self.config.get_config('web3')
-
-        return resolve_config(web3_config, self.project.config)
+        return web3_config
 
     @property
     def web3_config(self):

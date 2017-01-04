@@ -130,7 +130,7 @@ def resolve_config(config, master_config):
                     config['$ref'],
                 )
             )
-        return master_config.get_config(config['$ref'])
+        return master_config[config['$ref']]
     else:
         return config
 

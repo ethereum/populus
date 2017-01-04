@@ -47,6 +47,7 @@ class Config(object):
             self.config_for_write,
             self.default_config_info,
         )
+        self.parent = parent
 
     def get_master_config(self):
         if self.parent is None:

@@ -28,6 +28,7 @@ setup(
         "eth-testrpc>=0.9.3",
         "gevent>=1.1.2,<1.2.0",  # https://github.com/gevent/gevent/issues/916
         "ipfsapi>=0.4.0",
+        "jsonschema>=2.5.1",
         "py-geth>=1.5.0",
         "py-solc>=0.6.0",
         "pylru>=1.0.9",

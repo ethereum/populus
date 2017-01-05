@@ -1,0 +1,72 @@
+{
+  "title": "Populus configuration file schema",
+  "type": "object",
+  "version": "1",
+  "properties": {
+    "compilation": {
+      "$ref": "#/definitions/CompilationConfig"
+    },
+    "contracts": {
+      "$ref": "#/definitions/ContractsConfig"
+    }
+  },
+  "definitions": {
+    "CompilationConfig": {
+      "title": "Configuration for how populus compiles source files",
+      "type": "object",
+      "properties": {
+        "contracts_source_dir": {
+          "title": "The root filesystem path under which the projects source files can be found",
+          "type": "string"
+        },
+        "settings": {
+          "anyOf": [
+            {"$ref": "#/definitions/SolcCompilerSettings"}
+          ]
+        }
+      }
+    },
+    "SolcCompilerSettings": {
+      "title": "Settings for the solc command line compiler",
+      "type": "object",
+      "properties": {
+        "optimize": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ContractsConfig": {
+      "properties": {
+        "backends": {
+          "patternProperties": {
+            "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+              "$ref": "#/definitions/ContractBackendConfig"
+            }
+          }
+        }
+      }
+    },
+    "ContractBackendConfig": {
+      "title": "Configuration for a contract backend",
+      "type": "object",
+      "required": ["class", "priority"],
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "priority": {
+          "title": "The priority of this backend",
+          "type": "integer"
+        },
+        "settings": {
+          "title": "Backend specific settings",
+          "type": "object"
+        }
+      }
+    },
+    "PythonImportPath": {
+      "type": "string",
+      "pattern": "^[a-zA-Z][_a-zA-Z0-9]*(?:\\.[a-zA-Z][_a-zA-Z0-9]*)*$"
+    }
+  }
+}

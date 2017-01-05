@@ -9,12 +9,21 @@ from web3.utils.types import (
     is_object,
 )
 
+from populus import ASSETS_DIR
+
 from .functional import (
     compose,
     cast_return_to_tuple,
     sort_return,
     cast_return_to_ordered_dict,
 )
+
+
+CONFIG_SCHEMA_FILENAME = "config.schema.json"
+
+
+def get_config_schema_path():
+    return os.path.join(ASSETS_DIR, CONFIG_SCHEMA_FILENAME)
 
 
 INI_CONFIG_FILENAME = './populus.ini'

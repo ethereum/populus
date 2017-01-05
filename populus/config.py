@@ -16,12 +16,11 @@ from populus.utils.config import (
     has_nested_key,
     set_nested_key,
     pop_nested_key,
-)
-from populus.utils.config import (
     get_empty_config,
     flatten_config_items,
     get_ini_config_file_path,
     resolve_config,
+    get_config_schema_path,
 )
 
 
@@ -31,15 +30,19 @@ class empty(object):
 
 class Config(object):
     parent = None
+    schema = None
     default_config_info = None
     config_for_read = None
     config_for_write = None
 
-    def __init__(self, config=None, default_config_info=None, parent=None):
+    def __init__(self, config=None, default_config_info=None, parent=None, schema=None):
         if config is None:
             config = get_empty_config()
         elif isinstance(config, dict):
             config = anyconfig.to_container(config)
+
+        self.parent = parent
+        self.schema = schema
 
         if default_config_info is None:
             default_config_info = tuple()
@@ -49,7 +52,13 @@ class Config(object):
             self.config_for_write,
             self.default_config_info,
         )
-        self.parent = parent
+        if self.schema is not None:
+            self.validate()
+
+    def validate(self):
+        rc, err = anyconfig.validate(self.config_for_read, self.schema)
+        if err:
+            raise ValueError(err)
 
     def get_master_config(self):
         if self.parent is None:
@@ -314,3 +323,9 @@ def write_config(project_dir, config, write_path):
         )
 
     return write_path
+
+
+def load_config_schema():
+    config_schema_path = get_config_schema_path()
+    config_schema = anyconfig.load(config_schema_path)
+    return config_schema

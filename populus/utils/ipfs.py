@@ -1,10 +1,18 @@
 import operator
+import hashlib
 
 from urllib import parse  # TODO: python2
+
+from populus.pb.ipfs_file_pb2 import (
+    File,
+)
 
 from .functional import (
     compose,
     cast_return_to_dict,
+)
+from .base58 import (
+    b58encode,
 )
 
 
@@ -93,3 +101,24 @@ def walk_ipfs_tree(ipfs_client, ipfs_path, prefix='./'):
                     yield value
     else:
         raise ValueError("Unsupported type.  Must be an IPFS file or directory")
+
+
+IPFS_FILE_DATA_HEADER = "\u0008\u0002\u0012\u0006"
+IPFS_FILE_DATA_FOOTER = "\u0018\u0006"
+SHA2_256 = b'\x12'
+LENGTH_32 = b'\x20'
+
+
+def generate_ipfs_file_multihash(file_contents):
+    data = "".join((
+        IPFS_FILE_DATA_HEADER,
+        file_contents,
+        IPFS_FILE_DATA_FOOTER,
+    ))
+    data_protobuf = File(Data=data).SerializeToString()
+    data_hash = hashlib.sha256(data_protobuf).digest()
+
+    multihash = SHA2_256 + LENGTH_32 + data_hash
+    multihash_b58 = b58encode(multihash)
+
+    return multihash_b58

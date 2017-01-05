@@ -4,7 +4,8 @@ import hashlib
 from urllib import parse  # TODO: python2
 
 from populus.pb.ipfs_file_pb2 import (
-    File,
+    Data,
+    PBNode,
 )
 
 from .functional import (
@@ -103,22 +104,35 @@ def walk_ipfs_tree(ipfs_client, ipfs_path, prefix='./'):
         raise ValueError("Unsupported type.  Must be an IPFS file or directory")
 
 
-IPFS_FILE_DATA_HEADER = "\u0008\u0002\u0012\u0006"
-IPFS_FILE_DATA_FOOTER = "\u0018\u0006"
 SHA2_256 = b'\x12'
 LENGTH_32 = b'\x20'
 
 
-def generate_ipfs_file_multihash(file_contents):
-    data = "".join((
-        IPFS_FILE_DATA_HEADER,
-        file_contents,
-        IPFS_FILE_DATA_FOOTER,
-    ))
-    data_protobuf = File(Data=data).SerializeToString()
-    data_hash = hashlib.sha256(data_protobuf).digest()
+def multihash(value):
+    data_hash = hashlib.sha256(value).digest()
 
-    multihash = SHA2_256 + LENGTH_32 + data_hash
-    multihash_b58 = b58encode(multihash)
+    multihash_bytes = SHA2_256 + LENGTH_32 + data_hash
+    return multihash_bytes
 
-    return multihash_b58
+
+def serialize_file(file_path):
+    file_data = open(file_path, 'rb').read()
+    file_size = len(file_data)
+
+    data_protobuf = Data(
+        Type=Data.DataType.Value('File'),
+        Data=file_data,
+        filesize=file_size,
+    )
+    data_protobuf_bytes = data_protobuf.SerializeToString()
+
+    file_protobuf = PBNode(Links=[], Data=data_protobuf_bytes)
+
+    return file_protobuf
+
+
+def generate_file_hash(file_path):
+    file_protobuf = serialize_file(file_path)
+    file_protobuf_bytes = file_protobuf.SerializeToString()
+    file_multihash = multihash(file_protobuf_bytes)
+    return b58encode(file_multihash)

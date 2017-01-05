@@ -28,9 +28,10 @@ class IPFSPackageBackend(BasePackageBackend):
     """
     Package backend that resolves IPFS URIs
     """
-    def __init__(self, project, settings):
-        super(IPFSPackageBackend, self).__init__(project, settings)
-        self.setup_ipfs_client()
+    def setup_backend(self):
+        ipfs_host = self.settings['host']
+        ipfs_port = self.settings['port']
+        self.ipfs_client = ipfsapi.connect(ipfs_host, ipfs_port)
 
     def can_translate_package_identifier(self, package_identifier):
         return is_aliased_ipfs_uri(package_identifier)
@@ -88,12 +89,3 @@ class IPFSPackageBackend(BasePackageBackend):
         ipfs_file_hash = result['Hash']
         ipfs_uri = create_ipfs_uri(ipfs_file_hash)
         return ipfs_uri
-
-    #
-    # Internal API
-    #
-    def setup_ipfs_client(self):
-        ipfs_host = self.settings['host']
-        ipfs_port = self.settings['port']
-
-        self.ipfs_client = ipfsapi.connect(ipfs_host, ipfs_port)

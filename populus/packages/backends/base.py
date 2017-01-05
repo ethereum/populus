@@ -5,6 +5,10 @@ class BasePackageBackend(object):
     def __init__(self, project, settings):
         self.project = project
         self.settings = settings
+        self.setup_backend()
+
+    def setup_backend(self):
+        pass
 
     #
     # Read API primarily for package installation

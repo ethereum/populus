@@ -94,9 +94,10 @@ class BasePackageIndexFactory(Contract):
 class PackageIndexBackend(BasePackageBackend):
     package_index = None
 
-    def __init__(self, project, settings):
-        super(PackageIndexBackend, self).__init__(project, settings)
-        self.setup_package_index()
+    def setup_backend(self):
+        package_index_address = self.settings['package_index_address']
+        PackageIndexFactory = self.get_package_index_factory()
+        self.package_index = PackageIndexFactory(address=package_index_address)
 
     def can_translate_package_identifier(self, package_identifier):
         is_named_package_identifier = any((
@@ -150,8 +151,3 @@ class PackageIndexBackend(BasePackageBackend):
             abi=package_index_abi,
             base_contract_factory_class=BasePackageIndexFactory,
         )
-
-    def setup_package_index(self):
-        package_index_address = self.settings['package_index_address']
-        PackageIndexFactory = self.get_package_index_factory()
-        self.package_index = PackageIndexFactory(address=package_index_address)

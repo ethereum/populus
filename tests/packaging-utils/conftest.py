@@ -18,7 +18,6 @@ from populus.utils.filesystem import (
 from populus.utils.ipfs import (
     is_ipfs_uri,
     generate_file_hash,
-    create_ipfs_uri,
     extract_ipfs_path_from_uri,
 )
 
@@ -57,12 +56,6 @@ class MockIPFSBackend(BaseIPFSPackageBackend):
     def setup_backend(self):
         self.files = {}
 
-    def resolve_to_release_lockfile(self, package_identifier):
-        ipfs_path = extract_ipfs_path_from_uri(package_identifier)
-        lockfile_contents = self.files[ipfs_path]
-        release_lockfile = json.loads(lockfile_contents)
-        return release_lockfile
-
     @cast_return_to_dict
     def resolve_package_source_tree(self, release_lockfile):
         sources = release_lockfile['sources']
@@ -74,16 +67,16 @@ class MockIPFSBackend(BaseIPFSPackageBackend):
             else:
                 yield source_path, source_value
 
-    def persist_package_file(self, file_path):
-        """
-        Persists the provided file to this backends persistence layer.
-        """
+    def push_file_to_ipfs(self, file_path):
         ipfs_hash = generate_file_hash(file_path)
         with open(file_path) as file:
             file_contents = file.read()
             self.files[ipfs_hash] = file_contents
-        ipfs_uri = create_ipfs_uri(ipfs_hash)
-        return ipfs_uri
+        return ipfs_hash
+
+    def get_file_from_ipfs(self, ipfs_path):
+        file_contents = self.files[ipfs_path]
+        return file_contents
 
 
 @pytest.fixture()

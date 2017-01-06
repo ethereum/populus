@@ -25,7 +25,7 @@ def test_package_data_resolution_on_owned_example_package(load_example_project,
 
 
 def test_package_data_resolution_on_transferable_example_package(load_example_project,
-                                                          mock_package_backends):
+                                                                 mock_package_backends):
     load_example_project('owned')
     load_example_project('transferable')
     lineages = flatten_identifier_tree(compute_identifier_tree(['transferable'], mock_package_backends))
@@ -77,7 +77,7 @@ def test_package_data_resolution_on_standard_token_example_package(load_example_
 
 
 def test_package_data_resolution_on_piper_coin_example_package(load_example_project,
-                                                          mock_package_backends):
+                                                               mock_package_backends):
     load_example_project('standard-token')
     load_example_project('piper-coin')
     lineages = flatten_identifier_tree(compute_identifier_tree(['piper-coin'], mock_package_backends))
@@ -111,7 +111,7 @@ def test_package_data_resolution_on_piper_coin_example_package(load_example_proj
 
 
 def test_package_data_resolution_on_safe_math_lib_example_package(load_example_project,
-                                                          mock_package_backends):
+                                                                  mock_package_backends):
     load_example_project('safe-math-lib')
     lineages = flatten_identifier_tree(compute_identifier_tree(['safe-math-lib'], mock_package_backends))
     assert len(lineages) == 1
@@ -130,7 +130,7 @@ def test_package_data_resolution_on_safe_math_lib_example_package(load_example_p
 
 
 def test_package_data_resolution_on_escrow_example_package(load_example_project,
-                                                          mock_package_backends):
+                                                           mock_package_backends):
     load_example_project('escrow')
     lineages = flatten_identifier_tree(compute_identifier_tree(['escrow'], mock_package_backends))
     assert len(lineages) == 1
@@ -150,7 +150,7 @@ def test_package_data_resolution_on_escrow_example_package(load_example_project,
 
 
 def test_package_data_resolution_on_wallet_example_package(load_example_project,
-                                                          mock_package_backends):
+                                                           mock_package_backends):
     load_example_project('owned')
     load_example_project('safe-math-lib')
     load_example_project('wallet')

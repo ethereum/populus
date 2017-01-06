@@ -6,13 +6,13 @@ sudo: required
 env:
   matrix:
     # Solc 0.4.6 py35
-    - TOX_ENV=py27 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    #- TOX_ENV=py27 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
     # Solc 0.4.6 py34
-    - TOX_ENV=py34 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    #- TOX_ENV=py34 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
     # Solc 0.4.6 py35
-    - TOX_ENV=py35 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    #- TOX_ENV=py35 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
     # Solc 0.4.1 py35
-    - TOX_ENV=py35 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.1.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1
+    #- TOX_ENV=py35 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.1.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1
     # Solc 0.4.2 py35
     - TOX_ENV=py35 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.2.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2
     - TOX_ENV=flake8 SOLC_BINARY=ls SOLC_INSTALL_SCRIPT=/bin/ls

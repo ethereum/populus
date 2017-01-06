@@ -36,7 +36,7 @@ class Config(object):
     def __init__(self, config=None, default_config_info=None, parent=None):
         if config is None:
             config = get_empty_config()
-        else:
+        elif isinstance(config, dict):
             config = anyconfig.to_container(config)
 
         if default_config_info is None:

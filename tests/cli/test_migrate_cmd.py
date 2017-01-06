@@ -93,7 +93,7 @@ def test_migrate_cmd(project_dir, write_project_file, MATH):
 
     assert result.exit_code == 0, result.output + str(result.exception)
 
-    with project.get_chain('local_a') as chain:
+    with project.get_chain('local') as chain:
         registrar = chain.registrar
         math_address = registrar.call().getAddress('contract/Math')
         Math = chain.contract_factories.Math(address=math_address)

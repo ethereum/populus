@@ -21,7 +21,6 @@ def test_initializing_project(project_dir):
         os.path.join(contracts_dir, 'Greeter.sol'),
         os.path.join(project_dir, 'tests'),
         os.path.join(project_dir, 'tests', 'test_greeter.py'),
-        os.path.join(project_dir, 'populus.ini')
     )
 
     for path in expected_paths:

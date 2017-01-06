@@ -47,7 +47,7 @@ def test_get_unlocked_default_account_address_with_no_config(local_chain):
         result = runner.invoke(wrapper, [], input="1\ny\na-test-password\n")
 
         default_account = chain.web3.eth.accounts[1]
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output + str(result.exception)
         expected = "~~{0}~~".format(default_account)
         assert expected in result.output
 
@@ -73,13 +73,11 @@ def test_helper_fn_with_unlocked_pre_configured_account(local_chain):
         runner = CliRunner()
         result = runner.invoke(wrapper, [])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output + str(result.exception)
         expected = "~~{0}~~".format(web3.eth.coinbase)
         assert expected in result.output
 
-        print("Before ARST:", project.config)
         project.reload_config()
-        print("After ARST:", project.config)
         assert project.config['chains.local.web3.eth.default_account'] == web3.eth.coinbase
 
 
@@ -101,7 +99,7 @@ def test_helper_fn_with_locked_pre_configured_account(local_chain):
         runner = CliRunner()
         result = runner.invoke(wrapper, [], input="a-test-password\n")
 
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output + str(result.exception)
         expected = "~~{0}~~".format(web3.eth.accounts[1])
         assert expected in result.output
 

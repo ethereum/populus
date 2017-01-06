@@ -421,8 +421,8 @@ def get_unlocked_default_account_address(chain):
     config = project.config
 
     # Choose the address we should deploy from.
-    if 'default_account' in chain_config:
-        account = chain_config['default_account']
+    if 'web3.eth.default_account' in chain_config:
+        account = chain_config['web3.eth.default_account']
         if account not in web3.eth.accounts:
             raise click.ClickException(
                 "The chain {0!r} is configured to deploy from account {1!r} "

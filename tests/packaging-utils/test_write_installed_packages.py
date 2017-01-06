@@ -116,3 +116,90 @@ def test_write_package_data_with_existing_install(temp_dir,
     assert not os.path.exists(pre_existing_file_path)
     assert not os.path.exists(pre_existing_dir_path)
     assert not os.path.exists(os.path.join(pre_existing_dir_path, 'is-present'))
+
+
+def test_write_project_packages_with_no_installed_packages(project_dir,
+                                                           load_example_project,
+                                                           mock_package_backends):
+    load_example_project('owned')
+    load_example_project('safe-math-lib')
+    load_example_project('wallet')
+
+    project = Project()
+
+    lineages = flatten_identifier_tree(compute_identifier_tree(['wallet'], mock_package_backends))
+    assert len(lineages) == 1
+
+    package_data = recursively_resolve_package_data(
+        lineages[0],
+        mock_package_backends,
+    )
+
+    pre_existing_file_path = os.path.join(project.installed_packages_dir, 'test-file.txt')
+    ensure_file_exists(pre_existing_file_path)
+
+    pre_existing_dir_path = os.path.join(project.installed_packages_dir, 'test-dir')
+    ensure_path_exists(pre_existing_dir_path)
+    ensure_file_exists(os.path.join(pre_existing_dir_path, 'is-present'))
+
+    write_installed_packages(
+        project.installed_packages_dir,
+        [package_data],
+
+    )
+
+    assert os.path.exists(pre_existing_file_path)
+    assert os.path.exists(pre_existing_dir_path)
+    assert os.path.exists(os.path.join(pre_existing_dir_path, 'is-present'))
+
+    wallet_package_base_dir = get_dependency_base_dir(project.installed_packages_dir, 'wallet')
+    verify_installed_package(
+        project.installed_packages_dir,
+        wallet_package_base_dir,
+        package_data,
+    )
+
+
+def test_write_project_packages_with_existing_install(project_dir,
+                                                      load_example_project,
+                                                       mock_package_backends):
+    load_example_project('owned')
+    load_example_project('safe-math-lib')
+    load_example_project('wallet')
+
+    project = Project()
+
+    lineages = flatten_identifier_tree(compute_identifier_tree(['wallet'], mock_package_backends))
+    assert len(lineages) == 1
+
+    package_data = recursively_resolve_package_data(
+        lineages[0],
+        mock_package_backends,
+    )
+
+    pre_existing_file_path = os.path.join(project.installed_packages_dir, 'test-file.txt')
+    ensure_file_exists(pre_existing_file_path)
+
+    pre_existing_dir_path = os.path.join(project.installed_packages_dir, 'test-dir')
+    ensure_path_exists(pre_existing_dir_path)
+    ensure_file_exists(os.path.join(pre_existing_dir_path, 'is-present'))
+
+    wallet_package_base_dir = get_dependency_base_dir(project.installed_packages_dir, 'wallet')
+    ensure_file_exists(os.path.join(wallet_package_base_dir, 'another-test-file.txt'))
+
+    write_installed_packages(
+        project.installed_packages_dir,
+        [package_data],
+
+    )
+
+    assert os.path.exists(pre_existing_file_path)
+    assert os.path.exists(pre_existing_dir_path)
+    assert os.path.exists(os.path.join(pre_existing_dir_path, 'is-present'))
+    assert not os.path.exists(os.path.join(wallet_package_base_dir, 'another-test-file.txt'))
+
+    verify_installed_package(
+        project.installed_packages_dir,
+        wallet_package_base_dir,
+        package_data,
+    )

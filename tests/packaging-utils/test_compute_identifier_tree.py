@@ -1,6 +1,6 @@
 import json
 from populus.utils.packaging import (
-    compute_translated_identifier_tree,
+    compute_identifier_tree,
 )
 
 
@@ -9,7 +9,7 @@ def test_tree_computation_for_exact_package_name(mock_package_index_backend,
     mock_package_index_backend.packages['owned'] = {
         '1.0.0': 'ipfs://QmUwVUMVtkVctrLDeL12SoeCPUacELBU8nAxRtHUzvtjND',
     }
-    translated_identifier_tree = compute_translated_identifier_tree(
+    identifier_tree = compute_identifier_tree(
         ['owned'],
         mock_package_backends,
     )
@@ -20,7 +20,7 @@ def test_tree_computation_for_exact_package_name(mock_package_index_backend,
             },
         },
     }
-    assert translated_identifier_tree == expected
+    assert identifier_tree == expected
 
 
 def test_tree_computation_for_aliased_exact_package_name(mock_package_index_backend,
@@ -28,7 +28,7 @@ def test_tree_computation_for_aliased_exact_package_name(mock_package_index_back
     mock_package_index_backend.packages['owned'] = {
         '1.0.0': 'ipfs://QmUwVUMVtkVctrLDeL12SoeCPUacELBU8nAxRtHUzvtjND',
     }
-    translated_identifier_tree = compute_translated_identifier_tree(
+    identifier_tree = compute_identifier_tree(
         ['powned:owned'],
         mock_package_backends,
     )
@@ -41,7 +41,7 @@ def test_tree_computation_for_aliased_exact_package_name(mock_package_index_back
             },
         },
     }
-    assert translated_identifier_tree == expected
+    assert identifier_tree == expected
 
 
 def test_tree_computation_for_exact_version_package_identifier(mock_package_index_backend,
@@ -49,7 +49,7 @@ def test_tree_computation_for_exact_version_package_identifier(mock_package_inde
     mock_package_index_backend.packages['owned'] = {
         '1.0.0': 'ipfs://QmUwVUMVtkVctrLDeL12SoeCPUacELBU8nAxRtHUzvtjND',
     }
-    translated_identifier_tree = compute_translated_identifier_tree(
+    identifier_tree = compute_identifier_tree(
         ['owned==1.0.0'],
         mock_package_backends,
     )
@@ -58,7 +58,7 @@ def test_tree_computation_for_exact_version_package_identifier(mock_package_inde
             'ipfs://QmUwVUMVtkVctrLDeL12SoeCPUacELBU8nAxRtHUzvtjND': None,
         },
     }
-    assert translated_identifier_tree == expected
+    assert identifier_tree == expected
 
 
 def test_tree_computation_for_comparison_package_identifier(mock_package_index_backend,
@@ -67,7 +67,7 @@ def test_tree_computation_for_comparison_package_identifier(mock_package_index_b
         '1.0.0': 'ipfs://QmUwVUMVtkVctrLDeL12SoeCPUacELBU8nAxRtHUzvtjND',
         '2.0.0': 'ipfs://QmPvJ1P9B5rh8ZsMqwkEhUjEVfaRA36sTD4JeyP1Mbo1Vh',
     }
-    translated_identifier_tree = compute_translated_identifier_tree(
+    identifier_tree = compute_identifier_tree(
         ['owned>1.0.0'],
         mock_package_backends,
     )
@@ -78,7 +78,7 @@ def test_tree_computation_for_comparison_package_identifier(mock_package_index_b
             },
         },
     }
-    assert translated_identifier_tree == expected
+    assert identifier_tree == expected
 
 
 def test_tree_computation_from_manifest_dependencies(project_dir,
@@ -102,7 +102,7 @@ def test_tree_computation_from_manifest_dependencies(project_dir,
     }
     write_project_file('epm.json', json.dumps(package_manifest))
 
-    translated_identifier_tree = compute_translated_identifier_tree(
+    identifier_tree = compute_identifier_tree(
         ['.'],
         mock_package_backends,
     )
@@ -118,7 +118,7 @@ def test_tree_computation_from_manifest_dependencies(project_dir,
             }
         }
     }
-    assert translated_identifier_tree == expected
+    assert identifier_tree == expected
 
 
 def test_tree_computation_from_release_lockfile(project_dir,
@@ -131,14 +131,14 @@ def test_tree_computation_from_release_lockfile(project_dir,
     }
     write_project_file('test-package-1.0.0.json', json.dumps(release_lockfile))
 
-    translated_identifier_tree = compute_translated_identifier_tree(
+    identifier_tree = compute_identifier_tree(
         ['test-package-1.0.0.json'],
         mock_package_backends,
     )
     expected = {
         'test-package-1.0.0.json': None,
     }
-    assert translated_identifier_tree == expected
+    assert identifier_tree == expected
 
 
 def test_tree_computation_from_aliased_release_lockfile(project_dir,
@@ -151,7 +151,7 @@ def test_tree_computation_from_aliased_release_lockfile(project_dir,
     }
     write_project_file('test-package-1.0.0.json', json.dumps(release_lockfile))
 
-    translated_identifier_tree = compute_translated_identifier_tree(
+    identifier_tree = compute_identifier_tree(
         ['aliased-test-package@test-package-1.0.0.json'],
         mock_package_backends,
     )
@@ -160,4 +160,4 @@ def test_tree_computation_from_aliased_release_lockfile(project_dir,
             'test-package-1.0.0.json': None,
         }
     }
-    assert translated_identifier_tree == expected
+    assert identifier_tree == expected

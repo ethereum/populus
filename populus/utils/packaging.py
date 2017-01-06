@@ -85,44 +85,44 @@ def get_release_lockfile_path(dependency_base_dir):
     return os.path.join(dependency_base_dir, RELEASE_LOCKFILE_FILENAME)
 
 
-ROOT_IDENTIFIER_LOCKFILE_NAME = 'root_identifier.lock'
+INSTALL_IDENTIFIER_LOCKFILE_NAME = 'install_identifier.lock'
 
 
-def get_root_identifier_lockfile_path(dependency_base_dir):
+def get_install_identifier_lockfile_path(dependency_base_dir):
     """
     Returns file path where the root identifier for the installed dependency is stored.
     """
-    root_identifier_lockfile_path = os.path.join(
+    install_identifier_lockfile_path = os.path.join(
         dependency_base_dir,
-        ROOT_IDENTIFIER_LOCKFILE_NAME,
+        INSTALL_IDENTIFIER_LOCKFILE_NAME,
     )
-    return root_identifier_lockfile_path
+    return install_identifier_lockfile_path
 
 
-RESOLVED_IDENTIFIER_LOCKFILE_NAME = 'translated_identifier.lock'
+BUILD_IDENTIFIER_LOCKFILE_NAME = 'build_identifier.lock'
 
 
-def get_translated_identifier_lockfile_path(dependency_base_dir):
+def get_build_identifier_lockfile_path(dependency_base_dir):
     """
     Returns file path where the fully translated identifier for the installed
     dependency is stored.
     """
-    translated_identifier_lockfile_path = os.path.join(
+    build_identifier_lockfile_path = os.path.join(
         dependency_base_dir,
-        RESOLVED_IDENTIFIER_LOCKFILE_NAME,
+        BUILD_IDENTIFIER_LOCKFILE_NAME,
     )
-    return translated_identifier_lockfile_path
+    return build_identifier_lockfile_path
 
 
-def get_translated_identifier(dependency_base_dir):
+def get_build_identifier(dependency_base_dir):
     """
-    Gets the translated_identifier from the translated identifier lockfile
+    Gets the build_identifier from the translated identifier lockfile
     within a dependency's base dir.
     """
-    translated_identifier_lockfile_path = get_translated_identifier_lockfile_path(dependency_base_dir)
-    with open(translated_identifier_lockfile_path) as translated_identifier_lockfile_file:
-        translated_identifier = translated_identifier_lockfile_file.read().strip()
-    return translated_identifier
+    build_identifier_lockfile_path = get_build_identifier_lockfile_path(dependency_base_dir)
+    with open(build_identifier_lockfile_path) as build_identifier_lockfile_file:
+        build_identifier = build_identifier_lockfile_file.read().strip()
+    return build_identifier
 
 
 RELEASE_LOCKFILE_BUILD_FILENAME = '{version}.json'
@@ -386,20 +386,20 @@ def construct_package_identifier(dependency_name, dependency_identifier):
         raise ValueError("Unsupported Identifier: '{0}'".format(dependency_identifier))
 
 
-def construct_dependency_identifier(dependency_name, root_identifier, translated_identifier):
-    if is_direct_package_identifier(root_identifier):
-        package_name, comparison, version = parse_package_identifier(root_identifier)
+def construct_dependency_identifier(dependency_name, install_identifier, build_identifier):
+    if is_direct_package_identifier(install_identifier):
+        package_name, comparison, version = parse_package_identifier(install_identifier)
         if package_name == dependency_name:
             if comparison == '==':
                 return version
             else:
                 return ''.join((comparison, version))
         else:
-            return root_identifier
-    elif is_ipfs_uri(root_identifier):
-        return root_identifier
+            return install_identifier
+    elif is_ipfs_uri(install_identifier):
+        return install_identifier
     else:
-        raise ValueError("Unsupported root identifier: {0}".format(root_identifier))
+        raise ValueError("Unsupported root identifier: {0}".format(install_identifier))
 
 
 def extract_dependency_name_from_identifier_lineage(package_identifier_lineage,
@@ -442,7 +442,7 @@ def validate_release_lockfile(package_manifest):
     pass
 
 
-def extract_root_identifier(package_identifier_lineage):
+def extract_install_identifier(package_identifier_lineage):
     """
     Returns the root identifier from the translated lineage of the package
     identifier.
@@ -451,9 +451,6 @@ def extract_root_identifier(package_identifier_lineage):
         if is_package_name(identifier):
             continue
         elif is_direct_package_identifier(identifier):
-            _, comparison, _ = parse_package_identifier(identifier)
-            if comparison != "==":
-                continue
             return identifier
         elif is_ipfs_uri(identifier):
             return identifier
@@ -473,8 +470,8 @@ def extract_package_metadata(package_identifier_lineage,
             package_identifier_lineage,
             release_lockfile,
         ),
-        'root_identifier': extract_root_identifier(package_identifier_lineage),
-        'translated_identifier': package_identifier_lineage[-1],
+        'install_identifier': extract_install_identifier(package_identifier_lineage),
+        'build_identifier': package_identifier_lineage[-1],
     }
 
 
@@ -502,9 +499,7 @@ def fingerprint_identifier(package_identifier):
 
 
 @cast_return_to_dict
-def compute_translated_identifier_tree(identifier_set,
-                                       package_backends,
-                                       seen_fingerprints=None):
+def compute_identifier_tree(identifier_set, package_backends, seen_fingerprints=None):
     """
     Compute the directed acyclic graph of the package identifiers.  All leaf
     nodes are package identifiers which can be resolved to their release
@@ -539,7 +534,7 @@ def compute_translated_identifier_tree(identifier_set,
 
             yield (
                 package_identifier,
-                compute_translated_identifier_tree(
+                compute_identifier_tree(
                     translated_package_identifiers,
                     package_backends,
                     seen_fingerprints={fingerprint} | seen_fingerprints,
@@ -552,16 +547,16 @@ def compute_translated_identifier_tree(identifier_set,
 
 
 @cast_return_to_tuple
-def flatten_translated_identifier_tree(identifier_tree):
+def flatten_identifier_tree(identifier_tree):
     """
-    Takes the identifier tree produced by `compute_translated_identifier_tree`
+    Takes the identifier tree produced by `compute_identifier_tree`
     and flattens it so that there is one entry for each leaf node.
     """
     for key, value in identifier_tree.items():
         if value is None:
             yield (key,)
         else:
-            for sub_value in flatten_translated_identifier_tree(value):
+            for sub_value in flatten_identifier_tree(value):
                 yield (key,) + sub_value
 
 
@@ -625,11 +620,11 @@ def recursively_resolve_package_data(package_identifier_lineage, package_backend
         for dependency_name, dependency_identifier
         in package_build_dependencies.items()
     )
-    dependency_identifier_tree = compute_translated_identifier_tree(
+    dependency_identifier_tree = compute_identifier_tree(
         dependency_identifiers,
         package_backends,
     )
-    flattened_dependency_identifier_tree = flatten_translated_identifier_tree(
+    flattened_dependency_identifier_tree = flatten_identifier_tree(
         dependency_identifier_tree,
     )
 
@@ -759,5 +754,5 @@ def extract_build_dependendencies_from_installed_packages(installed_packages_dir
     installed_package_locations = find_installed_package_locations(installed_packages_dir)
     for dependency_base_dir in installed_package_locations:
         dependency_name = extract_dependency_name_from_base_dir(dependency_base_dir)
-        dependency_identifier = get_translated_identifier(dependency_base_dir)
+        dependency_identifier = get_build_identifier(dependency_base_dir)
         yield dependency_name, dependency_identifier

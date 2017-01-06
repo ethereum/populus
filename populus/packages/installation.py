@@ -16,10 +16,10 @@ from populus.utils.packaging import (
     get_installed_packages_dir,
     get_dependency_base_dir,
     get_release_lockfile_path,
-    get_root_identifier_lockfile_path,
-    get_translated_identifier_lockfile_path,
-    compute_translated_identifier_tree,
-    flatten_translated_identifier_tree,
+    get_build_identifier_lockfile_path,
+    get_install_identifier_lockfile_path,
+    compute_identifier_tree,
+    flatten_identifier_tree,
     recursively_resolve_package_data,
     construct_dependency_identifier,
 )
@@ -36,12 +36,12 @@ def install_project_dependencies(project, package_identifiers):
     """
     package_backends = project.package_backends
 
-    translated_identifier_tree = compute_translated_identifier_tree(
+    identifier_tree = compute_identifier_tree(
         package_identifiers,
         package_backends,
     )
-    flattened_identifier_tree = flatten_translated_identifier_tree(
-        translated_identifier_tree,
+    flattened_identifier_tree = flatten_identifier_tree(
+        identifier_tree,
     )
     resolved_package_data = tuple(
         recursively_resolve_package_data(package_identifier_lineage, package_backends)
@@ -115,19 +115,19 @@ def write_package_files(installed_packages_dir, package_data):
                     sort_keys=True,
                 ))
 
-        # Write the `root_identifier.lock` lockfile
-        root_identifier_lockfile_path = get_root_identifier_lockfile_path(
+        # Write the `build_identifier.lock` lockfile
+        build_identifier_lockfile_path = get_build_identifier_lockfile_path(
             temp_install_location,
         )
-        with open(root_identifier_lockfile_path, 'w') as root_identifier_lockfile_file:
-            root_identifier_lockfile_file.write(package_meta['root_identifier'])
+        with open(build_identifier_lockfile_path, 'w') as build_identifier_lockfile_file:
+            build_identifier_lockfile_file.write(package_meta['build_identifier'])
 
-        # Write the `translated_identifier.lock` lockfile
-        translated_identifier_lockfile_path = get_translated_identifier_lockfile_path(
+        # Write the `install_identifier.lock` lockfile
+        install_identifier_lockfile_path = get_install_identifier_lockfile_path(
             temp_install_location,
         )
-        with open(translated_identifier_lockfile_path, 'w') as translated_identifier_lockfile_file:
-            translated_identifier_lockfile_file.write(package_meta['translated_identifier'])
+        with open(install_identifier_lockfile_path, 'w') as install_identifier_lockfile_file:
+            install_identifier_lockfile_file.write(package_meta['install_identifier'])
 
         # Now recursively write dependency packages.
         installed_packages_dir_for_dependencies = get_installed_packages_dir(
@@ -155,13 +155,13 @@ def update_project_dependencies(project, installed_dependencies):
         package_meta = package_data['meta']
 
         dependency_name = package_meta['dependency_name']
-        root_identifier = package_meta['root_identifier']
-        translated_identifier = package_meta['translated_identifier']
+        install_identifier = package_meta['install_identifier']
+        build_identifier = package_meta['build_identifier']
 
         dependency_identifier = construct_dependency_identifier(
             dependency_name,
-            root_identifier,
-            translated_identifier,
+            install_identifier,
+            build_identifier,
         )
 
         package_manifest['dependencies'][dependency_name] = dependency_identifier

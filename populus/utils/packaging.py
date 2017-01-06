@@ -586,6 +586,8 @@ def resolve_package_source_tree(release_lockfile, package_backends):
         else:
             continue
     else:
+        if not release_lockfile.get('sources'):
+            return {}
         raise ValueError(
             "None of the configured package backends could resolve the source tree for"
             "'{0}'".format(release_lockfile)

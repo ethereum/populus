@@ -25,7 +25,6 @@ CONTEXT_SETTINGS = dict(
         "configuration files will be loaded"
     ),
     type=click.File(),
-    multiple=True,
 )
 @click.pass_context
 def main(ctx, config):

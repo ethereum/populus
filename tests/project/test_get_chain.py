@@ -13,6 +13,9 @@ from populus.utils.chains import (
     get_geth_ipc_path,
     get_data_dir as get_local_chain_datadir,
 )
+from populus.utils.networking import (
+    get_open_port,
+)
 
 
 @flaky
@@ -68,11 +71,11 @@ def test_project_morden_chain(project_dir):
 
 @flaky
 def test_project_local_chain_ipc(project_dir):
+    ipc_path = get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local'))
+
     project = Project()
     project.config['chains.local.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
-    project.config['chains.local.web3.provider.settings.ipc_path'] = (
-        get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local'))
-    )
+    project.config['chains.local.web3.provider.settings.ipc_path'] = ipc_path
     project.write_config()
 
     chain = project.get_chain('local')
@@ -93,6 +96,7 @@ def test_project_local_chain_ipc(project_dir):
 def test_project_local_chain_rpc(project_dir):
     project = Project()
     project.config['chains.local.web3.provider.class'] = 'web3.providers.rpc.RPCProvider'
+    project.config['chains.local.geth.settings.rpc_port'] = str(get_open_port())
     project.write_config()
 
     chain = project.get_chain('local')

@@ -653,15 +653,11 @@ class BaseGethChain(Chain):
         # context manager shenanigans
         self.stack = ExitStack()
 
-        self.extra_kwargs = {
-            key: value
-            for key, value in kwargs.items() if key not in GETH_KWARGS
-        }
-        self.geth_kwargs = {
-            key: value
-            for key, value in kwargs.items() if key in GETH_KWARGS
-        }
         self.geth = self.get_geth_process_instance()
+
+    @property
+    def geth_kwargs(self):
+        return self.config.get('geth.settings', {})
 
     @property
     def has_registrar(self):

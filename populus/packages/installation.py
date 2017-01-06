@@ -25,7 +25,7 @@ from populus.utils.packaging import (
 )
 
 
-def install_project_dependencies(project, package_identifiers):
+def install_project_dependencies(installed_packages_dir, package_identifiers, package_backends):
     """
     1. Recursively resolve all dependencies.
     2. Filter out any dependencies that are already met.
@@ -34,8 +34,6 @@ def install_project_dependencies(project, package_identifiers):
     Maybe:
     - check all chain identifiers are found on the current chain.
     """
-    package_backends = project.package_backends
-
     identifier_tree = compute_identifier_tree(
         package_identifiers,
         package_backends,
@@ -43,7 +41,7 @@ def install_project_dependencies(project, package_identifiers):
     flattened_identifier_tree = flatten_identifier_tree(
         identifier_tree,
     )
-    resolved_package_data = tuple(
+    package_data_to_install = tuple(
         recursively_resolve_package_data(package_identifier_lineage, package_backends)
         for package_identifier_lineage
         in flattened_identifier_tree
@@ -51,14 +49,14 @@ def install_project_dependencies(project, package_identifiers):
     # TODO: Filter out dependencies that are already satisfied.
     # TODO: Detect duplicate dependency names
     write_installed_packages(
-        project.installed_packages_dir,
-        resolved_package_data,
+        installed_packages_dir,
+        package_data_to_install,
     )
 
-    return resolved_package_data
+    return package_data_to_install
 
 
-def write_installed_packages(installed_packages_dir, resolved_package_data):
+def write_installed_packages(installed_packages_dir, package_data_to_install):
     with tempdir() as temporary_dir:
         temp_installed_packages_dir = get_installed_packages_dir(temporary_dir)
 
@@ -67,7 +65,7 @@ def write_installed_packages(installed_packages_dir, resolved_package_data):
         else:
             ensure_path_exists(temp_installed_packages_dir)
 
-        for package_data in resolved_package_data:
+        for package_data in package_data_to_install:
             write_package_files(temp_installed_packages_dir, package_data)
         else:
             # Upon successful writing of all dependencies, move
@@ -131,7 +129,7 @@ def write_package_files(installed_packages_dir, package_data):
 
         # Now recursively write dependency packages.
         installed_packages_dir_for_dependencies = get_installed_packages_dir(
-            dependency_base_dir,
+            temp_install_location,
         )
         write_installed_packages(
             installed_packages_dir_for_dependencies,
@@ -142,6 +140,7 @@ def write_package_files(installed_packages_dir, package_data):
         # package dir to the real installed_packages location.
         remove_dir_if_exists(dependency_base_dir)
         shutil.move(temp_install_location, dependency_base_dir)
+    return dependency_base_dir
 
 
 def update_project_dependencies(project, installed_dependencies):

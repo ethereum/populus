@@ -19,7 +19,7 @@ NAME_ONLY_IDENTIFIERS = (
 
 
 ALIASED_NAME_ONLY_IDENTIFIERS = tuple(
-    ':'.join((name, name)) for name in NAME_ONLY_IDENTIFIERS
+    ':'.join(('alias-' + name, name)) for name in NAME_ONLY_IDENTIFIERS
 )
 
 

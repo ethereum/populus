@@ -99,6 +99,17 @@ def get_install_identifier_lockfile_path(dependency_base_dir):
     return install_identifier_lockfile_path
 
 
+def get_install_identifier(dependency_base_dir):
+    """
+    Gets the install_identifier from the translated identifier lockfile
+    within a dependency's base dir.
+    """
+    install_identifier_lockfile_path = get_install_identifier_lockfile_path(dependency_base_dir)
+    with open(install_identifier_lockfile_path) as install_identifier_lockfile_file:
+        install_identifier = install_identifier_lockfile_file.read().strip()
+    return install_identifier
+
+
 BUILD_IDENTIFIER_LOCKFILE_NAME = 'build_identifier.lock'
 
 

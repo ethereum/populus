@@ -156,6 +156,14 @@ def is_package_name(value):
     return bool(re.match(EXACT_PACKAGE_NAME_REGEX, value))
 
 
+def is_aliased_package_name(value):
+    """
+    Returns boolean whether the value is a valid package name.
+    """
+    alias, _, package_name = value.partition(':')
+    return is_package_name(alias) and is_package_name(package_name)
+
+
 IDENTIFIER_VERSION_SPECIFIERS = (
     "==",
     ">=",
@@ -364,7 +372,7 @@ def construct_package_identifier(dependency_name, dependency_identifier):
             ipfs_uri=dependency_identifier,
         )
     elif is_version_specifier(dependency_identifier):
-        if is_exact_version:
+        if is_exact_version(dependency_identifier):
             return "{dependency_name}=={version}".format(
                 dependency_name=dependency_name,
                 version=dependency_identifier,
@@ -443,6 +451,9 @@ def extract_root_identifier(package_identifier_lineage):
         if is_package_name(identifier):
             continue
         elif is_direct_package_identifier(identifier):
+            _, comparison, _ = parse_package_identifier(identifier)
+            if comparison != "==":
+                continue
             return identifier
         elif is_ipfs_uri(identifier):
             return identifier

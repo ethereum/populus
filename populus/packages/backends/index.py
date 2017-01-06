@@ -17,6 +17,7 @@ from populus.utils.packaging import (
     filter_versions,
     get_max_version,
     is_package_name,
+    is_aliased_package_name,
 )
 from .base import (
     BasePackageBackend,
@@ -27,9 +28,7 @@ PACKAGE_INDEX_ABI_PATH = os.path.join(ASSETS_DIR, 'package_index_abi.json')
 
 
 class BasePackageIndexFactory(Contract):
-    def lookup_release_lockfile_uri(self, package_identifier):
-        package_name, comparison, version = parse_package_identifier(package_identifier)
-
+    def find_best_version_match(self, package_name, comparison, version):
         if comparison is None and version is None:
             return self.get_latest_release_lockfile(package_name)
         if comparison is None:
@@ -41,7 +40,11 @@ class BasePackageIndexFactory(Contract):
         matching_versions = filter_versions(comparison, version, all_release_data.keys())
         best_match = get_max_version(matching_versions)
 
-        return all_release_data[best_match]
+        return best_match
+
+    def lookup_release_lockfile_uri(self, package_name, version):
+        all_release_data = self.get_all_release_data(package_name)
+        return all_release_data[version]
 
     def get_latest_release(self, package_name):
         major, minor, patch, release_lockfile_uri = self.call().latestVersion(
@@ -117,10 +120,23 @@ class PackageIndexBackend(BasePackageBackend):
             return (
                 '=='.join((package_identifier, latest_version)),
             )
-        else:
+        elif is_aliased_package_name(package_identifier):
+            _, _, package_name = package_identifier.partition(':')
             return (
-                self.package_index.lookup_release_lockfile_uri(package_identifier),
+                package_name,
             )
+        else:
+            package_name, comparison, version = parse_package_identifier(package_identifier)
+            best_match = self.package_index.find_best_version_match(package_identifier),
+
+            if comparison == '==':
+                return (
+                    self.package_index.lookup_release_lockfile_uri(best_match),
+                )
+            else:
+                return (
+                    '=='.join((package_name, best_match)),
+                )
 
     def can_publish_release_lockfile(self, release_lockfile, release_lockfile_uri):
         return True

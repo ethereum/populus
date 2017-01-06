@@ -1,5 +1,9 @@
 import pytest
 
+from collections import OrderedDict
+
+from populus import Project
+
 from populus.utils.packaging import (
     is_direct_package_identifier,
     is_aliased_package_identifier,
@@ -7,12 +11,20 @@ from populus.utils.packaging import (
     get_max_version,
     parse_package_identifier,
     is_aliased_ipfs_uri,
+    is_package_name,
+    is_aliased_package_name,
+)
+from populus.utils.functional import (
+    cast_return_to_dict,
 )
 from populus.utils.ipfs import (
-    generate_ipfs_file_multihash,
+    is_ipfs_uri,
+    generate_file_hash,
 )
 
 from populus.packages.backends.base import BasePackageBackend
+from populus.packages.backends.manifest import LocalManifestBackend
+from populus.packages.backends.lockfile import LocalFilesystemLockfileBackend
 
 
 class MockPackageIndexBackend(BasePackageBackend):
@@ -39,9 +51,14 @@ class MockPackageIndexBackend(BasePackageBackend):
 
     def translate_package_identifier(self, package_identifier):
         if is_package_name(package_identifier):
-            latest_version = self.package_index.get_latest_release_version(package_identifier)
+            latest_version = get_max_version(self.packages[package_identifier].keys())
             return (
                 '=='.join((package_identifier, latest_version)),
+            )
+        elif is_aliased_package_name(package_identifier):
+            _, _, package_name = package_identifier.partition(':')
+            return (
+                package_name,
             )
         else:
             package_name, comparison, version = parse_package_identifier(
@@ -51,9 +68,14 @@ class MockPackageIndexBackend(BasePackageBackend):
             matching_versions = filter_versions(comparison, version, all_release_data.keys())
             best_match = get_max_version(matching_versions)
 
-            return (
-                all_release_data[best_match],
-            )
+            if comparison == '==':
+                return (
+                    all_release_data[best_match],
+                )
+            else:
+                return (
+                    '=='.join((package_name, best_match)),
+                )
 
     def can_publish_release_lockfile(self, release_lockfile, release_lockfile_uri):
         return True
@@ -107,10 +129,7 @@ class MockIPFSBackend(BasePackageBackend):
         for source_path, source_value in sources.items():
             if is_ipfs_uri(source_value):
                 ipfs_path = extract_ipfs_path_from_uri(source_value)
-                ipfs_source_tree = walk_ipfs_tree(self.ipfs_client, ipfs_path, source_path)
-                for sub_path, source_hash in ipfs_source_tree.items():
-                    source_content = self.ipfs_client.cat(source_hash)
-                    yield sub_path, source_content
+                yield source_path, self.files[ipfs_path]
             else:
                 yield source_path, source_value
 
@@ -124,7 +143,36 @@ class MockIPFSBackend(BasePackageBackend):
         """
         Persists the provided file to this backends persistence layer.
         """
-        result = self.ipfs_client.add(file_path)
-        ipfs_file_hash = result['Hash']
-        ipfs_uri = create_ipfs_uri(ipfs_file_hash)
+        ipfs_hash = generate_file_hash(file_path)
+        with open(file_path) as file:
+            file_contents = file.read()
+            self.files[ipfs_hash] = file_contents
+        ipfs_uri = create_ipfs_uri(ipfs_hash)
         return ipfs_uri
+
+
+@pytest.fixture()
+def project(project_dir):
+    _project = Project()
+    return _project
+
+
+@pytest.fixture()
+def mock_package_index_backend(project):
+    return MockPackageIndexBackend(project, {})
+
+
+@pytest.fixture()
+def mock_IPFS_backend(project):
+    return MockIPFSBackend(project, {})
+
+
+@pytest.fixture()
+def mock_package_backends(project, mock_IPFS_backend, mock_package_index_backend):
+    package_backends = OrderedDict((
+        ('LocalManifestBackend', LocalManifestBackend(project, {})),
+        ('LocalFilesystemLockfileBackend', LocalFilesystemLockfileBackend(project, {})),
+        ('MockIPFSBackend', mock_IPFS_backend),
+        ('MockPackageIndexBackend', mock_package_index_backend),
+    ))
+    return package_backends

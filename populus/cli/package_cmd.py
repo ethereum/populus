@@ -150,7 +150,11 @@ def package_install(ctx, package_identifiers, save):
     ))))
 
     if save:
-        update_project_dependencies(project, installed_dependencies)
+        update_project_dependencies(
+            project.installed_packages_dir,
+            installed_dependencies,
+            project.package_backends,
+        )
 
 
 @package_cmd.command('build')

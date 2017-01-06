@@ -1,0 +1,21 @@
+{
+  "lockfile_version": "1",
+  "version": "1.0.0",
+  "package_name": "transferable",
+  "meta": {
+    "license": "MIT",
+    "authors": [
+      "Piper Merriam <pipermerriam@gmail.com>"
+    ],
+    "description": "Reusable contracts which implement a privileged'owner' model for authorization with functionality for transfering ownership.",
+    "keywords": [
+      "authorization"
+    ]
+  },
+  "sources": {
+    "./contracts/transferable.sol": "ipfs://QmZ6Zg1iEejuJ18LFczowe7dyaxXm4KC4xTgnCkqwJZmAp"
+  },
+  "build_dependencies": {
+	"owned": "ipfs://QmUwVUMVtkVctrLDeL12SoeCPUacELBU8nAxRtHUzvtjND"
+  }
+}

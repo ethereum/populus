@@ -3,11 +3,13 @@ import itertools
 
 from populus.utils.packaging import (
     get_installed_packages_dir,
-    find_solidity_source_files,
     find_package_source_files,
     find_installed_package_locations,
     extract_dependency_name_from_base_dir,
     recursive_find_installed_dependency_base_dirs,
+)
+from populus.utils.filesystem import (
+    find_solidity_source_files,
 )
 from populus.utils.functional import (
     compose,

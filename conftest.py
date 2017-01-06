@@ -41,3 +41,8 @@ def write_project_file(project_dir):
         with open(full_path, 'w') as f:
             f.write(content)
     return _write_project_file
+
+
+@pytest.fixture()
+def populus_source_root():
+    return os.path.dirname(__file__)

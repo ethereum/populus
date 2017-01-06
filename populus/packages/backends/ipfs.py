@@ -24,15 +24,7 @@ from .base import (
 )
 
 
-class IPFSPackageBackend(BasePackageBackend):
-    """
-    Package backend that resolves IPFS URIs
-    """
-    def setup_backend(self):
-        ipfs_host = self.settings['host']
-        ipfs_port = self.settings['port']
-        self.ipfs_client = ipfsapi.connect(ipfs_host, ipfs_port)
-
+class BaseIPFSPackageBackend(BasePackageBackend):
     def can_translate_package_identifier(self, package_identifier):
         return is_aliased_ipfs_uri(package_identifier)
 
@@ -47,12 +39,6 @@ class IPFSPackageBackend(BasePackageBackend):
             return True
         return False
 
-    def resolve_to_release_lockfile(self, package_identifier):
-        ipfs_path = extract_ipfs_path_from_uri(package_identifier)
-        lockfile_contents = self.ipfs_client.cat(ipfs_path)
-        release_lockfile = json.loads(force_text(lockfile_contents))
-        return release_lockfile
-
     def can_resolve_package_source_tree(self, release_lockfile):
         sources = release_lockfile.get('sources')
         if sources is None:
@@ -60,6 +46,25 @@ class IPFSPackageBackend(BasePackageBackend):
         return all(
             is_ipfs_uri(value) for value in sources.values()
         )
+
+    def can_persist_package_file(self, file_path):
+        return True
+
+
+class IPFSPackageBackend(BaseIPFSPackageBackend):
+    """
+    Package backend that resolves IPFS URIs
+    """
+    def setup_backend(self):
+        ipfs_host = self.settings['host']
+        ipfs_port = self.settings['port']
+        self.ipfs_client = ipfsapi.connect(ipfs_host, ipfs_port)
+
+    def resolve_to_release_lockfile(self, package_identifier):
+        ipfs_path = extract_ipfs_path_from_uri(package_identifier)
+        lockfile_contents = self.ipfs_client.cat(ipfs_path)
+        release_lockfile = json.loads(force_text(lockfile_contents))
+        return release_lockfile
 
     @cast_return_to_dict
     def resolve_package_source_tree(self, release_lockfile):
@@ -74,12 +79,6 @@ class IPFSPackageBackend(BasePackageBackend):
                     yield sub_path, source_content
             else:
                 yield source_path, source_value
-
-    #
-    # Write API primarily for publishing
-    #
-    def can_persist_package_file(self, file_path):
-        return True
 
     def persist_package_file(self, file_path):
         """

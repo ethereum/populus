@@ -1,0 +1,127 @@
+{
+  "lockfile_version": "1",
+  "version": "1.0.0",
+  "package_name": "escrow",
+  "sources": {
+    "./contracts/SafeSendLib.sol": "ipfs://QmcnzhWjaV71qzKntv4burxyix9W2yBA2LrJB4k99tGqkZ",
+    "./contracts/Escrow.sol": "ipfs://QmSwmFLT5B5aag485ZWvHmfdC1cU5EFdcqs1oqE5KsxGMw"
+  },
+  "contract_types": {
+    "SafeSendLib": {
+      "bytecode": "0x606060405234610000575b60ad806100176000396000f36504062dabbdf050606060405260e060020a60003504639341231c81146024575b6000565b60306004356024356044565b604080519115158252519081900360200190f35b60003073ffffffffffffffffffffffffffffffffffffffff16318211156068576000565b60405173ffffffffffffffffffffffffffffffffffffffff84169083156108fc029084906000818181858888f19350505050151560a3576000565b5060015b9291505056",
+      "runtime_bytecode": "0x6504062dabbdf050606060405260e060020a60003504639341231c81146024575b6000565b60306004356024356044565b604080519115158252519081900360200190f35b60003073ffffffffffffffffffffffffffffffffffffffff16318211156068576000565b60405173ffffffffffffffffffffffffffffffffffffffff84169083156108fc029084906000818181858888f19350505050151560a3576000565b5060015b9291505056",
+      "abi": [
+        {
+          "constant": false,
+          "inputs": [
+            {"name": "recipient", "type": "address"},
+            {"name": "value", "type": "uint256"}
+          ],
+          "name": "sendOrThrow",
+          "outputs": [
+            {"name": "", "type": "bool"}
+          ],
+          "payable": false,
+          "type": "function"
+        }
+      ],
+      "compiler": {
+        "type": "solc",
+        "version": "0.4.6+commit.2dabbdf0.Darwin.appleclang",
+        "settings": {
+          "optimize": true
+        }
+      },
+      "natspec": {
+        "author": "Piper Merriam <pipermerriam@gmail.com>",
+        "methods": {
+          "sendOrThrow(address,uint256)": {
+            "details": "Attempts to send the specified amount to the recipient throwing an error if it fails",
+            "params": {
+              "recipient": "The address that the funds should be to.",
+              "value": "The amount in wei that should be sent."
+            }
+          }
+        },
+        "title": "Library for safe sending of ether."
+      }
+    },
+    "Escrow": {
+      "runtime_bytecode": "0x606060405260e060020a600035046366d003ac811461003457806367e404ce1461005d57806369d8957514610086575b610000565b3461000057610041610095565b60408051600160a060020a039092168252519081900360200190f35b34610000576100416100a4565b60408051600160a060020a039092168252519081900360200190f35b34610000576100936100b3565b005b600154600160a060020a031681565b600054600160a060020a031681565b60005433600160a060020a039081169116141561014857600154604080516000602091820152815160e260020a6324d048c7028152600160a060020a03938416600482015230909316316024840152905173__SafeSendLib___________________________92639341231c926044808301939192829003018186803b156100005760325a03f41561000057506101e2915050565b60015433600160a060020a039081169116141561002f576000805460408051602090810193909352805160e260020a6324d048c7028152600160a060020a039283166004820152309092163160248301525173__SafeSendLib___________________________92639341231c9260448082019391829003018186803b156100005760325a03f41561000057506101e2915050565b610000565b5b5b56",
+      "abi": [
+        {
+          "constant": true,
+          "inputs": [],
+          "name": "recipient",
+          "outputs": [
+            {"name": "","type": "address"}
+          ],
+          "payable": false,
+          "type": "function"
+        },
+        {
+          "constant": true,
+          "inputs": [],
+          "name": "sender",
+          "outputs": [
+            {"name": "","type": "address"}
+          ],
+          "payable": false,
+          "type": "function"
+        },
+        {
+          "constant": false,
+          "inputs": [],
+          "name": "releaseFunds",
+          "outputs": [],
+          "payable": false,
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {"name": "_recipient","type": "address"}
+          ],
+          "payable": true,
+          "type": "constructor"
+        }
+      ],
+      "compiler": {
+        "type": "solc",
+        "version": "0.4.6+commit.2dabbdf0.Darwin.appleclang",
+        "settings": {
+          "optimize": true
+        }
+      },
+      "natspec": {
+        "author": "Piper Merriam <pipermerriam@gmail.com>",
+        "methods": {
+          "releaseFunds()": {
+            "details": "Releases the escrowed funds to the other party.",
+            "notice": "This will release the escrowed funds to the other party."
+          }
+        },
+        "title": "Contract for holding funds in escrow between two semi trusted parties."
+      }
+    }
+  },
+  "deployments": {
+    "blockchain://41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d/block/e76cf1f29a4689f836d941d7ffbad4e4b32035a441a509dc53150c2165f8e90d": {
+      "SafeMathLib": {
+        "contract_type": "SafeSendLib",
+        "address": "0x80d7f7a33e551455a909e1b914c4fd4e6d0074cc",
+        "transaction": "0x74561167f360eaa20ea67bd4b4bf99164aabb36b2287061e86137bfa0d35d5fb",
+        "block": "0x46554e3cf7b768b1cc1990ad4e2d3a137fe9373c0dda765f4db450cd5fa64102"
+      },
+      "Escrow": {
+        "contract_type": "Escrow",
+        "address": "0x35b6b723786fd8bd955b70db794a1f1df56e852f",
+        "transaction": "0x905fbbeb6069d8b3c8067d233f58b0196b43da7a20b839f3da41f69c87da2037",
+        "block": "0x9b39dcab3d665a51755dedef56e7c858702f5817ce926a0cd8ff3081c5159b7f",
+        "link_dependencies": [
+          {"offset": 524, "value": "SafeSendLib"},
+          {"offset": 824, "value": "SafeSendLib"}
+        ]
+      }
+    }
+  }
+}

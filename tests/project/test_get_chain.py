@@ -99,17 +99,13 @@ def test_project_local_chain_rpc(project_dir):
     rpc_port = str(get_open_port())
     project.config['chains.local.web3.provider.class'] = 'web3.providers.rpc.RPCProvider'
     project.config['chains.local.geth.settings.rpc_port'] = rpc_port
-    project.config['chains.local.web3.settings.rpc_port'] = rpc_port
+    project.config['chains.local.web3.provider.settings.rpc_port'] = rpc_port
     project.write_config()
 
     chain = project.get_chain('local')
 
     with chain as running_local_chain:
         web3 = running_local_chain.web3
-        print(web3.currentProvider)
-        prent(vars(web3.currentProvider))
-        print(running_local_chain)
-        print(vars(running_local_chain))
         assert web3.version.node.startswith('Geth')
 
         running_local_chain.wait.for_block(block_number=1, timeout=180)

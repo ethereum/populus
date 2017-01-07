@@ -1,0 +1,4 @@
+{
+  "class": "populus.packages.backends.manifest.LocalManifestBackend",
+  "priority": 10
+}

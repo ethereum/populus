@@ -2,12 +2,8 @@ import os
 
 import click
 
-from populus.utils.config import (
-    get_default_project_config_file_path,
-)
 from populus.utils.filesystem import (
     ensure_path_exists,
-    ensure_file_exists,
 )
 
 from .main import main
@@ -58,29 +54,23 @@ def init(ctx):
     Generate project layout with an example contract.
     """
     project = ctx.obj['PROJECT']
-    if project.config_file_path is None:
-        project_config_file_path = get_default_project_config_file_path(
-            project.project_dir,
-        )
-    else:
-        project_config_file_path = project.config_file_path
 
-    if not os.path.exists(project_config_file_path):
-        ensure_file_exists(project_config_file_path)
+    if not project.config_file_path:
+        project.write_config()
         click.echo(
             "Wrote empty project config file: ./{0}".format(
-                os.path.relpath(project_config_file_path)
+                os.path.relpath(project.config_file_path)
             )
         )
 
-    if ensure_path_exists(project.contracts_dir):
+    if ensure_path_exists(project.contracts_source_dir):
         click.echo(
             "Created Directory: ./{0}".format(
-                os.path.relpath(project.contracts_dir)
+                os.path.relpath(project.contracts_source_dir)
             )
         )
 
-    example_contract_path = os.path.join(project.contracts_dir, 'Greeter.sol')
+    example_contract_path = os.path.join(project.contracts_source_dir, 'Greeter.sol')
     if not os.path.exists(example_contract_path):
         with open(example_contract_path, 'w') as example_contract_file:
             example_contract_file.write(GREETER_FILE_CONTENTS)

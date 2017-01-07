@@ -106,6 +106,10 @@ def test_project_local_chain_rpc(project_dir):
 
     with chain as running_local_chain:
         web3 = running_local_chain.web3
+        print(web3.currentProvider)
+        prent(vars(web3.currentProvider))
+        print(running_local_chain)
+        print(vars(running_local_chain))
         assert web3.version.node.startswith('Geth')
 
         running_local_chain.wait.for_block(block_number=1, timeout=180)

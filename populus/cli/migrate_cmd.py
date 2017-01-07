@@ -3,7 +3,6 @@ import click
 from populus.utils.cli import (
     select_chain,
     show_chain_sync_progress,
-    get_unlocked_deploy_from_address,
 )
 from populus.migrations.migration import (
     get_migration_classes_for_execution,
@@ -37,7 +36,7 @@ def migrate(ctx, chain_name):
     if not chain_name:
         chain_name = select_chain(project)
 
-    chain_config = project.config.chains[chain_name]
+    chain_config = project.get_chain_config(chain_name)
 
     # Determine if the chain is *migratable*
     if 'registrar' not in chain_config:
@@ -70,9 +69,6 @@ def migrate(ctx, chain_name):
     with project.get_chain(chain_name) as chain:
         if chain_name in {'mainnet', 'morden'}:
             show_chain_sync_progress(chain)
-
-        account = get_unlocked_deploy_from_address(chain)
-        chain.web3.eth.defaultAccount = account
 
         # Wait for chain sync if this is a public network.
         if chain_name in {'mainnet', 'morden'}:

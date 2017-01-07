@@ -2,8 +2,12 @@ import os
 
 import click
 
+from populus.utils.config import (
+    get_default_project_config_file_path,
+)
 from populus.utils.filesystem import (
-    ensure_path_exists
+    ensure_path_exists,
+    ensure_file_exists,
 )
 
 from .main import main
@@ -27,7 +31,9 @@ def test_custom_greeting(chain):
 """
 
 
-GREETER_FILE_CONTENTS = """contract Greeter {
+GREETER_FILE_CONTENTS = """pragma solidity ^0.4.0;
+
+    contract Greeter {
     string public greeting;
 
     function Greeter() {
@@ -52,13 +58,20 @@ def init(ctx):
     Generate project layout with an example contract.
     """
     project = ctx.obj['PROJECT']
+    if project.config_file_path is None:
+        project_config_file_path = get_default_project_config_file_path(
+            project.project_dir,
+        )
+    else:
+        project_config_file_path = project.config_file_path
 
-    if not os.path.exists(project.primary_config_file_path):
-        with open(project.primary_config_file_path, 'w') as config_file:
-            config_file.write("[populus]\n")
-            config_file.write("project_dir = {0}".format(
-                os.path.relpath(project.project_dir)
-            ))
+    if not os.path.exists(project_config_file_path):
+        ensure_file_exists(project_config_file_path)
+        click.echo(
+            "Wrote empty project config file: ./{0}".format(
+                os.path.relpath(project_config_file_path)
+            )
+        )
 
     if ensure_path_exists(project.contracts_dir):
         click.echo(

@@ -5,7 +5,6 @@ from collections import OrderedDict
 from populus.utils.cli import (
     select_chain,
     show_chain_sync_progress,
-    get_unlocked_deploy_from_address,
     deploy_contract_and_verify,
     select_project_contract,
 )
@@ -43,16 +42,6 @@ def echo_post_deploy_message(web3, deployed_contracts):
 
 @main.command('deploy')
 @click.option(
-    'deploy_from',
-    '--deploy-from',
-    '-d',
-    help=(
-        "Specifies the account that should be used for deploys.  You can "
-        "specify either the full account address, or the integer 0 based index "
-        "of the account in the account list."
-    ),
-)
-@click.option(
     'chain_name',
     '--chain',
     '-c',
@@ -64,7 +53,7 @@ def echo_post_deploy_message(web3, deployed_contracts):
 )
 @click.argument('contracts_to_deploy', nargs=-1)
 @click.pass_context
-def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
+def deploy(ctx, chain_name, contracts_to_deploy):
     """
     Deploys the specified contracts to a chain.
     """
@@ -100,22 +89,8 @@ def deploy(ctx, chain_name, deploy_from, contracts_to_deploy):
     deployed_contracts = OrderedDict()
 
     with chain:
-        web3 = chain.web3
-
         if chain_name in {'mainnet', 'morden'}:
             show_chain_sync_progress(chain)
-
-        if deploy_from is None:
-            deploy_from = get_unlocked_deploy_from_address(chain)
-        elif deploy_from not in web3.eth.accounts:
-            try:
-                deploy_from = web3.eth.accounts[int(deploy_from)]
-            except IndexError:
-                raise click.ClickException(
-                    "Unknown deploy_from account: {0}".format(deploy_from)
-                )
-
-        web3.eth.defaultAccount = deploy_from
 
         # Get the deploy order.
         deploy_order = get_deploy_order(

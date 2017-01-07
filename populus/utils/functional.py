@@ -1,4 +1,5 @@
 import functools
+import collections
 
 
 def noop(*args, **kwargs):
@@ -14,7 +15,7 @@ def combine(f, g):
 
 
 def compose(*functions):
-    return functools.reduce(combine, functions, identity)
+    return functools.reduce(combine, reversed(functions), identity)
 
 
 def apply_formatters_to_return(*formatters):
@@ -49,3 +50,20 @@ class cached_property(object):
             return self
         res = instance.__dict__[self.name] = self.func(instance)
         return res
+
+
+def cast_return(_type):
+    def outer(fn):
+        @functools.wraps(fn)
+        def inner(*args, **kwargs):
+            return _type(fn(*args, **kwargs))
+
+        return inner
+    return outer
+
+
+cast_return_to_tuple = cast_return(tuple)
+cast_return_to_list = cast_return(list)
+cast_return_to_dict = cast_return(dict)
+sort_return = cast_return(sorted)
+cast_return_to_ordered_dict = cast_return(collections.OrderedDict)

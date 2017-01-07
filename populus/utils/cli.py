@@ -6,17 +6,25 @@ import click
 
 import gevent
 
+from .deploy import (
+    deploy_contract,
+)
+from .accounts import (
+    is_account_locked,
+)
+from .chains import (
+    get_data_dir as get_local_chain_datadir,
+    get_geth_ipc_path,
+)
+
 from populus.observers import (
     DirWatcher,
 )
 from populus.compilation import (
     compile_and_write_contracts,
 )
-from .deploy import (
-    deploy_contract,
-)
-from .accounts import (
-    is_account_locked,
+from populus.config import (
+    Config,
 )
 
 
@@ -25,7 +33,7 @@ def select_chain(project):
     Present the user with a prompt to select which of the project chains they
     want to use.
     """
-    chain_options = set(project.config.chains.keys())
+    chain_options = set(project.config['chains'].keys())
 
     choose_chain_msg = "\n".join(itertools.chain((
         "Available Chains",
@@ -101,14 +109,12 @@ def configure_chain(project, chain_name):
     - rpc/ipc configuration
     - select default account (web3.eth.defaultAccount)
     """
-    is_existing_chain = chain_name in project.config.chains
-
-    chain_section_header = "chain:{chain_name}".format(chain_name=chain_name)
-
-    if is_existing_chain:
-        chain_config = dict(project.config.items(chain_section_header))
-    else:
-        chain_config = {}
+    try:
+        chain_config = project.get_chain_config(chain_name)
+        is_existing_chain = True
+    except KeyError:
+        chain_config = Config({})
+        is_existing_chain = False
 
     start_msg = "Configuring {status} chain: {chain_name}".format(
         status="existing" if is_existing_chain else "**new**",
@@ -135,7 +141,7 @@ def configure_chain(project, chain_name):
     is_internal = click.confirm(internal_or_external_msg, default=True)
 
     if not is_internal:
-        chain_config['is_external'] = 'True'
+        chain_config['is_external'] = True
 
     # Web3 Provider
     web3_provider_msg = (
@@ -147,16 +153,16 @@ def configure_chain(project, chain_name):
     provider = click.prompt(web3_provider_msg, default='ipc')
 
     if provider.lower() in {'ipc', '1'}:
-        chain_config['provider'] = 'web3.providers.ipc.IPCProvider'
+        chain_config['web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     elif provider.lower() in {'rpc', '2'}:
-        chain_config['provider'] = 'web3.providers.rpc.RPCProvider'
+        chain_config['web3.provider.class'] = 'web3.providers.rpc.RPCProvider'
     else:
         unknown_provider_message = (
             "Invalid response.  Allowed responses are 1/2/ipc/rpc"
         )
         raise click.ClickException(unknown_provider_message)
 
-    if chain_config['provider'] == 'web3.providers.ipc.IPCProvider':
+    if chain_config['web3.provider.class'] == 'web3.providers.ipc.IPCProvider':
         custom_ipc_path_msg = (
             "\n\nWill this blockchain be running with a non-standard `geth.ipc`"
             "path?\n\n"
@@ -164,15 +170,19 @@ def configure_chain(project, chain_name):
         if click.confirm(custom_ipc_path_msg, default=False):
             ipc_path_msg = "Path to `geth.ipc` socket?"
             ipc_path = click.prompt(ipc_path_msg)
-            chain_config['ipc_path'] = ipc_path
-    elif chain_config['provider'] == 'web3.providers.rpc.RPCProvider':
+            chain_config['web3.providers.settings.ipc_path'] = ipc_path
+        elif chain_name not in {"mainnet", "ropsten"}:
+            chain_config['web3.providers.settings.ipc_path'] = get_geth_ipc_path(
+                get_local_chain_datadir(project.project_dir, chain_name),
+            )
+    elif chain_config['web3.provider.class'] == 'web3.providers.rpc.RPCProvider':
         custom_rpc_host = (
             "\n\nWill the RPC server be bound to `localhost`?"
         )
         if not click.confirm(custom_rpc_host, default=True):
             rpc_host_msg = "Hostname?"
             rpc_host = click.prompt(rpc_host_msg)
-            chain_config['rpc_host'] = rpc_host
+            chain_config['web3.providers.settings.rpc_host'] = rpc_host
 
         custom_rpc_port = (
             "\n\nWill the RPC server be listening on port 8545?"
@@ -180,18 +190,12 @@ def configure_chain(project, chain_name):
         if not click.confirm(custom_rpc_port, default=True):
             rpc_port_msg = "Port?"
             rpc_port = click.prompt(rpc_port_msg)
-            chain_config['rpc_port'] = rpc_port
-
-    if not project.config.has_section(chain_section_header):
-        project.config.add_section(chain_section_header)
+            chain_config['web3.providers.settings.rpc_port'] = rpc_port
 
     # Save config so that we can spin this chain up.
-    for key, value in chain_config.items():
-        project.config.set(chain_section_header, key, value)
+    project.config['chains'][chain_name] = chain_config
 
-    project.write_config()
-
-    if project.config.chains[chain_name].get('is_external', False):
+    if chain_config.get('is_external', False):
         is_chain_ready_msg = (
             "Populus needs to connect to the chain.  Press [Enter] when the "
             "chain is ready for populus"
@@ -205,15 +209,12 @@ def configure_chain(project, chain_name):
             "{0}.  Would you like to set a different default "
             "account?".format(web3.eth.defaultAccount)
         )
-        if click.confirm(choose_default_account_msg):
+        if click.confirm(choose_default_account_msg, default=True):
             default_account = select_account(chain)
-            project.config.set(
-                chain_section_header, 'default_account', default_account,
-            )
+            default_account_key = 'chains.{0}.web3.eth.default_account'.format(chain_name)
+            project.config[default_account_key] = default_account
 
-    click.echo(
-        "Writing configuration to {0} ...".format(project.primary_config_file_path)
-    )
+    click.echo("Writing project configuration ...")
     project.write_config()
     click.echo("Success!")
 
@@ -263,9 +264,9 @@ def deploy_contract_and_verify(chain,
         base_contract_factory = chain.contract_factories[contract_name]
 
     if is_account_locked(web3, web3.eth.defaultAccount):
-        deploy_from = select_account(chain)
-        if is_account_locked(web3, deploy_from):
-            request_account_unlock(chain, deploy_from, None)
+        default_account = select_account(chain)
+        if is_account_locked(web3, default_account):
+            request_account_unlock(chain, default_account, None)
 
     # TODO: this needs to do contract linking.
     click.echo("Deploying {0}".format(contract_name))
@@ -404,7 +405,7 @@ def show_chain_sync_progress(chain):
             break
 
 
-def get_unlocked_deploy_from_address(chain):
+def get_unlocked_default_account_address(chain):
     """
     Combination of other utils to get the address deployments should come from.
 
@@ -414,15 +415,14 @@ def get_unlocked_deploy_from_address(chain):
     If not unlocked, askes for password to unlock.
     """
     web3 = chain.web3
-    chain_config = chain.chain_config
+    chain_config = chain.config
     chain_name = chain.chain_name
-    chain_section_name = "chain:{name}".format(name=chain_name)
     project = chain.project
     config = project.config
 
     # Choose the address we should deploy from.
-    if 'deploy_from' in chain_config:
-        account = chain_config['deploy_from']
+    if 'web3.eth.default_account' in chain_config:
+        account = chain_config['web3.eth.default_account']
         if account not in web3.eth.accounts:
             raise click.ClickException(
                 "The chain {0!r} is configured to deploy from account {1!r} "
@@ -434,20 +434,17 @@ def get_unlocked_deploy_from_address(chain):
             )
     else:
         account = select_account(chain)
-        set_as_deploy_from_msg = (
+        set_as_default_account_msg = (
             "Would you like set the address '{0}' as the default"
-            "`deploy_from` address for the '{1}' chain?".format(
+            "`default_account` address for the '{1}' chain?".format(
                 account,
                 chain_name,
             )
         )
-        if click.confirm(set_as_deploy_from_msg):
-            if not config.has_section(chain_section_name):
-                config.add_section(chain_section_name)
-            config.set(chain_section_name, 'deploy_from', account)
-            click.echo(
-                "Wrote updated chain configuration to '{0}'".format(project.write_config())
-            )
+        if click.confirm(set_as_default_account_msg):
+            config['chains.{0}.web3.eth.default_account'.format(chain_name)] = account
+            project.write_config()
+            click.echo("Wrote updated chain configuration")
 
     # Unlock the account if needed.
     if is_account_locked(web3, account):

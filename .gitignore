@@ -55,15 +55,19 @@ docs/populus.utils.rst
 **/known_contracts.json
 
 # Chains
-chains/
+/examples/**/chains/
 .hypothesis
-chaindata/
 genesis.json
-keystore/
+/chains/
+
+# Config
+/populus.ini
+/populus.json
+/populus.yml
 
 # Test remnants
-logs/
-./migrations/
+/logs/
+/migrations/
 
 # pytest
 .cache/

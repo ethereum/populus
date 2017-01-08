@@ -19,61 +19,47 @@ your populus project.
 Basic Usage
 ^^^^^^^^^^^
 
-.. py:class:: Project(config_file_paths=None)
+.. py:class:: Project(config_file_path=None)
 
-When instantaited with no arguments, the project will load any ``populus.ini``
-file found in the current working directory and the current user's ``$HOME``
-directory.
+When instantaited with no arguments, the project will look for the following
+configuration files in the following order.
 
-If there are specific configuration files that you would like loaded then you
-can do so by passing them in as an array to the constructor.
+* ``populus.json``
+* ``populus.yml``
+* ``populus.ini``
 
-.. code-block::
+If more than one of these files is present in the root of your project populus
+will throw an exception indicating that you must consolodate your configuration
+to a single file.
 
-    from populus.project import Project
-    # loads local `populus.ini` and `$HOME/populus.ini` if present.
-    project = Project()
-
-    # loads only the specified paths.
-    other_project = Project(['/path/to/other/populus.ini'])
-    other_project = Project([
-        '/path/to/other/populus.ini',
-        '/another/path/config.ini',
-    ])
-
-Configuration files are loaded in reverse order meaning that configuration
-values set in the first files will supercede files later in the list.
+The ``populus.ini`` style configuration is deprecated as of ``1.4.2`` and
+populus will refuse to update this type of configuration file as it must be
+migrated to a ``json`` or ``yaml`` file type.
 
 
 Loading, Reloading, and Writing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. py:attribute:: Project.primary_config_file_path
+.. py:attribute:: Project.config_file_path
 
-    The path that configuration will be written to by default when
+    The path that configuration will be written to when
     ``Project.write_config()`` is called.  This defaults to a file named
-    ``populus.ini`` in ``Project.project_dir``.
+    ``populus.json`` in directory ``Project.project_dir``.
 
 
-.. py:method:: Project.load_config(config_file_paths=None)
+.. py:method:: Project.load_config()
 
-    Loads the configuration files denoted by ``config_file_paths``.  If no
-    paths are given, defaults to loading the local ``populus.ini`` and
-    ``$HOME/populus.ini`` files.  This operation is destructive and will
-    override any configuration changes that have been made.
+    Loads the project configuration from disk, replacing the current
+    configuration for the project.  This occurs automatically during
+    instantiation of the ``Project`` class.
 
 
 .. py:method:: Project.write_config(destination_path=None)
 
-    Writes the current project configuration to the given ``destination_path``.
-    If no desitnation path is given, defaults to
-    ``Project.primary_config_file_path``.
-
-
-.. py:method:: Project.reload_config()
-
-    Reloads the configuration files.  This operation is destructive and will
-    override any configuration changes that have been made.
+    Writes the current project configuration to the file path denoted by
+    ``Project.config_file_path``.  If no configuration file was specified
+    during project instantiation which will typically be the case, this will
+    default to writing to ``populus.json`` or ``populus.yml``.
 
 
 Filesystem Path Properties and Methods
@@ -94,6 +80,8 @@ dictories and paths that populus uses.
 .. py:attribute:: Project.contracts_dir
 
     The path under which populus will search for contracts to compile.
+    Configurable under the path ``compilation.contracts_source_dir``.  Defaults
+    to ``<project-dir>/contracts``.
 
 
 .. py:attribute:: Project.build_dir
@@ -106,10 +94,9 @@ dictories and paths that populus uses.
     The path that the JSON build artifact will be written to.
 
 
-.. py:attribute:: Project.compile_project_contracts
+.. py:attribute:: Project.compile_contracts
 
-    The parsed JSON output loaded from the
-    ``Project.compiled_contracts_file_path``.
+    The parsed JSON result from compilation.
 
 
 .. py:method:: Project.get_chain(chain_name, *chain_args, *chain_kwargs)

@@ -23,6 +23,8 @@ your solidity source to match this updated version of the contract.
 
 .. code-block:: solidity
 
+    pragma solidity ^0.4.0;
+
     contract Greeter {
         string public greeting;
 
@@ -166,8 +168,9 @@ is a **real** Ethereum blockchain in the sense that it will use the go-ethereum
 binary to run the blockchain, and that you can interact with it the same way
 you woult the public networks.
 
-Next, we used the ``deploy`` command to deploy our ``Greeter`` contract onto
-this blockchain.  Under the hood, Populus did the following things.
+Next, we used the ``$ populus deploy`` command to deploy our ``Greeter``
+contract onto this blockchain.  Under the hood, Populus did the following
+things.
 
 * Ran the test chain in a subprocess.
 * Compiled your contracts.

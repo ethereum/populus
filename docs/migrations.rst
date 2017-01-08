@@ -6,6 +6,8 @@ Migrations
 .. py:module:: populus.migrations
 .. py:currentmodule:: populus.migrations
 
+.. warning:: The migrations functionality is pending deprecation and will be fully removed in an upcoming release.
+
 Introduction
 ------------
 

@@ -89,9 +89,6 @@ class Project(object):
 
         self._default_config_info = load_default_config_info()
 
-    def reload_config(self):
-        self.load_config()
-
     _config_cache = None
 
     @property

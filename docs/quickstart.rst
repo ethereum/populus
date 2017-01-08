@@ -83,6 +83,8 @@ that is generated as part of the project initialization.
 
 .. code-block:: solidity
 
+    pragma solidity ^0.4.0;
+
     contract Greeter {
         string public greeting;
 

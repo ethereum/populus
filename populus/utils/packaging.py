@@ -22,6 +22,7 @@ from .filesystem import (
 from .functional import (
     cast_return_to_tuple,
     cast_return_to_dict,
+    cast_return_to_ordered_dict,
 )
 
 
@@ -603,6 +604,33 @@ def resolve_package_source_tree(release_lockfile, package_backends):
             "None of the configured package backends could resolve the source tree for"
             "'{0}'".format(release_lockfile)
         )
+
+
+def persist_package_file(file_path, package_backends):
+    """
+    Find the first backend which is capable of persisting the given file path
+    and persist the given file.
+    """
+    for backend in package_backends.values():
+        if backend.can_persist_package_file(file_path):
+            return backend.persist_package_file(file_path)
+    else:
+        raise ValueError(
+            "None of the configured package backends could persist '{0}'".format(
+                file_path,
+            )
+        )
+
+
+@cast_return_to_ordered_dict
+def get_publishable_backends(release_lockfile, release_lockfile_uri, package_backends):
+    """
+    Return the package backends which are capable of publishing the given
+    release lockfile and corresponding URI.
+    """
+    for backend_name, backend in package_backends.items():
+        if backend.can_publish_release_lockfile(release_lockfile, release_lockfile_uri):
+            yield backend_name, backend
 
 
 def recursively_resolve_package_data(package_identifier_lineage, package_backends):

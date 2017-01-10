@@ -1,6 +1,7 @@
 import click
 import json
 import os
+import itertools
 
 from populus.utils.filesystem import (
     ensure_path_exists,
@@ -10,6 +11,7 @@ from populus.utils.packaging import (
     validate_package_manifest,
     get_lockfile_build_path,
     validate_release_lockfile,
+    get_publishable_backends,
 )
 
 from populus.packages.build import (
@@ -17,7 +19,9 @@ from populus.packages.build import (
     construct_deployments_object,
     construct_contract_type_object,
     persist_package_file,
-    get_publishable_backends,
+)
+from populus.packages.contracts import (
+    is_contract_name,
 )
 from populus.packages.installation import (
     install_project_dependencies,
@@ -281,19 +285,30 @@ def package_build(ctx,
             # TODO: if the chain is already defined, use that definition or replace it.
             # TODO: ewwww mutation
             release_lockfile['deployments'].setdefault(chain_definition, {})
+            # TODO: ewwww mutation
             release_lockfile['deployments'][chain_definition].update(
                 deployed_contract_instances
             )
 
-    # TODO: Pull contract types from deployments that need to be included as well.
-    # TODO: ewww mutationy stuff
-    if contract_instance_names:
+    contract_types_names_from_deployments = {
+        contract_instance['contract_type']
+        for deployed_instances in release_lockfile.get('deployments', {}).values()
+        for contract_instance in deployed_instances.values()
+        if is_contract_name(contract_instance['contract_type'])
+    }
+    all_contract_type_names = tuple(sorted(set(itertools.chain(
+        contract_type_names,
+        contract_types_names_from_deployments,
+    ))))
+
+    if all_contract_type_names:
+        # TODO: eww mutation
         release_lockfile.setdefault('contract_types', {})
 
-    for contract_name in contract_type_names:
-        contract_type_object = construct_contract_type_object(project, contract_name)
+    for contract_type_name in all_contract_type_names:
+        contract_type_object = construct_contract_type_object(project, contract_type_name)
         # TODO: eww mutation
-        release_lockfile['contract_types'][contract_name] = contract_type_object
+        release_lockfile['contract_types'][contract_type_name] = contract_type_object
 
     ensure_path_exists(project.build_asset_dir)
 

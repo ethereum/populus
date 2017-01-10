@@ -6,27 +6,92 @@ from populus.utils.linking import (
 )
 from populus.utils.functional import (
     cast_return_to_dict,
-    cast_return_to_ordered_dict,
 )
 from populus.utils.chains import (
     get_chain_definition,
 )
 from populus.utils.packaging import (
     validate_package_manifest,
+    persist_package_file,
     extract_build_dependendencies_from_installed_packages,
 )
 
 
-def persist_package_file(file_path, package_backends):
-    for backend in package_backends.values():
-        if backend.can_persist_package_file(file_path):
-            return backend.persist_package_file(file_path)
-    else:
-        raise ValueError(
-            "None of the configured package backends could persist '{0}'".format(
-                file_path,
+@cast_return_to_dict
+def build_release_lockfile(project,
+                           chain_names,
+                           contract_instance_names):
+    if not project.has_package_manifest:
+        raise ValueError("No package manifest found in project")
+
+    package_manifest = project.package_manifest
+    validate_package_manifest(package_manifest)
+
+    yield 'lockfile_version', '1'
+    yield 'package_name', package_manifest['package_name']
+    yield 'version', package_manifest['version']
+
+    package_backends = project.package_backends
+
+    source_file_uris = {
+        os.path.join('.', file_path): persist_package_file(file_path, package_backends)
+        for file_path in project.contract_source_paths
+    }
+    if source_file_uris:
+        yield 'sources', source_file_uris
+
+    deployments = build_deployments(project, chain_names, contract_instance_names)
+    if deployments:
+        yield 'deployments', deployments
+
+    package_meta = build_package_meta_data(package_manifest)
+    if package_meta:
+        yield 'package_meta': package_meta
+
+    # TODO: check if there are discrepancies between what is *supposed* to be
+    # installed and what is and figure out how to resolve them.
+    ARST
+
+    contract_types_names_from_deployments = {
+        contract_instance['contract_type']
+        for deployed_instances in release_lockfile.get('deployments', {}).values()
+        for contract_instance in deployed_instances.values()
+        if is_contract_name(contract_instance['contract_type'])
+    }
+    all_contract_type_names = tuple(sorted(set(itertools.chain(
+        contract_type_names,
+        contract_types_names_from_deployments,
+    ))))
+
+    if all_contract_type_names:
+        # TODO: eww mutation
+        release_lockfile.setdefault('contract_types', {})
+
+    for contract_type_name in all_contract_type_names:
+        contract_type_object = construct_contract_type_object(project, contract_type_name)
+        # TODO: eww mutation
+        release_lockfile['contract_types'][contract_type_name] = contract_type_object
+
+
+@cast_return_to_dict
+def build_deployments(project, chain_names, contract_instance_names):
+    for chain_name in chain_names:
+        with project.get_chain(chain_name) as chain:
+            chain_definition, deployed_contract_instances = construct_deployments_object(
+                chain,
+                contract_instance_names,
             )
-        )
+            yield chain_definition, deployed_contract_instances
+
+
+@cast_return_to_dict
+def build_build_dependencies(installed_packages_dir, project_dependencies):
+    installed_dependencies = extract_build_dependendencies_from_installed_packages(
+        installed_packages_dir,
+    )
+    for dependency_name, dependency_identifier in installed_dependencies.items():
+        if dependency_name in project_dependencies:
+            yield dependency_name, dependency_identifier
 
 
 @cast_return_to_dict
@@ -45,45 +110,10 @@ def build_package_meta_data(package_manifest):
 
 @cast_return_to_dict
 def build_base_release_lockfile_data(project):
-    if not project.has_package_manifest:
-        raise ValueError("No package manifest found in project")
-
-    package_manifest = project.package_manifest
-    validate_package_manifest(package_manifest)
-
-    package_backends = project.package_backends
-
-    source_file_uris = {
-        os.path.join('.', file_path): persist_package_file(file_path, package_backends)
-        for file_path in project.contract_source_paths
-    }
-
-    yield 'lockfile_version', '1'
-    yield 'package_name', package_manifest['package_name']
-    yield 'version', package_manifest['version']
-    yield 'sources', source_file_uris
 
     package_meta = build_package_meta_data(package_manifest)
     if package_meta:
         yield 'package_meta', package_meta
-
-    # TODO: check if there are discrepancies between what is *supposed* to be
-    # installed and what is and figure out how to resolve them.
-    if project.dependencies:
-        installed_dependencies = extract_build_dependendencies_from_installed_packages(
-            project.installed_packages_dir,
-        )
-        build_dependencies = {
-            dependency_name: dependency_identifier
-            for dependency_name, dependency_identifier
-            in installed_dependencies.items()
-            if dependency_name in project.dependencies
-        }
-        # TODO: if a dependency was installed directly via an IPFS URI then it
-        # is entirely possible that it isn't registered as a package in the
-        # registrar.  This needs to verify that it's resolvable, and if it
-        # isn't fallback to the IPFS URI of the lockfile.
-        yield 'build_dependencies', build_dependencies
 
 
 EMPTY_BYTECODE_VALUES = {None, "0x"}
@@ -194,10 +224,3 @@ def construct_contract_type_object(project,
             },
         }
         yield 'compiler', compiler_info
-
-
-@cast_return_to_ordered_dict
-def get_publishable_backends(release_lockfile, release_lockfile_uri, package_backends):
-    for backend_name, backend in package_backends.items():
-        if backend.can_publish_release_lockfile(release_lockfile, release_lockfile_uri):
-            yield backend_name, backend

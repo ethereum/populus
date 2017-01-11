@@ -25,16 +25,25 @@ setup(
         "anyconfig>=0.7.0",
         "click>=6.6",
         "contextlib2>=0.5.4",
-        "eth-testrpc>=0.9.3",
-        "gevent>=1.1.2,<1.2.0",  # https://github.com/gevent/gevent/issues/916
-        "py-geth>=1.5.0",
-        "py-solc>=0.6.0",
+        "eth-testrpc>=1.1.0",
+        "py-geth>=1.7.0",
+        "py-solc>=1.0.0",
         "pylru>=1.0.9",
         "pysha3>=0.3",
         "pytest>=2.7.2",
         "toposort>=1.4",
-        "web3>=3.4.4",
+        "watchdog>=0.8.3",
+        "web3>=3.5.1",
     ],
+    extras_require={
+        'gevent': [
+            "gevent>=1.1.2,<1.2.0",  # https://github.com/gevent/gevent/issues/916
+            "web3[gevent]>=3.5.1",
+            "eth-testrpc[gevent]>=1.1.0",
+            "py-geth[gevent]>=1.7.0",
+            "py-solc[gevent]>=0.9.0",
+        ],
+    },
     license="MIT",
     zip_safe=False,
     entry_points={

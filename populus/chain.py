@@ -8,11 +8,6 @@ except ImportError:
 
 from pylru import lrucache
 
-from web3 import (
-    TestRPCProvider,
-    EthereumTesterProvider,
-)
-
 from geth import (
     DevGethProcess,
     LiveGethProcess,
@@ -474,7 +469,6 @@ def testrpc_fn_proxy(fn_name):
 
 class BaseTesterChain(Chain):
     provider = None
-    port = None
 
     has_registrar = True
 
@@ -557,6 +551,14 @@ class BaseTesterChain(Chain):
 
 
 class TestRPCChain(BaseTesterChain):
+    port = None
+
+    def get_web3_config(self):
+        base_config = super(TestRPCChain, self).get_web3_config()
+        config = copy.deepcopy(base_config)
+        config['provider.settings.rpc_port'] = self.port
+        return config
+
     def __enter__(self):
         if self._running:
             raise ValueError("The TesterChain is already running")
@@ -564,7 +566,9 @@ class TestRPCChain(BaseTesterChain):
         if self.port is None:
             self.port = get_open_port()
 
-        self.provider = TestRPCProvider(port=self.port)
+        self._running = True
+
+        self.provider = self.web3.currentProvider
         self.rpc_methods = self.provider.server.application.rpc_methods
 
         self.rpc_methods.full_reset()
@@ -574,7 +578,6 @@ class TestRPCChain(BaseTesterChain):
         self.rpc_methods.evm_mine()
 
         wait_for_connection('127.0.0.1', self.port)
-        self._running = True
         return self
 
     def __exit__(self, *exc_info):
@@ -584,6 +587,9 @@ class TestRPCChain(BaseTesterChain):
             self.provider.server.stop()
             self.provider.server.close()
             self.provider.thread.kill()
+        except AttributeError:
+            self.provider.server.shutdown()
+            self.provider.server.server_close()
         finally:
             self._running = False
 
@@ -593,7 +599,9 @@ class EthereumTesterChain(BaseTesterChain):
         if self._running:
             raise ValueError("The TesterChain is already running")
 
-        self.provider = EthereumTesterProvider()
+        self._running = True
+
+        self.provider = self.web3.currentProvider
         self.rpc_methods = self.provider.rpc_methods
 
         self.rpc_methods.full_reset()
@@ -602,7 +610,6 @@ class EthereumTesterChain(BaseTesterChain):
         self.rpc_methods.rpc_configure('net_version', 1)
         self.rpc_methods.evm_mine()
 
-        self._running = True
         return self
 
     def __exit__(self, *exc_info):

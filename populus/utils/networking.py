@@ -1,8 +1,10 @@
 import sys
 import random
 
-import gevent
-from gevent import socket
+from .compat import (
+    socket,
+    Timeout,
+)
 
 
 if sys.version_info.major == 2:
@@ -19,16 +21,17 @@ def get_open_port():
 
 
 def wait_for_connection(host, port, timeout=30):
-    with gevent.Timeout(timeout):
+    with Timeout(timeout) as _timeout:
         while True:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.timeout = 1
+            s.settimeout(1)
             try:
                 s.connect((host, port))
             except (socket.timeout, ConnectionRefusedError):
-                gevent.sleep(random.random())
+                _timeout.sleep(random.random())
                 continue
             else:
+                s.close()
                 break
         else:
             raise ValueError("Unable to establish HTTP connection")

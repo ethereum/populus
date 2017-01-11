@@ -6,6 +6,8 @@ from web3 import (
     Web3,
     RPCProvider,
     IPCProvider,
+    HTTPProvider,
+    TestRPCProvider,
 )
 
 from .module_loading import (
@@ -116,7 +118,7 @@ def setup_web3_from_config(web3_config):
 
     provider_kwargs = {}
 
-    if issubclass(ProviderClass, RPCProvider):
+    if issubclass(ProviderClass, (RPCProvider, TestRPCProvider)):
         if 'provider.settings.rpc_host' in web3_config:
             provider_kwargs['host'] = web3_config['provider.settings.rpc_host']
 
@@ -128,6 +130,9 @@ def setup_web3_from_config(web3_config):
     elif issubclass(ProviderClass, IPCProvider):
         if 'provider.settings.ipc_path' in web3_config:
             provider_kwargs['ipc_path'] = web3_config['provider.settings.ipc_path']
+    elif issubclass(ProviderClass, HTTPProvider):
+        if 'provider.settings.rpc_endpoint' in web3_config:
+            provider_kwargs['endpoint_uri'] = web3_config['provider.settings.endpoint_uri']
 
     web3 = Web3(ProviderClass(**provider_kwargs))
 

@@ -1,5 +1,6 @@
+import os
+
 import random
-import gevent
 import contextlib
 
 try:
@@ -13,6 +14,10 @@ except ImportError:
         BaseHTTPRequestHandler,
     )
 
+from populus.utils.compat import (
+    spawn,
+    Timeout,
+)
 from populus.utils.networking import (
     get_open_port,
     wait_for_connection,
@@ -25,8 +30,8 @@ def test_wait_for_connection_success():
 
     def _do_client():
         try:
-            wait_for_connection('localhost', port)
-        except gevent.Timeout:
+            wait_for_connection('localhost', port, 2)
+        except Timeout:
             success_tracker['client_success'] = False
         else:
             success_tracker['client_success'] = True
@@ -35,10 +40,10 @@ def test_wait_for_connection_success():
     class TestHTTPServer(HTTPServer):
         timeout = 30
 
-        def handle_timeout():
+        def handle_timeout(self):
             success_tracker['server_success'] = False
 
-        def handle_error():
+        def handle_error(self):
             success_tracker['server_success'] = True
 
     def _do_server():
@@ -48,14 +53,14 @@ def test_wait_for_connection_success():
         server.handle_request()
         success_tracker.setdefault('server_success', True)
 
-    client_thread = gevent.spawn(_do_client)
-    server_thread = gevent.spawn(_do_server)
+    client_thread = spawn(_do_client)
+    server_thread = spawn(_do_server)
 
     try:
-        with gevent.Timeout(5):
+        with Timeout(5) as _timeout:
             while 'client_success' not in success_tracker and 'server_success' not in success_tracker:
-                gevent.sleep(random.random())
-    except gevent.Timeout:
+                _timeout.sleep(random.random())
+    except Timeout:
         pass
 
     assert 'client_success' in success_tracker
@@ -65,25 +70,25 @@ def test_wait_for_connection_success():
     assert success_tracker['server_success'] is True
 
 
-def test_wait_for_connection_success():
+def test_wait_for_connection_failure():
     success_tracker = {}
     port = get_open_port()
 
     def _do_client():
         try:
             wait_for_connection('localhost', port, 2)
-        except gevent.Timeout:
+        except Timeout:
             success_tracker['client_success'] = False
         else:
             success_tracker['client_success'] = True
 
-    client_thread = gevent.spawn(_do_client)
+    client_thread = spawn(_do_client)
 
     try:
-        with gevent.Timeout(5):
+        with Timeout(5) as _timeout:
             while 'client_success' not in success_tracker:
-                gevent.sleep(random.random())
-    except gevent.Timeout:
+                _timeout.sleep(random.random())
+    except Timeout:
         pass
 
     assert 'client_success' in success_tracker

@@ -1,12 +1,14 @@
 import random
 import functools
 
-import gevent
 import click
 
 from populus.chain import (
     BaseGethChain,
     reset_chain,
+)
+from populus.utils.compat import (
+    sleep,
 )
 
 from .main import main
@@ -68,6 +70,6 @@ def chain_run(ctx, chain_name, mine, verbosity):
     with chain:
         try:
             while True:
-                gevent.sleep(random.random())
+                sleep(random.random())
         except KeyboardInterrupt:
             pass

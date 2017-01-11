@@ -1,10 +1,11 @@
-import gevent
-
 import click
 
 from populus.utils.cli import (
     compile_project_contracts,
     watch_project_contracts,
+)
+from populus.utils.compat import (
+    spawn,
 )
 
 from .main import main
@@ -40,7 +41,7 @@ def compile_contracts(ctx, watch, optimize):
     compile_project_contracts(project, optimize=True)
 
     if watch:
-        thread = gevent.spawn(
+        thread = spawn(
             watch_project_contracts,
             project=project,
             optimize=True,

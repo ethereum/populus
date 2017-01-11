@@ -1,7 +1,6 @@
 import click
 import json
 import os
-import itertools
 
 from populus.utils.filesystem import (
     ensure_path_exists,
@@ -15,13 +14,8 @@ from populus.utils.packaging import (
 )
 
 from populus.packages.build import (
-    build_base_release_lockfile_data,
-    construct_deployments_object,
-    construct_contract_type_object,
     persist_package_file,
-)
-from populus.packages.contracts import (
-    is_contract_name,
+    build_release_lockfile,
 )
 from populus.packages.installation import (
     install_project_dependencies,
@@ -191,13 +185,6 @@ def package_install(ctx, package_identifiers, save):
     ),
 )
 @click.option(
-    '--ammend/--no-amend',
-    default=False,
-    help=(
-        "Specifies if this should ammend the changes to an existing release lockfile"
-    ),
-)
-@click.option(
     '--overwrite/--no-overwrite',
     default=False,
     help=(
@@ -210,7 +197,6 @@ def package_build(ctx,
                   chain_names,
                   contract_instance_names,
                   contract_type_names,
-                  ammend,
                   overwrite,
                   wait_for_sync):
     """
@@ -232,39 +218,17 @@ def package_build(ctx,
         version,
     )
 
-    if ammend and overwrite:
-        invariant_options_msg = (
-            "Must specify either --amend or --overwrite but not both"
-        )
-        click.echo(invariant_options_msg)
-        ctx.exit(1)
-    elif ammend and not os.path.exists(release_lockfile_path):
-        cannot_ammend_msg = (
-            "Did not find an existing release lockfile for {version} at "
-            "{release_lockfile_path}.  Run command again without "
-            "--amend.".format(
-                version=version,
-                release_lockfile_path=release_lockfile_path,
-            )
-        )
-        click.echo(cannot_ammend_msg)
-        ctx.exit(1)
-    elif not overwrite and os.path.exists(release_lockfile_path):
+    if not overwrite and os.path.exists(release_lockfile_path):
         cannot_overwrite_msg = (
             "Found an existing release lockfile for {version} at "
             "{release_lockfile_path}.  Run command again with --overwrite to "
-            "overwrite this file or with --amend to ammend to it.".format(
+            "overwrite this file.".format(
                 version=version,
                 release_lockfile_path=release_lockfile_path,
             )
         )
         click.echo(cannot_overwrite_msg)
         ctx.exit(1)
-    elif ammend and os.path.exists(release_lockfile_path):
-        with open(release_lockfile_path) as release_lockfile_file:
-            release_lockfile = json.load(release_lockfile_file)
-    elif overwrite or not os.path.exists(release_lockfile_path):
-        release_lockfile = build_base_release_lockfile_data(project)
     else:
         click.echo("Invariant: This should not be possible")
         ctx.exit(1)
@@ -272,43 +236,13 @@ def package_build(ctx,
     if chain_names and not contract_instance_names:
         click.echo("Must specify which contracts you want to include in the deployments")
         ctx.exit(1)
-    elif chain_names:
-        release_lockfile.setdefault('deployments', {})
 
-    for chain_name in chain_names:
-        click.echo("Building deployments for '{0}' chain".format(chain_name))
-        with project.get_chain(chain_name) as chain:
-            chain_definition, deployed_contract_instances = construct_deployments_object(
-                chain,
-                contract_instance_names,
-            )
-            # TODO: if the chain is already defined, use that definition or replace it.
-            # TODO: ewwww mutation
-            release_lockfile['deployments'].setdefault(chain_definition, {})
-            # TODO: ewwww mutation
-            release_lockfile['deployments'][chain_definition].update(
-                deployed_contract_instances
-            )
-
-    contract_types_names_from_deployments = {
-        contract_instance['contract_type']
-        for deployed_instances in release_lockfile.get('deployments', {}).values()
-        for contract_instance in deployed_instances.values()
-        if is_contract_name(contract_instance['contract_type'])
-    }
-    all_contract_type_names = tuple(sorted(set(itertools.chain(
-        contract_type_names,
-        contract_types_names_from_deployments,
-    ))))
-
-    if all_contract_type_names:
-        # TODO: eww mutation
-        release_lockfile.setdefault('contract_types', {})
-
-    for contract_type_name in all_contract_type_names:
-        contract_type_object = construct_contract_type_object(project, contract_type_name)
-        # TODO: eww mutation
-        release_lockfile['contract_types'][contract_type_name] = contract_type_object
+    release_lockfile = build_release_lockfile(
+        project=project,
+        chain_names=chain_names,
+        contract_instance_names=contract_instance_names,
+        contract_type_names=contract_type_names,
+    )
 
     ensure_path_exists(project.build_asset_dir)
 

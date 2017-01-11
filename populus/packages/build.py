@@ -10,6 +10,9 @@ from populus.utils.functional import (
 from populus.utils.chains import (
     get_chain_definition,
 )
+from populus.utils.contracts import (
+    is_contract_name,
+)
 from populus.utils.packaging import (
     validate_package_manifest,
     persist_package_file,
@@ -20,7 +23,8 @@ from populus.utils.packaging import (
 @cast_return_to_dict
 def build_release_lockfile(project,
                            chain_names,
-                           contract_instance_names):
+                           contract_instance_names,
+                           contract_type_names):
     if not project.has_package_manifest:
         raise ValueError("No package manifest found in project")
 
@@ -46,15 +50,20 @@ def build_release_lockfile(project,
 
     package_meta = build_package_meta_data(package_manifest)
     if package_meta:
-        yield 'package_meta': package_meta
+        yield 'package_meta', package_meta
 
     # TODO: check if there are discrepancies between what is *supposed* to be
     # installed and what is and figure out how to resolve them.
-    ARST
+    build_dependencies = build_build_dependencies(
+        project.installed_packages_dir,
+        project.dependencies,
+    )
+    if build_dependencies:
+        yield 'build_dependencies', build_dependencies
 
     contract_types_names_from_deployments = {
         contract_instance['contract_type']
-        for deployed_instances in release_lockfile.get('deployments', {}).values()
+        for deployed_instances in deployments
         for contract_instance in deployed_instances.values()
         if is_contract_name(contract_instance['contract_type'])
     }
@@ -63,14 +72,12 @@ def build_release_lockfile(project,
         contract_types_names_from_deployments,
     ))))
 
-    if all_contract_type_names:
-        # TODO: eww mutation
-        release_lockfile.setdefault('contract_types', {})
-
-    for contract_type_name in all_contract_type_names:
-        contract_type_object = construct_contract_type_object(project, contract_type_name)
-        # TODO: eww mutation
-        release_lockfile['contract_types'][contract_type_name] = contract_type_object
+    contract_types = build_contract_types(
+        project.compiled_contract_data,
+        all_contract_type_names,
+    )
+    if contract_types:
+        yield 'contract_types', contract_types
 
 
 @cast_return_to_dict
@@ -95,6 +102,16 @@ def build_build_dependencies(installed_packages_dir, project_dependencies):
 
 
 @cast_return_to_dict
+def build_contract_types(compiled_contract_data, contract_type_names):
+    for contract_type_name in contract_type_names:
+        contract_type_object = construct_contract_type_object(
+            compiled_contract_data,
+            contract_type_name,
+        )
+        yield contract_type_name, contract_type_object
+
+
+@cast_return_to_dict
 def build_package_meta_data(package_manifest):
     if 'authors' in package_manifest:
         yield 'authors', package_manifest['authors']
@@ -106,14 +123,6 @@ def build_package_meta_data(package_manifest):
         yield 'keywords', package_manifest['keywords']
     if 'links' in package_manifest:
         yield 'links', package_manifest['links']
-
-
-@cast_return_to_dict
-def build_base_release_lockfile_data(project):
-
-    package_meta = build_package_meta_data(package_manifest)
-    if package_meta:
-        yield 'package_meta', package_meta
 
 
 EMPTY_BYTECODE_VALUES = {None, "0x"}
@@ -192,11 +201,15 @@ def construct_deployments_object(chain, contract_names_to_include):
 
 
 @cast_return_to_dict
-def construct_contract_type_object(project,
-                                   contract_name):
-    yield 'contract_name', contract_name
+def construct_contract_type_object(compiled_contract_data,
+                                   contract_type_name,
+                                   contract_type_alias=None):
+    if contract_type_alias:
+        yield 'contract_name', contract_type_alias
+    else:
+        yield 'contract_name', contract_type_name
 
-    contract_data = project.compiled_contract_data[contract_name]
+    contract_data = compiled_contract_data[contract_type_name]
 
     if contract_data.get('code') not in EMPTY_BYTECODE_VALUES:
         yield 'bytecode', contract_data['code']

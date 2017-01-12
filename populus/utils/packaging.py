@@ -7,9 +7,13 @@ import json
 
 import semver
 
+import jsonschema
+
 from web3.utils.string import (
     force_bytes,
 )
+
+from populus import ASSETS_DIR
 
 from .ipfs import (
     is_ipfs_uri,
@@ -446,12 +450,22 @@ def validate_package_manifest(package_manifest):
     pass
 
 
-def validate_release_lockfile(package_manifest):
+RELEASE_LOCKFILE_SCHEMA_FILENAME = 'release-lockfile-v1.schema.json'
+
+
+def load_release_lockfile_schema():
+    schema_path = os.path.join(ASSETS_DIR, RELEASE_LOCKFILE_SCHEMA_FILENAME)
+    with open(schema_path) as schema_file:
+        schema = json.load(schema_file)
+    return schema
+
+
+def validate_release_lockfile(release_lockfile):
     """
     Validate a release lockfile against the expected schema.
     """
-    # TODO: implement jsonschema validation
-    pass
+    release_lockfile_schema = load_release_lockfile_schema()
+    jsonschema.validate(release_lockfile, release_lockfile_schema)
 
 
 def extract_install_identifier(package_identifier_lineage):

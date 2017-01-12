@@ -463,6 +463,11 @@ def load_release_lockfile_schema():
 def validate_release_lockfile(release_lockfile):
     """
     Validate a release lockfile against the expected schema.
+
+    TODO: additional validation that isn't covered by the JSON-schema
+    - valid relative file paths
+    - referenced package names
+    - whatever else...
     """
     release_lockfile_schema = load_release_lockfile_schema()
     jsonschema.validate(release_lockfile, release_lockfile_schema)

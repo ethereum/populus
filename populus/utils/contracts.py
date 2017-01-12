@@ -91,27 +91,27 @@ def is_contract_name(value):
 EMPTY_BYTECODE_VALUES = {None, "0x"}
 
 
-def verify_contract_bytecode(chain, contract_name, address):
-    contract_data = chain.compiled_contract_data[contract_name]
-    provider = chain.contract_provider
+def verify_contract_bytecode(web3, ContractFactory, address):
+    """
+    TODO: write tests for this.
+    """
+    from web3.contracts.exceptions import BytecodeMismatch
 
     # Check that the contract has bytecode
-    if contract_data['code_runtime'] in EMPTY_BYTECODE_VALUES:
+    if ContractFactory.code_runtime in EMPTY_BYTECODE_VALUES:
         raise ValueError(
             "Contract instances which contain an address cannot have empty "
             "runtime bytecode"
         )
 
-    ContractFactory = provider.get_contract_factory(contract_name)
-
-    chain_bytecode = chain.web3.eth.getCode(address)
+    chain_bytecode = web3.eth.getCode(address)
 
     if chain_bytecode in EMPTY_BYTECODE_VALUES:
-        raise ValueError(
+        raise BytecodeMismatch(
             "No bytecode found at address: {0}".format(address)
         )
     elif chain_bytecode != ContractFactory.code_runtime:
-        raise ValueError(
+        raise BytecodeMismatch(
             "Bytecode found at {0} does not match compiled bytecode:\n"
             " - chain_bytecode: {1}\n"
             " - compiled_bytecode: {2}".format(

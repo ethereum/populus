@@ -8,6 +8,7 @@ from populus.utils.contracts import (
     package_contracts,
     get_shallow_dependency_graph,
     get_recursive_contract_dependencies,
+    verify_contract_bytecode,
 )
 from populus.utils.deploy import (
     compute_deploy_order,
@@ -80,13 +81,11 @@ class Provider(object):
             return False
 
         ContractFactory = self.get_contract_factory(contract_name)
-
-        chain_bytecode = self.chain.web3.eth.getCode(contract_address)
-
-        is_bytecode_match = chain_bytecode == ContractFactory.code_runtime
-
-        if not is_bytecode_match:
+        try:
+            verify_contract_bytecode(self.chain.web3, ContractFactory, contract_address)
+        except (BytecodeMismatch, ValueError):
             return False
+
         return True
 
     def are_contract_factory_dependencies_available(self, contract_name):
@@ -115,20 +114,8 @@ class Provider(object):
         ContractFactory = self.get_contract_factory(contract_name)
         contract_address = self.get_contract_address(contract_name)
 
-        chain_bytecode = self.chain.web3.eth.getCode(contract_address)
-        is_bytecode_match = chain_bytecode == ContractFactory.code_runtime
+        verify_contract_bytecode(self.chain.web3, ContractFactory, contract_address)
 
-        if not is_bytecode_match:
-            raise BytecodeMismatch(
-                "Compiled bytecode does not match the bytecode found on chain.\n\n"
-                " - address: {0}\n"
-                " - chain-bytecode: {1}\n"
-                " - computed-bytecode: {2}\n".format(
-                    contract_address,
-                    ContractFactory.code_runtime,
-                    chain_bytecode,
-                )
-            )
         return ContractFactory(address=contract_address)
 
     def get_or_deploy_contract(self,
@@ -179,7 +166,7 @@ class Provider(object):
         for provider in self.provider_backends.values():
             try:
                 return provider.get_contract_address(contract_name)
-            except NoKnownAddress as error:
+            except NoKnownAddress:
                 continue
         else:
             raise NoKnownAddress("No known address for contract")

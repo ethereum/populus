@@ -14,6 +14,9 @@ from populus.utils.contracts import (
     is_contract_name,
     EMPTY_BYTECODE_VALUES,
 )
+from populus.utils.dicts import (
+    dict_merge,
+)
 from populus.utils.packaging import (
     validate_package_manifest,
     persist_package_file,
@@ -105,8 +108,9 @@ def construct_build_dependencies(installed_packages_dir, project_dependencies):
 @cast_return_to_dict
 def construct_contract_types(compiled_contract_data, contract_type_names):
     for contract_type_name in contract_type_names:
+        contract_data = compiled_contract_data[contract_type_name]
         contract_type_object = construct_contract_type_object(
-            compiled_contract_data,
+            contract_data,
             contract_type_name,
         )
         yield contract_type_name, contract_type_object
@@ -168,15 +172,9 @@ def construct_deployments_object(chain, contract_names_to_include):
 
 
 @cast_return_to_dict
-def construct_contract_type_object(compiled_contract_data,
-                                   contract_type_name,
-                                   contract_type_alias=None):
-    if contract_type_alias:
-        yield 'contract_name', contract_type_alias
-    else:
-        yield 'contract_name', contract_type_name
-
-    contract_data = compiled_contract_data[contract_type_name]
+def construct_contract_type_object(contract_data,
+                                   contract_type_name):
+    yield 'contract_name', contract_type_name
 
     if contract_data.get('code') not in EMPTY_BYTECODE_VALUES:
         yield 'bytecode', contract_data['code']
@@ -184,23 +182,15 @@ def construct_contract_type_object(compiled_contract_data,
     if contract_data.get('code_runtime') not in EMPTY_BYTECODE_VALUES:
         yield 'runtime_bytecode', contract_data['code_runtime']
 
-    if contract_data.get('abi'):
+    if 'abi' in contract_data:
         yield 'abi', contract_data['abi']
 
     if 'userdoc' or 'devdoc' in contract_data:
-        # TODO: this needs to be a deep merge.
-        natspec = dict(itertools.chain(
-            contract_data.get('userdoc', {}).items(),
-            contract_data.get('devdoc', {}).items(),
-        ))
+        natspec = dict_merge(
+            contract_data.get('userdoc', {}),
+            contract_data.get('devdoc', {}),
+        )
         yield 'natspec', natspec
 
     if 'runtime_bytecode' in contract_data or 'bytecode' in contract_data:
-        compiler_info = {
-            'type': 'solc',
-            'version': contract_data['meta']['compilerVersion'],
-            'settings': {
-                'optimize': True,
-            },
-        }
-        yield 'compiler', compiler_info
+        yield 'compiler', contract_data['meta']

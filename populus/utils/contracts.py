@@ -86,3 +86,37 @@ CONTRACT_NAME_REGEX = '^[_a-zA-Z][_a-zA-Z0-9]*$'
 
 def is_contract_name(value):
     return bool(re.match(CONTRACT_NAME_REGEX, value))
+
+
+EMPTY_BYTECODE_VALUES = {None, "0x"}
+
+
+def verify_contract_bytecode(chain, contract_name, address):
+    contract_data = chain.compiled_contract_data[contract_name]
+    provider = chain.contract_provider
+
+    # Check that the contract has bytecode
+    if contract_data['code_runtime'] in EMPTY_BYTECODE_VALUES:
+        raise ValueError(
+            "Contract instances which contain an address cannot have empty "
+            "runtime bytecode"
+        )
+
+    ContractFactory = provider.get_contract_factory(contract_name)
+
+    chain_bytecode = chain.web3.eth.getCode(address)
+
+    if chain_bytecode in EMPTY_BYTECODE_VALUES:
+        raise ValueError(
+            "No bytecode found at address: {0}".format(address)
+        )
+    elif chain_bytecode != ContractFactory.code_runtime:
+        raise ValueError(
+            "Bytecode found at {0} does not match compiled bytecode:\n"
+            " - chain_bytecode: {1}\n"
+            " - compiled_bytecode: {2}".format(
+                address,
+                chain_bytecode,
+                ContractFactory.code_runtime,
+            )
+        )

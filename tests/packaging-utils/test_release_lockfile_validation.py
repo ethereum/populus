@@ -97,5 +97,9 @@ AUTHORS_AS_STRING = build_schema(meta={'authors': "Piper Merriam"})
     )
 )
 def test_raises_on_invalid_schema(release_lockfile):
+    """
+    TODO: This test suite could be greatly expanded as there are a lot more
+    ways that lockfiles can be invalid.
+    """
     with pytest.raises(jsonschema.ValidationError):
         validate_release_lockfile(release_lockfile)

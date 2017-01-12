@@ -12,6 +12,7 @@ from populus.utils.chains import (
 )
 from populus.utils.contracts import (
     is_contract_name,
+    EMPTY_BYTECODE_VALUES,
 )
 from populus.utils.packaging import (
     validate_package_manifest,
@@ -21,10 +22,10 @@ from populus.utils.packaging import (
 
 
 @cast_return_to_dict
-def build_release_lockfile(project,
-                           chain_names,
-                           contract_instance_names,
-                           contract_type_names):
+def construct_release_lockfile(project,
+                               chain_names,
+                               contract_instance_names,
+                               contract_type_names):
     if not project.has_package_manifest:
         raise ValueError("No package manifest found in project")
 
@@ -44,22 +45,22 @@ def build_release_lockfile(project,
     if source_file_uris:
         yield 'sources', source_file_uris
 
-    deployments = build_deployments(project, chain_names, contract_instance_names)
+    deployments = construct_deployments(project, chain_names, contract_instance_names)
     if deployments:
         yield 'deployments', deployments
 
-    package_meta = build_package_meta_data(package_manifest)
+    package_meta = construct_package_meta_data(package_manifest)
     if package_meta:
         yield 'package_meta', package_meta
 
     # TODO: check if there are discrepancies between what is *supposed* to be
     # installed and what is and figure out how to resolve them.
-    build_dependencies = build_build_dependencies(
+    construct_dependencies = construct_build_dependencies(
         project.installed_packages_dir,
         project.dependencies,
     )
-    if build_dependencies:
-        yield 'build_dependencies', build_dependencies
+    if construct_dependencies:
+        yield 'build_dependencies', construct_dependencies
 
     contract_types_names_from_deployments = {
         contract_instance['contract_type']
@@ -72,7 +73,7 @@ def build_release_lockfile(project,
         contract_types_names_from_deployments,
     ))))
 
-    contract_types = build_contract_types(
+    contract_types = construct_contract_types(
         project.compiled_contract_data,
         all_contract_type_names,
     )
@@ -81,7 +82,7 @@ def build_release_lockfile(project,
 
 
 @cast_return_to_dict
-def build_deployments(project, chain_names, contract_instance_names):
+def construct_deployments(project, chain_names, contract_instance_names):
     for chain_name in chain_names:
         with project.get_chain(chain_name) as chain:
             chain_definition, deployed_contract_instances = construct_deployments_object(
@@ -92,7 +93,7 @@ def build_deployments(project, chain_names, contract_instance_names):
 
 
 @cast_return_to_dict
-def build_build_dependencies(installed_packages_dir, project_dependencies):
+def construct_build_dependencies(installed_packages_dir, project_dependencies):
     installed_dependencies = extract_build_dependendencies_from_installed_packages(
         installed_packages_dir,
     )
@@ -102,7 +103,7 @@ def build_build_dependencies(installed_packages_dir, project_dependencies):
 
 
 @cast_return_to_dict
-def build_contract_types(compiled_contract_data, contract_type_names):
+def construct_contract_types(compiled_contract_data, contract_type_names):
     for contract_type_name in contract_type_names:
         contract_type_object = construct_contract_type_object(
             compiled_contract_data,
@@ -112,7 +113,7 @@ def build_contract_types(compiled_contract_data, contract_type_names):
 
 
 @cast_return_to_dict
-def build_package_meta_data(package_manifest):
+def construct_package_meta_data(package_manifest):
     if 'authors' in package_manifest:
         yield 'authors', package_manifest['authors']
     if 'license' in package_manifest:
@@ -123,40 +124,6 @@ def build_package_meta_data(package_manifest):
         yield 'keywords', package_manifest['keywords']
     if 'links' in package_manifest:
         yield 'links', package_manifest['links']
-
-
-EMPTY_BYTECODE_VALUES = {None, "0x"}
-
-
-def verify_contract_bytecode(chain, contract_name, address):
-    contract_data = chain.compiled_contract_data[contract_name]
-    provider = chain.contract_provider
-
-    # Check that the contract has bytecode
-    if contract_data['code_runtime'] in EMPTY_BYTECODE_VALUES:
-        raise ValueError(
-            "Contract instances which contain an address cannot have empty "
-            "runtime bytecode"
-        )
-
-    ContractFactory = provider.get_contract_factory(contract_name)
-
-    chain_bytecode = chain.web3.eth.getCode(address)
-
-    if chain_bytecode in EMPTY_BYTECODE_VALUES:
-        raise ValueError(
-            "No bytecode found at address: {0}".format(address)
-        )
-    elif chain_bytecode != ContractFactory.code_runtime:
-        raise ValueError(
-            "Bytecode found at {0} does not match compiled bytecode:\n"
-            " - chain_bytecode: {1}\n"
-            " - compiled_bytecode: {2}".format(
-                address,
-                chain_bytecode,
-                ContractFactory.code_runtime,
-            )
-        )
 
 
 @cast_return_to_dict

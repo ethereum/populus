@@ -15,7 +15,7 @@ from populus.utils.packaging import (
 
 from populus.packages.build import (
     persist_package_file,
-    build_release_lockfile,
+    construct_release_lockfile,
 )
 from populus.packages.installation import (
     install_project_dependencies,
@@ -237,7 +237,7 @@ def package_build(ctx,
         click.echo("Must specify which contracts you want to include in the deployments")
         ctx.exit(1)
 
-    release_lockfile = build_release_lockfile(
+    release_lockfile = construct_release_lockfile(
         project=project,
         chain_names=chain_names,
         contract_instance_names=contract_instance_names,

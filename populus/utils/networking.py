@@ -1,14 +1,9 @@
-import sys
 import random
 
 from .compat import (
     socket,
     Timeout,
 )
-
-
-if sys.version_info.major == 2:
-    ConnectionRefusedError = socket.error
 
 
 def get_open_port():
@@ -27,7 +22,7 @@ def wait_for_connection(host, port, timeout=30):
             s.settimeout(1)
             try:
                 s.connect((host, port))
-            except (socket.timeout, ConnectionRefusedError):
+            except (socket.timeout, socket.error, OSError):
                 _timeout.sleep(random.random())
                 continue
             else:

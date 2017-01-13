@@ -29,6 +29,7 @@ def test_wait_for_connection_success():
     port = get_open_port()
 
     def _do_client():
+        success_tracker['client_booted'] = True
         try:
             wait_for_connection('localhost', port)
         except Timeout:
@@ -47,10 +48,13 @@ def test_wait_for_connection_success():
             success_tracker['server_success'] = True
 
     def _do_server():
+        success_tracker['server_booted'] = True
         server = TestHTTPServer(('localhost', port), BaseHTTPRequestHandler)
         server.timeout = 30
 
+        success_tracker['server_before_handle'] = True
         server.handle_request()
+        success_tracker['server_after_handle'] = True
         success_tracker.setdefault('server_success', True)
 
     client_thread = spawn(_do_client)
@@ -75,6 +79,7 @@ def test_wait_for_connection_failure():
     port = get_open_port()
 
     def _do_client():
+        success_tracker['client_booted'] = True
         try:
             wait_for_connection('localhost', port, 2)
         except Timeout:

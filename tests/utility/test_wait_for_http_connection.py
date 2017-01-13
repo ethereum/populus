@@ -30,7 +30,7 @@ def test_wait_for_connection_success():
 
     def _do_client():
         try:
-            wait_for_connection('localhost', port, 5)
+            wait_for_connection('localhost', port)
         except Timeout:
             success_tracker['client_success'] = False
         else:
@@ -76,7 +76,7 @@ def test_wait_for_connection_failure():
 
     def _do_client():
         try:
-            wait_for_connection('localhost', port, 5)
+            wait_for_connection('localhost', port)
         except Timeout:
             success_tracker['client_success'] = False
         else:

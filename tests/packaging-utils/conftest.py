@@ -135,3 +135,8 @@ def load_example_project(populus_source_root,
         for solidity_source_path in find_solidity_source_files(contracts_source_dir):
             mock_IPFS_backend.persist_package_file(solidity_source_path)
     return _load_example_project
+
+
+@pytest.fixture()
+def mock_contract_backends(project, mock_installed_packages_backend):
+    assert False

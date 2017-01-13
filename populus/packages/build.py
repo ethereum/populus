@@ -88,8 +88,10 @@ def construct_release_lockfile(project,
 def construct_deployments(project, chain_names, contract_instance_names):
     for chain_name in chain_names:
         with project.get_chain(chain_name) as chain:
-            chain_definition, deployed_contract_instances = construct_deployments_object(
-                chain,
+            chain_definition = get_chain_definition(chain.web3)
+            provider = chain.contract_provider
+            deployed_contract_instances = construct_deployments_object(
+                provider,
                 contract_instance_names,
             )
             yield chain_definition, deployed_contract_instances
@@ -160,15 +162,14 @@ def construct_deployed_contract_instance(provider,
             yield 'link_dependencies', link_dependencies
 
 
-def construct_deployments_object(chain, contract_names_to_include):
-    provider = chain.contract_provider
-    chain_definition = get_chain_definition(chain.web3)
-    deployment_instances = {
-        contract_name: construct_deployed_contract_instance(provider, contract_name)
-        for contract_name
-        in contract_names_to_include
-    }
-    return chain_definition, deployment_instances
+@cast_return_to_dict
+def construct_deployments_object(provider, contract_names_to_include):
+    for contract_name in contract_names_to_include:
+        deployed_contract_instance = construct_deployed_contract_instance(
+            provider,
+            contract_name,
+        )
+        yield contract_name, deployed_contract_instance
 
 
 @cast_return_to_dict

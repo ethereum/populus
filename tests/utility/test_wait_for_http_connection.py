@@ -24,6 +24,18 @@ from populus.utils.networking import (
 )
 
 
+def can_test_connect_with_gevent():
+    if os.environ.get('THREADING_BACKEND', 'stdlib') != 'gevent':
+        return True
+    try:
+        from gevent import monkey
+    except ImportError:
+        return False
+
+    return monkey.is_module_patched('socket')
+
+
+@pytest.mark.skipif(can_test_connect_with_gevent(), reason="Bad configuration for gevent based testing")
 def test_wait_for_connection_success():
     success_tracker = {}
     port = get_open_port()
@@ -36,6 +48,8 @@ def test_wait_for_connection_success():
             success_tracker['client_success'] = False
         else:
             success_tracker['client_success'] = True
+        finally:
+            success_tracker['client_exited'] = True
 
 
     class TestHTTPServer(HTTPServer):
@@ -56,6 +70,7 @@ def test_wait_for_connection_success():
         server.handle_request()
         success_tracker['server_after_handle'] = True
         success_tracker.setdefault('server_success', True)
+        success_tracker['server_exited'] = True
 
     client_thread = spawn(_do_client)
     server_thread = spawn(_do_server)

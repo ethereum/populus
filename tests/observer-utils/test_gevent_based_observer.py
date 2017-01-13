@@ -7,16 +7,11 @@ from populus.utils.filesystem import (
 )
 
 
-def is_gevent_available():
-    try:
-        import gevent
-    except ImportError:
-        return False
-    else:
-        return True
+def is_gevent_enabled():
+    return os.environ.get('THREADING_BACKEND', 'stdlib') == 'gevent'
 
 
-@pytest.mark.skipif(not is_gevent_available(), reason="missing gevent dependency")
+@pytest.mark.skipif(not is_gevent_enabled(), reason="missing gevent dependency")
 def test_gevent_based_observer(temporary_dir):
     from populus.utils.observers.observers_gevent import DirWatcher
     import gevent

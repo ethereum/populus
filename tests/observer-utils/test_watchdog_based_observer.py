@@ -12,6 +12,11 @@ from populus.utils.six import (
 from populus.utils.observers.observers_watchdog import DirWatcher
 
 
+def is_gevent_enabled():
+    return os.environ.get('THREADING_BACKEND', 'stdlib') == 'gevent'
+
+
+@pytest.mark.skipif(not is_gevent_enabled(), reason="gevent has been enabled")
 def test_watchdog_based_observer(temporary_dir):
     file_path_a = os.path.join(temporary_dir, 'file-a.txt')
 

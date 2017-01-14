@@ -18,7 +18,7 @@ from populus.packages.build import (
     construct_release_lockfile,
 )
 from populus.packages.installation import (
-    install_project_dependencies,
+    install_packages_to_project,
     update_project_dependencies,
 )
 
@@ -142,7 +142,11 @@ def package_install(ctx, package_identifiers, save):
     if not package_identifiers:
         package_identifiers = ('.',)
 
-    installed_dependencies = install_project_dependencies(project, package_identifiers)
+    installed_dependencies = install_packages_to_project(
+        project.installed_packages_dir,
+        package_identifiers,
+        project.package_backends,
+    )
     click.echo("Installed Packages: {0}".format(', '.join((
         package_data['meta']['package_name'] for package_data in installed_dependencies
     ))))

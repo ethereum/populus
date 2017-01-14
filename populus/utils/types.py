@@ -3,6 +3,7 @@ import re
 
 from web3.utils.types import (
     is_string,
+    is_bytes,
     is_integer,
     is_boolean,
 )

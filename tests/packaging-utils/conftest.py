@@ -8,12 +8,18 @@ from populus import Project
 
 from populus.utils.packaging import (
     is_aliased_ipfs_uri,
+    get_dependency_base_dir,
+    get_build_identifier,
+    get_install_identifier,
+    get_release_lockfile_path,
+    get_installed_packages_dir,
 )
 from populus.utils.functional import (
     cast_return_to_dict,
 )
 from populus.utils.filesystem import (
     find_solidity_source_files,
+    is_same_path,
 )
 from populus.utils.ipfs import (
     is_ipfs_uri,
@@ -135,3 +141,50 @@ def load_example_project(populus_source_root,
         for solidity_source_path in find_solidity_source_files(contracts_source_dir):
             mock_IPFS_backend.persist_package_file(solidity_source_path)
     return _load_example_project
+
+
+@pytest.fixture()
+def verify_installed_package():
+    def _verify_installed_package(installed_packages_dir, package_base_dir, package_data):
+        package_meta = package_data['meta']
+
+        expected_package_base_dir = get_dependency_base_dir(
+            installed_packages_dir,
+            package_meta['dependency_name'],
+        )
+
+        assert os.path.exists(package_base_dir)
+        assert is_same_path(package_base_dir, expected_package_base_dir)
+
+        for rel_source_path, source_contents in package_data['source_tree'].items():
+            source_path = os.path.join(package_base_dir, rel_source_path)
+            assert os.path.exists(source_path)
+            with open(source_path) as source_file:
+                actual_source_contents = source_file.read()
+            assert actual_source_contents == source_contents
+
+        build_identifier = get_build_identifier(package_base_dir)
+        assert build_identifier == package_meta['build_identifier']
+
+        install_identifier = get_install_identifier(package_base_dir)
+        assert install_identifier == package_meta['install_identifier']
+
+        release_lockfile_path = get_release_lockfile_path(package_base_dir)
+        with open(release_lockfile_path) as release_lockfile_file:
+            release_lockfile = json.load(release_lockfile_file)
+
+        assert release_lockfile == package_data['lockfile']
+
+        package_installed_packages_dir = get_installed_packages_dir(package_base_dir)
+
+        for dependency_package_data in package_data['dependencies']:
+            sub_dependency_base_dir = get_dependency_base_dir(
+                package_installed_packages_dir,
+                dependency_package_data['meta']['dependency_name'],
+            )
+            _verify_installed_package(
+                package_installed_packages_dir,
+                sub_dependency_base_dir,
+                dependency_package_data,
+            )
+    return _verify_installed_package

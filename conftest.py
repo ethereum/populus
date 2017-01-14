@@ -16,12 +16,6 @@ def temporary_dir(tmpdir):
 
 
 @pytest.fixture()
-def temp_dir(tmpdir):
-    _temp_dir = str(tmpdir.mkdir("temporary-dir"))
-    return _temp_dir
-
-
-@pytest.fixture()
 def project_dir(tmpdir, monkeypatch):
     from populus.utils.filesystem import (
         ensure_path_exists,

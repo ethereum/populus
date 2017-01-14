@@ -13,10 +13,6 @@ from populus.utils.packaging import (
     flatten_identifier_tree,
     recursively_resolve_package_data,
     get_dependency_base_dir,
-    get_installed_packages_dir,
-    get_release_lockfile_path,
-    get_build_identifier,
-    get_install_identifier,
 )
 
 from populus.packages.installation import (
@@ -25,53 +21,10 @@ from populus.packages.installation import (
 )
 
 
-def verify_installed_package(installed_packages_dir, package_base_dir, package_data):
-    package_meta = package_data['meta']
-
-    expected_package_base_dir = get_dependency_base_dir(
-        installed_packages_dir,
-        package_meta['dependency_name'],
-    )
-
-    assert os.path.exists(package_base_dir)
-    assert is_same_path(package_base_dir, expected_package_base_dir)
-
-    for rel_source_path, source_contents in package_data['source_tree'].items():
-        source_path = os.path.join(package_base_dir, rel_source_path)
-        assert os.path.exists(source_path)
-        with open(source_path) as source_file:
-            actual_source_contents = source_file.read()
-        assert actual_source_contents == source_contents
-
-    build_identifier = get_build_identifier(package_base_dir)
-    assert build_identifier == package_meta['build_identifier']
-
-    install_identifier = get_install_identifier(package_base_dir)
-    assert install_identifier == package_meta['install_identifier']
-
-    release_lockfile_path = get_release_lockfile_path(package_base_dir)
-    with open(release_lockfile_path) as release_lockfile_file:
-        release_lockfile = json.load(release_lockfile_file)
-
-    assert release_lockfile == package_data['lockfile']
-
-    package_installed_packages_dir = get_installed_packages_dir(package_base_dir)
-
-    for dependency_package_data in package_data['dependencies']:
-        sub_dependency_base_dir = get_dependency_base_dir(
-            package_installed_packages_dir,
-            dependency_package_data['meta']['dependency_name'],
-        )
-        verify_installed_package(
-            package_installed_packages_dir,
-            sub_dependency_base_dir,
-            dependency_package_data,
-        )
-
-
-def test_initial_write_of_package_data(temp_dir,
+def test_initial_write_of_package_data(temporary_dir,
                                        load_example_project,
-                                       mock_package_backends):
+                                       mock_package_backends,
+                                       verify_installed_package):
     load_example_project('owned')
     load_example_project('safe-math-lib')
     load_example_project('wallet')
@@ -83,14 +36,15 @@ def test_initial_write_of_package_data(temp_dir,
         mock_package_backends,
     )
 
-    package_base_dir = write_package_files(temp_dir, package_data)
+    package_base_dir = write_package_files(temporary_dir, package_data)
 
-    verify_installed_package(temp_dir, package_base_dir, package_data)
+    verify_installed_package(temporary_dir, package_base_dir, package_data)
 
 
-def test_write_package_data_with_existing_install(temp_dir,
+def test_write_package_data_with_existing_install(temporary_dir,
                                                   load_example_project,
-                                                  mock_package_backends):
+                                                  mock_package_backends,
+                                                  verify_installed_package):
     load_example_project('owned')
     load_example_project('safe-math-lib')
     load_example_project('wallet')
@@ -102,7 +56,7 @@ def test_write_package_data_with_existing_install(temp_dir,
         mock_package_backends,
     )
 
-    package_base_dir = get_dependency_base_dir(temp_dir, 'wallet')
+    package_base_dir = get_dependency_base_dir(temporary_dir, 'wallet')
 
     pre_existing_file_path = os.path.join(package_base_dir, 'test-file.txt')
     ensure_file_exists(pre_existing_file_path)
@@ -111,23 +65,24 @@ def test_write_package_data_with_existing_install(temp_dir,
     ensure_path_exists(pre_existing_dir_path)
     ensure_file_exists(os.path.join(pre_existing_dir_path, 'is-present'))
 
-    write_package_files(temp_dir, package_data)
+    write_package_files(temporary_dir, package_data)
 
     assert not os.path.exists(pre_existing_file_path)
     assert not os.path.exists(pre_existing_dir_path)
     assert not os.path.exists(os.path.join(pre_existing_dir_path, 'is-present'))
 
 
-def test_write_project_packages_with_no_installed_packages(project_dir,
+def test_write_project_packages_with_no_installed_packages(temporary_dir,
                                                            load_example_project,
-                                                           mock_package_backends):
+                                                           mock_package_backends,
+                                                           verify_installed_package):
     load_example_project('owned')
     load_example_project('safe-math-lib')
     load_example_project('wallet')
 
-    project = Project()
-
-    lineages = flatten_identifier_tree(compute_identifier_tree(['wallet'], mock_package_backends))
+    lineages = flatten_identifier_tree(
+        compute_identifier_tree(['wallet'],mock_package_backends),
+    )
     assert len(lineages) == 1
 
     package_data = recursively_resolve_package_data(
@@ -135,15 +90,15 @@ def test_write_project_packages_with_no_installed_packages(project_dir,
         mock_package_backends,
     )
 
-    pre_existing_file_path = os.path.join(project.installed_packages_dir, 'test-file.txt')
+    pre_existing_file_path = os.path.join(temporary_dir, 'test-file.txt')
     ensure_file_exists(pre_existing_file_path)
 
-    pre_existing_dir_path = os.path.join(project.installed_packages_dir, 'test-dir')
+    pre_existing_dir_path = os.path.join(temporary_dir, 'test-dir')
     ensure_path_exists(pre_existing_dir_path)
     ensure_file_exists(os.path.join(pre_existing_dir_path, 'is-present'))
 
     write_installed_packages(
-        project.installed_packages_dir,
+        temporary_dir,
         [package_data],
 
     )
@@ -152,17 +107,18 @@ def test_write_project_packages_with_no_installed_packages(project_dir,
     assert os.path.exists(pre_existing_dir_path)
     assert os.path.exists(os.path.join(pre_existing_dir_path, 'is-present'))
 
-    wallet_package_base_dir = get_dependency_base_dir(project.installed_packages_dir, 'wallet')
+    wallet_package_base_dir = get_dependency_base_dir(temporary_dir, 'wallet')
     verify_installed_package(
-        project.installed_packages_dir,
+        temporary_dir,
         wallet_package_base_dir,
         package_data,
     )
 
 
-def test_write_project_packages_with_existing_install(project_dir,
+def test_write_project_packages_with_existing_install(temporary_dir,
                                                       load_example_project,
-                                                       mock_package_backends):
+                                                      mock_package_backends,
+                                                      verify_installed_package):
     load_example_project('owned')
     load_example_project('safe-math-lib')
     load_example_project('wallet')
@@ -177,18 +133,18 @@ def test_write_project_packages_with_existing_install(project_dir,
         mock_package_backends,
     )
 
-    pre_existing_file_path = os.path.join(project.installed_packages_dir, 'test-file.txt')
+    pre_existing_file_path = os.path.join(temporary_dir, 'test-file.txt')
     ensure_file_exists(pre_existing_file_path)
 
-    pre_existing_dir_path = os.path.join(project.installed_packages_dir, 'test-dir')
+    pre_existing_dir_path = os.path.join(temporary_dir, 'test-dir')
     ensure_path_exists(pre_existing_dir_path)
     ensure_file_exists(os.path.join(pre_existing_dir_path, 'is-present'))
 
-    wallet_package_base_dir = get_dependency_base_dir(project.installed_packages_dir, 'wallet')
+    wallet_package_base_dir = get_dependency_base_dir(temporary_dir, 'wallet')
     ensure_file_exists(os.path.join(wallet_package_base_dir, 'another-test-file.txt'))
 
     write_installed_packages(
-        project.installed_packages_dir,
+        temporary_dir,
         [package_data],
 
     )
@@ -199,7 +155,7 @@ def test_write_project_packages_with_existing_install(project_dir,
     assert not os.path.exists(os.path.join(wallet_package_base_dir, 'another-test-file.txt'))
 
     verify_installed_package(
-        project.installed_packages_dir,
+        temporary_dir,
         wallet_package_base_dir,
         package_data,
     )

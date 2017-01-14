@@ -2,10 +2,13 @@ import os
 import json
 import shutil
 
-from web3.utils.string import (
+
+from populus.utils.types import (
     is_bytes,
 )
-
+from populus.utils.functional import (
+    cast_return_to_tuple,
+)
 from populus.utils.filesystem import (
     tempdir,
     ensure_path_exists,
@@ -25,7 +28,7 @@ from populus.utils.packaging import (
 )
 
 
-def install_project_dependencies(installed_packages_dir, package_identifiers, package_backends):
+def install_packages_to_project(installed_packages_dir, package_identifiers, package_backends):
     """
     1. Recursively resolve all dependencies.
     2. Filter out any dependencies that are already met.
@@ -48,14 +51,15 @@ def install_project_dependencies(installed_packages_dir, package_identifiers, pa
     )
     # TODO: Filter out dependencies that are already satisfied.
     # TODO: Detect duplicate dependency names
-    write_installed_packages(
+    installed_packages = write_installed_packages(
         installed_packages_dir,
         package_data_to_install,
     )
 
-    return package_data_to_install
+    return installed_packages
 
 
+@cast_return_to_tuple
 def write_installed_packages(installed_packages_dir, package_data_to_install):
     with tempdir() as temporary_dir:
         temp_installed_packages_dir = get_installed_packages_dir(temporary_dir)
@@ -65,8 +69,14 @@ def write_installed_packages(installed_packages_dir, package_data_to_install):
         else:
             ensure_path_exists(temp_installed_packages_dir)
 
-        for package_data in package_data_to_install:
+        sorted_package_data_to_install = sorted(
+            package_data_to_install,
+            key=lambda pd: pd['meta']['dependency_name']
+        )
+
+        for package_data in sorted_package_data_to_install:
             write_package_files(temp_installed_packages_dir, package_data)
+            yield package_data
         else:
             # Upon successful writing of all dependencies, move
             remove_dir_if_exists(installed_packages_dir)
@@ -95,6 +105,7 @@ def write_package_files(installed_packages_dir, package_data):
         # Write the package source tree.
         package_source_tree = package_data['source_tree']
         for rel_source_path, source_content in package_source_tree.items():
+            # TODO: enforce that this directory doesn't traverse out of the root directory.
             source_path = os.path.join(temp_install_location, rel_source_path)
             ensure_file_exists(source_path)
             mode = 'wb' if is_bytes(source_content) else 'w'

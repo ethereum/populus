@@ -38,6 +38,10 @@ def set_geth_ropsten_ipc_path(config):
 
 POPULUS_CONFIG_DEFAULTS = {
     #
+    # Compilation
+    #
+    ('compilation',),
+    #
     # Chains
     #
     # Temp Geth Chains

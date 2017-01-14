@@ -9,6 +9,7 @@ from populus.utils.empty import (
     empty,
 )
 from populus.utils.config import (
+    has_nested_key,
     get_nested_key,
     set_nested_key,
     pop_nested_key,
@@ -58,9 +59,10 @@ class Config(object):
 
     def get(self, key, default=None):
         try:
-            return get_nested_key(self.config_for_read, key)
+            value = get_nested_key(self.config_for_read, key)
         except KeyError:
             return default
+        return self.resolve(value)
 
     def get_config(self, key, defaults=None):
         try:
@@ -82,7 +84,7 @@ class Config(object):
         except KeyError:
             pass
 
-        return value
+        return self.resolve(value)
 
     def setdefault(self, key, value):
         try:
@@ -137,7 +139,7 @@ class Config(object):
         return len(self.config_for_read)
 
     def __getitem__(self, key):
-        return get_nested_key(self.config_for_read, key)
+        return self.resolve(get_nested_key(self.config_for_read, key))
 
     def __setitem__(self, key, value):
         if isinstance(value, type(self)):
@@ -148,12 +150,7 @@ class Config(object):
             return set_nested_key(self.config_for_write, key, value)
 
     def __contains__(self, key):
-        try:
-            self[key]
-        except KeyError:
-            return False
-        else:
-            return True
+        return has_nested_key(self.config_for_read, key)
 
     def __iter__(self):
         return iter(self.keys())

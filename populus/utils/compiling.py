@@ -2,24 +2,23 @@ import os
 import json
 import itertools
 
-from web3.utils.formatting import (
+from .formatting import (
     add_0x_prefix,
 )
-
-from populus.utils.types import (
+from .types import (
     is_string,
 )
-from populus.utils.packaging import (
+from .packaging import (
     get_installed_packages_dir,
     find_package_source_files,
     find_installed_package_locations,
     extract_dependency_name_from_base_dir,
     recursive_find_installed_dependency_base_dirs,
 )
-from populus.utils.filesystem import (
+from .filesystem import (
     find_solidity_source_files,
 )
-from populus.utils.functional import (
+from .functional import (
     compose,
     cast_return_to_tuple,
     cast_return_to_dict,

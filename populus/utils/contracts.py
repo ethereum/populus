@@ -2,10 +2,9 @@ import itertools
 import os
 import re
 
-from web3.utils.types import (
+from .types import (
     is_string,
 )
-
 from .linking import (
     find_link_references,
 )

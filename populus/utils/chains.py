@@ -1,12 +1,6 @@
 import os
 import re
 
-from urllib import parse
-
-from web3.utils.formatting import (
-    remove_0x_prefix,
-    add_0x_prefix,
-)
 from web3 import (
     Web3,
     RPCProvider,
@@ -14,10 +8,17 @@ from web3 import (
     HTTPProvider,
     TestRPCProvider,
 )
+
+from .formatting import (
+    add_0x_prefix,
+    remove_0x_prefix,
+)
+from .six import (
+    parse,
+)
 from .types import (
     is_integer,
 )
-
 from .module_loading import (
     import_string,
 )

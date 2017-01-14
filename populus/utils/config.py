@@ -5,12 +5,11 @@ import itertools
 
 import anyconfig
 
-from web3.utils.types import (
-    is_object,
-)
-
 from populus import ASSETS_DIR
 
+from .types import (
+    is_object,
+)
 from .functional import (
     compose,
     cast_return_to_tuple,

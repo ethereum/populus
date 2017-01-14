@@ -2,10 +2,9 @@ import json
 
 import ipfsapi
 
-from web3.utils.string import (
+from populus.utils.string import (
     force_text,
 )
-
 from populus.utils.functional import (
     cast_return_to_dict,
 )

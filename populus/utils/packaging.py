@@ -9,12 +9,11 @@ import semver
 
 import jsonschema
 
-from web3.utils.string import (
-    force_bytes,
-)
-
 from populus import ASSETS_DIR
 
+from .string import (
+    force_bytes,
+)
 from .ipfs import (
     is_ipfs_uri,
 )

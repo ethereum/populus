@@ -2,14 +2,14 @@ import re
 import functools
 import collections
 
-from web3.utils.formatting import (
+
+from .string import (
+    coerce_args_to_text,
+)
+from .formatting import (
     remove_0x_prefix,
     add_0x_prefix,
 )
-from web3.utils.string import (
-    coerce_args_to_text,
-)
-
 from .functional import (
     cast_return_to_tuple,
     compose,

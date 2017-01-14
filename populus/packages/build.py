@@ -136,7 +136,7 @@ def construct_package_meta_data(package_manifest):
 def construct_deployed_contract_instance(provider,
                                          contract_name):
     contract_instance = provider.get_contract(contract_name)
-    contract_data = provider.chain.project.compiled_contract_data
+    contract_data = provider.chain.project.compiled_contract_data[contract_name]
 
     # TODO: handle contract types from dependencies.
     yield 'contract_type', contract_name

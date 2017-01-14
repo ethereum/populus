@@ -95,7 +95,7 @@ def verify_contract_bytecode(web3, ContractFactory, address):
     """
     TODO: write tests for this.
     """
-    from web3.contracts.exceptions import BytecodeMismatch
+    from populus.contracts.exceptions import BytecodeMismatch
 
     # Check that the contract has bytecode
     if ContractFactory.code_runtime in EMPTY_BYTECODE_VALUES:

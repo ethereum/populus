@@ -12,14 +12,12 @@ from solc.exceptions import (
 from populus.utils.filesystem import (
     ensure_file_exists,
 )
-from populus.utils.compile import (
-    normalize_contract_data,
-    get_contract_meta,
-)
 
 from populus.utils.compiling import (
     get_compiled_contracts_asset_path,
     compute_project_compilation_arguments,
+    normalize_contract_data,
+    get_contract_meta,
 )
 
 

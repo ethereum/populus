@@ -1,13 +1,14 @@
 import operator
 import hashlib
 
-from urllib import parse  # TODO: python2
-
 from populus.pb.ipfs_file_pb2 import (
     Data,
     PBNode,
 )
 
+from .six import (
+    parse,
+)
 from .functional import (
     compose,
     cast_return_to_dict,

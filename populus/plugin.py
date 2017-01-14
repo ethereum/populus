@@ -56,7 +56,7 @@ def web3(unmigrated_chain):
 
 
 @pytest.fixture()
-def contracts(unmigrated_chain):
+def contract_factories(unmigrated_chain):
     return unmigrated_chain.contract_factories
 
 

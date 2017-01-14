@@ -64,13 +64,13 @@ Unmigrated Chain
 
 * ``unmigrated_chain``
 
-The ``'testrpc'`` test chain.  This chain will not have had migrations run.
+The ``'tester'`` test chain.  This chain will not have had migrations run.
 
 
 .. code-block:: python
 
     def test_greeter(unmigrated_chain):
-        greeter = unmigrated_chain.get_contract('Greeter')
+        greeter, _ = unmigrated_chain.get_or_deploy_contract('Greeter')
 
         assert greeter.call().greet() == "Hello"
 
@@ -92,7 +92,7 @@ migrations run ion it.
 .. code-block:: python
 
     def test_greeter(chain):
-        greeter = chain.get_contract('Greeter')
+        greeter, _ = chain.get_or_deploy_contract('Greeter')
 
         assert greeter.call().greet() == "Hello"
 
@@ -113,26 +113,27 @@ A Web3.py instance configured to connect to ``chain`` fixture.
 
     def test_account_balance(web3, chain):
         initial_balance = web3.eth.getBalance(web3.eth.coinbase)
-        wallet = chain.get_contract('Wallet')
+        wallet = chain.get_or_deploy_contract('Wallet')
 
         withdraw_txn_hash = wallet.transact().withdraw(12345)
+        withdraw_txn_receipt = chain.wait.for_receipt(withdraw_txn_hash)
         after_balance = web3.eth.getBalance(web3.eth.coinbase)
 
         assert after_balance - initial_balance == 1234
 
 
-Contracts
-~~~~~~~~~
+Base Contract Factories
+~~~~~~~~~~~~~~~~~~~~~~~
 
-* ``contracts``
+* ``contract_factories``
 
-The contract factory classes for your project.  These will all be associated
-with the Web3 instance from the ``web3`` fixture.
+The contract factory classes for your project.  These will all be
+associated with the Web3 instance from the ``web3`` fixture.
 
 .. code-block:: python
 
-    def test_wallet_deployment(web3, contracts):
-        WalletFactory = contracts.Wallet
+    def test_wallet_deployment(web3, contract_factories):
+        WalletFactory = contract_factories.Wallet
 
         deploy_txn_hash = WalletFactory.deploy()
 

@@ -23,6 +23,8 @@ your solidity source to match this updated version of the contract.
 
 .. code-block:: solidity
 
+    pragma solidity ^0.4.0;
+
     contract Greeter {
         string public greeting;
 
@@ -72,22 +74,22 @@ Now we'll want to test our contract.  Lets add another test to
 .. code-block:: python
 
     def test_greeter(chain):
-        greeter = chain.get_contract('Greeter')
+        greeter, _ = chain.get_or_deploy_contract('Greeter')
 
         greeting = greeter.call().greet()
         assert greeting == 'Hello'
 
     def test_custom_greeting(chain):
-        greeter = chain.get_contract('Greeter')
+        greeter, _ = chain.get_or_deploy_contract('Greeter')
 
         set_txn_hash = greeter.transact().setGreeting('Guten Tag')
         chain.wait.for_receipt(set_txn_hash)
 
-        greeting = greeter.call().greet()
+        greeting, _ = greeter.call().greet()
         assert greeting == 'Guten Tag'
 
     def test_named_greeting(chain):
-        greeter = chain.get_contract('Greeter')
+        greeter, _ = chain.get_or_deploy_contract('Greeter')
 
         greeting = greeter.call().greet('Piper')
         assert greeting == 'Hello Piper'

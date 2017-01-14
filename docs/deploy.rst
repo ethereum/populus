@@ -36,10 +36,6 @@ Deployment is handled through the ``$ populus deploy`` command.
       Deploys the specified contracts to a chain.
 
 	Options:
-	  -d, --deploy-from TEXT  Specifies the account that should be used for
-							  deploys.  You can specify either the full account
-							  address, or the integer 0 based index of the account
-							  in the account list.
 	  -c, --chain TEXT        Specifies the chain that contracts should be
 							  deployed to. The chains mainnet' and 'morden' are
 							  pre-configured to connect to the public networks.

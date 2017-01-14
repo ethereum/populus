@@ -6,6 +6,8 @@ if os.environ.get('THREADING_BACKEND', 'stdlib') == 'gevent':
 
 import pytest  # noqa: E402
 
+from populus import Project  # noqa: E402
+
 
 @pytest.fixture()
 def temporary_dir(tmpdir):
@@ -62,3 +64,8 @@ def write_project_file(project_dir):
 @pytest.fixture()
 def populus_source_root():
     return os.path.dirname(__file__)
+
+
+@pytest.fixture()
+def project(project_dir):
+    return Project()

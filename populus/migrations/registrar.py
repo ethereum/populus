@@ -5,6 +5,9 @@ from solc import (
     get_solc_version,
 )
 
+from populus.utils.compile import (
+    normalize_contract_data,
+)
 from populus.utils.contracts import (
     link_bytecode,
 )
@@ -40,7 +43,8 @@ def get_compiled_registrar_contract():
             "are supported".format(get_solc_version())
         )
     contract_data = compiled_contracts['Registrar']
-    return contract_data
+    normalized_data = normalize_contract_data(contract_data, {})
+    return normalized_data
 
 
 def get_registrar(web3, address=None):

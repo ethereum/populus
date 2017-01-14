@@ -1,16 +1,22 @@
 import os
 import json
 
+from solc import (
+    compile_files,
+    get_solc_version,
+)
+from solc.exceptions import (
+    ContractsNotFound,
+)
+
 from populus.utils.filesystem import (
     get_compiled_contracts_file_path,
     recursive_find_files,
     DEFAULT_CONTRACTS_DIR
 )
-from solc import (
-    compile_files,
-)
-from solc.exceptions import (
-    ContractsNotFound,
+from populus.utils.compile import (
+    normalize_contract_data,
+    get_contract_meta,
 )
 
 
@@ -39,11 +45,20 @@ def compile_project_contracts(project_dir, contracts_dir, **compiler_kwargs):
     compiler_kwargs.setdefault('output_values', ['bin', 'bin-runtime', 'abi'])
     contract_source_paths = find_project_contracts(project_dir, contracts_dir)
     try:
-        compiled_sources = compile_files(contract_source_paths, **compiler_kwargs)
+        compiled_contracts = compile_files(contract_source_paths, **compiler_kwargs)
     except ContractsNotFound:
         return contract_source_paths, {}
 
-    return contract_source_paths, compiled_sources
+    solc_version = get_solc_version()
+    contract_meta = get_contract_meta(compiler_kwargs, solc_version)
+
+    normalized_compiled_contracts = {
+        contract_name: normalize_contract_data(contract_data, contract_meta)
+        for contract_name, contract_data
+        in compiled_contracts.items()
+    }
+
+    return contract_source_paths, normalized_compiled_contracts
 
 
 def compile_and_write_contracts(project_dir, contracts_dir, **compiler_kwargs):

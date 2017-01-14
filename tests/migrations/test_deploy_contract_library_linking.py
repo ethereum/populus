@@ -27,7 +27,7 @@ def prepared_project(project_dir, write_project_file, LIBRARY_13, MULTIPLY_13):
 
 @pytest.yield_fixture()
 def deploy_chain(prepared_project):
-    with prepared_project.get_chain('testrpc') as chain:
+    with prepared_project.get_chain('tester') as chain:
         yield chain
 
 

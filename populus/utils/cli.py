@@ -4,8 +4,6 @@ import random
 
 import click
 
-import gevent
-
 from .deploy import (
     deploy_contract,
 )
@@ -16,10 +14,14 @@ from .chains import (
     get_data_dir as get_local_chain_datadir,
     get_geth_ipc_path,
 )
-
-from populus.observers import (
+from .observers import (
     DirWatcher,
 )
+from .compat import (
+    Timeout,
+    sleep,
+)
+
 from populus.compilation import (
     compile_and_write_contracts,
 )
@@ -356,14 +358,14 @@ def show_chain_sync_progress(chain):
         click.echo("Waiting for peer connections.")
         try:
             chain.wait.for_peers(timeout=240)
-        except gevent.Timeout:
+        except Timeout:
             raise click.ClickException("Never connected to any peers.")
 
     if not web3.eth.syncing:
         click.echo("Waiting for synchronization to start.")
         try:
             chain.wait.for_syncing(timeout=240)
-        except gevent.Timeout:
+        except Timeout:
             raise click.ClickException("Chain synchronization never started.")
 
     starting_block = web3.eth.syncing['startingBlock']
@@ -396,7 +398,7 @@ def show_chain_sync_progress(chain):
                 if current_block >= highest_block:
                     break
 
-                gevent.sleep(random.random())
+                sleep(random.random())
             else:
                 # start a new progress bar with the new `highestBlock`
                 continue
@@ -452,7 +454,7 @@ def get_unlocked_default_account_address(chain):
             # in case the chain is still spinning up, give it a moment to
             # unlock itself.
             chain.wait.for_unlock(account, timeout=5)
-        except gevent.Timeout:
+        except Timeout:
             request_account_unlock(chain, account, None)
 
     return account
@@ -489,20 +491,18 @@ def compile_project_contracts(project, optimize=True):
 
 
 def watch_project_contracts(project, **compile_kwargs):
-    watcher = DirWatcher(project.contracts_dir)
 
-    last_hash = project.get_source_file_hash()
+    def callback(file_path, event_name):
+        if event_name in {'modified', 'created'}:
+            click.echo("Change detected in: {0}".format(file_path))
+            compile_project_contracts(project, **compile_kwargs)
+
+    watcher = DirWatcher(project.contracts_dir, callback)
+    watcher.start()
 
     try:
         while True:
-            event = watcher.get()
-            if event.name in {'update', 'add', 'create'}:
-                current_hash = project.get_source_file_hash()
-                if current_hash == last_hash:
-                    continue
-                last_hash = current_hash
-                click.echo("Change detected in: {e.path}".format(e=event))
-                compile_project_contracts(project, **compile_kwargs)
+            sleep(0.1)
     except KeyboardInterrupt:
         pass
 

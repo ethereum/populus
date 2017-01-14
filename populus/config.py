@@ -135,6 +135,12 @@ class Config(object):
         else:
             return any(tuple(zip(*self.default_config_info)[1]))
 
+    def __nonzero__(self):
+        return self.__bool__()
+
+    def __len__(self):
+        return len(self.config_for_read)
+
     def __getitem__(self, key):
         return get_nested_key(self.config_for_read, key)
 

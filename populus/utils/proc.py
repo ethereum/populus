@@ -1,14 +1,14 @@
 import random
 import signal
 
-import gevent
+from populus.utils.compat import Timeout
 
 
 def wait_for_popen(proc, max_wait=5):
-    with gevent.Timeout(max_wait):
+    with Timeout(max_wait) as timeout:
         while True:
             if proc.poll() is None:
-                gevent.sleep(random.random())
+                timeout.sleep(random.random())
             else:
                 break
 

@@ -1,6 +1,16 @@
 import os
 
-import pytest
+if os.environ.get('THREADING_BACKEND', 'stdlib') == 'gevent':
+    from gevent import monkey
+    monkey.patch_socket()
+
+import pytest  # noqa: E402
+
+
+@pytest.fixture()
+def temporary_dir(tmpdir):
+    _temporary_dir = str(tmpdir.mkdir("temporary-dir"))
+    return _temporary_dir
 
 
 @pytest.fixture()

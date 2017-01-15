@@ -93,11 +93,11 @@ def test_get_contract_factory_with_registrar_dependency(testrpc_chain,
 
     expected_code = link_bytecode_by_name(
         MULTIPLY_13['code'],
-        **{'Library13': library_13.address},
+        **{'Library13': library_13.address}
     )
     expected_runtime = link_bytecode_by_name(
         MULTIPLY_13['code_runtime'],
-        **{'Library13': library_13.address},
+        **{'Library13': library_13.address}
     )
 
     assert Multiply13.code == expected_code

@@ -96,51 +96,17 @@ def multiply_13(tester_chain, library_13):
     return LinkedMultiply13(address=multiply_13_address)
 
 
-<<<<<<< HEAD
-@pytest.fixture()
-def register_address(tester_chain):
-    chain = tester_chain
-
-    def _register_address(name, value):
-        register_txn_hash = tester_chain.registrar.transact().setAddress(
-            'contract/{name}'.format(name=name), value,
-        )
-        chain.wait.for_receipt(register_txn_hash, timeout=120)
-    return _register_address
-
-
-<<<<<<< HEAD:tests/chain-management/test_chain_deployed_contracts_property.py
-def test_with_no_deployed_contracts(tester_chain, math, register_address):
-    chain = tester_chain
-=======
-def test_with_no_deployed_contracts(testrpc_chain, math, register_address):
-    chain = testrpc_chain
-    provider = chain.contract_provider
->>>>>>> dirty:tests/contract-provider/test_deployed_contracts_property.py
-=======
 def test_with_no_deployed_contracts(testrpc_chain, math):
     chain = testrpc_chain
     provider = chain.store.provider
->>>>>>> Get some tests passing
 
     assert len(provider.deployed_contracts) == 0
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD:tests/chain-management/test_chain_deployed_contracts_property.py
-def test_with_single_deployed_contract(tester_chain, math, register_address):
-    chain = tester_chain
-=======
-def test_with_single_deployed_contract(testrpc_chain, math, register_address):
-    chain = testrpc_chain
-    provider = chain.contract_provider
->>>>>>> dirty:tests/contract-provider/test_deployed_contracts_property.py
-=======
 def test_with_single_deployed_contract(testrpc_chain, math):
     chain = testrpc_chain
     provider = chain.store.provider
     registrar = chain.store.registrar
->>>>>>> Get some tests passing
 
     registrar.set_contract_address('Math', math.address)
 
@@ -152,21 +118,10 @@ def test_with_single_deployed_contract(testrpc_chain, math):
 def test_with_multiple_deployed_contracts(tester_chain,
                                           math,
                                           library_13,
-<<<<<<< HEAD
-                                          multiply_13,
-                                          register_address):
-<<<<<<< HEAD:tests/chain-management/test_chain_deployed_contracts_property.py
-    chain = tester_chain
-=======
-    chain = testrpc_chain
-    provider = chain.contract_provider
->>>>>>> dirty:tests/contract-provider/test_deployed_contracts_property.py
-=======
                                           multiply_13):
     chain = testrpc_chain
     provider = chain.store.provider
     registrar = chain.store.registrar
->>>>>>> Get some tests passing
 
     registrar.set_contract_address('Math', math.address)
     registrar.set_contract_address('Library13', library_13.address)
@@ -184,26 +139,13 @@ def test_with_multiple_deployed_contracts(tester_chain,
     assert provider.deployed_contracts.Multiply13.call().multiply13(3) == 39
 
 
-<<<<<<< HEAD:tests/chain-management/test_chain_deployed_contracts_property.py
-def test_missing_dependencies_ignored(tester_chain,
-                                      math,
-                                      library_13,
-                                      multiply_13,
-                                      register_address):
-    chain = tester_chain
-=======
 def test_contracts_with_missing_dependencies_ignored(testrpc_chain,
                                                      math,
                                                      library_13,
                                                      multiply_13):
     chain = testrpc_chain
-<<<<<<< HEAD
-    provider = chain.contract_provider
->>>>>>> dirty:tests/contract-provider/test_deployed_contracts_property.py
-=======
     provider = chain.store.provider
     registrar = chain.store.registrar
->>>>>>> Get some tests passing
 
     registrar.set_contract_address('Math', math.address)
     registrar.set_contract_address('Multiply13', multiply_13.address)

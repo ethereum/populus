@@ -6,11 +6,11 @@ sudo: required
 env:
   matrix:
     # Solc 0.4.6 py35
-    - TOX_ENV=py27-stdlib SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
-    - TOX_ENV=py27-gevent SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    #- TOX_ENV=py27-stdlib SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    #- TOX_ENV=py27-gevent SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
     # Solc 0.4.6 py34
-    - TOX_ENV=py34-stdlib SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
-    - TOX_ENV=py34-gevent SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    #- TOX_ENV=py34-stdlib SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
+    #- TOX_ENV=py34-gevent SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
     # Solc 0.4.6 py35
     - TOX_ENV=py35-stdlib SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
     - TOX_ENV=py35-gevent SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6

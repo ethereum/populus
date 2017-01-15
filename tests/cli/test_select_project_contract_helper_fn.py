@@ -28,14 +28,15 @@ def test_select_project_contract_helper(project_dir,
     write_project_file('contracts/ContractC.sol', 'contract C { function C() {}}')
 
     project = Project()
+    chain = project.get_chain('testrpc')
 
-    assert 'A' in project.compiled_contracts
-    assert 'B' in project.compiled_contracts
-    assert 'C' in project.compiled_contracts
+    assert 'A' in chain.compiled_contract_data
+    assert 'B' in chain.compiled_contract_data
+    assert 'C' in chain.compiled_contract_data
 
     @click.command()
     def wrapper():
-        contract_name = select_project_contract(project)
+        contract_name = select_project_contract(chain)
         print("~~{0}~~".format(contract_name))
 
     runner = CliRunner()
@@ -58,14 +59,15 @@ def test_select_project_contract_helper(project_dir,
     write_project_file('contracts/ContractC.sol', 'contract C { function C() {}}')
 
     project = Project()
+    chain = project.get_chain('testrpc')
 
-    assert 'A' in project.compiled_contracts
-    assert 'B' in project.compiled_contracts
-    assert 'C' in project.compiled_contracts
+    assert 'A' in chain.compiled_contract_data
+    assert 'B' in chain.compiled_contract_data
+    assert 'C' in chain.compiled_contract_data
 
     @click.command()
     def wrapper():
-        contract_name = select_project_contract(project)
+        contract_name = select_project_contract(chain)
         print("~~{0}~~".format(contract_name))
 
     runner = CliRunner()

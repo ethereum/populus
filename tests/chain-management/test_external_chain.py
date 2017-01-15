@@ -6,7 +6,7 @@ def test_external_rpc_chain(project_dir, write_project_file):
 
     with project.get_chain('testrpc') as chain:
         web3 = chain.web3
-        registrar = chain.registrar
+        registrar = chain.store.registrar
 
         project.config['chains.external.is_external'] = True
         project.config['chains.external.registrar'] = registrar.address

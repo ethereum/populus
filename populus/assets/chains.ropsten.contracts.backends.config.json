@@ -1,0 +1,5 @@
+{
+    "JSONFile": {
+        "$ref": "contracts.backends.JSONFile"
+    }
+}

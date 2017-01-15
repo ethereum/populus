@@ -1,0 +1,10 @@
+{
+  "class": "populus.packages.backends.index.PackageIndexBackend",
+  "priority": 40,
+  "settings": {
+    "web3": {
+      "$ref": "web3.InfuraRopsten"
+    },
+    "package_index_address": "0x0f50896C956E8DC16a0eD127Cb8E253ba6C8BD8e"
+  }
+}

@@ -6,184 +6,421 @@ Configuration
 Introduction
 ------------
 
-Populus supports configuration via a configuration file.  By default, this file
-is located at the root of your project and named ``populus.ini``.
+Populus is designed to be highly configurable through the project configuration
+file.  By default, populus will load the file name ``populus.json`` from the
+root of your project.
 
-In addition to a local project configuration file, populus supports a *global*
-configuration file which should be located in your user's ``$HOME`` directory.
-Local project configuration will always supercede global configuration.
+Configuration API
+-----------------
 
-.. code-block::
+The project configuration can be accessed as a property on the ``Project``
+object via ``project.config``.  This object is a dictionary-like object with
+some added convenience APIs.
 
-    [populus]
-    # project level configuration values would be set here.
-    default_chain=morden
+Project configuration is represented as a nested key/value mapping.
 
-    [chain:morden]
-    default_account=0xd3cda913deb6f67967b99d67acdfa1712c293601
+Getting and Setting
+^^^^^^^^^^^^^^^^^^^
 
-    [chain:local]
-    # This makes the `local` chain available.  You don't have to specify any
-    # configuration values.
+The ``project.config`` object exposes the following API for getting and setting
+configuration values.  Supposing that the project configuration file contained
+the following data.
 
+.. code-block:: javascript
 
-Configuration via CLI
----------------------
-
-The configuration file can be easily modified using the following CLI commands.
-
-* ``$ populus config``: Prints the current configuration to the console.
-* ``$ populus config:set <option>:<value>``: Sets the ``option`` to the provided
-  value under the ``[populus]`` section of the config file.
-* ``$ populus config:set --section chain:<chain_name> <option>:<value>``: Sets
-  the ``option`` to the provided value under the ``[chain:chain_name]`` section
-  of the config file.
-* ``$ populus config:unset <option>``: Deletes the ``option`` from the
-  ``[populus]`` section of the config file.
-* ``$ populus config:unset --section chain:<chain_name> <option>``: Deletes the
-  ``option`` from the ``[chain:chain_name]`` section of the config file.
-
-
-.. code-block::
-
-    $ populus config:set default_chain:mainnet
-    $ populus config:set project_dir:some/sub-directory
-    $ populus config
-    [populus]
-      default_chain = mainnet
-      project_dir = some/sub-dir
-
-    $ populus config:set --section chain:mainnet provider:web3.providers.rpc.RPCProvider
-    $ populus config:set --section chain:mainnet port:8001
-    $ populus config
-    [populus]
-      default_chain = mainnet
-      project_dir = some/sub-dir
-
-    [chain:mainnet]
-      provider = web3.providers.rpc.RPCProvider
-      port = 8001
-
-    $ populus config:unset project_dir
-    $ populus config
-    [populus]
-      default_chain = mainnet
-
-    [chain:mainnet]
-      provider = web3.providers.rpc.RPCProvider
-      port = 8001
-
-    $ populus config:unset --section chain:mainnet *
-    Are you sure you want to remove the entire 'chain:mainnet' section? [Y/n] Y
-    $ populus config
-    [populus]
-      default_chain = mainnet
+    {
+      'a': {
+        'b': {
+          'c': 'd',
+          'e': 'f'
+        }
+      },
+      'g': {
+        'h': {
+          'i': 'j',
+          'k': 'l'
+        }
+      }
+    }
 
 
-Configuration Options
----------------------
-
-The following configuration options are recognized by populus.
-
-
-Project Level Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-All project level configuration must be declared under the ``[populus]``
-section of the config file.
-
-* ``default_chain``:
-
-  If set, then all command line operations that act on a specific chain will
-  default to using this chain.
+The config object supports retrieval of values in much the same manner as a
+dictionary.  For convenience, you can also access *deep* nested values using a
+single key which is dot-separated combination of all keys.
 
 
-Chain Level Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: python
 
-Configuration for individual chains should be done under
-``[chain:my-chain-name]`` sections.
+    >>> project.config.get('a')
+    {
+      'b': {
+        'c': 'd',
+        'e': 'f'
+      }
+    }
+    >>> project.config['a']
+    {
+      'b': {
+        'c': 'd',
+        'e': 'f'
+      }
+    }
+    >>> project.config.get('a.b')
+    {
+      'c': 'd',
+      'e': 'f'
+    }
+    >>> project.config['a.b']
+    {
+      'c': 'd',
+      'e': 'f'
+    }
+    >>> project.config.get('a.b.c')
+    'd'
+    >>> project.config['a.b.c']
+    'd'
+    >>> project.config.get('a.b.x')
+    None
+    >>> project.config['a.b.x']
+    KeyError: 'x'
+    >>> project.config.get('a.b.x', 'some-default')
+    'some-default'
 
-By default, populus recognizes the following pre-configured chain names.  These
-chains do not have to be declared within your configuration file in order to
-use them, in which case they will run using a default configuration.
+The config object also supports setting of values in the same manner.
 
-* ``mainnet``: The primary ethereum public main network.
-* ``morden``: The primary ethereum public test network.
-* ``testrpc``: A test chain backed by the python ``eth-testrpc`` package.  This
-  chain does not persist any data between runs.
-* ``temp``: A test chain backed by geth that runs in a temporary directory.
-  This chain does not persist any data between runs.
+.. code-block:: python
 
+    >>> project.config['m'] = 'n'
+    >>> project.config
+    {
+      'a': {
+        'b': {
+          'c': 'd',
+          'e': 'f'
+        }
+      },
+      'g': {
+        'h': {
+          'i': 'j',
+          'k': 'l'
+        }
+      },
+      'm': 'n'
+    }
+    >>> project.config['o.p'] = 'q'
+    >>> project.config
+    {
+      'a': {
+        'b': {
+          'c': 'd',
+          'e': 'f'
+        }
+      },
+      'g': {
+        'h': {
+          'i': 'j',
+          'k': 'l'
+        }
+      },
+      'm': 'n'
+      'o': {
+        'p': 'q'
+      }
+    }
 
-Each chain allows configuration via the following options.
+Config objects support existence queries as well.
 
-* ``default_account``:
+.. code-block:: python
 
-    This value should be set to a ``0x`` prefixed address that can be found on
-    the given chain.  The ``web3`` object for this chain will have this value
-    set to its ``web3.eth.defaultAccount`` value, making it the default sending
-    address for all transactions.
-
-
-* ``deploy_from``:
-
-    This value should be set to a ``0x`` prefixed address that can be found on
-    the given chain.  When running ``$ populus deploy`` or ``$ populus
-    migrate`` this address will be used as the sending address for all
-    transactions.  This value supercedes the ``default_account`` value.
-
-
-* ``is_external``:
-
-    Indicates that populus will not be responsible for running this chain, and
-    will only configure the ``web3`` instance to connect to this chain.  This
-    should be used in cases where you want populus to connect to an externally
-    running blockchain client.
-
-
-* ``provider``:
-
-    Specify the python path to the provider class that ``web3.py`` should use
-    to connect to this chain.  This should be a dot separated python path such
-    as ``web3.providers.ipc.IPCProvider``
-
-
-* ``ipc_path``:
-
-    When using the ``web3.providers.ipc.IPCProvider`` this value will be used
-    to specify the path to the ``geth.ipc`` path.
-
-
-* ``rpc_host``:
-
-    When using the ``web3.providers.rpc.RPCProvider`` this value will be used
-    to specify the host that the provider will connect to.
-
-
-* ``rpc_port``:
-
-    When using the ``web3.providers.rpc.RPCProvider`` this value will be used
-    to specify the port that the provider will connect to.
+    >>> 'a' in project.config
+    True
+    >>> 'a.b' in project.config
+    True
+    >>> 'a.b.c' in project.config
+    True
+    >>> 'a.b.x' in project.config
+    False
 
 
-Here is an example configuration file.
+Sub Configuration
+^^^^^^^^^^^^^^^^^
+
+Certain sections of the project configuration such as individual chain
+configurations are treated as their own config object.  If looked up using the
+above dictionary-like API the returned object will be a normal dictionary like
+object which doesn't support nested key lookups.
+
+.. code-block:: python
+
+    >>> a = project.config['a']
+    >>> a['b.c']
+    KeyError: 'b.c'
+
+In cases like these you should use the ``.get_config`` API.
+
+.. code-block:: python
+
+    >>> a = project.config.get_config('a')
+    >>> a['b.c']
+    'd'
 
 
-.. code-block::
+Config References
+^^^^^^^^^^^^^^^^^
 
-    [populus]
-    default_chain=morden
+Sometimes it is useful to be able to re-use some configuration in multiple
+locations in your configuration file.  This is where references can be useful.
+To reference another part of your configuration use an object with a single key
+of ``$ref``.  The value should be the full key path that should be used in
+place of the reference object.
 
-    [chain:mainnet]
-    default_from=0xd3cda913deb6f67967b99d67acdfa1712c293601
+.. code-block:: javascript
 
-    [chain:morden]
-    default_account=0x571ce41cde28fb489d269c1b7dd79397bc4abf2a
-    provider=web3.providers.rpc.RPCProvider
-    rpc_host=http://some.public-testnet-host.net
-    rpc_port=8001
+    {
+      'a': {
+        '$ref': 'b.c'
+      }
+      'b': {
+        'c': 'd'
+      }
+    }
 
-    [chain:local_test]
-    provider=web3.providers.ipc.IPCProvider
-    ipc_path=/some/other/path/geth.ipc
+In the above, the key ``a`` is a reference to the value found under key ``b.c``
+
+.. code-block:: python
+
+    >>> project.config['a']
+    ['d']
+    >>> project.config.get('a')
+    ['d']
+
+
+Web3 Configuration
+------------------
+
+There are various parts of the application which require configuration a web3
+instance to connect to a node.  Each web3 configuration has the following
+configuration options.
+
+Provider
+^^^^^^^^
+
+Configuration for the Web3 Provider 
+
+Provider Class
+""""""""""""""
+
+Specifies the import path for the provider class that should be used.
+
+* key: ``provider.class``
+* value: Dot separated python path
+* required: Yes
+
+Provider Settings
+"""""""""""""""""
+
+Specifies the ``**kwargs`` that should be used when instantiating the provider.
+
+* key: ``provider.settings``
+* value: Key/Value mapping
+
+
+Eth Module
+^^^^^^^^^^
+
+Configuration for the Web3 Eth Module
+
+Default Account
+"""""""""""""""
+
+If present the ``web3.eth.defaultAccount`` will be populated with this address.
+
+* key: ``eth.default_account``
+* value: Ethereum Address
+
+
+What you can Configure
+----------------------
+
+The following things can be configured via the project configuration file.
+
+
+Compiler
+^^^^^^^^
+
+Contract Source Directory
+"""""""""""""""""""""""""
+
+The directory that project source files can be found in.
+
+* key: ``compilation.contracts_source_dir``
+* value: Filesystem path
+* default: ``'./contracts'``
+
+
+Compiler Settings
+"""""""""""""""""
+
+Enable or disable compile optimization.
+
+* key: ``compilation.settings.optimize``
+* value: Boolean
+* default: ``True``
+
+
+Chains
+^^^^^^
+
+All chain configurations are found under the namespace ``chains``.  The
+configuration for a chain named ``'local'`` would be found under the key
+``chains.local``.
+
+Is External
+"""""""""""
+
+Flag to specify if populus should manage running this chain.
+
+* key: ``chains.<chain-name>.is_external``
+* value: Boolean
+* default: ``False``
+
+Web3
+""""""""""""""""""
+
+Configuration for the Web3 instance this chain will use to connect to the blockchain.
+
+* key: ``chains.<chain-name>.web3``
+* value: Web3 Configuration
+* required: Yes
+
+
+
+Defaults
+--------
+
+Populus ships with many defaults which can be overridden as you see fit.
+
+
+Pre-Configured Web3 Connections
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The following pre-configured configurations are available.  To use one of the
+configurations on a chain it should be referenced like this:
+
+.. code-block:: javascript
+
+    {
+      "chains": {
+        "my-custom-chain": {
+            "web3": {"$ref": "web3.GethMainnet"}
+        }
+      }
+    }
+
+GethMainnet
+"""""""""""
+Web3 connection which will connect to the main ``geth.ipc`` socket.
+
+* key: ``web3.GethMainnet``
+
+
+GethRopsten
+"""""""""""
+
+Web3 connection which will connect to the ropsten ``geth.ipc`` socket.
+
+* key: ``web3.GethRopsten``
+
+
+GethEphemeral
+"""""""""""""
+
+Web3 connection which will connect to a local geth backed chain over the
+``geth.ipc`` socket.
+
+* key: ``web3.GethEphemeral``
+
+
+InfuraMainnet
+"""""""""""""
+
+Web3 connection which will connect to the mainnet ethereum network via Infura.
+
+* key: ``web3.InfuraMainnet``
+
+
+InfuraRopsten
+"""""""""""""
+
+Web3 connection which will connect to the ropsten ethereum network via Infura.
+
+* key: ``web3.InfuraRopsten``
+
+
+TestRPC
+"""""""
+
+Web3 connection which will use the ``TestRPCProvider``.
+
+* key: ``web3.TestRPC``
+
+
+Tester
+""""""
+
+Web3 connection which will use the ``EthereumTesterProvider``.
+
+* key: ``web3.Tester``
+
+
+Pre-Configured Chains
+^^^^^^^^^^^^^^^^^^^^^
+
+The following pre-configured chains can be used with the ``Populus.get_chain`` API.
+
+
+Mainnet
+"""""""
+
+* chain name: ``mainnet``
+
+Chain runs the ``geth`` ethreum client configured for the mainnet and connects
+to the chain using the pre-configured ``GethMainnet`` web3 connection.
+
+
+Ropsten
+"""""""
+
+* chain name: ``ropsten``
+
+Chain runs the ``geth`` ethreum client configured for the ropsten test network
+and connects to the chain using the pre-configured ``GethMainnet`` web3
+connection.
+
+
+Temp
+""""
+
+* chain name: ``temp``
+
+Ephemeral chain whcih runs the ``geth`` ethreum client against an ephemeral
+private chain in a temporary directory.  The chain data will be erased when the
+chain is shut down.  This uses the pre-configured ``GethEphemeral`` web3
+connections.
+
+
+Tester
+""""""
+
+* chain name: ``tester``
+
+Ephemeral chain which uses an in memory EVM.  Fast and good for testing.
+
+
+TestRPC
+"""""""
+
+* chain name: ``testrpc``
+
+Same as the ``tester`` chain except that it connects over an HTTP RPC
+connection.

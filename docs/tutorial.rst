@@ -23,6 +23,8 @@ your solidity source to match this updated version of the contract.
 
 .. code-block:: solidity
 
+    pragma solidity ^0.4.0;
+
     contract Greeter {
         string public greeting;
 

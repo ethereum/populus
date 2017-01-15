@@ -23,6 +23,8 @@ def migrate(ctx, chain_name):
     """
     project = ctx.obj['PROJECT']
 
+    click.echo("The Migrations feature has been deprecated and is scheduled for removal")
+
     if not project.migrations:
         raise click.ClickException((
             "The project does not appear to have any migrations.  You can use "

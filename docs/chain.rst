@@ -20,9 +20,14 @@ Transient Chains
 
 Populus can run two types of transient chains.
 
+* ``tester``
+
+    A test EVM backed blockchain.
+
+
 * ``testrpc``
 
-    Rusn the ``eth-testrpc`` chain which implements the full JSON-RPC interface
+    Runs the ``eth-testrpc`` chain which implements the full JSON-RPC interface
     backed by a test EVM.
 
 
@@ -36,22 +41,17 @@ Populus can run two types of transient chains.
 Local Chains
 ^^^^^^^^^^^^
 
-Local chains can be setup within your ``populus.ini`` file.  Each local chain
-stores its chain data in the :py:attribute::`populus.Project.blockchains_dir` and persists it's data
-between runs.
+Local chains can be setup within your ``populus.json`` file.  Each local chain
+stores its chain data in the :py:attribute::`populus.Project.blockchains_dir`
+and persists it's data between runs.
 
 Local chains are backed by the go-ethereum ``geth`` client.
-
-.. code-block::
-
-    [chain:local]
-    # you don't actually have to set any configuration, just create the heading.
 
 
 Public Chains
 ^^^^^^^^^^^^^
 
-Populus can run both the main and morden public chains.
+Populus can run both the main and ropsten public chains.
 
 * ``mainnet``
 
@@ -59,10 +59,10 @@ Populus can run both the main and morden public chains.
     client for you connected to the main public ethereum network.
 
 
-* ``morden``
+* ``ropsten``
 
-    With ``$ populus chain run morden`` populus will run the the go-ethereum
-    client for you connected to the testnet public ethereum network.
+    With ``$ populus chain run ropsten`` populus will run the the go-ethereum
+    client for you connected to the ropsten testnet public ethereum network.
 
 
 Running from the command line
@@ -119,14 +119,14 @@ the chain the EVM data is fully reset.  The benefit of the ``testrpc`` server
 is that it starts quicker, and has mechanisms for manually resetting the chain.
 
 
-Here is an example of running the ``testrpc`` blockchain.
+Here is an example of running the ``tester`` blockchain.
 
 
 .. code-block:: python
 
     >>> from populus import Project
     >>> project = Project()
-    >>> with project.get_chain('testrpc') as chain:
+    >>> with project.get_chain('tester') as chain:
     ...     print('coinbase:', chain.web3.eth.coinbase)
     ...     print('blockNumber:', chain.web3.eth.blockNumber)
     ...     chain.mine()
@@ -146,125 +146,7 @@ Here is an example of running the ``testrpc`` blockchain.
     blockNumber: 4
     blockNumber: 2
 
-
-Here is an example how to have your own py.test fixture for launching
-a temporary Geth instance with a fresh blockchain.
-
-See
-
-* :py:meth:`populus.project.Project.get_chain`
-
-* :py:class:`populus.project.Project`
-
-* :py:class:`populus.chain.TemporaryGethChain`
-
-* :py:class:`populus.config.Config`
-
-* :py:class:`web3.Web3`
-
-Example:
-
-.. code-block:: python
-
-    import os
-
-    from populus.project import Project
-    from populus.utils.config import Config
-    from web3 import Web3
-    from web3 import RPCProvider
-
-
-    @pytest.yield_fixture(scope="session")
-    def web3() -> Web3:
-        """A py.test fixture to get a Web3 interface to a temporary geth instance.
-
-        This is session scoped fixture.
-        Geth is launched only once during the beginning of the test run.
-
-        Geth will have a huge premined instant balance on its coinbase account.
-        Geth will also mine our transactions on artificially low difficulty level.
-
-        :yield: :py:class:`web3.Web3` instance
-        """
-
-        project = Project()
-
-        # Project is configured using populus.config.Config class
-        # which is a subclass of Python config parser.
-        # Instead of reading .ini file, here we dynamically
-        # construct the configuration.
-        project.config = Config()
-
-        # Settings come for [populus] section of the config.
-        project.config.add_section("populus")
-
-        # Configure where Populus can find our contracts.json
-        build_dir = os.path.join(os.getcwd(), "websauna", "wallet", "ethereum")
-        project.config.set("populus", "build_dir", build_dir)
-
-        chain_kwargs = {
-
-            # Force RPC provider instead of default IPC one
-            "provider": RPCProvider,
-
-            # Adjust geth verbosity for less
-            # output so that test failures are easier to read.
-            "verbosity": "2"
-        }
-
-        # This returns TemporaryGethChain instance as geth_proc
-        with project.get_chain("temp", **chain_kwargs) as geth_proc:
-
-            web3 = geth_proc.web3
-
-            # Allow access to sendTransaction() to use coinbase balance
-            # to deploy contracts. Password is from py-geth
-            # default_blockchain_password file. Assume we don't
-            # run tests for more than 9999 seconds
-            coinbase = web3.eth.coinbase
-            success = web3.personal.unlockAccount(
-                coinbase,
-                passphrase="this-is-not-a-secure-password",
-                duration=9999)
-
-            assert success, "Could not unlock test geth coinbase account"
-
-            yield web3
-
-
-Configuring Chains
-------------------
-
-Populus can configure your chains for you using the ``$ populus chain config``
-command.  During configuration you will be prompted with a series of questions
-about how populus should interact with the chain, as well as allowing you to
-set some default values for the chain.
-
-.. code-block:: shell
-
-    $ populus chain config local_a
-    Configuring **new** chain: local_a
-    ----------------------------------
-
-
-    Populus can run the blockchain client for you, including connecting to the public main and test networks.
-
-     Should populus manage running this chain? [Y/n]: y
-
-
-    Web3 Provider Choices:
-    1) IPC socket (default)
-    2) RPC via HTTP
-
-    How should populus connect web3.py to this chain? [ipc]:
-
-
-    Will this blockchain be running with a non-standard `geth.ipc`path?
-
-     [y/N]:
-    This chain will default to sending transactions from 0x03c932f52524ea0a47b83e86feacd9f26465f0e1.  Would you like to set a different default account? [y/N]:
-    Writing configuration to /Users/piper/sites/populus/populus.ini ...
-    Sucess!
+The ``testrpc`` chain can be run in the same manner.
 
 
 Access To Contracts

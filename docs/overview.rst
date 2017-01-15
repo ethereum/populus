@@ -20,16 +20,12 @@ Command Line Options
       Populus
 
     Options:
-      -c, --config FILENAME  Specify a populus configuration file to be used.  No
-                             other configuration files will be loaded
+      -c, --config FILENAME  Specify a populus configuration file to be used.
       -h, --help             Show this message and exit.
 
     Commands:
       chain          Manage and run ethereum blockchains.
       compile        Compile project contracts, storing their...
-      config         Print the current project configuration
-      config:set     Sets key/value pairs in the populus.ini...
-      config:unset   Deletes the provided keys from the...
       deploy         Deploys the specified contracts to a chain.
       init           Generate project layout with an example...
       makemigration  Generate an empty migration.
@@ -44,6 +40,7 @@ By default Populus expects a project to be layed out as follows.
 .. code-block:: shell
 
     └── project root
+        ├── populus.json
         ├── build (automatically created during compilation)
         │   └── contracts.json
         ├── contracts

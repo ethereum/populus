@@ -1,4 +1,4 @@
-from populus.utils.packaging import get_chain_definition
+from populus.utils.chains import get_chain_definition
 
 def test_get_chain_definition(web3):
     chain_definition = get_chain_definition(web3)

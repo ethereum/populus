@@ -12,8 +12,8 @@ from .chains import (
 
 
 def get_data_dir(project_dir, chain_name):
-    base_blochcain_storage_dir = get_base_blockchain_storage_dir(project_dir)
-    return os.path.join(base_blochcain_storage_dir, chain_name)
+    base_blockchain_storage_dir = get_base_blockchain_storage_dir(project_dir)
+    return os.path.join(base_blockchain_storage_dir, chain_name)
 
 
 CHAINDATA_DIR = './chaindata'

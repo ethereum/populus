@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+1.1.0
+-----
+
+This release begins the first deprecation cycle for APIs which will be removed
+in future releases.
+
+* Deprecated: Entire migrations API
+* New configuration API which replaces the ``populus.ini`` based configuration.
+* Removal of ``gevent`` as a required dependency.  Threading and other
+  asynchronous operations now default to standard library tools with the option
+  to enable the gevent with an environment variable
+  ``THREADING_BACKEND==gevent``
+
 
 1.0.0
 -----

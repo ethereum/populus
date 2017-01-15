@@ -25,6 +25,8 @@ def make_migration(ctx, migration_name):
     """
     project = ctx.obj['PROJECT']
 
+    click.echo("The Migrations feature has been deprecated and is scheduled for removal")
+
     next_migration_number = get_next_migration_number(project.project_dir)
 
     if migration_name is None:

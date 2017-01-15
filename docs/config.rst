@@ -233,7 +233,7 @@ Configuration for the Web3 Eth Module
 Default Account
 """""""""""""""
 
-Sets the default account that will be used for the ``from`` address.
+If present the ``web3.eth.defaultAccount`` will be populated with this address.
 
 * key: ``eth.default_account``
 * value: Ethereum Address
@@ -300,3 +300,127 @@ Defaults
 
 Populus ships with many defaults which can be overridden as you see fit.
 
+
+Pre-Configured Web3 Connections
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The following pre-configured configurations are available.  To use one of the
+configurations on a chain it should be referenced like this:
+
+.. code-block:: javascript
+
+    {
+      "chains": {
+        "my-custom-chain": {
+            "web3": {"$ref": "web3.GethMainnet"}
+        }
+      }
+    }
+
+GethMainnet
+"""""""""""
+Web3 connection which will connect to the main ``geth.ipc`` socket.
+
+* key: ``web3.GethMainnet``
+
+
+GethRopsten
+"""""""""""
+
+Web3 connection which will connect to the ropsten ``geth.ipc`` socket.
+
+* key: ``web3.GethRopsten``
+
+
+GethEphemeral
+"""""""""""""
+
+Web3 connection which will connect to a local geth backed chain over the
+``geth.ipc`` socket.
+
+* key: ``web3.GethEphemeral``
+
+
+InfuraMainnet
+"""""""""""""
+
+Web3 connection which will connect to the mainnet ethereum network via Infura.
+
+* key: ``web3.InfuraMainnet``
+
+
+InfuraRopsten
+"""""""""""""
+
+Web3 connection which will connect to the ropsten ethereum network via Infura.
+
+* key: ``web3.InfuraRopsten``
+
+
+TestRPC
+"""""""
+
+Web3 connection which will use the ``TestRPCProvider``.
+
+* key: ``web3.TestRPC``
+
+
+Tester
+""""""
+
+Web3 connection which will use the ``EthereumTesterProvider``.
+
+* key: ``web3.Tester``
+
+
+Pre-Configured Chains
+^^^^^^^^^^^^^^^^^^^^^
+
+The following pre-configured chains can be used with the ``Populus.get_chain`` API.
+
+
+Mainnet
+"""""""
+
+* chain name: ``mainnet``
+
+Chain runs the ``geth`` ethreum client configured for the mainnet and connects
+to the chain using the pre-configured ``GethMainnet`` web3 connection.
+
+
+Ropsten
+"""""""
+
+* chain name: ``ropsten``
+
+Chain runs the ``geth`` ethreum client configured for the ropsten test network
+and connects to the chain using the pre-configured ``GethMainnet`` web3
+connection.
+
+
+Temp
+""""
+
+* chain name: ``temp``
+
+Ephemeral chain whcih runs the ``geth`` ethreum client against an ephemeral
+private chain in a temporary directory.  The chain data will be erased when the
+chain is shut down.  This uses the pre-configured ``GethEphemeral`` web3
+connections.
+
+
+Tester
+""""""
+
+* chain name: ``tester``
+
+Ephemeral chain which uses an in memory EVM.  Fast and good for testing.
+
+
+TestRPC
+"""""""
+
+* chain name: ``testrpc``
+
+Same as the ``tester`` chain except that it connects over an HTTP RPC
+connection.

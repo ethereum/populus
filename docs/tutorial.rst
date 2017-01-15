@@ -74,22 +74,22 @@ Now we'll want to test our contract.  Lets add another test to
 .. code-block:: python
 
     def test_greeter(chain):
-        greeter, _ = chain.get_or_deploy_contract('Greeter')
+        greeter = chain.get_contract('Greeter')
 
         greeting = greeter.call().greet()
         assert greeting == 'Hello'
 
     def test_custom_greeting(chain):
-        greeter, _ = chain.get_or_deploy_contract('Greeter')
+        greeter = chain.get_contract('Greeter')
 
         set_txn_hash = greeter.transact().setGreeting('Guten Tag')
         chain.wait.for_receipt(set_txn_hash)
 
-        greeting, _ = greeter.call().greet()
+        greeting = greeter.call().greet()
         assert greeting == 'Guten Tag'
 
     def test_named_greeting(chain):
-        greeter, _ = chain.get_or_deploy_contract('Greeter')
+        greeter = chain.get_contract('Greeter')
 
         greeting = greeter.call().greet('Piper')
         assert greeting == 'Hello Piper'

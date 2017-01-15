@@ -19,7 +19,7 @@ class TestRPCChain(Chain):
     #
     def get_web3_config(self):
         web3_config = copy.deepcopy(super(TestRPCChain, self).get_web3_config())
-        web3_config.set('provider.settings.rpc_port', get_open_port())
+        web3_config.setdefault('provider.settings.rpc_port', self.rpc_port)
         return web3_config
 
     #
@@ -49,6 +49,10 @@ class TestRPCChain(Chain):
         if self._running:
             raise ValueError("The TesterChain is already running")
 
+        self._running = True
+
+        self.rpc_port = get_open_port()
+
         self.provider = self.web3.currentProvider
         self.rpc_methods = self.provider.server.application.rpc_methods
 
@@ -58,8 +62,7 @@ class TestRPCChain(Chain):
         self.configure('net_version', 1)
         self.mine()
 
-        wait_for_connection('127.0.0.1', self.provider.port)
-        self._running = True
+        wait_for_connection('127.0.0.1', self.rpc_port)
         return self
 
     def __exit__(self, *exc_info):
@@ -69,5 +72,7 @@ class TestRPCChain(Chain):
             self.provider.server.stop()
             self.provider.server.close()
             self.provider.thread.kill()
+        except AttributeError:
+            self.provider.server.shutdown()
         finally:
             self._running = False

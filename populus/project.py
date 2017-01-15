@@ -26,6 +26,9 @@ from populus.utils.compiling import (
 from populus.utils.config import (
     sort_prioritized_configs,
 )
+from populus.utils.chains import (
+    get_base_blockchain_storage_dir,
+)
 from populus.utils.module_loading import (
     import_string,
 )
@@ -312,3 +315,8 @@ class Project(object):
                                   chain_name=chain_name,
                                   *chain_args,
                                   **chain_kwargs)
+
+    @property
+    @relpath
+    def base_blockchain_storage_dir(self):
+        return get_base_blockchain_storage_dir(self.project_dir)

@@ -132,8 +132,8 @@ class BaseGethChain(Chain):
 
     def get_web3_config(self):
         web3_config = copy.deepcopy(super(BaseGethChain, self).get_web3_config())
-        web3_config.set('provider.settings.ipc_path', self.geth.ipc_path)
-        web3_config.set('provider.settings.rpc_port', self.geth.rpc_port)
+        web3_config['provider.settings.ipc_path'] = self.geth.ipc_path
+        web3_config['provider.settings.rpc_port'] = self.geth.rpc_port
         return web3_config
 
     def get_geth_process_instance(self):

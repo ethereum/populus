@@ -13,7 +13,7 @@ readme = open(os.path.join(DIR, 'README.md')).read()
 
 setup(
     name='populus',
-    version="1.4.2",
+    version="1.5.0-beta.1",
     description="""Ethereum Development Framework""",
     long_description=readme,
     author='Piper Merriam',

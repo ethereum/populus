@@ -1,3 +1,11 @@
+1.5.0 (unreleased)
+-----
+
+- Remove had gevent dependency
+- Deprecate migrations functionality.
+- Deprecate and remove old `populus.ini` configuration scheme.
+- Add new configuration API.
+
 1.4.2
 -----
 

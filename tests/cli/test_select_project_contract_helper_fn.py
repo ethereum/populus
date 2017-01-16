@@ -28,11 +28,11 @@ def test_select_project_contract_helper(project_dir,
     write_project_file('contracts/ContractC.sol', 'contract C { function C() {}}')
 
     project = Project()
-    chain = project.get_chain('testrpc')
+    chain = project.get_chain('tester')
 
-    assert 'A' in chain.compiled_contract_data
-    assert 'B' in chain.compiled_contract_data
-    assert 'C' in chain.compiled_contract_data
+    assert 'A' in project.compiled_contract_data
+    assert 'B' in project.compiled_contract_data
+    assert 'C' in project.compiled_contract_data
 
     @click.command()
     def wrapper():
@@ -59,11 +59,11 @@ def test_select_project_contract_helper(project_dir,
     write_project_file('contracts/ContractC.sol', 'contract C { function C() {}}')
 
     project = Project()
-    chain = project.get_chain('testrpc')
+    chain = project.get_chain('tester')
 
-    assert 'A' in chain.compiled_contract_data
-    assert 'B' in chain.compiled_contract_data
-    assert 'C' in chain.compiled_contract_data
+    assert 'A' in project.compiled_contract_data
+    assert 'B' in project.compiled_contract_data
+    assert 'C' in project.compiled_contract_data
 
     @click.command()
     def wrapper():

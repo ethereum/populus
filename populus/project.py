@@ -220,7 +220,7 @@ class Project(object):
             self._cached_compiled_contracts_mtime = self.get_source_modification_time()
             _, self._cached_compiled_contracts = compile_project_contracts(
                 project=self,
-                optimize=self.config.get('compilation.settings.optimize', True),
+                **self.config.get('compilation.settings', {})
             )
         return self._cached_compiled_contracts
 

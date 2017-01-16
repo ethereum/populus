@@ -36,7 +36,7 @@ def test_select_project_contract_helper(project_dir,
 
     @click.command()
     def wrapper():
-        contract_name = select_project_contract(chain)
+        contract_name = select_project_contract(project)
         print("~~{0}~~".format(contract_name))
 
     runner = CliRunner()
@@ -67,7 +67,7 @@ def test_select_project_contract_helper(project_dir,
 
     @click.command()
     def wrapper():
-        contract_name = select_project_contract(chain)
+        contract_name = select_project_contract(project)
         print("~~{0}~~".format(contract_name))
 
     runner = CliRunner()

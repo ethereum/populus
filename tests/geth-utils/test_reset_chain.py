@@ -6,6 +6,10 @@ from populus.utils.filesystem import (
 from populus.project import Project
 from populus.utils.geth import (
     reset_chain,
+    get_chaindata_dir,
+    get_dapp_dir,
+    get_nodekey_path,
+    get_geth_ipc_path,
 )
 
 
@@ -15,10 +19,10 @@ def test_reset_chain_on_empty_project_dir(project_dir, write_project_file):
     data_dir = project.get_blockchain_data_dir('test-chain')
     ensure_path_exists(data_dir)
 
-    chaindata_dir = project.get_blockchain_chaindata_dir('test-chain')
-    dapp_dir = project.get_blockchain_dapp_dir('test-chain')
-    nodekey_path = project.get_blockchain_nodekey_path('test-chain')
-    geth_ipc_path = project.get_blockchain_ipc_path('test-chain')
+    chaindata_dir = get_chaindata_dir(data_dir, 'test-chain')
+    dapp_dir = get_dapp_dir(data_dir, 'test-chain')
+    nodekey_path = get_nodekey_path(data_dir, 'test-chain')
+    geth_ipc_path = get_geth_ipc_path(data_dir, 'test-chain')
 
     # sanity check
     assert os.path.exists(data_dir)
@@ -42,10 +46,10 @@ def test_reset_chain(project_dir, write_project_file):
     data_dir = project.get_blockchain_data_dir('test-chain')
     ensure_path_exists(data_dir)
 
-    chaindata_dir = project.get_blockchain_chaindata_dir('test-chain')
-    dapp_dir = project.get_blockchain_dapp_dir('test-chain')
-    nodekey_path = project.get_blockchain_nodekey_path('test-chain')
-    geth_ipc_path = project.get_blockchain_ipc_path('test-chain')
+    chaindata_dir = get_chaindata_dir(data_dir, 'test-chain')
+    dapp_dir = get_dapp_dir(data_dir, 'test-chain')
+    nodekey_path = get_nodekey_path(data_dir, 'test-chain')
+    geth_ipc_path = get_geth_ipc_path(data_dir, 'test-chain')
 
     ensure_path_exists(chaindata_dir)
     ensure_path_exists(dapp_dir)

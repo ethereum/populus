@@ -96,15 +96,15 @@ def multiply_13(tester_chain, library_13):
     return LinkedMultiply13(address=multiply_13_address)
 
 
-def test_with_no_deployed_contracts(testrpc_chain, math):
-    chain = testrpc_chain
+def test_with_no_deployed_contracts(tester_chain, math):
+    chain = tester_chain
     provider = chain.store.provider
 
     assert len(provider.deployed_contracts) == 0
 
 
-def test_with_single_deployed_contract(testrpc_chain, math):
-    chain = testrpc_chain
+def test_with_single_deployed_contract(tester_chain, math):
+    chain = tester_chain
     provider = chain.store.provider
     registrar = chain.store.registrar
 
@@ -119,7 +119,7 @@ def test_with_multiple_deployed_contracts(tester_chain,
                                           math,
                                           library_13,
                                           multiply_13):
-    chain = testrpc_chain
+    chain = tester_chain
     provider = chain.store.provider
     registrar = chain.store.registrar
 
@@ -139,11 +139,11 @@ def test_with_multiple_deployed_contracts(tester_chain,
     assert provider.deployed_contracts.Multiply13.call().multiply13(3) == 39
 
 
-def test_contracts_with_missing_dependencies_ignored(testrpc_chain,
+def test_contracts_with_missing_dependencies_ignored(tester_chain,
                                                      math,
                                                      library_13,
                                                      multiply_13):
-    chain = testrpc_chain
+    chain = tester_chain
     provider = chain.store.provider
     registrar = chain.store.registrar
 

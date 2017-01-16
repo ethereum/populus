@@ -9,7 +9,7 @@ from populus.packages.build import (
 )
 
 
-TEST_CONTRACT_SOURCE = """pragma solidit ^0.4.0;
+TEST_CONTRACT_SOURCE = """pragma solidity ^0.4.0;
 
 contract TestContract {
     uint value;

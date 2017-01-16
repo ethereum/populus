@@ -80,7 +80,7 @@ def deploy(ctx, chain_name, contracts_to_deploy):
     else:
         # prompt the user to select the desired contracts they want to deploy.
         # Potentially display the currently deployed status.
-        contracts_to_deploy = [select_project_contract(chain)]
+        contracts_to_deploy = [select_project_contract(project)]
 
     with chain:
         provider = chain.store.provider

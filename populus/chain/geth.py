@@ -159,7 +159,7 @@ class LocalGethChain(BaseGethChain):
     def get_geth_process_instance(self):
         return LoggedDevGethProcess(
             project_dir=self.project.project_dir,
-            blockchains_dir=self.project.base_blochchain_storage_dir,
+            blockchains_dir=self.project.base_blockchain_storage_dir,
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
         )

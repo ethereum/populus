@@ -266,6 +266,7 @@ def deploy_contract_and_verify(chain,
     a different name.
     """
     web3 = chain.web3
+    provider = chain.store.provider
 
     if is_account_locked(web3, web3.eth.defaultAccount):
         default_account = select_account(chain)
@@ -273,7 +274,7 @@ def deploy_contract_and_verify(chain,
             request_account_unlock(chain, default_account, None)
 
     if ContractFactory is None:
-        ContractFactory = chain.get_contract_factory(contract_name)
+        ContractFactory = provider.get_contract_factory(contract_name)
 
     # TODO: this needs to do contract linking.
     click.echo("Deploying {0}".format(contract_name))

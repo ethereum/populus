@@ -8,8 +8,8 @@ from populus import ASSETS_DIR
 from populus.utils.functional import (
     cast_return_to_tuple,
 )
-from populus.utils.chains import (
-    get_default_ipc_path as get_geth_default_ipc_path,
+from populus.utils.geth import (
+    get_geth_default_ipc_path,
 )
 from populus.utils.config import (
     get_nested_key,

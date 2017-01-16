@@ -91,7 +91,7 @@ def test_deploying_contract_with_error_during_deploy(project_dir, THROWER):
                 chain,
                 contract_name='Thrower',
                 ContractFactory=Thrower,
-                deploy_arguments=[True],
+                deploy_args=[True],
             )
             exports.append(math_contract)
             print("~~{0}~~".format(math_contract.address))
@@ -121,7 +121,7 @@ def test_deploying_contract_with_error_during_deploy_sanity_check(project_dir,
                 chain,
                 contract_name='Thrower',
                 ContractFactory=Thrower,
-                deploy_arguments=[False],
+                deploy_args=[False],
             )
             exports.append(math_contract)
             print("~~{0}~~".format(math_contract.address))

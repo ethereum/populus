@@ -5,7 +5,6 @@ from populus.utils.chains import (
 )
 from populus.packages.build import (
     construct_deployments_object,
-    construct_deployments,
 )
 
 
@@ -34,10 +33,11 @@ def test_construct_deployments_object(project, TestContract):
     contract_data = project.compiled_contract_data['TestContract']
 
     with project.get_chain('tester') as chain:
-        test_contract, created = chain.store.provider.get_or_deploy_contract('TestContract')
+        provider = chain.store.provider
+        test_contract, created = provider.get_or_deploy_contract('TestContract')
         assert created
 
-    deployments_object = construct_deployments_object(provider, ['TestContract'])
+        deployments_object = construct_deployments_object(provider, ['TestContract'])
 
     assert 'TestContract' in deployments_object
 
@@ -45,10 +45,3 @@ def test_construct_deployments_object(project, TestContract):
     assert deployed_instance['runtime_bytecode'] == contract_data['code_runtime']
     assert deployed_instance['address'] == test_contract.address
     assert deployed_instance['contract_type'] == 'TestContract'
-
-
-def test_construct_deployments(project, TestContract):
-    contract_data = project.compiled_contract_data['TestContract']
-
-    # TODO: have to setup chains in project dir that have deployed instances
-    assert False

@@ -7,7 +7,7 @@ from populus.contracts.exceptions import (
 
 
 @pytest.yield_fixture()
-def testrpc_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
+def tester_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
     write_project_file('contracts/Math.sol', MATH['source'])
     write_project_file(
         'contracts/Multiply13.sol',
@@ -20,13 +20,13 @@ def testrpc_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13
     assert 'Library13' in project.compiled_contract_data
     assert 'Multiply13' in project.compiled_contract_data
 
-    with project.get_chain('testrpc') as chain:
+    with project.get_chain('tester') as chain:
         yield chain
 
 
 @pytest.fixture()
-def math(testrpc_chain):
-    chain = testrpc_chain
+def math(tester_chain):
+    chain = tester_chain
     web3 = chain.web3
 
     Math = chain.base_contract_factories.Math
@@ -43,8 +43,8 @@ def math(testrpc_chain):
 
 
 @pytest.fixture()
-def library_13(testrpc_chain):
-    chain = testrpc_chain
+def library_13(tester_chain):
+    chain = tester_chain
     web3 = chain.web3
 
     Library13 = chain.base_contract_factories.Library13
@@ -60,16 +60,16 @@ def library_13(testrpc_chain):
     return Library13(address=library_13_address)
 
 
-def test_unknown_contract(testrpc_chain):
-    chain = testrpc_chain
+def test_unknown_contract(tester_chain):
+    chain = tester_chain
     provider = chain.store.provider
 
     with pytest.raises(UnknownContract):
         provider.get_or_deploy_contract('NotAKnownContract')
 
 
-def test_it_uses_existing_address(testrpc_chain, math):
-    chain = testrpc_chain
+def test_it_uses_existing_address(tester_chain, math):
+    chain = tester_chain
     provider = chain.store.provider
     registrar = chain.store.registrar
 
@@ -80,8 +80,8 @@ def test_it_uses_existing_address(testrpc_chain, math):
     assert created is None
 
 
-def test_it_lazily_deploys_contract(testrpc_chain):
-    chain = testrpc_chain
+def test_it_lazily_deploys_contract(tester_chain):
+    chain = tester_chain
     provider = chain.store.provider
 
     math, created = provider.get_or_deploy_contract('Math')
@@ -91,8 +91,8 @@ def test_it_lazily_deploys_contract(testrpc_chain):
     assert created is not None
 
 
-def test_it_handles_library_dependencies(testrpc_chain):
-    chain = testrpc_chain
+def test_it_handles_library_dependencies(tester_chain):
+    chain = tester_chain
     provider = chain.store.provider
 
     multiply_13, created = provider.get_or_deploy_contract('Multiply13')
@@ -100,8 +100,8 @@ def test_it_handles_library_dependencies(testrpc_chain):
     assert created is not None
 
 
-def test_it_uses_existing_library_dependencies(testrpc_chain, library_13):
-    chain = testrpc_chain
+def test_it_uses_existing_library_dependencies(tester_chain, library_13):
+    chain = tester_chain
     provider = chain.store.provider
     registrar = chain.store.registrar
 

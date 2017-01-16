@@ -69,7 +69,10 @@ def test_project_local_chain_ipc(project_dir):
         block_0 = web3.eth.getBlock(0)
         assert block_0['hash'] != MAINNET_BLOCK_0_HASH
         assert block_0['hash'] != ROPSTEN_BLOCK_0_HASH
-        assert block_0['miner'] == web3.eth.coinbase
+        assert block_0['miner'] == "0x3333333333333333333333333333333333333333"
+
+        block_1 = web3.eth.getBlock(1)
+        assert block_1['miner'] == web3.eth.coinbase
 
 
 @pytest.mark.slow
@@ -92,4 +95,7 @@ def test_project_local_chain_rpc(project_dir):
         block_0 = web3.eth.getBlock(0)
         assert block_0['hash'] != MAINNET_BLOCK_0_HASH
         assert block_0['hash'] != ROPSTEN_BLOCK_0_HASH
-        assert block_0['miner'] == web3.eth.coinbase
+        assert block_0['miner'] == "0x3333333333333333333333333333333333333333"
+
+        block_1 = web3.eth.getBlock(1)
+        assert block_1['miner'] == web3.eth.coinbase

@@ -9,6 +9,7 @@ from .string import (
 from .formatting import (
     remove_0x_prefix,
     add_0x_prefix,
+    remove_dunderscore_prefix,
 )
 from .functional import (
     cast_return_to_tuple,
@@ -31,6 +32,10 @@ LinkReference = collections.namedtuple(
 )
 
 
+def remove_dunderscore_wrapper(value):
+    return remove_dunderscore_prefix(value.rstrip('_'))
+
+
 @cast_return_to_tuple
 @coerce_args_to_text
 def find_link_references(bytecode, full_reference_names):
@@ -47,8 +52,8 @@ def find_link_references(bytecode, full_reference_names):
 
     link_references = tuple((
         LinkReference(
-            reference_name=match.group().strip('_'),
-            full_name=expand_fn(match.group().strip('_')),
+            reference_name=remove_dunderscore_wrapper(match.group()),
+            full_name=expand_fn(remove_dunderscore_wrapper(match.group())),
             offset=match.start(),
             length=match.end() - match.start(),
         ) for match in re.finditer(DEPENDENCY_RE, unprefixed_bytecode)

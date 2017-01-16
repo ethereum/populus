@@ -83,11 +83,6 @@ FULL_NAMES = (
                     'length': 40,
                 },
                 {
-                    'name': '_StartsWithUnderscore',
-                    'offset': 364,
-                    'length': 40,
-                },
-                {
                     'name': 'LongerThan40Characters1234567890123456789012345678901234567890',
                     'offset': 508,
                     'length': 40,
@@ -108,4 +103,10 @@ FULL_NAMES = (
 )
 def test_find_link_references(bytecode, expected):
     actual = find_link_references(bytecode, FULL_NAMES)
-    assert actual == expected
+
+    assert len(actual) == len(expected)
+
+    for left, right in zip(actual, expected):
+        assert left.full_name == right['name']
+        assert left.offset == right['offset']
+        assert left.length == right['length']

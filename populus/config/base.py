@@ -13,8 +13,7 @@ from populus.utils.config import (
     get_nested_key,
     set_nested_key,
     pop_nested_key,
-)
-from populus.utils.config import (
+    get_config_schema_path,
     get_empty_config,
     flatten_config_items,
     resolve_config,

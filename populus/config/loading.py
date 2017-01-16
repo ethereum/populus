@@ -2,6 +2,7 @@ import anyconfig
 
 from populus.utils.config import (
     get_ini_config_file_path,
+    get_config_schema_path,
 )
 
 

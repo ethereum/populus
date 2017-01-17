@@ -71,13 +71,32 @@ When a package is installed it is automatically saved to the project
 dependencies within the package manifest.  This can be disabled by passing in
 the ``--no-save`` flag during installation.
 
+Using Contracts from Installed Packages
+---------------------------------------
+
 Importing a contract from an installed package is done by prefixing the source
 path with the name of the installed package, or the alias name if an alias was
 used.
 
-For example, if the ``owned`` project had a single source file located at
-``./contracts/owned.sol`` then you would use the import statement ``import
-owned/contracts/owned.sol`` to import that source file.
+Lets use the common *owned* pattern for an example.  Suppose we have the
+``owned`` package installed in our project.  We know that this package has a
+single solidity source file that contains the ``owned`` contract located at
+``./contracts/owned.sol``.
+
+To import a contract from this file into local solidity source files you would
+simply prefix the import path with the package name.
+
+.. code-block:: solidity
+
+    pragma solidity ^0.4.0;
+
+    import "owned/contracts/owned.sol";
+
+    contract MyContract is owned {
+        ...
+    }
+
+.. note:: If you install a package which either has source files which do not compile with the solidity compiler version you are using, or which have a ``pragma solidity`` statement which is incompatable with your version of solidity then compilation will fail.
 
 
 Building and Publishing Releases

@@ -1,5 +1,8 @@
 from pylru import lrucache
 
+from populus.utils.string import (
+    force_bytes,
+)
 from populus.utils.linking import (
     link_bytecode,
     find_link_references,
@@ -55,7 +58,7 @@ class Provider(object):
             code_runtime=code_runtime,
             abi=base_contract_factory.abi,
             source=base_contract_factory.source,
-            contract_name=contract_name,
+            contract_name=force_bytes(contract_name),
         )
 
         self._factory_cache[contract_name] = contract_factory

@@ -75,6 +75,7 @@ def test_project_local_chain_ipc(project_dir):
 
     ipc_path = get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local'))
 
+    project.config['chains.local.chain.class'] = 'populus.chain.LocalGethChain'
     project.config['chains.local.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local.web3.provider.settings.ipc_path'] = ipc_path
     project.write_config()
@@ -97,8 +98,9 @@ def test_project_local_chain_ipc(project_dir):
 def test_project_local_chain_rpc(project_dir):
     project = Project()
     rpc_port = str(get_open_port())
+    project.config['chains.local.chain.class'] = 'populus.chain.LocalGethChain'
+    project.config['chains.local.chain.settings.rpc_port'] = rpc_port
     project.config['chains.local.web3.provider.class'] = 'web3.providers.rpc.RPCProvider'
-    project.config['chains.local.geth.settings.rpc_port'] = rpc_port
     project.config['chains.local.web3.provider.settings.rpc_port'] = rpc_port
     project.write_config()
 

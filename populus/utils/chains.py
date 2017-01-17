@@ -140,3 +140,11 @@ def setup_web3_from_config(web3_config):
         web3.eth.defaultAccount = web3_config['eth.default_account']
 
     return web3
+
+
+def setup_chain_from_config(project, chain_name, chain_config):
+    chain_class_import_path = chain_config['chain.class']
+
+    ChainClass = import_string(chain_class_import_path)
+    chain = ChainClass(project, chain_name, chain_config)
+    return chain

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import itertools
 import copy
 
@@ -92,9 +93,9 @@ class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
         )
 
 
-class LoggedMordenGethProccess(LoggingMixin, TestnetGethProcess):
+class LoggedTestnetGethProccess(LoggingMixin, TestnetGethProcess):
     def __init__(self, project_dir, geth_kwargs):
-        super(LoggedMordenGethProccess, self).__init__(
+        super(LoggedTestnetGethProccess, self).__init__(
             geth_kwargs=geth_kwargs,
         )
 
@@ -153,19 +154,21 @@ class Chain(object):
     """
     project = None
     chain_name = None
+    config = None
     _factory_cache = None
 
-    def __init__(self, project, chain_name):
+    def __init__(self, project, chain_name, chain_config):
         self.project = project
         self.chain_name = chain_name
+        self.config = chain_config
         self._factory_cache = lrucache(128)
+        self.initialize_chain()
 
-    #
-    # Config
-    #
-    @property
-    def config(self):
-        return self.project.get_chain_config(self.chain_name)
+    def initialize_chain(self):
+        """
+        Hook for initialization that is called during class instantiation.
+        """
+        pass
 
     #
     # Required Public API
@@ -652,19 +655,17 @@ GETH_KWARGS = {
 
 
 class BaseGethChain(Chain):
+    stack = None
     geth = None
 
-    def __init__(self, project, chain_name, **kwargs):
-        super(BaseGethChain, self).__init__(project, chain_name)
-
+    def initialize_chain(self):
         # context manager shenanigans
         self.stack = ExitStack()
-
         self.geth = self.get_geth_process_instance()
 
     @property
     def geth_kwargs(self):
-        return self.config.get('geth.settings', {})
+        return self.config.get('chain.settings', {})
 
     @property
     def has_registrar(self):
@@ -714,6 +715,12 @@ class LocalGethChain(BaseGethChain):
             overrides=self.geth_kwargs,
         )
 
+    def get_web3_config(self):
+        base_config = super(LocalGethChain, self).get_web3_config()
+        config = copy.deepcopy(base_config)
+        config['provider.settings.ipc_path'] = self.geth.ipc_path
+        return config
+
 
 class TemporaryGethChain(BaseGethChain):
     def get_geth_process_instance(self):
@@ -745,9 +752,9 @@ class TemporaryGethChain(BaseGethChain):
         return registrar
 
 
-class MordenChain(BaseGethChain):
+class TestnetChain(BaseGethChain):
     def get_geth_process_instance(self):
-        return LoggedMordenGethProccess(
+        return LoggedTestnetGethProccess(
             project_dir=self.project.project_dir,
             geth_kwargs=self.geth_kwargs,
         )

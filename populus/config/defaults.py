@@ -46,14 +46,19 @@ POPULUS_CONFIG_DEFAULTS = {
     #
     # Temp Geth Chains
     ('chains.temp.web3',),
+    ('chains.temp.chain',),
     # Mainnet
     ('chains.mainnet.web3',),
+    ('chains.mainnet.chain',),
     # Ropsten
     ('chains.ropsten.web3',),
+    ('chains.ropsten.chain',),
     # TestRPC
     ('chains.testrpc.web3',),
+    ('chains.testrpc.chain',),
     # Tester
     ('chains.tester.web3',),
+    ('chains.tester.chain',),
     #
     # Web3 Presets
     #

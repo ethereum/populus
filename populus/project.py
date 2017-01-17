@@ -15,6 +15,7 @@ from populus.utils.chains import (
     get_dapp_dir,
     get_geth_ipc_path,
     get_nodekey_path,
+    setup_chain_from_config,
 )
 from populus.utils.config import (
     get_default_project_config_file_path,
@@ -37,15 +38,6 @@ from populus.config import (
     write_config as _write_config,
     load_default_config_info,
     Config,
-)
-from populus.chain import (
-    TestRPCChain,
-    EthereumTesterChain,
-    TemporaryGethChain,
-    MordenChain,
-    MainnetChain,
-    LocalGethChain,
-    ExternalChain,
 )
 
 
@@ -126,11 +118,6 @@ class Project(object):
         else:
             return get_build_dir(self.project_dir)
 
-    @property
-    @relpath
-    def compiled_contracts_file_path(self):
-        return get_compiled_contracts_file_path(self.project_dir)
-
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None
 
@@ -164,6 +151,11 @@ class Project(object):
         self._cached_compiled_contracts = contracts
 
     @property
+    @relpath
+    def compiled_contracts_file_path(self):
+        return get_compiled_contracts_file_path(self.project_dir)
+
+    @property
     def compiled_contracts(self):
         if self.compiled_contracts_stale():
             self._cached_compiled_contracts_mtime = self.get_source_modification_time()
@@ -192,7 +184,7 @@ class Project(object):
                 )
             )
 
-    def get_chain(self, chain_name, *chain_args, **chain_kwargs):
+    def get_chain(self, chain_name, chain_config=None):
         """
         Returns a context manager that runs a chain within the context of the
         current populus project.
@@ -240,30 +232,10 @@ class Project(object):
 
         :return: :class:`populus.chain.Chain`
         """
-        if chain_name == 'testrpc':
-            return TestRPCChain(self, 'testrpc', *chain_args, **chain_kwargs)
-        elif chain_name == 'tester':
-            return EthereumTesterChain(self, 'tester', *chain_args, **chain_kwargs)
-        elif chain_name == 'temp':
-            return TemporaryGethChain(self, 'temp', *chain_args, **chain_kwargs)
-
-        chain_config = self.get_chain_config(chain_name)
-
-        if chain_config.get('is_external', False):
-            # TODO: the chain_kwargs is really currently required to contain a
-            # `web3` instance.  This isn't quite congruent with the current
-            # API.
-            return ExternalChain(self, chain_name, *chain_args, **chain_kwargs)
-
-        if chain_name == 'morden':
-            return MordenChain(self, 'morden', *chain_args, **chain_kwargs)
-        elif chain_name == 'mainnet':
-            return MainnetChain(self, 'mainnet', *chain_args, **chain_kwargs)
-        else:
-            return LocalGethChain(self,
-                                  chain_name=chain_name,
-                                  *chain_args,
-                                  **chain_kwargs)
+        if chain_config is None:
+            chain_config = self.get_chain_config(chain_name)
+        chain = setup_chain_from_config(self, chain_name, chain_config)
+        return chain
 
     @property
     @relpath

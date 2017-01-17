@@ -10,6 +10,154 @@ Populus is designed to be highly configurable through the project configuration
 file.  By default, populus will load the file name ``populus.json`` from the
 root of your project.
 
+What you can Configure
+^^^^^^^^^^^^^^^^^^^^^^
+
+This config file controls many aspects of populus that are configurable.
+Currently the config file controls the following things.
+
+* Compiler settings
+* Available chains and how web3 connects to them.
+
+
+Built-in defaults
+^^^^^^^^^^^^^^^^^
+
+Populus ships with the following *default* configuration 
+
+.. code-block:: javascript 
+
+    TODO
+
+
+When you author your own ``populus.json`` file populus will automatically merge
+the defaults into your declared project configuration.
+
+
+Compiler Configuration
+^^^^^^^^^^^^^^^^^^^^^^
+
+The following configuration options are available to control how populus
+compiles your project contracts.
+
+Contract Source Directory
+"""""""""""""""""""""""""
+
+The directory that project source files can be found in.
+
+* key: ``compilation.contracts_source_dir``
+* value: Filesystem path
+* default: ``'./contracts'``
+
+
+Compiler Settings
+"""""""""""""""""
+
+Enable or disable compile optimization.
+
+* key: ``compilation.settings.optimize``
+* value: Boolean
+* default: ``True``
+
+
+Chains
+^^^^^^
+
+The ``chains`` key within the configuration file declares what chains populus
+has access to and how to connect to them.  Populus comes pre-configured with
+the following chains.
+
+* ``'mainnet'``: Connects to the public ethereum mainnet via ``geth``.
+* ``'ropsten'``: Connects to the public ethereum ropsten testnet via ``geth``.
+* ``'tester'``: Uses an ephemeral in-memory chain backed by pyethereum.
+* ``'testrpc'``: Uses an ephemeral in-memory chain backed by pyethereum.
+* ``'temp'``: Local private chain whos data directory is removed when the chain
+  is shutdown.  Runs via ``geth``.
+
+
+Chain
+"""""
+
+Configures the chain class which is used to run the chain.
+
+* key: ``chains.<chain-name>.chain``
+* value: Chain Class Configuration
+* required: Yes
+
+Web3
+""""""""""""""""""
+
+Configuration for the Web3 instance this chain will use to connect to the blockchain.
+
+* key: ``chains.<chain-name>.web3``
+* value: Web3 Configuration
+* required: Yes
+
+
+Chain Class Configuration
+-------------------------
+
+Class
+^^^^^
+
+* key: ``class``
+* value: Dot separated python path to the chain class that should be used.
+
+
+Settings
+""""""""
+
+Specifies the ``**kwargs`` that will be passed into the chain class on instantiation.
+
+* key: ``provider.settings``
+* value: Key/Value mapping
+* default: ``{}``
+
+
+Web3 Configuration
+------------------
+
+There are various parts of the application which require configuration a web3
+instance to connect to a node.  Each web3 configuration has the following
+configuration options.
+
+Provider
+^^^^^^^^
+
+Configuration for the Web3 Provider 
+
+Provider Class
+""""""""""""""
+
+Specifies the import path for the provider class that should be used.
+
+* key: ``provider.class``
+* value: Dot separated python path
+* required: Yes
+
+Provider Settings
+"""""""""""""""""
+
+Specifies the ``**kwargs`` that should be used when instantiating the provider.
+
+* key: ``provider.settings``
+* value: Key/Value mapping
+
+
+Eth Module
+^^^^^^^^^^
+
+Configuration for the Web3 Eth Module
+
+Default Account
+"""""""""""""""
+
+If present the ``web3.eth.defaultAccount`` will be populated with this address.
+
+* key: ``eth.default_account``
+* value: Ethereum Address
+
+
 Configuration API
 -----------------
 
@@ -193,105 +341,6 @@ In the above, the key ``a`` is a reference to the value found under key ``b.c``
     ['d']
     >>> project.config.get('a')
     ['d']
-
-
-Web3 Configuration
-------------------
-
-There are various parts of the application which require configuration a web3
-instance to connect to a node.  Each web3 configuration has the following
-configuration options.
-
-Provider
-^^^^^^^^
-
-Configuration for the Web3 Provider 
-
-Provider Class
-""""""""""""""
-
-Specifies the import path for the provider class that should be used.
-
-* key: ``provider.class``
-* value: Dot separated python path
-* required: Yes
-
-Provider Settings
-"""""""""""""""""
-
-Specifies the ``**kwargs`` that should be used when instantiating the provider.
-
-* key: ``provider.settings``
-* value: Key/Value mapping
-
-
-Eth Module
-^^^^^^^^^^
-
-Configuration for the Web3 Eth Module
-
-Default Account
-"""""""""""""""
-
-If present the ``web3.eth.defaultAccount`` will be populated with this address.
-
-* key: ``eth.default_account``
-* value: Ethereum Address
-
-
-What you can Configure
-----------------------
-
-The following things can be configured via the project configuration file.
-
-
-Compiler
-^^^^^^^^
-
-Contract Source Directory
-"""""""""""""""""""""""""
-
-The directory that project source files can be found in.
-
-* key: ``compilation.contracts_source_dir``
-* value: Filesystem path
-* default: ``'./contracts'``
-
-
-Compiler Settings
-"""""""""""""""""
-
-Enable or disable compile optimization.
-
-* key: ``compilation.settings.optimize``
-* value: Boolean
-* default: ``True``
-
-
-Chains
-^^^^^^
-
-All chain configurations are found under the namespace ``chains``.  The
-configuration for a chain named ``'local'`` would be found under the key
-``chains.local``.
-
-Is External
-"""""""""""
-
-Flag to specify if populus should manage running this chain.
-
-* key: ``chains.<chain-name>.is_external``
-* value: Boolean
-* default: ``False``
-
-Web3
-""""""""""""""""""
-
-Configuration for the Web3 instance this chain will use to connect to the blockchain.
-
-* key: ``chains.<chain-name>.web3``
-* value: Web3 Configuration
-* required: Yes
 
 
 

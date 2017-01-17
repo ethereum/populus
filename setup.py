@@ -41,7 +41,7 @@ setup(
             "web3[gevent]>=3.5.1",
             "eth-testrpc[gevent]>=1.1.0",
             "py-geth[gevent]>=1.7.0",
-            "py-solc[gevent]>=0.9.0",
+            "py-solc[gevent]>=1.0.0",
         ],
     },
     license="MIT",

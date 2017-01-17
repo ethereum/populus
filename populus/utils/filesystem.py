@@ -13,8 +13,7 @@ from populus.utils.functional import (
 
 
 if sys.version_info.major == 2:
-    class FileNotFoundError(OSError, IOError):
-        pass
+    FileNotFoundError = OSError
 
 
 def ensure_path_exists(dir_path):

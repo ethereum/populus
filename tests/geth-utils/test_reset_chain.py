@@ -6,6 +6,7 @@ from populus.utils.filesystem import (
 from populus.project import Project
 from populus.utils.geth import (
     reset_chain,
+    get_data_dir,
     get_chaindata_dir,
     get_dapp_dir,
     get_nodekey_path,

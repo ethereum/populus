@@ -60,6 +60,6 @@ def test_simple_lockfile_with_only_sources(project, TestContract, package_manife
     assert 'sources' in release_lockfile
     sources = release_lockfile['sources']
     assert './contracts/TestContract.sol' in sources
-    assert sources['./contracts/TestContract.sol'] == 'ipfs://QmU6dMXKMe4t3huaR8V4mNKfD9Ei3Mm8CY86VU1KPdWM2f'
+    assert sources['./contracts/TestContract.sol'] == 'ipfs://QmTRxTJ7LLYjKuC6toWFBAKu3h7rXxEzmsV19TyQ4q5RzF'
 
     assert 'contract_types' not in release_lockfile

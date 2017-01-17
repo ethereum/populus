@@ -245,6 +245,8 @@ class Project(object):
 
         if source_mtime is None:
             return True
+        elif self._cached_compiled_contracts_mtime is None:
+            return True
         else:
             return self._cached_compiled_contracts_mtime < source_mtime
 

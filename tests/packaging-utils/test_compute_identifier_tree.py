@@ -147,6 +147,7 @@ def test_tree_computation_from_aliased_release_lockfile(project_dir,
                                                         mock_package_index_backend,
                                                         mock_package_backends):
     release_lockfile = {
+        'lockfile_version': '1',
         'version': '1.0.0',
         'package_name': 'test-package',
     }

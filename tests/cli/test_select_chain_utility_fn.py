@@ -19,7 +19,7 @@ from populus.utils.cli import (
         ('1\n', '~~local_b~~'),
         ('2\n', '~~local_c~~'),
         ('3\n', '~~mainnet~~'),
-        #('4\n', '~~morden~~'),
+        ('4\n', '~~ropsten~~'),
         ('5\n', '~~temp~~'),
         ('6\n', '~~tester~~'),
         ('7\n', '~~testrpc~~'),
@@ -27,7 +27,7 @@ from populus.utils.cli import (
         ('local_b\n', '~~local_b~~'),
         ('local_c\n', '~~local_c~~'),
         ('mainnet\n', '~~mainnet~~'),
-        #('morden\n', '~~morden~~'),
+        ('ropsten\n', '~~ropsten~~'),
         ('temp\n', '~~temp~~'),
         ('tester\n', '~~tester~~'),
         ('testrpc\n', '~~testrpc~~'),
@@ -35,14 +35,17 @@ from populus.utils.cli import (
 )
 def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expected):
     project = Project()
+    project.config['chains.local_a.chain.class'] = 'populus.chain.EthereumTesterChain'
     project.config['chains.local_a.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local_a.web3.provider.settings.ipc_path'] = (
         get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_a'))
     )
+    project.config['chains.local_b.chain.class'] = 'populus.chain.EthereumTesterChain'
     project.config['chains.local_b.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local_b.web3.provider.settings.ipc_path'] = (
         get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_b'))
     )
+    project.config['chains.local_c.chain.class'] = 'populus.chain.EthereumTesterChain'
     project.config['chains.local_c.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local_c.web3.provider.settings.ipc_path'] = (
         get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_c'))

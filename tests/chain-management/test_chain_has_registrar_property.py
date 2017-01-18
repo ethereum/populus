@@ -29,6 +29,7 @@ def test_temp_chain_has_registrar(project_dir):
 
 def test_geth_chain_has_registrar(project_dir, write_project_file):
     project = Project()
+    project.config['chains.local.chain.class'] = 'populus.chain.LocalGethChain'
     project.config['chains.local.registrar'] = 'faking-it'
     project.config['chains.local.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local.web3.provider.settings.ipc_path'] = (

@@ -85,14 +85,15 @@ dictories and paths that populus uses.
     The path that the JSON build artifact will be written to.
 
 
-.. py:attribute:: Project.compile_project_contracts
+.. py:attribute:: Project.compiled_contracts
 
     The parsed JSON output loaded from the
     ``Project.compiled_contracts_file_path``.
 
 
-.. py:method:: Project.get_chain(chain_name, *chain_args, *chain_kwargs)
+.. py:method:: Project.get_chain(chain_name, chain_config=None)
 
     Returns the ``populus.chain.Chain`` instance associated with the geven
-    ``chain_name``.  The ``chain_args`` and ``chain_kwargs`` are passed through
-    to the constructor of the underlying ``populus.chain.Chain`` object.
+    ``chain_name``.  If ``chain_config`` is passed in then it will attempt to
+    lookup the chain configuratin under ``chains.<chain_name>`` raising a
+    ``KeyError`` if no configuration is found.

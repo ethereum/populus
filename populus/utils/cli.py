@@ -266,9 +266,13 @@ def deploy_contract_and_verify(chain,
         base_contract_factory = chain.contract_factories[contract_name]
 
     if is_account_locked(web3, web3.eth.defaultAccount):
-        default_account = select_account(chain)
-        if is_account_locked(web3, default_account):
-            request_account_unlock(chain, default_account, None)
+        try:
+            chain.wait.for_unlock(web3.eth.defaultAccount, 5)
+        except Timeout:
+            default_account = select_account(chain)
+            if is_account_locked(web3, default_account):
+                request_account_unlock(chain, default_account, None)
+            web3.eth.defaultAccount = default_account
 
     # TODO: this needs to do contract linking.
     click.echo("Deploying {0}".format(contract_name))

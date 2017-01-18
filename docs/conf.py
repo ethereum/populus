@@ -13,6 +13,7 @@
 # serve to show the default.
 import sys
 import os
+import importlib
 
 
 # Mock out dependencies
@@ -27,13 +28,14 @@ class Mock(MagicMock):
 
 MOCK_MODULES = [
     'testrpc',
-    'eth_tester_client',
     'sha3',
 ]
 
-sys.modules.update(
-    (mod_name, Mock()) for mod_name in MOCK_MODULES
-)
+for mod_name in MOCK_MODULES:
+    try:
+        importlib.import_module(mod_name)
+    except ImportError:
+        sys.modules[mod_name] = Mock()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

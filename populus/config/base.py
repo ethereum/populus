@@ -75,7 +75,7 @@ class Config(object):
             value = pop_nested_key(self.config_for_read, key)
         except KeyError:
             if default is empty:
-                raise
+                raise KeyError("Key '{0}' not found in {1}".format(key, self.config_for_read))
             else:
                 value = default
 
@@ -139,7 +139,10 @@ class Config(object):
         return len(self.config_for_read)
 
     def __getitem__(self, key):
-        return self.resolve(get_nested_key(self.config_for_read, key))
+        try:
+            return self.resolve(get_nested_key(self.config_for_read, key))
+        except KeyError:
+            raise KeyError("Key '{0}' not found in {1}".format(key, self.config_for_read))
 
     def __setitem__(self, key, value):
         if isinstance(value, type(self)):

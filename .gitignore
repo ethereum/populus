@@ -42,8 +42,10 @@ docs/_build
 docs/modules.rst
 docs/populus.rst
 docs/populus.cli.rst
+docs/populus.config.rst
 docs/populus.migrations.rst
 docs/populus.utils.rst
+docs/populus.utils.*.rst
 
 # Blockchain
 **/chains/*/nodes/*

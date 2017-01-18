@@ -5,6 +5,10 @@ from click.testing import CliRunner
 
 from geth.accounts import create_new_account
 
+from web3.utils.string import (
+    force_text,
+)
+
 from populus.project import Project
 from populus.utils.chains import (
     get_geth_ipc_path,
@@ -18,6 +22,7 @@ from populus.utils.cli import (
 @pytest.fixture()
 def local_chain(project_dir):
     project = Project()
+    project.config['chains.local.chain.class'] = 'populus.chain.LocalGethChain'
     project.config['chains.local.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local.web3.provider.settings.ipc_path'] = (
         get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local'))
@@ -26,18 +31,20 @@ def local_chain(project_dir):
 
     chain = project.get_chain('local')
 
-    # create a new account
-    create_new_account(chain.geth.data_dir, b'a-test-password')
-
     return chain
+
+@pytest.fixture()
+def second_account(local_chain):
+    # create a new account
+    account = create_new_account(local_chain.geth.data_dir, b'a-test-password')
+    return force_text(account)
 
 
 @flaky
-def test_get_unlocked_default_account_address_with_no_config(local_chain):
-    project = Project()
-    chain = local_chain
+def test_get_unlocked_default_account_address_with_no_config(local_chain, second_account):
+    project = local_chain.project
 
-    with chain:
+    with project.get_chain(local_chain.chain_name) as chain:
         @click.command()
         def wrapper():
             account = get_unlocked_default_account_address(chain)
@@ -46,21 +53,19 @@ def test_get_unlocked_default_account_address_with_no_config(local_chain):
         runner = CliRunner()
         result = runner.invoke(wrapper, [], input="1\ny\na-test-password\n")
 
-        default_account = chain.web3.eth.accounts[1]
         assert result.exit_code == 0, result.output + str(result.exception)
-        expected = "~~{0}~~".format(default_account)
+        expected = "~~{0}~~".format(second_account)
         assert expected in result.output
 
         project.reload_config()
-        assert project.config['chains.local.web3.eth.default_account'] == default_account
+        assert project.config['chains.local.web3.eth.default_account'] == second_account
 
 
 @flaky
-def test_helper_fn_with_unlocked_pre_configured_account(local_chain):
-    chain = local_chain
-    project = chain.project
+def test_helper_fn_with_unlocked_pre_configured_account(local_chain, second_account):
+    project = local_chain.project
 
-    with chain:
+    with project.get_chain(local_chain.chain_name) as chain:
         web3 = chain.web3
         project.config['chains.local.web3.eth.default_account'] = web3.eth.coinbase
         project.write_config()
@@ -82,14 +87,14 @@ def test_helper_fn_with_unlocked_pre_configured_account(local_chain):
 
 
 @flaky
-def test_helper_fn_with_locked_pre_configured_account(local_chain):
-    chain = local_chain
-    project = chain.project
+def test_helper_fn_with_locked_pre_configured_account(local_chain, second_account):
+    project = local_chain.project
+    project.config['chains.local.web3.eth.default_account'] = second_account
+    project.write_config()
 
-    with chain:
+    with project.get_chain(local_chain.chain_name) as chain:
         web3 = chain.web3
-        project.config['chains.local.web3.eth.default_account'] = web3.eth.accounts[1]
-        project.write_config()
+        assert chain.web3.eth.defaultAccount == second_account
 
         @click.command()
         def wrapper():

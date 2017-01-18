@@ -1,10 +1,8 @@
 {
     "provider": {
-        "class": "web3.providers.rpc.RPCProvider",
+        "class": "web3.providers.rpc.HTTPProvider",
         "settings": {
-            "rpc_host": "ropsten.infura.io",
-            "rpc_port": 443,
-            "use_ssl": true
+            "endpoint_uri": "https://ropsten.infura.io"
         }
     },
     "eth": {

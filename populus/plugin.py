@@ -27,12 +27,8 @@ def project(request):
 
 @pytest.yield_fixture()
 def unmigrated_chain(request, project):
-    # This should probably allow you to specify the test chain to be used based
-    # on the `request` object.  It's unclear what the best way to do this is
-    # so... punt!
-    chain = project.get_chain('tester')
-
-    with chain:
+    # TODO: pull chain name from configuration.
+    with project.get_chain('tester') as chain:
         yield chain
 
 

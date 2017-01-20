@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import click
 
@@ -23,6 +24,10 @@ def make_migration(ctx, migration_name):
     """
     Generate an empty migration.
     """
+    warnings.warn(PendingDeprecationWarning(
+        "The migrations API is pending deprecation and will be removed in the "
+        "near future."
+    ))
     project = ctx.obj['PROJECT']
 
     click.echo("The Migrations feature has been deprecated and is scheduled for removal")

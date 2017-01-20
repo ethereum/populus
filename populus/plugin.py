@@ -1,4 +1,5 @@
 import pytest
+import warnings
 
 from populus.migrations.migration import (
     get_migration_classes_for_execution,
@@ -40,6 +41,12 @@ def chain(unmigrated_chain):
         unmigrated_chain,
     )
 
+    if migrations_to_execute:
+        warnings.warn(PendingDeprecationWarning(
+            "The migrations API is deprecated and will be removed in the near "
+            "future"
+        ))
+
     for migration in migrations_to_execute:
         migration.execute()
 
@@ -52,8 +59,18 @@ def web3(unmigrated_chain):
 
 
 @pytest.fixture()
-def contract_factories(unmigrated_chain):
+def base_contract_factories(unmigrated_chain):
     return unmigrated_chain.contract_factories
+
+
+@pytest.fixture()
+def contracts(base_contract_factories):
+    warnings.warn(PendingDeprecationWarning(
+        "The `contracts` fixture has been renamed to `base_contract_factories`. "
+        "The `contracts` fixture is pending deprecation and will be removed in "
+        "the near future"
+    ))
+    return base_contract_factories
 
 
 @pytest.fixture()

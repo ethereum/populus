@@ -125,15 +125,15 @@ A Web3.py instance configured to connect to ``chain`` fixture.
 Base Contract Factories
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-* ``contract_factories``
+* ``base_contract_factories``
 
 The contract factory classes for your project.  These will all be
 associated with the Web3 instance from the ``web3`` fixture.
 
 .. code-block:: python
 
-    def test_wallet_deployment(web3, contract_factories):
-        WalletFactory = contract_factories.Wallet
+    def test_wallet_deployment(web3, base_contract_factories):
+        WalletFactory = base_contract_factories.Wallet
 
         deploy_txn_hash = WalletFactory.deploy()
 
@@ -141,8 +141,9 @@ associated with the Web3 instance from the ``web3`` fixture.
 
     For contracts that have library dependencies, you should use the
     ``Chain.get_contract_factory(...)`` api.  The contract factories from the
-    ``contracts`` fixture will not be returned with linked bytecode.  The ones
-    from ``Chain.get_contract_factory()`` are returned fully linked.
+    ``base_contract_factories`` fixture will not be returned with linked
+    bytecode.  The ones from ``Chain.get_contract_factory()`` are returned
+    fully linked.
 
 
 Accounts

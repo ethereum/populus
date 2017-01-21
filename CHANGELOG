@@ -4,6 +4,7 @@
 - Remove had gevent dependency
 - Deprecate migrations functionality.
 - Deprecate and remove old `populus.ini` configuration scheme.
+- Mark `contracts` fixture for deprecation.  Replaced by `base_contract_factories` fixture.
 - Add new configuration API.
 
 1.4.2

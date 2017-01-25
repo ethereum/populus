@@ -65,12 +65,10 @@ def compile_project_contracts(project_dir, contracts_dir, compiler_settings=None
 
 
 def compile_and_write_contracts(project_dir, contracts_dir, compiler_settings=None):
-    if compiler_settings is None:
-        compiler_settings = {}
     contract_source_paths, compiled_sources = compile_project_contracts(
         project_dir,
         contracts_dir,
-        **compiler_settings
+        compiler_settings=compiler_settings,
     )
 
     output_file_path = write_compiled_sources(project_dir, compiled_sources)

@@ -137,9 +137,18 @@ class Project(object):
             in source_file_paths
         ) if len(source_file_paths) > 0 else None
 
-    def compiled_contracts_stale(self):
-        return self._cached_compiled_contracts_mtime is None or \
-            self._cached_compiled_contracts_mtime < self.get_source_modification_time()
+    def is_compiled_contract_cache_stale(self):
+        if self._cached_compiled_contracts is None:
+            return True
+
+        source_mtime = self.get_source_modification_time()
+
+        if source_mtime is None:
+            return True
+        elif self._cached_compiled_contracts_mtime is None:
+            return True
+        else:
+            return self._cached_compiled_contracts_mtime < source_mtime
 
     def fill_contracts_cache(self, contracts, contracts_mtime):
         """
@@ -157,7 +166,7 @@ class Project(object):
 
     @property
     def compiled_contracts(self):
-        if self.compiled_contracts_stale():
+        if self.is_compiled_contract_cache_stale():
             self._cached_compiled_contracts_mtime = self.get_source_modification_time()
             _, self._cached_compiled_contracts = compile_project_contracts(
                 project_dir=self.project_dir,

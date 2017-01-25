@@ -278,20 +278,21 @@ def package_publish(ctx, release_lockfile_path, wait_for_sync):
 
     validate_release_lockfile(release_lockfile)
 
-    package_backends = project.package_backends
+    with project.get_chain('ropsten'):
+        package_backends = project.package_backends
 
-    release_lockfile_uri = persist_package_file(release_lockfile_path, package_backends)
-    publishable_backends = get_publishable_backends(
-        release_lockfile,
-        release_lockfile_uri,
-        package_backends,
-    )
+        release_lockfile_uri = persist_package_file(release_lockfile_path, package_backends)
+        publishable_backends = get_publishable_backends(
+            release_lockfile,
+            release_lockfile_uri,
+            package_backends,
+        )
 
-    if not publishable_backends:
-        raise ValueError("TODO: handle this gracefully")
-    elif len(publishable_backends) > 1:
-        raise ValueError("TODO: handle this gracefully")
-    else:
-        backend_name, backend = tuple(publishable_backends.items())[0]
-        click.echo("Publishing to {0}".format(backend_name))
-        backend.publish_release_lockfile(release_lockfile, release_lockfile_uri)
+        if not publishable_backends:
+            raise ValueError("TODO: handle this gracefully")
+        elif len(publishable_backends) > 1:
+            raise ValueError("TODO: handle this gracefully")
+        else:
+            backend_name, backend = tuple(publishable_backends.items())[0]
+            click.echo("Publishing to {0}".format(backend_name))
+            backend.publish_release_lockfile(release_lockfile, release_lockfile_uri)

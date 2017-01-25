@@ -23,12 +23,14 @@ def project(request):
     return project
 
 
+@pytest.fixture()
 def chain(request, project):
     # TODO: pull this from configuration
     with project.get_chain('tester') as chain:
         yield chain
 
 
+@pytest.fixture()
 def web3(chain):
     return chain.web3
 

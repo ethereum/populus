@@ -1,3 +1,5 @@
+import pytest
+
 import anyconfig
 
 from populus.config import (
@@ -26,62 +28,78 @@ def test_checking_config_equality():
     assert config == m9dict_value
 
 
-TEST_CONFIG_DICT = {
-    'a': 'z',
-    'b': {'gg': 'yy'},
-    'c': {'hh': 'xx', 'oo': 'pp'},
-    'd': {'ii': {'jjj': 'www', 'kkk': 'vvv'}},
-}
-
-TEST_CONFIG_DEFAULTS = (
-    ('b', {'gg': 'new-yy', 'hh': 'new'}, anyconfig.MS_NO_REPLACE),
-    ('c', {'oo': 'new-oo', 'qq': 'new'}, anyconfig.MS_DICTS),
-    ('d', {'ii': {'kkk': 'new-kkk', 'lll': 'new'}}, anyconfig.MS_REPLACE),
-    ('f', {'dd': 'ee'}, anyconfig.MS_REPLACE),
-    ('g', {'ddd': 'eee'}, anyconfig.MS_DICTS),
-    ('h', {'dddd': 'eeee'}, anyconfig.MS_NO_REPLACE),
-    ('i.jj', {'dd': 'ee'}, anyconfig.MS_REPLACE),
-    ('k.ll', {'ddd': 'eee'}, anyconfig.MS_DICTS),
-    ('m.nn', {'dddd': 'eeee'}, anyconfig.MS_NO_REPLACE),
+@pytest.mark.parametrize(
+    'ac_merge',
+    (None, anyconfig.MS_REPLACE, anyconfig.MS_NO_REPLACE, anyconfig.MS_DICTS),
 )
+def test_applying_config_defaults_when_key_not_present(ac_merge):
+    defaults = (
+        ('a.b', {'c': 1, 'd': 2}, ac_merge),
+    )
+    config = Config({'x': 3}, defaults)
+    assert set(config.items(flatten=True)) == {
+        ('a.b.c', 1),
+        ('a.b.d', 2),
+        ('x', 3),
+    }
 
 
-def test_applying_config_defaults():
-    config = Config(TEST_CONFIG_DICT, TEST_CONFIG_DEFAULTS)
+@pytest.mark.parametrize(
+    'ac_merge',
+    (anyconfig.MS_REPLACE, anyconfig.MS_NO_REPLACE, anyconfig.MS_DICTS),
+)
+def test_applying_config_defaults_with_merge_and_key_present(ac_merge):
+    defaults = (
+        ('a.b', {'c': 1, 'd': 2}, ac_merge),
+    )
+    config = Config({'a': {'b': {'z': 4}}, 'x': 3}, defaults)
+    expected = {
+        ('a.b.c', 1),
+        ('a.b.d', 2),
+        ('a.b.z', 4),
+        ('x', 3),
+    }
+    assert set(config.items(flatten=True)) == expected
 
-    assert config.config_for_write == TEST_CONFIG_DICT
 
-    # 'a':
-    assert config['a'] == 'z'
+def test_applying_config_defaults_with_no_merge_and_key_present():
+    defaults = (
+        ('a.b', {'c': 1, 'd': 2}, None),
+    )
+    config = Config({'a': {'b': {'z': 4}}, 'x': 3}, defaults)
+    expected = {
+        ('a.b.z', 4),
+        ('x', 3),
+    }
+    assert set(config.items(flatten=True)) == expected
 
-    # 'b':
-    assert config['b.gg'] == 'yy'
-    assert config['b.hh'] == 'new'
 
-    # 'c':
-    assert config['c.hh'] == 'xx'
-    assert config['c.oo'] == 'new-oo'
-    assert config['c.qq'] == 'new'
+@pytest.mark.parametrize(
+    'ac_merge',
+    (anyconfig.MS_REPLACE, anyconfig.MS_NO_REPLACE, anyconfig.MS_DICTS),
+)
+def test_applying_config_defaults_with_merge_to_reference(ac_merge):
+    defaults = (
+        ('a.b', {'c': 1, 'd': 2}, ac_merge),
+    )
+    config = Config({'a': {'b': {'$ref': 'x.y'}}, 'x': {'y': {'z': 4}}}, defaults)
+    expected = {
+        ('a.b.z', 4),
+        ('a.b.c', 1),
+        ('a.b.d', 2),
+        ('x.y.z', 4),
+    }
+    assert set(config.items(flatten=True)) == expected
 
-    # 'd':
-    assert 'd.ii.jjj' not in config
-    assert config['d.ii.kkk'] == 'new-kkk'
-    assert config['d.ii.lll'] == 'new'
 
-    # 'f':
-    assert config['f.dd'] == 'ee'
-
-    # 'g':
-    assert config['g.ddd'] == 'eee'
-
-    # 'h':
-    assert config['h.dddd'] == 'eeee'
-
-    # 'i':
-    assert config['i.jj.dd'] == 'ee'
-
-    # 'h':
-    assert config['k.ll.ddd'] == 'eee'
-
-    # 'h':
-    assert config['m.nn.dddd'] == 'eeee'
+def test_applying_config_defaults_with_no_merge_to_reference():
+    defaults = (
+        ('a.b', {'c': 1, 'd': 2}, None),
+    )
+    config = Config({'a': {'b': {'$ref': 'x.y'}}, 'x': {'y': {'z': 4}}}, defaults)
+    expected = {
+        ('a.b.$ref', 'x.y'),
+        ('x.y.z', 4),
+    }
+    actual = set(config.items(flatten=True))
+    assert actual == expected

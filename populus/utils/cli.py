@@ -464,14 +464,14 @@ def get_unlocked_default_account_address(chain):
     return account
 
 
-def compile_project_contracts(project, optimize=True):
+def compile_project_contracts(project, compiler_settings=None):
     click.echo("============ Compiling ==============")
     click.echo("> Loading source files from: ./{0}\n".format(project.contracts_dir))
 
     result = compile_and_write_contracts(
         project.project_dir,
         project.contracts_dir,
-        optimize=optimize
+        compiler_settings=compiler_settings,
     )
     contract_source_paths, compiled_sources, output_file_path = result
 
@@ -494,12 +494,12 @@ def compile_project_contracts(project, optimize=True):
     )
 
 
-def watch_project_contracts(project, **compile_kwargs):
+def watch_project_contracts(project, compiler_settings):
 
     def callback(file_path, event_name):
         if event_name in {'modified', 'created'}:
             click.echo("Change detected in: {0}".format(file_path))
-            compile_project_contracts(project, **compile_kwargs)
+            compile_project_contracts(project, compiler_settings)
 
     watcher = DirWatcher(project.contracts_dir, callback)
     watcher.start()

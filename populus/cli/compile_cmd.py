@@ -18,15 +18,8 @@ from .main import main
     is_flag=True,
     help="Watch contract source files and recompile on changes",
 )
-@click.option(
-    '--optimize',
-    '-o',
-    default=True,
-    is_flag=True,
-    help="Enable compile time optimization",
-)
 @click.pass_context
-def compile_contracts(ctx, watch, optimize):
+def compile_contracts(ctx, watch):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -38,12 +31,13 @@ def compile_contracts(ctx, watch, optimize):
     """
     project = ctx.obj['PROJECT']
 
-    compile_project_contracts(project, optimize=True)
+    compiler_settings = project.config.get('compilation.settings', {})
+    compile_project_contracts(project, compiler_settings)
 
     if watch:
         thread = spawn(
             watch_project_contracts,
             project=project,
-            optimize=True,
+            compiler_settings=compiler_settings,
         )
         thread.join()

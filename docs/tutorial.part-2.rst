@@ -26,6 +26,9 @@ of your project named ``populus.json`` with the following contents
     {
       "chains": {
         "horton": {
+          "chain": {
+            "class": 'populus.chain.LocalGethChain'
+          },
           "web3": {
             "provider": {
               "class": "web3.providers.ipc.IPCProvider"
@@ -94,6 +97,9 @@ address should be.  Change your configuration to match this.
     {
       "chains": {
         "horton": {
+          "chain": {
+            "class": 'populus.chain.LocalGethChain'
+          },
           "web3": {
             "provider": {
               "class": "web3.providers.ipc.IPCProvider"

@@ -54,7 +54,7 @@ def construct_release_lockfile(project,
 
     package_meta = construct_package_meta_data(package_manifest)
     if package_meta:
-        yield 'package_meta', package_meta
+        yield 'meta', package_meta
 
     # TODO: check if there are discrepancies between what is *supposed* to be
     # installed and what is and figure out how to resolve them.

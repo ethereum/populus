@@ -8,8 +8,7 @@ from populus.utils.filesystem import (
 from populus.utils.packaging import (
     get_project_package_manifest_path,
     get_installed_packages_dir,
-    extract_dependency_name_from_base_dir,
-    find_installed_package_locations,
+    get_installed_dependency_locations,
 )
 from populus.utils.config import (
     get_default_project_config_file_path,
@@ -153,11 +152,7 @@ class Project(object):
     @property
     @cast_return_to_dict
     def installed_package_locations(self):
-        for dependency_base_dir in find_installed_package_locations(self.installed_packages_dir):
-            yield (
-                extract_dependency_name_from_base_dir(dependency_base_dir),
-                dependency_base_dir,
-            )
+        return get_installed_dependency_locations(self.installed_packages_dir)
 
     #
     # Packaging: Backends
@@ -212,7 +207,7 @@ class Project(object):
             self._cached_compiled_contracts_mtime = self.get_source_modification_time()
             _, self._cached_compiled_contracts = compile_project_contracts(
                 project=self,
-                **self.config.get('compilation.settings', {})
+                compiler_settings=self.config.get('compilation.settings', {})
             )
         return self._cached_compiled_contracts
 

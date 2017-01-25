@@ -50,7 +50,7 @@ def setup_web3_from_config(web3_config):
         if 'provider.settings.ipc_path' in web3_config:
             provider_kwargs['ipc_path'] = web3_config['provider.settings.ipc_path']
     elif issubclass(ProviderClass, HTTPProvider):
-        if 'provider.settings.rpc_endpoint' in web3_config:
+        if 'provider.settings.endpoint_uri' in web3_config:
             provider_kwargs['endpoint_uri'] = web3_config['provider.settings.endpoint_uri']
 
     web3 = Web3(ProviderClass(**provider_kwargs))

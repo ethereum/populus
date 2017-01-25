@@ -54,17 +54,6 @@ def init(ctx):
     Generate project layout with an example contract.
     """
     project = ctx.obj['PROJECT']
-<<<<<<< HEAD
-=======
-
-    if not project.config_file_path:
-        project.write_config()
-        click.echo(
-            "Wrote empty project config file: ./{0}".format(
-                os.path.relpath(project.config_file_path)
-            )
-        )
->>>>>>> Packaging implementation
 
     if ensure_path_exists(project.contracts_source_dir):
         click.echo(

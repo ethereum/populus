@@ -5,6 +5,6 @@
     "web3": {
       "$ref": "web3.InfuraRopsten"
     },
-    "package_index_address": "0x0f50896C956E8DC16a0eD127Cb8E253ba6C8BD8e"
+    "package_index_address": "0xbab799ff7d9e13a50696a8bebb7a1b77ae519586"
   }
 }

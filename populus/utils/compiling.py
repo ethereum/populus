@@ -10,10 +10,9 @@ from .types import (
 )
 from .packaging import (
     get_installed_packages_dir,
-    find_package_source_files,
-    find_installed_package_locations,
-    extract_dependency_name_from_base_dir,
     recursive_find_installed_dependency_base_dirs,
+    find_package_source_files,
+    get_installed_dependency_locations,
 )
 from .filesystem import (
     find_solidity_source_files,
@@ -67,12 +66,8 @@ def compute_project_compilation_arguments(contracts_source_dir, root_installed_p
     # TODO: this should only compute remappings for solidity files which part
     # of the imports used by the project.  This could be pulled from the AST or
     # by regex.
-    project_installed_package_locations = dict(
-        (
-            extract_dependency_name_from_base_dir(dependency_base_dir),
-            dependency_base_dir,
-        ) for dependency_base_dir
-        in find_installed_package_locations(root_installed_packages_dir)
+    project_installed_package_locations = get_installed_dependency_locations(
+        root_installed_packages_dir,
     )
 
     project_import_remappings = compute_import_remappings(
@@ -108,16 +103,13 @@ def compute_installed_package_compilation_arguments(dependency_base_dir):
     package_source_paths = find_package_source_files(dependency_base_dir)
     package_installed_packages_dir = get_installed_packages_dir(dependency_base_dir)
 
-    if not os.path.exists(package_installed_packages_dir):
-        package_installed_package_locations = {}
-    else:
-        package_installed_package_locations = find_installed_package_locations(
-            package_installed_packages_dir,
-        )
+    package_installed_dependencies = get_installed_dependency_locations(
+        package_installed_packages_dir,
+    )
 
     package_import_remappings = compute_import_remappings(
         package_source_paths,
-        package_installed_package_locations,
+        package_installed_dependencies,
     )
     return package_source_paths, package_import_remappings
 

@@ -789,6 +789,15 @@ def find_installed_package_locations(installed_packages_dir):
                 yield dependency_base_dir
 
 
+@cast_return_to_ordered_dict
+def get_installed_dependency_locations(installed_packages_dir):
+    for dependency_base_dir in find_installed_package_locations(installed_packages_dir):
+        yield (
+            extract_dependency_name_from_base_dir(dependency_base_dir),
+            dependency_base_dir,
+        )
+
+
 @cast_return_to_tuple
 def recursive_find_installed_dependency_base_dirs(installed_packages_dir):
     """

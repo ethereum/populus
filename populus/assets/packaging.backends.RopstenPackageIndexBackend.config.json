@@ -2,8 +2,11 @@
   "class": "populus.packages.backends.index.PackageIndexBackend",
   "priority": 40,
   "settings": {
-    "web3": {
+    "web3-for-install": {
       "$ref": "web3.InfuraRopsten"
+    },
+    "web3-for-publish": {
+      "$ref": "web3.GethRopsten"
     },
     "package_index_address": "0xbab799ff7d9e13a50696a8bebb7a1b77ae519586"
   }

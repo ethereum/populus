@@ -85,7 +85,7 @@ def package_init(ctx):
     package_manifest['authors'] = click.prompt(
         'Author(s)',
         value_proc=split_on_commas,
-        default=package_manifest.get('authors', ''),
+        default=package_manifest.get('authors', []),
     )
 
     package_manifest['version'] = click.prompt(
@@ -107,13 +107,13 @@ def package_init(ctx):
     package_manifest['keywords'] = click.prompt(
         'Keywords',
         value_proc=split_on_commas,
-        default=package_manifest.get('keywords', ''),
+        default=package_manifest.get('keywords', []),
     )
 
     package_manifest['links'] = click.prompt(
         'Links',
         value_proc=split_on_commas,
-        default=package_manifest.get('links', ''),
+        default=package_manifest.get('links', {}),
     )
 
     with open(project.package_manifest_path, 'w') as package_manifest_file:
@@ -229,9 +229,6 @@ def package_build(ctx,
         )
         click.echo(cannot_overwrite_msg)
         ctx.exit(1)
-    else:
-        click.echo("Invariant: This should not be possible")
-        ctx.exit(1)
 
     if chain_names and not contract_instance_names:
         click.echo("Must specify which contracts you want to include in the deployments")
@@ -243,6 +240,8 @@ def package_build(ctx,
         contract_instance_names=contract_instance_names,
         contract_type_names=contract_type_names,
     )
+
+    validate_release_lockfile(release_lockfile)
 
     ensure_path_exists(project.build_asset_dir)
 

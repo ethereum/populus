@@ -149,12 +149,11 @@ class PackageIndexBackend(BasePackageIndexBackend):
     package_index = None
 
     def setup_backend(self):
-        package_index_address = self.settings['package_index_address']
-        PackageIndexFactory = self.get_package_index_factory()
-        self.package_index = PackageIndexFactory(address=package_index_address)
+        self.package_index_for_install = self.get_package_index_for_install()
+        self.package_index_for_publish = self.get_package_index_for_publish()
 
     def publish_release_lockfile(self, release_lockfile, release_lockfile_uri):
-        publish_txn_hash = self.package_index.release(
+        publish_txn_hash = self.package_index_for_publish.release(
             release_lockfile['package_name'],
             release_lockfile['version'],
             release_lockfile_uri,
@@ -162,27 +161,40 @@ class PackageIndexBackend(BasePackageIndexBackend):
         return publish_txn_hash
 
     def is_known_package_name(self, package_name):
-        return self.package_index.is_known_package_name(package_name)
+        return self.package_index_for_install.is_known_package_name(package_name)
 
     def get_all_versions(self, package_name):
-        return self.package_index.get_all_versions(package_name)
+        return self.package_index_for_install.get_all_versions(package_name)
 
     def get_release_lockfile_for_version(self, package_name, version):
-        return self.package_index.lookup_release_lockfile_uri(package_name, version)
+        return self.package_index_for_install.lookup_release_lockfile_uri(package_name, version)
 
     #
     # Internal API
     #
-    def get_web3(self):
-        web3_config = self.settings.get_config('web3')
+    def get_web3_for_install(self):
+        web3_config = self.settings.get_config('web3-for-install')
         web3 = setup_web3_from_config(web3_config)
         return web3
 
-    def get_package_index_factory(self):
+    def get_package_index_for_install(self):
+        PackageIndexFactory = self.get_package_index_factory(self.get_web3_for_install())
+        package_index_address = self.settings['package_index_address']
+        return PackageIndexFactory(address=package_index_address)
+
+    def get_web3_for_publish(self):
+        web3_config = self.settings.get_config('web3-for-publish')
+        web3 = setup_web3_from_config(web3_config)
+        return web3
+
+    def get_package_index_for_publish(self):
+        PackageIndexFactory = self.get_package_index_factory(self.get_web3_for_publish())
+        package_index_address = self.settings['package_index_address']
+        return PackageIndexFactory(address=package_index_address)
+
+    def get_package_index_factory(self, web3):
         with open(PACKAGE_INDEX_ABI_PATH) as package_index_abi_file:
             package_index_abi = json.load(package_index_abi_file)
-
-        web3 = self.get_web3()
 
         return web3.eth.contract(
             abi=package_index_abi,

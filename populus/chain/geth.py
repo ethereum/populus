@@ -111,33 +111,23 @@ class BaseGethChain(Chain):
     geth = None
     provider_class = None
 
-    def __init__(self, project, chain_name, **geth_kwargs):
-        super(BaseGethChain, self).__init__(project, chain_name)
-
-        if geth_kwargs is None:
-            geth_kwargs = {}
-
+    def initialize_chain(self):
         # context manager shenanigans
         self.stack = ExitStack()
-
-        self.extra_kwargs = {
-            key: value
-            for key, value in geth_kwargs.items() if key not in GETH_KWARGS
-        }
-        self.geth_kwargs = {
-            key: value
-            for key, value in geth_kwargs.items() if key in GETH_KWARGS
-        }
         self.geth = self.get_geth_process_instance()
+
+    @property
+    def geth_kwargs(self):
+        return self.config.get('chain.settings', {})
+
+    def get_geth_process_instance(self):
+        raise NotImplementedError("Must be implemented by subclasses")
 
     def get_web3_config(self):
         web3_config = copy.deepcopy(super(BaseGethChain, self).get_web3_config())
         web3_config['provider.settings.ipc_path'] = self.geth.ipc_path
         web3_config['provider.settings.rpc_port'] = self.geth.rpc_port
         return web3_config
-
-    def get_geth_process_instance(self):
-        raise NotImplementedError("Must be implemented by subclasses")
 
     def __enter__(self, *args, **kwargs):
         self.stack.enter_context(self.geth)

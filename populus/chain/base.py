@@ -1,5 +1,3 @@
-from pylru import lrucache
-
 from populus.utils.functional import (
     cached_property,
 )
@@ -28,21 +26,17 @@ class Chain(object):
     chain_name = None
     _factory_cache = None
 
-    def __init__(self, project, chain_name, **kwargs):
+    def __init__(self, project, chain_name, chain_config):
         self.project = project
         self.chain_name = chain_name
-        self._factory_cache = lrucache(128)
+        self.config = chain_config
+        self.initialize_chain()
 
-    #
-    # Meta Data API
-    #
-    @property
-    def has_datadir(self):
-        raise NotImplementedError("Must be implemented by subclasses")
-
-    @property
-    def datadir_path(self):
-        raise NotImplementedError("Must be implemented by subclasses")
+    def initialize_chain(self):
+        """
+        Hook for initialization that will be called during class instantiation.
+        """
+        pass
 
     #
     # Chain Interaction API
@@ -66,11 +60,6 @@ class Chain(object):
     @property
     def wait(self):
         return Wait(self.web3)
-
-    @property
-    def config(self):
-        config_key = "chains.{chain_name}".format(chain_name=self.chain_name)
-        return self.project.config.get_config(config_key)
 
     #
     # Contract Store

@@ -19,7 +19,7 @@ from .main import main
     help="Watch contract source files and recompile on changes",
 )
 @click.pass_context
-def compile_cmd(ctx, watch, optimize):
+def compile_cmd(ctx, watch):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 

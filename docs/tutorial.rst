@@ -1,7 +1,7 @@
 Tutorial
 ========
 
-Populus is a smart contract development framework for the Ethereum blockchain.
+Learn how to use populus by working your way through the following tutorials.
 
 
 Contents

@@ -121,6 +121,13 @@ A Web3.py instance configured to connect to ``chain`` fixture.
 
         assert after_balance - initial_balance == 1234
 
+Contracts
+~~~~~~~~~
+
+* ``contracts``
+
+.. warning:: This fixture has been renamed to ``base_contract_factories``.  In future releases of populus this fixture will be removed or repurposed.
+
 
 Base Contract Factories
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -174,7 +181,7 @@ to set the initial supply.
 
     import pytest
 
-    @pytest.fixture
+    @pytest.fixture()
     def token_contract(chain):
         TokenFactory = chain.get_contract_factory('Token')
         deploy_txn_hash = TokenFactory.deploy(arguments=[

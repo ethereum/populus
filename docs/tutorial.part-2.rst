@@ -75,7 +75,17 @@ Now that we have a local chain we can deploy our ``Greeter`` contract using the
     Deploy Transaction Sent: 0xd3e6ad1ee455b37bd18703a6686575e9471101fbed7aa21808afd0495e026fe6
     Waiting for confirmation...
 
-    TODO: remaining output
+    Transaction Mined
+    =================
+    Tx Hash      : 0xce71883741bf4a86e2ca5dd0be5e99888e09888b8a40361a9fb1df81210abe10
+    Address      : 0x89c2a280a483f45a3d140ef752ffe9c6cd4b57fa
+    Gas Provided : 433940
+    Gas Used     : 333940
+
+
+    Verifying deployed bytecode...
+    Verified contract bytecode @ 0x89c2a280a483f45a3d140ef752ffe9c6cd4b57fa matches expected runtime bytecode
+    Deployment Successful.
 
 
 .. note:: Your output will differ in that the ethereum address and transaction hashes won't be the same.

@@ -13,7 +13,7 @@ Contents
     quickstart
     overview
     tutorial
-    compile
+    compiling
     testing
     deploy
     migrations
@@ -22,6 +22,7 @@ Contents
     chain
     release
     modules
+    API Documentation <populus>
 
 
 Indices and tables

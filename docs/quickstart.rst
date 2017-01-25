@@ -94,6 +94,8 @@ that is generated as part of the project initialization.
 
 .. code-block:: solidity
 
+    pragma solidity ^0.4.0;
+
     contract Greeter {
         string public greeting;
 
@@ -160,7 +162,19 @@ following.
 
 
 You should see two tests, one that tests the default greeting, and one that
-tests that we can set a custom greeting.
+tests that we can set a custom greeting.  You can run tests using the
+``py.test`` command line utility which was installed when you installed
+populus.
+
+.. code-block:: bash
+
+    $ py.test tests/
+    collected 2 items
+
+    tests/test_greeter.py::test_greeter PASSED
+    tests/test_greeter.py::test_custom_greeting PASSED
+
+You should see something akin to the output above with three passing tests.
 
 
 .. _Go Ethereum: https://github.com/ethereum/go-ethereum/

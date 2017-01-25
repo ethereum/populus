@@ -20,123 +20,6 @@ Currently the config file controls the following things.
 * Available chains and how web3 connects to them.
 
 
-Built-in defaults
-^^^^^^^^^^^^^^^^^
-
-Populus ships with the following *default* configuration 
-
-.. code-block:: javascript 
-
-    {
-      'chains': {
-        'mainnet': {
-          'chain': {
-            'class': 'populus.chain.MainnetChain',
-          },
-          'web3': {
-            '$ref': 'web3.GethMainnet',
-          },
-        },
-        'ropsten': {
-          'chain': {
-            'class': 'populus.chain.TestnetChain',
-          },
-          'web3': {
-            '$ref': 'web3.GethRopsten',
-          },
-        },
-        'temp': {
-          'chain': {
-            'class': 'populus.chain.TemporaryGethChain',
-          },
-          'web3': {
-            '$ref': 'web3.GethEphemeral',
-          },
-        },
-        'tester': {
-          'chain': {
-            'class': 'populus.chain.EthereumTesterChain',
-          },
-          'web3': {
-            '$ref': 'web3.Tester',
-          },
-        },
-        'testrpc': {
-          'chain': {
-            'class': 'populus.chain.TestRPCChain',
-          },
-          'web3': {
-            '$ref': 'web3.TestRPC',
-          },
-        },
-      },
-      'compilation': {
-        'contracts_source_dir': './contracts',
-        'settings': {
-          'optimize': True,
-        },
-      },
-      'web3': {
-        'GethEphemeral': {
-          'provider': {
-            'class': 'web3.providers.ipc.IPCProvider',
-          },
-        },
-        'GethMainnet': {
-          'provider': {
-            'class': 'web3.providers.ipc.IPCProvider',
-            'settings': {
-              'ipc_path': '/Users/piper/Library/Ethereum/geth.ipc',
-            },
-          },
-        },
-        'GethRopsten': {
-          'provider': {
-            'class': 'web3.providers.ipc.IPCProvider',
-            'settings': {
-              'ipc_path': '/Users/piper/Library/Ethereum/testnet/geth.ipc',
-            },
-          },
-        },
-        'InfuraMainnet': {
-          'eth': {
-            'default_account': '0x0000000000000000000000000000000000000001',
-          },
-          'provider': {
-            'class': 'web3.providers.rpc.HTTPProvider',
-            'settings': {
-              'endpoint_uri': 'https://mainnet.infura.io',
-            },
-          },
-        },
-        'InfuraRopsten': {
-          'eth': {
-            'default_account': '0x0000000000000000000000000000000000000001',
-          },
-          'provider': {
-            'class': 'web3.providers.rpc.HTTPProvider',
-            'settings': {
-              'endpoint_uri': 'https://ropsten.infura.io',
-            },
-          },
-        },
-        'TestRPC': {
-          'provider': {
-            'class': 'web3.providers.tester.TestRPCProvider',
-          },
-        },
-        'Tester': {
-          'provider': {
-            'class': 'web3.providers.tester.EthereumTesterProvider',
-          },
-        },
-      },
-    }
-
-
-When you author your own ``populus.json`` file populus will automatically merge
-the defaults into your declared project configuration. 
-
 
 Compiler Configuration
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -208,7 +91,7 @@ Each key and value in the ``chains`` portion of the configuration corresponds
 to the name of the chain and the settings for that chain.  Each chain has two
 primary sections, ``web3`` and ``chain`` configuration settings.
 
-.. code-block:: javascrpit
+.. code-block:: javascript
 
     {
       "chains": {
@@ -310,7 +193,7 @@ Configuration for setting up a Web3 instance.
 
 
 Provider Class
-""""""""""""""
+^^^^^^^^^^^^^^
 
 Specifies the import path for the provider class that should be used.
 
@@ -319,7 +202,7 @@ Specifies the import path for the provider class that should be used.
 * required: Yes
 
 Provider Settings
-"""""""""""""""""
+^^^^^^^^^^^^^^^^^
 
 Specifies the ``**kwargs`` that should be used when instantiating the provider.
 
@@ -328,7 +211,7 @@ Specifies the ``**kwargs`` that should be used when instantiating the provider.
 
 
 Default Account
-"""""""""""""""
+^^^^^^^^^^^^^^^
 
 If present the ``web3.eth.defaultAccount`` will be populated with this address.
 
@@ -505,6 +388,85 @@ Defaults
 Populus ships with many defaults which can be overridden as you see fit.
 
 
+Built-in defaults
+^^^^^^^^^^^^^^^^^
+
+Populus ships with the following *default* configuration 
+
+.. code-block:: javascript 
+
+    {
+      'chains': {
+        'mainnet': {
+          'chain': {'class': 'populus.chain.MainnetChain'},
+          'web3': {'$ref': 'web3.GethMainnet'},
+        },
+        'ropsten': {
+          'chain': {'class': 'populus.chain.TestnetChain'},
+          'web3': {'$ref': 'web3.GethRopsten'},
+        },
+        'temp': {
+          'chain': {'class': 'populus.chain.TemporaryGethChain'},
+          'web3': {'$ref': 'web3.GethEphemeral'},
+        },
+        'tester': {
+          'chain': {'class': 'populus.chain.EthereumTesterChain'},
+          'web3': {'$ref': 'web3.Tester'},
+        },
+        'testrpc': {
+          'chain': {'class': 'populus.chain.TestRPCChain'},
+          'web3': {'$ref': 'web3.TestRPC'},
+        },
+      },
+      'compilation': {
+        'contracts_source_dir': './contracts',
+        'settings': {'optimize': True},
+      },
+      'web3': {
+        'GethEphemeral': {
+          'provider': {'class': 'web3.providers.ipc.IPCProvider'},
+        },
+        'GethMainnet': {
+          'provider': {
+            'class': 'web3.providers.ipc.IPCProvider',
+            'settings': {'ipc_path': '/Users/piper/Library/Ethereum/geth.ipc'},
+          },
+        },
+        'GethRopsten': {
+          'provider': {
+            'class': 'web3.providers.ipc.IPCProvider',
+            'settings': {'ipc_path': '/Users/piper/Library/Ethereum/testnet/geth.ipc'},
+          },
+        },
+        'InfuraMainnet': {
+          'eth': {'default_account': '0x0000000000000000000000000000000000000001'},
+          'provider': {
+            'class': 'web3.providers.rpc.HTTPProvider',
+            'settings': {'endpoint_uri': 'https://mainnet.infura.io'},
+          },
+        },
+        'InfuraRopsten': {
+          'eth': {'default_account': '0x0000000000000000000000000000000000000001'},
+          'provider': {
+            'class': 'web3.providers.rpc.HTTPProvider',
+            'settings': {'endpoint_uri': 'https://ropsten.infura.io'},
+          },
+        },
+        'TestRPC': {
+          'provider': {'class': 'web3.providers.tester.TestRPCProvider'},
+        },
+        'Tester': {
+          'provider': {'class': 'web3.providers.tester.EthereumTesterProvider'},
+        },
+      },
+    }
+
+
+When you author your own ``populus.json`` file populus will automatically merge
+the defaults into your declared project configuration. 
+
+
+
 Pre-Configured Web3 Connections
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -575,56 +537,3 @@ Tester
 Web3 connection which will use the ``EthereumTesterProvider``.
 
 * key: ``web3.Tester``
-
-
-Pre-Configured Chains
-^^^^^^^^^^^^^^^^^^^^^
-
-The following pre-configured chains can be used with the ``Populus.get_chain`` API.
-
-
-Mainnet
-"""""""
-
-* chain name: ``mainnet``
-
-Chain runs the ``geth`` ethreum client configured for the mainnet and connects
-to the chain using the pre-configured ``GethMainnet`` web3 connection.
-
-
-Ropsten
-"""""""
-
-* chain name: ``ropsten``
-
-Chain runs the ``geth`` ethreum client configured for the ropsten test network
-and connects to the chain using the pre-configured ``GethMainnet`` web3
-connection.
-
-
-Temp
-""""
-
-* chain name: ``temp``
-
-Ephemeral chain whcih runs the ``geth`` ethreum client against an ephemeral
-private chain in a temporary directory.  The chain data will be erased when the
-chain is shut down.  This uses the pre-configured ``GethEphemeral`` web3
-connections.
-
-
-Tester
-""""""
-
-* chain name: ``tester``
-
-Ephemeral chain which uses an in memory EVM.  Fast and good for testing.
-
-
-TestRPC
-"""""""
-
-* chain name: ``testrpc``
-
-Same as the ``tester`` chain except that it connects over an HTTP RPC
-connection.

@@ -30,40 +30,43 @@ PACKAGE_INDEX_ABI_PATH = os.path.join(ASSETS_DIR, 'package_index_abi.json')
 class BasePackageIndexFactory(Contract):
     def lookup_release_lockfile_uri(self, package_name, version):
         version_info = semver.parse_version_info(version)
-        return self.call().getReleaseLockFile(
+        return self.call().getReleaseLockfileURI(
             name=package_name,
             major=version_info.major,
             minor=version_info.minor,
             patch=version_info.patch,
+            preRelease=version_info.prerelease or '',
+            build=version_info.build or '',
         )
 
     def get_all_versions(self, package_name):
-        return tuple(self.get_all_release_data(package_name).keys())
-        all_version_info = tuple((
-            self.call().getRelease(package_name, idx)
-            for idx in range(self.call().numReleases(package_name))
+        all_release_hashes = self.call().getAllPackageReleaseHashes(package_name)
+        all_release_data = tuple((
+            self.call().getReleaseData(release_hash)
+            for release_hash in all_release_hashes
         ))
         all_versions = tuple((
-            "{0}.{1}.{2}".format(major, minor, patch)
-            for major, minor, patch, _
-            in all_version_info
+            semver.format_version(major, minor, patch, prerelease or None, build or None)
+            for major, minor, patch, prerelease, build, _, _, _
+            in all_release_data
         ))
         return all_versions
 
     def is_known_package_name(self, package_name):
-        return self.call().exists(package_name)
+        return self.call().packageExists(package_name)
 
-    def publish_release(self, package_name, version, release_lockfile_uri, transaction=None):
+    def release(self, package_name, version, release_lockfile_uri, transaction=None):
         version_info = semver.parse_version_info(version)
-        major, minor, patch = version_info.major, version_info.minor, version_info.patch
-        publish_txn_hash = self.transact(transaction).release(
+        release_txn_hash = self.transact(transaction).release(
             name=package_name,
-            major=major,
-            minor=minor,
-            patch=patch,
-            releaseLockFileURI=release_lockfile_uri,
+            major=version_info.major,
+            minor=version_info.minor,
+            patch=version_info.patch,
+            preRelease=version_info.prerelease or '',
+            build=version_info.build or '',
+            releaseLockfileURI=release_lockfile_uri,
         )
-        return publish_txn_hash
+        return release_txn_hash
 
 
 class BasePackageIndexBackend(BasePackageBackend):
@@ -151,7 +154,7 @@ class PackageIndexBackend(BasePackageIndexBackend):
         self.package_index = PackageIndexFactory(address=package_index_address)
 
     def publish_release_lockfile(self, release_lockfile, release_lockfile_uri):
-        publish_txn_hash = self.package_index.publish_release(
+        publish_txn_hash = self.package_index.release(
             release_lockfile['package_name'],
             release_lockfile['version'],
             release_lockfile_uri,

@@ -15,6 +15,7 @@ from populus.utils.config import (
     get_nested_key,
     has_nested_key,
     set_nested_key,
+    resolve_config,
 )
 
 
@@ -40,7 +41,7 @@ POPULUS_CONFIG_DEFAULTS = {
     #
     # Compilation
     #
-    ('compilation',),
+    ('compilation', anyconfig.MS_DICTS),
     #
     # Chains
     #
@@ -66,13 +67,11 @@ POPULUS_CONFIG_DEFAULTS = {
     ('web3.InfuraMainnet',),
     (
         'web3.GethMainnet',
-        'web3.GethMainnet.config.json',
         anyconfig.MS_NO_REPLACE,
         set_geth_mainnet_ipc_path,
     ),
     (
         'web3.GethRopsten',
-        'web3.GethRopsten.config.json',
         anyconfig.MS_NO_REPLACE,
         set_geth_ropsten_ipc_path,
     ),
@@ -87,18 +86,18 @@ def load_default_config_info(config_defaults=POPULUS_CONFIG_DEFAULTS):
     for config_value in config_defaults:
         if len(config_value) == 1:
             write_path = config_value[0]
+            merge_strategy = None
             config_file_name = "{0}.config.json".format(write_path)
-            merge_strategy = anyconfig.MS_NO_REPLACE
             callback = None
         elif len(config_value) == 2:
-            write_path, config_file_name = config_value
-            merge_strategy = anyconfig.MS_NO_REPLACE
+            write_path, merge_strategy = config_value
+            config_file_name = "{0}.config.json".format(write_path)
             callback = None
         elif len(config_value) == 3:
-            write_path, config_file_name, merge_strategy = config_value
-            callback = None
+            write_path, merge_strategy, callback = config_value
+            config_file_name = "{0}.config.json".format(write_path)
         elif len(config_value) == 4:
-            write_path, config_file_name, merge_strategy, callback = config_value
+            write_path, merge_strategy, callback, config_file_name = config_value
         else:
             raise ValueError("Invalid Default Configuration")
 
@@ -118,9 +117,12 @@ def apply_default_configs(config, default_configs):
 
     for write_path, default_config, merge_strategy in default_configs:
         if has_nested_key(merged_config, write_path):
-            sub_config = copy.deepcopy(get_nested_key(merged_config, write_path))
+            if not merge_strategy:
+                continue
+            sub_config = get_nested_key(merged_config, write_path)
+            resolved_sub_config = resolve_config(sub_config, config)
             sub_config_with_merge_rules = anyconfig.to_container(
-                sub_config,
+                copy.deepcopy(resolved_sub_config),
                 ac_merge=merge_strategy,
             )
             sub_config_with_merge_rules.update(default_config)

@@ -124,13 +124,13 @@ def resolve_config(config, master_config):
                 "Config references may not contain extra keys.  The keys "
                 "'{0}' were found.".format("', '".join(config.keys()))
             )
-        if config['$ref'] not in master_config:
+        if not has_nested_key(master_config, config['$ref']):
             raise KeyError(
                 "Config reference {0} is not present in master configuration".format(
                     config['$ref'],
                 )
             )
-        return master_config[config['$ref']]
+        return get_nested_key(master_config, config['$ref'])
     else:
         return config
 

@@ -38,12 +38,13 @@ def compile_contracts(ctx, watch, optimize):
     """
     project = ctx.obj['PROJECT']
 
-    compile_project_contracts(project, optimize=True)
+    compiler_settings = project.config.get('compilation.settings', {})
+    compile_project_contracts(project, project.config.get('compilation.settings', {}))
 
     if watch:
         thread = spawn(
             watch_project_contracts,
             project=project,
-            optimize=True,
+            compiler_settings=compiler_settings,
         )
         thread.join()

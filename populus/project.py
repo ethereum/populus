@@ -159,12 +159,10 @@ class Project(object):
     def compiled_contracts(self):
         if self.compiled_contracts_stale():
             self._cached_compiled_contracts_mtime = self.get_source_modification_time()
-            # TODO: the hard coded `optimize=True` should be configurable
-            # somehow.
             _, self._cached_compiled_contracts = compile_project_contracts(
                 project_dir=self.project_dir,
                 contracts_dir=self.contracts_dir,
-                optimize=True,
+                compiler_settings=self.config.get('compilation.settings'),
             )
         return self._cached_compiled_contracts
 

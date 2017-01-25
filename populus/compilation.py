@@ -41,16 +41,19 @@ def write_compiled_sources(project_dir, compiled_sources):
     return compiled_contract_path
 
 
-def compile_project_contracts(project_dir, contracts_dir, **compiler_kwargs):
-    compiler_kwargs.setdefault('output_values', ['bin', 'bin-runtime', 'abi'])
+def compile_project_contracts(project_dir, contracts_dir, compiler_settings=None):
+    if compiler_settings is None:
+        compiler_settings = {}
+
+    compiler_settings.setdefault('output_values', ['bin', 'bin-runtime', 'abi'])
     contract_source_paths = find_project_contracts(project_dir, contracts_dir)
     try:
-        compiled_contracts = compile_files(contract_source_paths, **compiler_kwargs)
+        compiled_contracts = compile_files(contract_source_paths, **compiler_settings)
     except ContractsNotFound:
         return contract_source_paths, {}
 
     solc_version = get_solc_version()
-    contract_meta = get_contract_meta(compiler_kwargs, solc_version)
+    contract_meta = get_contract_meta(compiler_settings, solc_version)
 
     normalized_compiled_contracts = {
         contract_name: normalize_contract_data(contract_data, contract_meta)
@@ -61,11 +64,13 @@ def compile_project_contracts(project_dir, contracts_dir, **compiler_kwargs):
     return contract_source_paths, normalized_compiled_contracts
 
 
-def compile_and_write_contracts(project_dir, contracts_dir, **compiler_kwargs):
+def compile_and_write_contracts(project_dir, contracts_dir, compiler_settings=None):
+    if compiler_settings is None:
+        compiler_settings = {}
     contract_source_paths, compiled_sources = compile_project_contracts(
         project_dir,
         contracts_dir,
-        **compiler_kwargs
+        **compiler_settings
     )
 
     output_file_path = write_compiled_sources(project_dir, compiled_sources)

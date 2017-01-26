@@ -170,7 +170,7 @@ def verify_installed_package():
         assert install_identifier == package_meta['install_identifier']
 
         release_lockfile_path = get_release_lockfile_path(package_base_dir)
-        rel_source_path = load_release_lockfile(release_lockfile_path)
+        release_lockfile = load_release_lockfile(release_lockfile_path)
 
         assert release_lockfile == package_data['lockfile']
 

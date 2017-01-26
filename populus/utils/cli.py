@@ -157,7 +157,7 @@ def configure_chain(project, chain_name):
     if provider.lower() in {'ipc', '1'}:
         chain_config['web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     elif provider.lower() in {'rpc', '2'}:
-        chain_config['web3.provider.class'] = 'web3.providers.rpc.RPCProvider'
+        chain_config['web3.provider.class'] = 'web3.providers.rpc.HTTPProvider'
     else:
         unknown_provider_message = (
             "Invalid response.  Allowed responses are 1/2/ipc/rpc"
@@ -177,14 +177,15 @@ def configure_chain(project, chain_name):
             chain_config['web3.providers.settings.ipc_path'] = get_geth_ipc_path(
                 get_local_chain_datadir(project.project_dir, chain_name),
             )
-    elif chain_config['web3.provider.class'] == 'web3.providers.rpc.RPCProvider':
+    elif chain_config['web3.provider.class'] == 'web3.providers.rpc.HTTPProvider':
         custom_rpc_host = (
             "\n\nWill the RPC server be bound to `localhost`?"
         )
         if not click.confirm(custom_rpc_host, default=True):
             rpc_host_msg = "Hostname?"
             rpc_host = click.prompt(rpc_host_msg)
-            chain_config['web3.providers.settings.rpc_host'] = rpc_host
+        else:
+            rpc_host = 'localhost'
 
         custom_rpc_port = (
             "\n\nWill the RPC server be listening on port 8545?"
@@ -192,7 +193,13 @@ def configure_chain(project, chain_name):
         if not click.confirm(custom_rpc_port, default=True):
             rpc_port_msg = "Port?"
             rpc_port = click.prompt(rpc_port_msg)
-            chain_config['web3.providers.settings.rpc_port'] = rpc_port
+        else:
+            rpc_port = '8545'
+
+        chain_config['web3.providers.settings.rpc_host'] = 'http://{0}:{1}'.format(
+            rpc_host,
+            rpc_port,
+        )
 
     # Save config so that we can spin this chain up.
     project.config['chains'][chain_name] = chain_config

@@ -43,7 +43,6 @@ from populus.utils.chains import (
     get_nodekey_path,
     get_geth_ipc_path,
     get_geth_logfile_path,
-    setup_web3_from_config,
 )
 
 from populus.migrations.migration import (
@@ -51,6 +50,9 @@ from populus.migrations.migration import (
 )
 from populus.migrations.registrar import (
     get_registrar,
+)
+from populus.config import (
+    Web3Config,
 )
 
 
@@ -174,7 +176,7 @@ class Chain(object):
     # Required Public API
     #
     def get_web3_config(self):
-        web3_config = self.config.get_config('web3')
+        web3_config = self.config.get_config('web3', config_class=Web3Config)
         return web3_config
 
     @property
@@ -185,7 +187,7 @@ class Chain(object):
     def web3(self):
         if not self._running:
             raise ValueError("Chain must be running prior to accessing web3")
-        return setup_web3_from_config(self.web3_config)
+        return self.web3_config.get_web3()
 
     @property
     def wait(self):
@@ -559,7 +561,7 @@ class TestRPCChain(BaseTesterChain):
     def get_web3_config(self):
         base_config = super(TestRPCChain, self).get_web3_config()
         config = copy.deepcopy(base_config)
-        config['provider.settings.rpc_port'] = self.port
+        config['provider.settings.port'] = self.port
         return config
 
     def __enter__(self):

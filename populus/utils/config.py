@@ -4,10 +4,13 @@ import itertools
 
 import anyconfig
 
-from web3.utils.types import (
+from .types import (
+    is_string,
     is_object,
 )
-
+from .module_loading import (
+    import_string,
+)
 from .functional import (
     compose,
     cast_return_to_tuple,
@@ -196,3 +199,24 @@ def pop_nested_key(config, key):
     popper_fn = compose(*itertools.chain(head_getters, (tail_popper,)))
 
     return popper_fn(config)
+
+
+class ClassImportPath(object):
+    def __init__(self, key):
+        self.key = key
+
+    def __get__(self, obj, type=None):
+        class_import_path = obj[self.key]
+        klass = import_string(class_import_path)
+        return klass
+
+    def __set__(self, obj, value):
+        if is_string(value):
+            obj[self.key] = value
+        elif isinstance(value, type):
+            obj[self.key] = '.'.join([value.__module__, value.__name__])
+        else:
+            raise ValueError(
+                "Unsupported type.  Must be either a string import path or a "
+                "chain class"
+            )

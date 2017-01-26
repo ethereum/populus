@@ -19,29 +19,13 @@ of the following steps.
 
 .. note::
 
-    Deployment currently cannot handle contracts that require constructor arguments.
+    The command line deployment command cannot be used to deploy contracts which require constructor arguments.
 
 
-Deploying Your First Contract
------------------------------
+Deploying A Contract
+--------------------
 
 Deployment is handled through the ``$ populus deploy`` command.
-
-
-.. code-block:: shell
-
-	$ populus deploy --help
-	Usage: populus deploy [OPTIONS] [CONTRACTS_TO_DEPLOY]...
-
-      Deploys the specified contracts to a chain.
-
-	Options:
-	  -c, --chain TEXT        Specifies the chain that contracts should be
-							  deployed to. The chains mainnet' and 'morden' are
-							  pre-configured to connect to the public networks.
-							  Other values should be predefined in your
-							  populus.ini
-	  -h, --help              Show this message and exit.<Paste>
 
 
 Lets deploy a simple Wallet contract.  First we'll need a contract in our
@@ -65,7 +49,7 @@ project ``./contracts`` directory.
 	}
 
 
-We can deploy this contract to a local test chain like thi.
+We can deploy this contract to a local test chain like this.
 
 .. code-block:: shell
 
@@ -87,8 +71,7 @@ We can deploy this contract to a local test chain like thi.
 
 	Verifying deployed bytecode...
 	Verified contract bytecode @ 0xb6fac5cb309da4d984bb6145078104355ece96ca matches expected runtime bytecode
-	Registering contract 'Wallet' @ 0xb6fac5cb309da4d984bb6145078104355ece96ca in registrar in txn: 0xca91ff346d63d9cec452ba94d8b2e650d8169b9b14fdf5ca76f770c1ce3a997f ... DONE
-	Deployment Successful.
+    Deployment Successful.
 
 
 Above you can see the output for a basic deployment.

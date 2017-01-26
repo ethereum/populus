@@ -1,9 +1,13 @@
-Compile
-=======
+Compiling
+=========
 
 Running ``$ populus compile`` will compile all of the project contracts found
 in the ``./contracts/`` directory.  The compiled assets are then written to
 ``./build/contracts.json``.
+
+.. note::
+
+    Populus currently only supports compilation of Solidity contracts.
 
 
 Basic Compilation
@@ -12,7 +16,7 @@ Basic Compilation
 Basic usage to compile all of the contracts and libraries in your project can
 be done as follows.
 
-.. code-block:: shell
+.. code-block:: bash
 
     $ populus compile
     ============ Compiling ==============
@@ -30,10 +34,10 @@ be done as follows.
 Watching
 --------
 
-This command can be used with the flag ``--watch`` which will automatically
+This command can be used with the flag ``--watch/-w`` which will automatically
 recompile your contracts when the source code changes.
 
-.. code-block:: shell
+.. code-block:: bash
 
     $ populus compile --watch
     ============ Compiling ==============
@@ -140,7 +144,3 @@ names to the compiled assets for that contract.
             "source": null
         }
     }
-
-.. note::
-
-    Populus currently only supports compilation of Solidity contracts.

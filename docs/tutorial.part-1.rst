@@ -101,3 +101,10 @@ installed when you installed populus.
 .. code-block:: bash
 
     $ py.test tests/
+    collected 3 items
+
+    tests/test_greeter.py::test_greeter PASSED
+    tests/test_greeter.py::test_custom_greeting PASSED
+    tests/test_greeter.py::test_named_greeting PASSED
+
+You should see something akin to the output above with three passing tests.

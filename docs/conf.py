@@ -112,11 +112,11 @@ pygments_style = 'sphinx'
 
 # Custom solidity lexer
 sys.path.append(os.path.dirname(__file__))
-from pygments.lexer import __all__ as pygments_lexers
+from sphinx.highlighting import lexers
 from solidity_lexer import SolidityLexer
 
 
-pygments_lexers.append(SolidityLexer)
+lexers['solidity'] = SolidityLexer()
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -258,8 +258,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'populus', u'Populus Documentation',
-     [u'Piper Merriam'], 1)
+    ('index', 'populus', u'Populus Documentation', ['Piper Merriam'], 1)
 ]
 
 # If true, show URL addresses after external links.

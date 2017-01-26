@@ -1,99 +1,70 @@
-.. _Project:
-
 Project
--------
+=======
 
 .. contents:: :local:
 
-.. py:module:: populus
-.. py:currentmodule:: populus
-
 
 Introduction
-^^^^^^^^^^^^
+------------
 
 The Project API is the common entry point to all aspects of
 your populus project.
 
 
 Basic Usage
-^^^^^^^^^^^
+-----------
 
-.. py:class:: Project(config_file_path=None)
+- ``Project(config_file_path=None)``
 
 When instantaited with no arguments, the project will look for a ``populus.json``
 file found in the current working directory and load that if found.
 
 
-.. code-block::
+.. code-block:: python
 
     from populus.project import Project
     # loads local `populus.json` file (if present)
     project = Project()
 
     # loads the specified config file
-    other_project = Project('/path/to/other/populus.json'])
+    other_project = Project('/path/to/other/populus.json')
 
 
-
-Loading, Reloading, and Writing
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. py:attribute:: Project.config_file_path
-
-    The path to that configuration file that was loaded or ``None`` if no
-    configuration file is present.
+The project object is the entry point for almost everything that populus can do.
 
 
-.. py:method:: Project.load_config()
+.. code-block:: python
 
-    Loads the the project configuration from disk.
-
-
-.. py:method:: Project.write_config()
-
-    Writes the current project configuration to disk.  Writes to
-    ``Project.config_file_path`` or ``project.json`` if
-    ``Project.config_file_path`` is ``None``.
-
-
-Filesystem Path Properties and Methods
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Populus exposes properties and methods to access the the various filesystem
-dictories and paths that populus uses.
-
-
-.. py:attribute:: Project.project_dir
-
-    The path that populus will treat as the root of your
-    project.  This defaults to the current working directory.
-
-
-.. py:attribute:: Project.contracts_dir
-
-    The path under which populus will search for contracts to compile.
+    >>> project.project_dir
+    '/path/to/your-project`
+    >>> project.contracts_dir
+    './contracts'
+    >>> project.config
+    {....}  # Your project configuration.
+    >>> project.compiled_contracts
+    {
+      'Greeter': {
+        'code': '0x...',
+        'code_runtime': '0x...',
+        'abi': [...],
+        ...
+      },
+      ...
+    }
+    >>> with p.get_chain('temp') as chain:
+    ...     print(chain.web3.eth.coinbase)
+    ...
+    0x4949dce962e182bc148448efa93e73c6ba163f03
 
 
-.. py:attribute:: Project.build_dir
+Chain API
+---------
 
-    The path that populus will place it's build artifacts from compilation.
+- ``get_chain(chain_name, chain_config=None)``
 
+    Returns a ``populus.chain.Chain`` instance.  You may provide
+    ``chain_config`` in which case the chain will be configured using the
+    provided configuration rather than the declared configuration for this
+    chain from your configuration file.
 
-.. py:attribute:: Project.compiled_contracts_file_path
-
-    The path that the JSON build artifact will be written to.
-
-
-.. py:attribute:: Project.compiled_contracts
-
-    The parsed JSON output loaded from the
-    ``Project.compiled_contracts_file_path``.
-
-
-.. py:method:: Project.get_chain(chain_name, chain_config=None)
-
-    Returns the ``populus.chain.Chain`` instance associated with the geven
-    ``chain_name``.  If ``chain_config`` is passed in then it will attempt to
-    lookup the chain configuratin under ``chains.<chain_name>`` raising a
-    ``KeyError`` if no configuration is found.
+    The returned ``Chain`` instance can be used as a context manager.

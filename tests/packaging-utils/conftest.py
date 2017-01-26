@@ -13,6 +13,7 @@ from populus.utils.packaging import (
     get_install_identifier,
     get_release_lockfile_path,
     get_installed_packages_dir,
+    load_release_lockfile,
 )
 from populus.utils.functional import (
     cast_return_to_dict,

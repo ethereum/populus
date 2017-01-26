@@ -131,12 +131,11 @@ def load_example_project(populus_source_root,
         v1_release_lockfile_uri = mock_IPFS_backend.persist_package_file(
             v1_release_lockfile_path,
         )
-        with open(v1_release_lockfile_path) as v1_release_lockfile_file:
-            v1_release_lockfile = json.load(v1_release_lockfile_file)
-            mock_package_index_backend.publish_release_lockfile(
-                v1_release_lockfile,
-                v1_release_lockfile_uri,
-            )
+        v1_release_lockfile = load_release_lockfile(v1_release_lockfile_path)
+        mock_package_index_backend.publish_release_lockfile(
+            v1_release_lockfile,
+            v1_release_lockfile_uri,
+        )
 
         for solidity_source_path in find_solidity_source_files(contracts_source_dir):
             mock_IPFS_backend.persist_package_file(solidity_source_path)
@@ -170,8 +169,7 @@ def verify_installed_package():
         assert install_identifier == package_meta['install_identifier']
 
         release_lockfile_path = get_release_lockfile_path(package_base_dir)
-        with open(release_lockfile_path) as release_lockfile_file:
-            release_lockfile = json.load(release_lockfile_file)
+        rel_source_path = load_release_lockfile(release_lockfile_path)
 
         assert release_lockfile == package_data['lockfile']
 

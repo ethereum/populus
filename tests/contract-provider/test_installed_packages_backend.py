@@ -13,6 +13,8 @@ from populus.utils.chains import (
 from populus.utils.packaging import (
     extract_package_metadata,
     get_release_lockfile_path,
+    load_release_lockfile,
+    write_release_lockfile,
 )
 from populus.packages.installation import (
     write_installed_packages,
@@ -71,8 +73,7 @@ def installed_safe_math_lib_dependency(populus_source_root,
         'contracts',
         'SafeMathLib.sol',
     )
-    with open(release_lockfile_path) as release_lockfile_file:
-        release_lockfile = json.load(release_lockfile_file)
+    release_lockfile = load_release_lockfile(release_lockfile_path)
 
     with open(source_file_path) as source_file:
         source_content = source_file.read()
@@ -104,8 +105,7 @@ def deployed_safe_math_lib(test_chain, installed_safe_math_lib_dependency):
         project.installed_package_locations['safe-math-lib'],
     )
 
-    with open(release_lockfile_path) as release_lockfile_file:
-        release_lockfile = json.load(release_lockfile_file)
+    release_lockfile = load_release_lockfile(release_lockfile_path)
 
     chain_definition = get_chain_definition(chain.web3)
     SafeMathLibFactory = provider.get_contract_factory('SafeMathLib')
@@ -120,8 +120,7 @@ def deployed_safe_math_lib(test_chain, installed_safe_math_lib_dependency):
             },
         }
     })
-    with open(release_lockfile_path, 'w') as release_lockfile_file:
-        release_lockfile = json.dump(release_lockfile, release_lockfile_file)
+    write_release_lockfile(release_lockfile, release_lockfile_path)
 
 
 def test_getting_contract_address_from_installed_package(test_chain,

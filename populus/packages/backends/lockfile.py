@@ -1,8 +1,7 @@
-import json
-
 from populus.utils.packaging import (
     is_filesystem_release_lockfile_path,
     is_aliased_filesystem_release_lockfile_path,
+    load_release_lockfile,
 )
 
 from .base import (
@@ -35,6 +34,5 @@ class LocalFilesystemLockfileBackend(BasePackageBackend):
         else:
             raise ValueError("Unsupported identifier: {0}".format(package_identifier))
 
-        with open(release_lockfile_path) as release_lockfile_file:
-            release_lockfile = json.load(release_lockfile_file)
+        release_lockfile = load_release_lockfile(release_lockfile_path)
         return release_lockfile

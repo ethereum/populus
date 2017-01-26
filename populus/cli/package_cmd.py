@@ -11,6 +11,8 @@ from populus.utils.packaging import (
     get_lockfile_build_path,
     validate_release_lockfile,
     get_publishable_backends,
+    load_release_lockfile,
+    write_release_lockfile,
 )
 
 from populus.packages.build import (
@@ -245,8 +247,7 @@ def package_build(ctx,
 
     ensure_path_exists(project.build_asset_dir)
 
-    with open(release_lockfile_path, 'w') as release_lockfile_file:
-        json.dump(release_lockfile, release_lockfile_file, sort_keys=True, indent=2)
+    write_release_lockfile(release_lockfile, release_lockfile_path)
 
     click.echo("Wrote release lock file: {0}".format(release_lockfile_path))
 
@@ -273,8 +274,7 @@ def package_publish(ctx, release_lockfile_path, wait_for_sync):
         # TODO: select from `./build` dir
         raise NotImplementedError("Not implemented")
 
-    with open(release_lockfile_path) as release_lockfile_file:
-        release_lockfile = json.load(release_lockfile_file)
+    release_lockfile = load_release_lockfile(release_lockfile_path)
 
     validate_release_lockfile(release_lockfile)
 

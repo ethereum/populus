@@ -41,7 +41,7 @@ def compile_project_contracts(project, compiler_settings=None):
         compiled_contracts = compile_files(
             all_source_paths,
             import_remappings=import_remappings,
-            **compiler_settings,
+            **compiler_settings
         )
     except ContractsNotFound:
         return project_source_paths, {}

@@ -152,6 +152,7 @@ class Project(object):
     @property
     @cast_return_to_dict
     def installed_package_locations(self):
+        # TODO: rename to `installed_dependency_locations`
         return get_installed_dependency_locations(self.installed_packages_dir)
 
     #

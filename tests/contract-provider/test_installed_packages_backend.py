@@ -1,0 +1,130 @@
+import pytest
+
+import os
+import json
+
+from populus import Project
+from populus.utils.config import (
+    get_json_config_file_path,
+)
+from populus.utils.chains import (
+    get_chain_definition,
+)
+from populus.utils.packaging import (
+    extract_package_metadata,
+    get_release_lockfile_path,
+)
+from populus.packages.installation import (
+    write_installed_packages,
+)
+
+
+EXAMPLE_PACKAGES_BASE_PATH = './tests/example-packages'
+
+
+@pytest.fixture()
+def with_installed_packages_backend(project_dir):
+    config_file_path = get_json_config_file_path(project_dir)
+    config = {
+        'chains': {
+            'tester': {
+                'contracts': {
+                    'backends': {
+                        'InstalledPackagesContractBackend': {
+                            "class": "populus.contracts.backends.installed_packages.InstalledPackagesContractBackend",
+                            "priority": 10
+                        }
+                    }
+                }
+            }
+        }
+    }
+    with open(config_file_path, 'w') as config_file:
+        json.dump(config, config_file)
+    return config_file_path
+
+
+@pytest.yield_fixture()
+def test_chain(with_installed_packages_backend):
+    project = Project(with_installed_packages_backend)
+    assert 'chains.tester.contracts.backends.InstalledPackagesContractBackend' in project.config
+    with project.get_chain('tester') as chain:
+        yield chain
+
+
+@pytest.fixture()
+def installed_safe_math_lib_dependency(populus_source_root,
+                                       test_chain):
+    chain = test_chain
+    project = chain.project
+    assert 'InstalledPackagesContractBackend' in chain.store.provider.provider_backends
+    release_lockfile_path = os.path.join(
+        populus_source_root,
+        EXAMPLE_PACKAGES_BASE_PATH,
+        'safe-math-lib',
+        '1.0.0.json',
+    )
+    source_file_path = os.path.join(
+        populus_source_root,
+        EXAMPLE_PACKAGES_BASE_PATH,
+        'safe-math-lib',
+        'contracts',
+        'SafeMathLib.sol',
+    )
+    with open(release_lockfile_path) as release_lockfile_file:
+        release_lockfile = json.load(release_lockfile_file)
+
+    with open(source_file_path) as source_file:
+        source_content = source_file.read()
+
+    package_meta = extract_package_metadata(
+        ('ipfs://QmfUwis9K2SLwnUh62PDb929JzU5J2aFKd4kS1YErYajdq',),
+        release_lockfile,
+    )
+    package_data = {
+        'meta': package_meta,
+        'lockfile': release_lockfile,
+        'source_tree': {'./contracts/SafeMathLib.sol': source_content},
+        'dependencies': tuple(),
+    }
+    write_installed_packages(project.installed_packages_dir, [package_data])
+    assert 'safe-math-lib' in project.installed_package_locations
+    project._cached_compiled_contracts = None
+    assert 'SafeMathLib' in project.compiled_contract_data
+
+
+@pytest.fixture()
+def deployed_safe_math_lib(test_chain, installed_safe_math_lib_dependency):
+    chain = test_chain
+    project = chain.project
+    provider = chain.store.provider
+    assert not provider.is_contract_available('SafeMathLib')
+
+    release_lockfile_path = get_release_lockfile_path(
+        project.installed_package_locations['safe-math-lib'],
+    )
+
+    with open(release_lockfile_path) as release_lockfile_file:
+        release_lockfile = json.load(release_lockfile_file)
+
+    chain_definition = get_chain_definition(chain.web3)
+    SafeMathLibFactory = provider.get_contract_factory('SafeMathLib')
+    deploy_txn = SafeMathLibFactory.deploy()
+    contract_address = chain.wait.for_contract_address(deploy_txn)
+    release_lockfile['deployments'].update({
+        chain_definition: {
+            'SafeMathLib': {
+                'address': contract_address,
+                'contract_type': 'SafeMathLib',
+                'runtime_bytecode': SafeMathLibFactory.code_runtime,
+            },
+        }
+    })
+    with open(release_lockfile_path, 'w') as release_lockfile_file:
+        release_lockfile = json.dump(release_lockfile, release_lockfile_file)
+
+
+def test_getting_contract_address_from_installed_package(test_chain,
+                                                         deployed_safe_math_lib):
+    chain = test_chain
+    assert chain.store.provider.is_contract_available('SafeMathLib')

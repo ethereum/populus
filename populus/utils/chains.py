@@ -2,9 +2,6 @@ import os
 import sys
 import datetime
 
-from .module_loading import (
-    import_string,
-)
 from .filesystem import (
     get_blockchains_dir,
 )
@@ -103,11 +100,3 @@ def get_geth_logfile_path(project_dir, prefix, suffix):
         ),
     )
     return os.path.join(logs_dir, logfile_name)
-
-
-def setup_chain_from_config(project, chain_name, chain_config):
-    chain_class_import_path = chain_config['chain.class']
-
-    ChainClass = import_string(chain_class_import_path)
-    chain = ChainClass(project, chain_name, chain_config)
-    return chain

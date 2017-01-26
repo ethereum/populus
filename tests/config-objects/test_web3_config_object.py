@@ -1,6 +1,11 @@
 import pytest
 
-from web3.providers.ipc import IPCProvider
+from web3.providers.ipc import (
+    IPCProvider,
+)
+from web3.providers.rpc import (
+    HTTPProvider,
+)
 
 from populus.config.web3 import Web3Config
 
@@ -30,8 +35,51 @@ def test_provider_property_with_settings():
     assert web3_config.provider.ipc_path == '/not/a/real-path'
 
 
+@pytest.mark.parametrize(
+    'value,expected',
+    (
+        ('ipc', 'web3.providers.ipc.IPCProvider'),
+        ('rpc', 'web3.providers.rpc.HTTPProvider'),
+        ('web3.providers.ipc.IPCProvider', 'web3.providers.ipc.IPCProvider'),
+        ('web3.providers.rpc.HTTPProvider', 'web3.providers.rpc.HTTPProvider'),
+        ('web3.providers.rpc.RPCProvider', 'web3.providers.rpc.RPCProvider'),
+        (IPCProvider, 'web3.providers.ipc.IPCProvider'),
+        (HTTPProvider, 'web3.providers.rpc.HTTPProvider'),
+    )
+)
+def test_set_provider_class_api(value, expected):
+    web3_config = Web3Config()
+    web3_config.set_provider_class(value)
+    assert web3_config['provider.class'] == expected
+
+
+def test_provider_kwargs_property():
+    web3_config = Web3Config({
+        'provider': {
+            'class': 'web3.providers.ipc.IPCProvider',
+        },
+    })
+    assert web3_config.provider_kwargs == {}
+
+    web3_config.provider_kwargs = {'ipc_path': '/not/a/real-path'}
+    assert web3_config.provider_kwargs == {'ipc_path': '/not/a/real-path'}
+
+    web3_config.provider_kwargs['some-key'] = 32
+    assert web3_config.provider_kwargs == {'ipc_path': '/not/a/real-path', 'some-key': 32}
+
+
 def test_getting_web3_instance():
     web3_config = Web3Config({'provider': {'class': 'web3.providers.ipc.IPCProvider'}})
     web3 = web3_config.get_web3()
 
     assert isinstance(web3.currentProvider, IPCProvider)
+
+
+def test_default_account_property():
+    web3_config = Web3Config()
+
+    with pytest.raises(KeyError):
+        web3_config.default_account
+
+    web3_config.default_account = '0x0000000000000000000000000000000000000001'
+    assert web3_config.default_account == '0x0000000000000000000000000000000000000001'

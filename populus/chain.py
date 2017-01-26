@@ -57,9 +57,6 @@ from populus.migrations.migration import (
 from populus.migrations.registrar import (
     get_registrar,
 )
-from populus.config import (
-    Web3Config,
-)
 
 
 TESTNET_BLOCK_1_HASH = '0xad47413137a753b2061ad9b484bf7b0fc061f654b951b562218e9f66505be6ce'
@@ -182,7 +179,7 @@ class Chain(object):
     # Required Public API
     #
     def get_web3_config(self):
-        web3_config = self.config.get_config('web3', config_class=Web3Config)
+        web3_config = self.config.get_web3_config()
         return web3_config
 
     @property
@@ -605,7 +602,7 @@ class TestRPCChain(BaseTesterChain):
             self._running = False
 
 
-class EthereumTesterChain(BaseTesterChain):
+class TesterChain(BaseTesterChain):
     def __enter__(self):
         if self._running:
             raise ValueError("The TesterChain is already running")

@@ -112,6 +112,36 @@ The above chain configuration sets up a new local private chain within your
 project.  The chain above would set it's data directory to
 ``<project-dir>/chains/my-chain/``.
 
+To simplify configuration of chains you can use the ``ChainConfig`` object.
+
+.. code-block:: python
+
+    >>> from populus.config import ChainConfig
+    >>> chain_config = ChainConfig()
+    >>> chain_config.set_chain_class('local')
+    >>> chain_config['web3'] = web3_config  # see below for the Web3Config object
+    >>> project.config['chains.my-chain'] = chain_config
+
+The ``set_chain_class()`` method can take any of the following values.
+
+- These strings
+    - `chain_config.set_chain_class('local') => 'populus.chain.LocalGethChain'`
+    - `chain_config.set_chain_class('external') => 'populus.chain.ExternalChain'`
+    - `chain_config.set_chain_class('tester') => 'populus.chain.TesterChain'`
+    - `chain_config.set_chain_class('testrpc') => 'populus.chain.TestRPCChain'`
+    - `chain_config.set_chain_class('temp') => 'populus.chain.TemporaryGethChain'`
+    - `chain_config.set_chain_class('mainnet') => 'populus.chain.MainnetChain'`
+    - `chain_config.set_chain_class('testnet') => 'populus.chain.TestnetChain'`
+    - `chain_config.set_chain_class('ropsten') => 'populus.chain.TestnetChain'`
+- Full python paths to the desired chain class.
+    - `chain_config.set_chain_class('populus.chain.LocalGethChain') => 'populus.chain.LocalGethChain'`
+    - `chain_config.set_chain_class('populus.chain.ExternalChain') => 'populus.chain.ExternalChain'`
+    - `...`
+- The actual chain class.
+    - `chain_config.set_chain_class(LocalGethChain) => 'populus.chain.LocalGethChain'`
+    - `chain_config.set_chain_class(ExternalChain) => 'populus.chain.ExternalChain'`
+    - `...`
+
 
 Chain Class Settings
 """"""""""""""""""""
@@ -135,7 +165,7 @@ Available options are:
     in-memory ethereum blockchain.  This chain will spin up an HTTP based RPC
     server.
 
-* ``populus.chain.EthereumTesterChain``
+* ``populus.chain.TesterChain``
 
     An ephemeral chain that uses the python ``eth-testrpc`` package to run an
     in-memory ethereum blockchain.  This chain **must** be used in conjunction
@@ -190,6 +220,19 @@ Configuration for setting up a Web3 instance.
         "default_account": "0xd3cda913deb6f67967b99d67acdfa1712c293601",
       }
     }
+
+In order to simplify configuring Web3 instances you can use the ``Web3Config``
+class.
+
+.. code-block:: python
+
+    >>> from populus.config import Web3Config
+    >>> web3_config = Web3Config()
+    >>> web3_config.set_provider('ipc')
+    >>> web3_config.provider_kwargs['ipc_path'] = '/path/to/geth.ipc'
+    >>> web3.config.default_account = '0x0000000000000000000000000000000000000001'
+    >>> project.config['chains.my-chain.web3'] = web3_config
+    >>> project.write_config()  # optionally persist the configuration to disk
 
 
 Provider Class
@@ -410,7 +453,7 @@ Populus ships with the following *default* configuration
           'web3': {'$ref': 'web3.GethEphemeral'},
         },
         'tester': {
-          'chain': {'class': 'populus.chain.EthereumTesterChain'},
+          'chain': {'class': 'populus.chain.TesterChain'},
           'web3': {'$ref': 'web3.Tester'},
         },
         'testrpc': {

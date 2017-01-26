@@ -332,13 +332,10 @@ def is_filesystem_release_lockfile_path(package_identifier):
     elif not os.path.isfile(package_identifier):
         return False
 
-    with open(package_identifier) as maybe_release_lockfile_file:
-        try:
-            maybe_release_lockfile = json.load(maybe_release_lockfile_file)
-        except json.JSONDecodeError:
-            return False
-
-    validate_release_lockfile(maybe_release_lockfile)
+    try:
+        load_release_lockfile(package_identifier)
+    except json.JSONDecodeError:
+        return False
 
     return True
 
@@ -470,6 +467,20 @@ def validate_release_lockfile(release_lockfile):
     """
     release_lockfile_schema = load_release_lockfile_schema()
     jsonschema.validate(release_lockfile, release_lockfile_schema)
+
+
+def load_release_lockfile(release_lockfile_path, validate=True):
+    with open(release_lockfile_path) as release_lockfile_file:
+        release_lockfile = json.load(release_lockfile_file)
+
+    if validate:
+        validate_release_lockfile(release_lockfile)
+    return release_lockfile
+
+
+def write_release_lockfile(release_lockfile, release_lockfile_path):
+    with open(release_lockfile_path, 'w') as release_lockfile_file:
+        json.dump(release_lockfile, release_lockfile_file, sort_keys=True, indent=2)
 
 
 def extract_install_identifier(package_identifier_lineage):

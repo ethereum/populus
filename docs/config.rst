@@ -125,22 +125,22 @@ To simplify configuration of chains you can use the ``ChainConfig`` object.
 The ``set_chain_class()`` method can take any of the following values.
 
 - These strings
-    - `chain_config.set_chain_class('local') => 'populus.chain.LocalGethChain'`
-    - `chain_config.set_chain_class('external') => 'populus.chain.ExternalChain'`
-    - `chain_config.set_chain_class('tester') => 'populus.chain.TesterChain'`
-    - `chain_config.set_chain_class('testrpc') => 'populus.chain.TestRPCChain'`
-    - `chain_config.set_chain_class('temp') => 'populus.chain.TemporaryGethChain'`
-    - `chain_config.set_chain_class('mainnet') => 'populus.chain.MainnetChain'`
-    - `chain_config.set_chain_class('testnet') => 'populus.chain.TestnetChain'`
-    - `chain_config.set_chain_class('ropsten') => 'populus.chain.TestnetChain'`
+    - ``chain_config.set_chain_class('local') => 'populus.chain.LocalGethChain'``
+    - ``chain_config.set_chain_class('external') => 'populus.chain.ExternalChain'``
+    - ``chain_config.set_chain_class('tester') => 'populus.chain.TesterChain'``
+    - ``chain_config.set_chain_class('testrpc') => 'populus.chain.TestRPCChain'``
+    - ``chain_config.set_chain_class('temp') => 'populus.chain.TemporaryGethChain'``
+    - ``chain_config.set_chain_class('mainnet') => 'populus.chain.MainnetChain'``
+    - ``chain_config.set_chain_class('testnet') => 'populus.chain.TestnetChain'``
+    - ``chain_config.set_chain_class('ropsten') => 'populus.chain.TestnetChain'``
 - Full python paths to the desired chain class.
-    - `chain_config.set_chain_class('populus.chain.LocalGethChain') => 'populus.chain.LocalGethChain'`
-    - `chain_config.set_chain_class('populus.chain.ExternalChain') => 'populus.chain.ExternalChain'`
-    - `...`
+    - ``chain_config.set_chain_class('populus.chain.LocalGethChain') => 'populus.chain.LocalGethChain'``
+    - ``chain_config.set_chain_class('populus.chain.ExternalChain') => 'populus.chain.ExternalChain'``
+    - ``...``
 - The actual chain class.
-    - `chain_config.set_chain_class(LocalGethChain) => 'populus.chain.LocalGethChain'`
-    - `chain_config.set_chain_class(ExternalChain) => 'populus.chain.ExternalChain'`
-    - `...`
+    - ``chain_config.set_chain_class(LocalGethChain) => 'populus.chain.LocalGethChain'``
+    - ``chain_config.set_chain_class(ExternalChain) => 'populus.chain.ExternalChain'``
+    - ``...``
 
 
 Chain Class Settings

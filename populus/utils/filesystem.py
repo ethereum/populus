@@ -39,6 +39,15 @@ def ensure_file_exists(file_path):
     return True
 
 
+def is_path_under_base_path(base_path, path_to_check):
+    abs_base_path = os.path.normcase(os.path.abspath(base_path))
+    abs_path_to_check = os.path.normcase(os.path.abspath(path_to_check))
+    if abs_path_to_check.startswith(abs_base_path):
+        return True
+    else:
+        return False
+
+
 def remove_file_if_exists(path):
     if os.path.isfile(path):
         os.remove(path)

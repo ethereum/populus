@@ -13,6 +13,37 @@ Populus can be used as a package manager to interact with any ERC190 smart
 contract packages.
 
 
+Disclaimers and General Development Status
+------------------------------------------
+
+.. warning:: The packaging functionality is not safe enough for anything close to production use cases.
+
+.. warning:: The packaging APIs are subject to change without notice.
+
+You *should* be able to do the following things
+
+- Install *any* valid release lockfile.
+- Import contract sources from installed packages.
+- Link against deployed instances of libraries from installed packages.
+- Building source-only packages (packages which don't contain any deployed contract instances)
+- Building packages with deployed instances on a single chain.
+- Publishing release lockfiles.
+
+The following things may not work at all or may only work specific conditions.
+
+- Building packages with deployed instances from multiple chainls chains.
+- Building packages with deployed instances of contracts from a dependency.
+- Attempting to link against a deployed instance of a library from an installed package which itself has link dependencies from deployed instances of libraries from one of the installed package's installed packages.
+- Compilation will fail if there are two libraries with the same name across any of the source files.
+- Compilation does not respect declared compiler version for bytecode verification.
+
+The following things are not yet implemented.
+
+- Full bytecode verification through all dependencies.
+- Friendly errors
+- Friendly or detailed terminal output.
+
+
 Project Manifest
 ----------------
 

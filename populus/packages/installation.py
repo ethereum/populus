@@ -14,6 +14,7 @@ from populus.utils.filesystem import (
     ensure_path_exists,
     ensure_file_exists,
     remove_dir_if_exists,
+    is_path_under_base_path,
 )
 from populus.utils.packaging import (
     get_installed_packages_dir,
@@ -105,8 +106,19 @@ def write_package_files(installed_packages_dir, package_data):
         # Write the package source tree.
         package_source_tree = package_data['source_tree']
         for rel_source_path, source_content in package_source_tree.items():
-            # TODO: enforce that this directory doesn't traverse out of the root directory.
             source_path = os.path.join(temp_install_location, rel_source_path)
+            if not is_path_under_base_path(temp_install_location, source_path):
+                # TODO: test this failure path.
+                raise ValueError(
+                    "Source path is attempting to write a non-relative file path.\n"
+                    " - source-path: {0}\n"
+                    " - resolved-path: {1}\n"
+                    " - base-install-path: {2}".format(
+                        rel_source_path,
+                        os.path.abspath(source_path),
+                        temp_install_location,
+                    )
+                )
             ensure_file_exists(source_path)
             mode = 'wb' if is_bytes(source_content) else 'w'
             with open(source_path, mode) as source_file:

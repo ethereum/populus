@@ -100,8 +100,8 @@ def test_project_local_chain_rpc(project_dir):
     rpc_port = str(get_open_port())
     project.config['chains.local.chain.class'] = 'populus.chain.LocalGethChain'
     project.config['chains.local.chain.settings.rpc_port'] = rpc_port
-    project.config['chains.local.web3.provider.class'] = 'web3.providers.rpc.RPCProvider'
-    project.config['chains.local.web3.provider.settings.rpc_port'] = rpc_port
+    project.config['chains.local.web3.provider.class'] = 'web3.providers.rpc.HTTPProvider'
+    project.config['chains.local.web3.provider.settings.endpoint_uri'] = "http://127.0.0.1:{0}".format(rpc_port)
     project.write_config()
 
     chain = project.get_chain('local')

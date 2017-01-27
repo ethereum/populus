@@ -27,18 +27,28 @@ def project(request):
 
 
 @pytest.yield_fixture()
-def unmigrated_chain(request, project):
+def _unmigrated_chain(request, project):
     # TODO: pull chain name from configuration.
     with project.get_chain('tester') as chain:
         yield chain
 
 
 @pytest.fixture()
-def chain(unmigrated_chain):
+def unmigrated_chain(_unmigrated_chain):
+    warnings.warn(PendingDeprecationWarning(
+        "The migrations API has been deprecated.  Please switch to using the "
+        "`chain` fixture as the `unmigrated_chain` fixture will be removed in "
+        "upcoming releases"
+    ))
+    return _unmigrated_chain
+
+
+@pytest.fixture()
+def chain(_unmigrated_chain):
     # Determine if we have any migrations to run.
     migrations_to_execute = get_migration_classes_for_execution(
-        unmigrated_chain.project.migrations,
-        unmigrated_chain,
+        _unmigrated_chain.project.migrations,
+        _unmigrated_chain,
     )
 
     if migrations_to_execute:
@@ -50,17 +60,17 @@ def chain(unmigrated_chain):
     for migration in migrations_to_execute:
         migration.execute()
 
-    return unmigrated_chain
+    return _unmigrated_chain
 
 
 @pytest.fixture()
-def web3(unmigrated_chain):
-    return unmigrated_chain.web3
+def web3(_unmigrated_chain):
+    return _unmigrated_chain.web3
 
 
 @pytest.fixture()
-def base_contract_factories(unmigrated_chain):
-    return unmigrated_chain.contract_factories
+def base_contract_factories(_unmigrated_chain):
+    return _unmigrated_chain.contract_factories
 
 
 @pytest.fixture()

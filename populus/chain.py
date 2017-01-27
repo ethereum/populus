@@ -15,6 +15,12 @@ from geth import (
     TestnetGethProcess,
     LoggingMixin,
 )
+
+from web3 import (
+    IPCProvider,
+    HTTPProvider,
+)
+
 from populus.utils.functional import (
     cached_property,
 )
@@ -43,7 +49,6 @@ from populus.utils.chains import (
     get_nodekey_path,
     get_geth_ipc_path,
     get_geth_logfile_path,
-    setup_web3_from_config,
 )
 
 from populus.migrations.migration import (
@@ -174,7 +179,7 @@ class Chain(object):
     # Required Public API
     #
     def get_web3_config(self):
-        web3_config = self.config.get_config('web3')
+        web3_config = self.config.get_web3_config()
         return web3_config
 
     @property
@@ -185,7 +190,7 @@ class Chain(object):
     def web3(self):
         if not self._running:
             raise ValueError("Chain must be running prior to accessing web3")
-        return setup_web3_from_config(self.web3_config)
+        return self.web3_config.get_web3()
 
     @property
     def wait(self):
@@ -559,7 +564,7 @@ class TestRPCChain(BaseTesterChain):
     def get_web3_config(self):
         base_config = super(TestRPCChain, self).get_web3_config()
         config = copy.deepcopy(base_config)
-        config['provider.settings.rpc_port'] = self.port
+        config['provider.settings.port'] = self.port
         return config
 
     def __enter__(self):
@@ -597,7 +602,7 @@ class TestRPCChain(BaseTesterChain):
             self._running = False
 
 
-class EthereumTesterChain(BaseTesterChain):
+class TesterChain(BaseTesterChain):
     def __enter__(self):
         if self._running:
             raise ValueError("The TesterChain is already running")
@@ -718,7 +723,14 @@ class LocalGethChain(BaseGethChain):
     def get_web3_config(self):
         base_config = super(LocalGethChain, self).get_web3_config()
         config = copy.deepcopy(base_config)
-        config['provider.settings.ipc_path'] = self.geth.ipc_path
+        if issubclass(base_config.provider_class, IPCProvider):
+            config['provider.settings.ipc_path'] = self.geth.ipc_path
+        elif issubclass(base_config.provider_class, HTTPProvider):
+            config['provider.settings.endpoint_uri'] = "http://127.0.0.1:{0}".format(
+                self.geth.rpc_port,
+            )
+        else:
+            raise ValueError("Unknown provider type")
         return config
 
 

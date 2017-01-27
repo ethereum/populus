@@ -4,10 +4,11 @@ Release Notes
 1.5.0 (unreleased)
 ------------------
 
-- Remove had gevent dependency
-- Deprecate migrations functionality.
-- Deprecate and remove old ``populus.ini`` configuration scheme.
+- Remove gevent dependency
+- Mark migrations API for deprecation.
+- Mark unmigrated_chain testing fixture for deprecation.
 - Mark ``contracts`` fixture for deprecation.  Replaced by ``base_contract_factories`` fixture.
+- Deprecate and remove old ``populus.ini`` configuration scheme.
 - Add new configuration API.
 
 1.4.2

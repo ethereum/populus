@@ -15,7 +15,6 @@ from populus.utils.chains import (
     get_dapp_dir,
     get_geth_ipc_path,
     get_nodekey_path,
-    setup_chain_from_config,
 )
 from populus.utils.config import (
     get_default_project_config_file_path,
@@ -38,6 +37,7 @@ from populus.config import (
     write_config as _write_config,
     load_default_config_info,
     Config,
+    ChainConfig,
 )
 
 
@@ -182,7 +182,7 @@ class Project(object):
         chain_config_key = 'chains.{chain_name}'.format(chain_name=chain_name)
 
         if chain_config_key in self.config:
-            return self.config.get_config(chain_config_key)
+            return self.config.get_config(chain_config_key, config_class=ChainConfig)
         else:
             raise KeyError(
                 "Unknown chain: {0!r} - Must be one of {1!r}".format(
@@ -241,7 +241,7 @@ class Project(object):
         """
         if chain_config is None:
             chain_config = self.get_chain_config(chain_name)
-        chain = setup_chain_from_config(self, chain_name, chain_config)
+        chain = chain_config.get_chain(self, chain_name)
         return chain
 
     @property

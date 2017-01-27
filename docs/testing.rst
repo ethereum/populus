@@ -62,6 +62,9 @@ The :ref:`Project` object for your project.
 Unmigrated Chain
 ~~~~~~~~~~~~~~~~
 
+.. warning:: This fixture has been removed as part of the deprecation of the migrations API.  You should instead use the ``chain`` fixture.
+
+
 * ``unmigrated_chain``
 
 The ``'tester'`` test chain.  This chain will not have had migrations run.
@@ -124,10 +127,10 @@ A Web3.py instance configured to connect to ``chain`` fixture.
 Contracts
 ~~~~~~~~~
 
-* ``contracts``
-
 .. warning:: This fixture has been renamed to ``base_contract_factories``.  In future releases of populus this fixture will be removed or repurposed.
 
+
+* ``contracts``
 
 Base Contract Factories
 ~~~~~~~~~~~~~~~~~~~~~~~

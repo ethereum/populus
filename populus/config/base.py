@@ -64,11 +64,13 @@ class Config(object):
             return default
         return self.resolve(value)
 
-    def get_config(self, key, defaults=None):
+    def get_config(self, key, defaults=None, config_class=None):
+        if config_class is None:
+            config_class = Config
         try:
-            return type(self)(self.resolve(self[key]), defaults, parent=self)
+            return config_class(self.resolve(self[key]), defaults, parent=self)
         except KeyError:
-            return type(self)(get_empty_config(), defaults, parent=self)
+            return config_class(get_empty_config(), defaults, parent=self)
 
     def pop(self, key, default=empty):
         try:
@@ -108,7 +110,7 @@ class Config(object):
             yield key, value
 
     def update(self, other, **kwargs):
-        if isinstance(other, type(self)):
+        if isinstance(other, Config):
             self.config_for_read.update(copy.deepcopy(other.config_for_read), **kwargs)
             self.config_for_write.update(copy.deepcopy(other.config_for_write), **kwargs)
         else:
@@ -145,7 +147,7 @@ class Config(object):
             raise KeyError("Key '{0}' not found in {1}".format(key, self.config_for_read))
 
     def __setitem__(self, key, value):
-        if isinstance(value, type(self)):
+        if isinstance(value, Config):
             set_nested_key(self.config_for_read, key, value.config_for_read)
             return set_nested_key(self.config_for_write, key, value.config_for_write)
         else:

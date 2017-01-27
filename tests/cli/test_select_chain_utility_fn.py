@@ -35,17 +35,17 @@ from populus.utils.cli import (
 )
 def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expected):
     project = Project()
-    project.config['chains.local_a.chain.class'] = 'populus.chain.EthereumTesterChain'
+    project.config['chains.local_a.chain.class'] = 'populus.chain.TesterChain'
     project.config['chains.local_a.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local_a.web3.provider.settings.ipc_path'] = (
         get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_a'))
     )
-    project.config['chains.local_b.chain.class'] = 'populus.chain.EthereumTesterChain'
+    project.config['chains.local_b.chain.class'] = 'populus.chain.TesterChain'
     project.config['chains.local_b.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local_b.web3.provider.settings.ipc_path'] = (
         get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_b'))
     )
-    project.config['chains.local_c.chain.class'] = 'populus.chain.EthereumTesterChain'
+    project.config['chains.local_c.chain.class'] = 'populus.chain.TesterChain'
     project.config['chains.local_c.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local_c.web3.provider.settings.ipc_path'] = (
         get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_c'))

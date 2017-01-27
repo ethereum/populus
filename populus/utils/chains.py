@@ -2,17 +2,6 @@ import os
 import sys
 import datetime
 
-from web3 import (
-    Web3,
-    RPCProvider,
-    IPCProvider,
-    HTTPProvider,
-    TestRPCProvider,
-)
-
-from .module_loading import (
-    import_string,
-)
 from .filesystem import (
     get_blockchains_dir,
 )
@@ -111,40 +100,3 @@ def get_geth_logfile_path(project_dir, prefix, suffix):
         ),
     )
     return os.path.join(logs_dir, logfile_name)
-
-
-def setup_web3_from_config(web3_config):
-    ProviderClass = import_string(web3_config['provider.class'])
-
-    provider_kwargs = {}
-
-    if issubclass(ProviderClass, (RPCProvider, TestRPCProvider)):
-        if 'provider.settings.rpc_host' in web3_config:
-            provider_kwargs['host'] = web3_config['provider.settings.rpc_host']
-
-        if 'provider.settings.rpc_port' in web3_config:
-            provider_kwargs['port'] = web3_config['provider.settings.rpc_port']
-
-        if 'provider.settings.use_ssl' in web3_config:
-            provider_kwargs['ssl'] = web3_config['provider.settings.use_ssl']
-    elif issubclass(ProviderClass, IPCProvider):
-        if 'provider.settings.ipc_path' in web3_config:
-            provider_kwargs['ipc_path'] = web3_config['provider.settings.ipc_path']
-    elif issubclass(ProviderClass, HTTPProvider):
-        if 'provider.settings.rpc_endpoint' in web3_config:
-            provider_kwargs['endpoint_uri'] = web3_config['provider.settings.endpoint_uri']
-
-    web3 = Web3(ProviderClass(**provider_kwargs))
-
-    if 'eth.default_account' in web3_config:
-        web3.eth.defaultAccount = web3_config['eth.default_account']
-
-    return web3
-
-
-def setup_chain_from_config(project, chain_name, chain_config):
-    chain_class_import_path = chain_config['chain.class']
-
-    ChainClass = import_string(chain_class_import_path)
-    chain = ChainClass(project, chain_name, chain_config)
-    return chain

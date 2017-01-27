@@ -1,10 +1,11 @@
 import re
 
 
-from web3.utils.types import (
+from web3.utils.types import (  # noqa: F401
     is_string,
     is_integer,
     is_boolean,
+    is_object,
 )
 from web3.utils.string import (
     force_text,

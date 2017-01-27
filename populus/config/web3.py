@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from web3 import Web3
 
 from populus.utils.module_loading import (

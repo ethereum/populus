@@ -80,7 +80,7 @@ def package_init(ctx):
     # TODO: pull from git configuration if present.
     package_manifest['package_name'] = click.prompt(
         'Package Name',
-        default=package_manifest.get('package_name', ''),
+        default=package_manifest.get('package_name'),
     )
 
     # TODO: pull default email from git configuration.

@@ -1,5 +1,5 @@
-Configuration
-=============
+Packaging
+=========
 
 .. contents:: :local:
 
@@ -20,6 +20,19 @@ In order to take advantage of the packaging features you will first need to
 create a package manifest for your project.  This can either be done manually
 or using the command line helper ``$ populus package init`` which will present
 an interactive prompt for creating the ``epm.json`` file.
+
+.. code-block:: bash
+
+    $ populus package init
+    Writing new epm.json file.
+    Package Name: fancy-greeter
+    Author(s) [[]]: Piper Merriam <pipermerriam@gmail.com>
+    Version [1.0.0]:
+    License [MIT]:
+    Description []: A fancy greeter contract
+    Keywords [[]]: greeter, greetings
+    Links [{}]:
+    Wrote package manifest: epm.json
 
 
 Installing Packages
@@ -71,6 +84,7 @@ When a package is installed it is automatically saved to the project
 dependencies within the package manifest.  This can be disabled by passing in
 the ``--no-save`` flag during installation.
 
+
 Using Contracts from Installed Packages
 ---------------------------------------
 
@@ -96,10 +110,25 @@ simply prefix the import path with the package name.
         ...
     }
 
-.. note:: If you install a package which either has source files which do not compile with the solidity compiler version you are using, or which have a ``pragma solidity`` statement which is incompatable with your version of solidity then compilation will fail.
+.. note:: 
+
+    If you install a package which either has source files which do not compile
+    with the solidity compiler version you are using, or which have a ``pragma
+    solidity`` statement which is incompatable with your version of solidity
+    then compilation will fail.
+
+
+Library Linking
+---------------
+
+If you have a package installed which contains a library contract with a deployed instance of that library, populus will automatically find and link against that existing deployed library.  One of the default contract backends that populus uses will check all installed packages
+
 
 
 Building and Publishing Releases
 --------------------------------
 
-TODO
+Populus can be used to build and publish packages to The Ethereum Package
+Registry or any registry which implements a compatable API.
+
+To build a release use the ``$ populus package build`` command.

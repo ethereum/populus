@@ -27,13 +27,19 @@ class JSONFileRegistrarBackend(BaseContractBackend):
     #
     # Registrar API
     #
-    def record_contract(self, contract_instance):
+    def record_contract(self, contract_identifier, contract_instance):
         # TODO
         raise NotImplementedError("Must be implemented by subclasses")
 
     def record_address(self, key, address):
         # TODO
         raise NotImplementedError("Must be implemented by subclasses")
+
+    #
+    # ProviderAPI
+    #
+    def get_contract_address(self, contract_identifier):
+        assert False
 
     #
     # Private API
@@ -74,6 +80,7 @@ class JSONFileRegistrarBackend(BaseContractBackend):
             _, chain_definition = resolved_and_sorted_definitions[-1]
 
             for duplicate_definition in resolved_and_sorted_definitions[:-1]:
+                # eww. mutation
                 data[chain_definition].update(
                     data.pop(duplicate_definition),
                     ac_merge=anyconfig.MS_NO_REPLACE,

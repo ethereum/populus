@@ -2,6 +2,15 @@ import os
 
 import click
 
+from populus.config import (
+    load_default_config,
+    write_config,
+)
+
+from populus.utils.config import (
+    get_json_config_file_path,
+    check_if_json_config_file_exists,
+)
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
@@ -54,6 +63,28 @@ def init(ctx):
     Generate project layout with an example contract.
     """
     project = ctx.obj['PROJECT']
+
+    has_json_config = check_if_json_config_file_exists(project.project_dir)
+
+    if has_json_config:
+        click.echo(
+            "Found existing `populus.json` file.  Not writing default config."
+        )
+    else:
+        json_config_file_path = get_json_config_file_path(project.project_dir)
+        default_config = load_default_config()
+        write_config(
+            project.project_dir,
+            default_config,
+            json_config_file_path,
+        )
+        click.echo(
+            "Wrote default populus configuration to `./{0}`.".format(
+                os.path.relpath(json_config_file_path, project.project_dir),
+            )
+        )
+
+    project.load_config()
 
     if ensure_path_exists(project.contracts_dir):
         click.echo(

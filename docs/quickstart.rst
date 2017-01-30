@@ -75,6 +75,7 @@ Populus can initialize your project using the ``$ populus init`` command.
 .. code-block:: shell
 
     $ populus init
+    Wrote default populus configuration to `./populus.json`.
     Created Directory: ./contracts
     Created Example Contract: ./contracts/Greeter.sol
     Created Directory: ./tests

@@ -10,15 +10,19 @@ Populus is designed to be highly configurable through the project configuration
 file.  By default, populus will load the file name ``populus.json`` from the
 root of your project.
 
+The ``$ populus init`` command will write the full default configuration.
+
+
 What you can Configure
 ^^^^^^^^^^^^^^^^^^^^^^
 
 This config file controls many aspects of populus that are configurable.
 Currently the config file controls the following things.
 
+* Project root directory
+* Contract source file location
 * Compiler settings
 * Available chains and how web3 connects to them.
-
 
 
 Compiler Configuration
@@ -31,7 +35,7 @@ compiles your project contracts.
 
     {
       "compilation": {
-        "contracts_source_dir": "./path/to/contract-source-files",
+        "contracts_dir": "./path/to/contract-source-files",
         "settings": {
           "optimize": true,
           "optimize_runs": 100
@@ -44,7 +48,7 @@ Contract Source Directory
 
 The directory that project source files can be found in.
 
-* key: ``compilation.contracts_source_dir``
+* key: ``compilation.contracts_dir``
 * value: Filesystem path
 * default: ``'./contracts'``
 
@@ -434,80 +438,14 @@ Populus ships with many defaults which can be overridden as you see fit.
 Built-in defaults
 ^^^^^^^^^^^^^^^^^
 
-Populus ships with the following *default* configuration 
+Populus ships with the following *default* configuration.  
 
-.. code-block:: javascript 
-
-    {
-      'chains': {
-        'mainnet': {
-          'chain': {'class': 'populus.chain.MainnetChain'},
-          'web3': {'$ref': 'web3.GethMainnet'},
-        },
-        'ropsten': {
-          'chain': {'class': 'populus.chain.TestnetChain'},
-          'web3': {'$ref': 'web3.GethRopsten'},
-        },
-        'temp': {
-          'chain': {'class': 'populus.chain.TemporaryGethChain'},
-          'web3': {'$ref': 'web3.GethEphemeral'},
-        },
-        'tester': {
-          'chain': {'class': 'populus.chain.TesterChain'},
-          'web3': {'$ref': 'web3.Tester'},
-        },
-        'testrpc': {
-          'chain': {'class': 'populus.chain.TestRPCChain'},
-          'web3': {'$ref': 'web3.TestRPC'},
-        },
-      },
-      'compilation': {
-        'contracts_source_dir': './contracts',
-        'settings': {'optimize': True},
-      },
-      'web3': {
-        'GethEphemeral': {
-          'provider': {'class': 'web3.providers.ipc.IPCProvider'},
-        },
-        'GethMainnet': {
-          'provider': {
-            'class': 'web3.providers.ipc.IPCProvider',
-            'settings': {'ipc_path': '/Users/piper/Library/Ethereum/geth.ipc'},
-          },
-        },
-        'GethRopsten': {
-          'provider': {
-            'class': 'web3.providers.ipc.IPCProvider',
-            'settings': {'ipc_path': '/Users/piper/Library/Ethereum/testnet/geth.ipc'},
-          },
-        },
-        'InfuraMainnet': {
-          'eth': {'default_account': '0x0000000000000000000000000000000000000001'},
-          'provider': {
-            'class': 'web3.providers.rpc.HTTPProvider',
-            'settings': {'endpoint_uri': 'https://mainnet.infura.io'},
-          },
-        },
-        'InfuraRopsten': {
-          'eth': {'default_account': '0x0000000000000000000000000000000000000001'},
-          'provider': {
-            'class': 'web3.providers.rpc.HTTPProvider',
-            'settings': {'endpoint_uri': 'https://ropsten.infura.io'},
-          },
-        },
-        'TestRPC': {
-          'provider': {'class': 'web3.providers.tester.TestRPCProvider'},
-        },
-        'Tester': {
-          'provider': {'class': 'web3.providers.tester.EthereumTesterProvider'},
-        },
-      },
-    }
+.. literalinclude:: ../populus/assets/defaults.config.json
+   :language: javascript
 
 
-When you author your own ``populus.json`` file populus will automatically merge
-the defaults into your declared project configuration. 
-
+It is recommended to use the ``$ populus init`` command to populate this file
+as it contains useful defaults.
 
 
 Pre-Configured Web3 Connections
@@ -521,33 +459,16 @@ configurations on a chain it should be referenced like this:
     {
       "chains": {
         "my-custom-chain": {
-            "web3": {"$ref": "web3.GethMainnet"}
+            "web3": {"$ref": "web3.GethIPC"}
         }
       }
     }
 
-GethMainnet
-"""""""""""
-Web3 connection which will connect to the main ``geth.ipc`` socket.
+GethIPC
+"""""""
+Web3 connection which will connect to geth using an IPC socket.
 
-* key: ``web3.GethMainnet``
-
-
-GethRopsten
-"""""""""""
-
-Web3 connection which will connect to the ropsten ``geth.ipc`` socket.
-
-* key: ``web3.GethRopsten``
-
-
-GethEphemeral
-"""""""""""""
-
-Web3 connection which will connect to a local geth backed chain over the
-``geth.ipc`` socket.
-
-* key: ``web3.GethEphemeral``
+* key: ``web3.GethIPC``
 
 
 InfuraMainnet

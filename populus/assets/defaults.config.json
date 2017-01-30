@@ -1,0 +1,90 @@
+{
+  "version": "1",
+  "chains": {
+    "mainnet": {
+      "chain": {
+        "class": "populus.chain.MainnetChain"
+      },
+      "web3": {
+        "$ref": "web3.GethIPC"
+      }
+    },
+    "ropsten": {
+      "chain": {
+        "class": "populus.chain.TestnetChain"
+      },
+      "web3": {
+        "$ref": "web3.GethIPC"
+      }
+    },
+    "temp": {
+      "chain": {
+        "class": "populus.chain.TemporaryGethChain"
+      },
+      "web3": {
+        "$ref": "web3.GethIPC"
+      }
+    },
+    "tester": {
+      "chain": {
+        "class": "populus.chain.TesterChain"
+      },
+      "web3": {
+        "$ref": "web3.Tester"
+      }
+    },
+    "testrpc": {
+      "chain": {
+        "class": "populus.chain.TestRPCChain"
+      },
+      "web3": {
+        "$ref": "web3.TestRPC"
+      }
+    }
+  },
+  "compilation": {
+    "contracts_dir": "./contracts",
+    "settings": {
+      "optimize": true
+    }
+  },
+  "web3": {
+    "GethIPC": {
+      "provider": {
+        "class": "web3.providers.ipc.IPCProvider"
+      }
+    },
+    "InfuraMainnet": {
+      "eth": {
+        "default_account": "0x0000000000000000000000000000000000000001"
+      },
+      "provider": {
+        "class": "web3.providers.rpc.HTTPProvider",
+        "settings": {
+          "endpoint_uri": "https://mainnet.infura.io"
+        }
+      }
+    },
+    "InfuraRopsten": {
+      "eth": {
+        "default_account": "0x0000000000000000000000000000000000000001"
+      },
+      "provider": {
+        "class": "web3.providers.rpc.HTTPProvider",
+        "settings": {
+          "endpoint_uri": "https://ropsten.infura.io"
+        }
+      }
+    },
+    "TestRPC": {
+      "provider": {
+        "class": "web3.providers.tester.TestRPCProvider"
+      }
+    },
+    "Tester": {
+      "provider": {
+        "class": "web3.providers.tester.EthereumTesterProvider"
+      }
+    }
+  }
+}

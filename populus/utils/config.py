@@ -18,41 +18,21 @@ from .functional import (
 )
 
 
-INI_CONFIG_FILENAME = './populus.ini'
-
-
-def get_ini_config_file_path(project_dir):
-    ini_config_file_path = os.path.join(project_dir, INI_CONFIG_FILENAME)
-    return ini_config_file_path
-
-
-def check_if_ini_config_file_exists(project_dir):
-    ini_config_file_path = get_ini_config_file_path(project_dir)
-    return os.path.exists(ini_config_file_path)
-
-
-YAML_CONFIG_FILENAME = './populus.yml'
-
-
-def get_yaml_config_file_path(project_dir):
-    yaml_config_file_path = os.path.join(project_dir, YAML_CONFIG_FILENAME)
-    return yaml_config_file_path
-
-
-def check_if_yaml_config_file_exists(project_dir):
-    yaml_config_file_path = get_yaml_config_file_path(project_dir)
-    return os.path.exists(yaml_config_file_path)
-
-
 JSON_CONFIG_FILENAME = './populus.json'
 
 
-def get_json_config_file_path(project_dir):
+def get_json_config_file_path(project_dir=None):
+    if project_dir is None:
+        project_dir = os.getcwd()
+
     json_config_file_path = os.path.join(project_dir, JSON_CONFIG_FILENAME)
     return json_config_file_path
 
 
-def check_if_json_config_file_exists(project_dir):
+def check_if_json_config_file_exists(project_dir=None):
+    if project_dir is None:
+        project_dir = os.getcwd()
+
     json_config_file_path = get_json_config_file_path(project_dir)
     return os.path.exists(json_config_file_path)
 
@@ -89,35 +69,6 @@ def flatten_config_items(config, base_prefix=None):
                 yield sub_key, sub_value
         else:
             yield '.'.join(prefix), value
-
-
-def find_project_config_file_path(project_dir=None):
-    if project_dir is None:
-        project_dir = os.getcwd()
-
-    has_ini_config = check_if_ini_config_file_exists(project_dir)
-    has_yaml_config = check_if_yaml_config_file_exists(project_dir)
-    has_json_config = check_if_json_config_file_exists(project_dir)
-
-    if has_ini_config:
-        if has_yaml_config or has_json_config:
-            raise ValueError(
-                "Legacy INI config file found alongside new configuration files"
-            )
-        ini_config_file_path = get_ini_config_file_path(project_dir)
-        return ini_config_file_path
-    elif has_json_config:
-        if has_yaml_config:
-            raise ValueError(
-                "Multiple configuration files found.  Ensure that there is only one"
-            )
-        json_config_file_path = get_json_config_file_path(project_dir)
-        return json_config_file_path
-    elif has_yaml_config:
-        yaml_config_file_path = get_yaml_config_file_path(project_dir)
-        return yaml_config_file_path
-    else:
-        raise ValueError("No config file found")
 
 
 def resolve_config(config, master_config):

@@ -1,5 +1,0 @@
-{
-    "provider": {
-        "class": "web3.providers.tester.EthereumTesterProvider"
-    }
-}

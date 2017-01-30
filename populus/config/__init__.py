@@ -12,5 +12,6 @@ from .loading import (  # noqa: F401
     write_config,
 )
 from .defaults import (  # noqa: F401
-    load_default_config_info,
+    get_default_config_path,
+    load_default_config,
 )

@@ -1,5 +1,6 @@
 import os
 import hashlib
+import warnings
 
 from populus.utils.filesystem import (
     get_contracts_dir,
@@ -17,37 +18,36 @@ from populus.utils.chains import (
     get_nodekey_path,
 )
 from populus.utils.config import (
+    get_json_config_file_path,
+    check_if_json_config_file_exists,
     get_default_project_config_file_path,
-    find_project_config_file_path,
 )
 
 from populus.migrations.migration import (
     sort_migrations,
 )
 from populus.migrations.loading import (
-    find_project_migrations,
     load_project_migrations,
+    find_project_migrations,
 )
 from populus.compilation import (
     find_project_contracts,
     compile_project_contracts,
 )
 from populus.config import (
+    get_default_config_path,
     load_config as _load_config,
     write_config as _write_config,
-    load_default_config_info,
     Config,
     ChainConfig,
+)
+from populus.legacy.config import (
+    check_if_ini_config_file_exists,
 )
 
 
 class Project(object):
     def __init__(self, config_file_path=None):
-        if config_file_path is None:
-            try:
-                config_file_path = find_project_config_file_path()
-            except ValueError:
-                pass
         self.config_file_path = config_file_path
         self.load_config()
 
@@ -57,7 +57,6 @@ class Project(object):
     config_file_path = None
 
     _project_config = None
-    _default_config_info = None
 
     def write_config(self):
         if self.config_file_path is None:
@@ -67,7 +66,7 @@ class Project(object):
 
         self.config_file_path = _write_config(
             self.project_dir,
-            self.config.config_for_write,
+            self.config,
             write_path=config_file_path,
         )
 
@@ -76,10 +75,31 @@ class Project(object):
     def load_config(self):
         self._config_cache = None
 
-        if self.config_file_path:
-            self._project_config = _load_config(self.config_file_path)
+        if self.config_file_path is None:
+            has_ini_config = check_if_ini_config_file_exists()
+            has_json_config = check_if_json_config_file_exists()
 
-        self._default_config_info = load_default_config_info()
+            if has_ini_config and has_json_config:
+                raise DeprecationWarning(
+                    "Found both `populus.ini` and `populus.json` config files. "
+                    "Please migrate you `populus.ini` file settings into the "
+                    "`populus.json` file and remove the `populus.ini` file"
+                )
+            elif has_ini_config:
+                warnings.warn(DeprecationWarning(
+                    "The `populus.ini` configuration format has been "
+                    "deprecated.  You must upgrade your configuration file to "
+                    "the new `populus.json` format."
+                ))
+                path_to_load = get_default_config_path()
+            elif has_json_config:
+                path_to_load = get_json_config_file_path()
+            else:
+                path_to_load = get_default_config_path()
+        else:
+            path_to_load = self.config_file_path
+
+        self._project_config = _load_config(path_to_load)
 
     def reload_config(self):
         self.load_config()
@@ -89,7 +109,7 @@ class Project(object):
     @property
     def config(self):
         if self._config_cache is None:
-            self._config_cache = Config(self._project_config, self._default_config_info)
+            self._config_cache = Config(self._project_config)
         return self._config_cache
 
     #

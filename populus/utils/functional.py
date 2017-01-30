@@ -1,4 +1,5 @@
 import functools
+import itertools
 import collections
 
 
@@ -67,3 +68,18 @@ cast_return_to_list = cast_return(list)
 cast_return_to_dict = cast_return(dict)
 sort_return = cast_return(sorted)
 cast_return_to_ordered_dict = cast_return(collections.OrderedDict)
+
+
+@cast_return_to_dict
+def deep_merge_dicts(*dicts):
+    for key in set(itertools.chain(*(_dict.keys() for _dict in dicts))):
+        values = tuple((_dict[key] for _dict in dicts if key in _dict))
+        if isinstance(values[-1], collections.Mapping):
+            yield key, deep_merge_dicts(*(
+                _dict[key]
+                for _dict
+                in dicts
+                if isinstance(_dict.get(key), collections.Mapping)
+            ))
+        else:
+            yield key, values[-1]

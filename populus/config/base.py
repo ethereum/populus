@@ -18,31 +18,19 @@ from populus.utils.config import (
     resolve_config,
 )
 
-from .defaults import (
-    apply_default_configs,
-)
-
 
 class Config(object):
     parent = None
     default_config_info = None
-    config_for_read = None
-    config_for_write = None
+    _wrapped = None
 
-    def __init__(self, config=None, default_config_info=None, parent=None):
+    def __init__(self, config=None, parent=None):
         if config is None:
             config = get_empty_config()
         elif isinstance(config, dict):
             config = anyconfig.to_container(config)
 
-        if default_config_info is None:
-            default_config_info = tuple()
-        self.default_config_info = default_config_info
-        self.config_for_write = config
-        self.config_for_read = apply_default_configs(
-            self.config_for_write,
-            self.default_config_info,
-        )
+        self._wrapped = config
         self.parent = parent
 
     def get_master_config(self):
@@ -59,32 +47,27 @@ class Config(object):
 
     def get(self, key, default=None):
         try:
-            value = get_nested_key(self.config_for_read, key)
+            value = get_nested_key(self._wrapped, key)
         except KeyError:
             return default
         return self.resolve(value)
 
-    def get_config(self, key, defaults=None, config_class=None):
+    def get_config(self, key, config_class=None):
         if config_class is None:
             config_class = Config
         try:
-            return config_class(self.resolve(self[key]), defaults, parent=self)
+            return config_class(self.resolve(self[key]), parent=self)
         except KeyError:
-            return config_class(get_empty_config(), defaults, parent=self)
+            return config_class(get_empty_config(), parent=self)
 
     def pop(self, key, default=empty):
         try:
-            value = pop_nested_key(self.config_for_read, key)
+            value = pop_nested_key(self._wrapped, key)
         except KeyError:
             if default is empty:
-                raise KeyError("Key '{0}' not found in {1}".format(key, self.config_for_read))
+                raise KeyError("Key '{0}' not found in {1}".format(key, self.wrapped))
             else:
                 value = default
-
-        try:
-            pop_nested_key(self.config_for_write, key)
-        except KeyError:
-            pass
 
         return self.resolve(value)
 
@@ -103,71 +86,60 @@ class Config(object):
     @cast_return_to_tuple
     def items(self, flatten=False):
         if flatten:
-            _items = flatten_config_items(self.config_for_read)
+            _items = flatten_config_items(self._wrapped)
         else:
-            _items = self.config_for_read.items()
+            _items = self._wrapped.items()
         for key, value in _items:
             yield key, value
 
     def update(self, other, **kwargs):
         if isinstance(other, Config):
-            self.config_for_read.update(copy.deepcopy(other.config_for_read), **kwargs)
-            self.config_for_write.update(copy.deepcopy(other.config_for_write), **kwargs)
+            self._wrapped.update(copy.deepcopy(other._wrapped), **kwargs)
         else:
-            self.config_for_read.update(copy.deepcopy(other), **kwargs)
-            self.config_for_write.update(copy.deepcopy(other), **kwargs)
+            self._wrapped.update(copy.deepcopy(other), **kwargs)
 
     def __str__(self):
-        return str(self.config_for_read)
+        return str(self._wrapped)
 
     def __repr__(self):
-        return repr(self.config_for_read)
+        return repr(self._wrapped)
 
     def __eq__(self, other):
-        return self.config_for_read == other
+        return self._wrapped == other
 
     def __bool__(self):
-        if self.config_for_write:
-            return True
-        elif not self.default_config_info:
-            return False
-        else:
-            return any(tuple(zip(*self.default_config_info)[1]))
+        return bool(self._wrapped)
 
     def __nonzero__(self):
         return self.__bool__()
 
     def __len__(self):
-        return len(self.config_for_read)
+        return len(self._wrapped)
 
     def __getitem__(self, key):
         try:
-            return self.resolve(get_nested_key(self.config_for_read, key))
+            return self.resolve(get_nested_key(self._wrapped, key))
         except KeyError:
-            raise KeyError("Key '{0}' not found in {1}".format(key, self.config_for_read))
+            raise KeyError("Key '{0}' not found in {1}".format(key, self._wrapped))
 
     def __setitem__(self, key, value):
         if isinstance(value, Config):
-            set_nested_key(self.config_for_read, key, value.config_for_read)
-            return set_nested_key(self.config_for_write, key, value.config_for_write)
+            return set_nested_key(self._wrapped, key, value._wrapped)
         else:
-            set_nested_key(self.config_for_read, key, value)
-            return set_nested_key(self.config_for_write, key, value)
+            return set_nested_key(self._wrapped, key, value)
 
     def __contains__(self, key):
-        return has_nested_key(self.config_for_read, key)
+        return has_nested_key(self._wrapped, key)
 
     def __iter__(self):
         return iter(self.keys())
 
     def __copy__(self):
         return type(self)(
-            copy.copy(self.config_for_write),
-            copy.copy(self.default_config_info),
+            copy.copy(self._wrapped),
         )
 
     def __deepcopy__(self, memo):
         return type(self)(
-            copy.deepcopy(self.config_for_write, memo),
-            copy.deepcopy(self.default_config_info, memo),
+            copy.deepcopy(self._wrapped, memo),
         )

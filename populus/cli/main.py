@@ -1,3 +1,4 @@
+import os
 import sys
 
 import click
@@ -7,6 +8,10 @@ from populus.utils.filesystem import (
 )
 from populus.project import (
     Project,
+)
+from populus.legacy.config import (
+    upgrade_legacy_config_file,
+    check_if_ini_config_file_exists,
 )
 
 
@@ -24,13 +29,24 @@ CONTEXT_SETTINGS = dict(
         "Specify a populus configuration file to be used.  No other "
         "configuration files will be loaded"
     ),
-    type=click.File(),
+    type=click.Path(exists=True, dir_okay=False),
 )
 @click.pass_context
 def main(ctx, config):
     """
     Populus
     """
+    if not config and check_if_ini_config_file_exists():
+        click.echo("Attempting to upgrade legacy `populus.ini` config file")
+        try:
+            upgrade_legacy_config_file(os.getcwd())
+        except:
+            click.echo(
+                "The following error occured while trying to upgrade the legacy "
+                "`populus.ini` config file:"
+            )
+            raise
+
     project = Project(config)
 
     if not any(is_same_path(p, project.project_dir) for p in sys.path):

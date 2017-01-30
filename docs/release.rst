@@ -1,8 +1,8 @@
 Release Notes
 =============
 
-1.5.0 (unreleased)
-------------------
+1.5.0
+-----
 
 - Remove gevent dependency
 - Mark migrations API for deprecation.

@@ -39,13 +39,19 @@ def main(ctx, config):
     if not config and check_if_ini_config_file_exists():
         click.echo("Attempting to upgrade legacy `populus.ini` config file")
         try:
-            upgrade_legacy_config_file(os.getcwd())
+            backup_ini_config_file_path = upgrade_legacy_config_file(os.getcwd())
         except:
             click.echo(
                 "The following error occured while trying to upgrade the legacy "
                 "`populus.ini` config file:"
             )
             raise
+        else:
+            click.echo(
+                "Project configuration upgraded.  New config file "
+                "`populus.json` has been written.  Old config file was renamed "
+                "to `{0}`".format(backup_ini_config_file_path)
+            )
 
     project = Project(config)
 

@@ -78,6 +78,11 @@ def init(ctx):
             default_config,
             json_config_file_path,
         )
+        click.echo(
+            "Wrote default populus configuration to `./{0}`.".format(
+                os.path.relpath(json_config_file_path, project.project_dir),
+            )
+        )
 
     project.load_config()
 

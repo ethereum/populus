@@ -29,14 +29,16 @@ def get_deployed_contract_instances_from_installed_packages(web3,
     raise NoKnownAddress("No known address for '{0}'".format(contract_name))
 
 
-class InstalledPackagesContractBackend(BaseContractBackend):
+class InstalledPackagesBackend(BaseContractBackend):
     """
     A contract backend that only acts as a provider sourcing contracts from
     installed packages.
     """
+    @property
     def is_registrar(self):
         return False
 
+    @property
     def is_provider(self):
         return True
 

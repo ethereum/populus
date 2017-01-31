@@ -1,4 +1,0 @@
-{
-    "class": "populus.contracts.backends.memory.MemoryBackend",
-    "priority": 40
-}

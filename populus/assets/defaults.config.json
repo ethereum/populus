@@ -70,11 +70,11 @@
   "contracts": {
     "backends": {
       "InstalledPackages": {
-        "class": "populus.providers.backends.installed_packages.InstalledPackagesProviderBackend",
+        "class": "populus.providers.backends.installed_packages.InstalledPackagesBackend",
         "priority": 20
       },
       "JSONFile": {
-        "class": "populus.contracts.backends.filesystem.JSONFileRegistrar",
+        "class": "populus.contracts.backends.filesystem.JSONFileBackend",
         "priority": 10,
         "settings": {
           "file_path": "./registrar.json"

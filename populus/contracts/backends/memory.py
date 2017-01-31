@@ -13,9 +13,11 @@ class MemoryBackend(BaseContractBackend):
     def setup_backend(self):
         self.contract_addresses = {}
 
+    @property
     def is_registrar(self):
         return True
 
+    @property
     def is_provider(self):
         return True
 

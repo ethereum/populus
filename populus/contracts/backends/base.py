@@ -9,9 +9,11 @@ class BaseContractBackend(object):
     #
     # Meta API
     #
+    @property
     def is_provider(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
+    @property
     def is_registrar(self):
         raise NotImplementedError("Must be implemented by subclasses")
 

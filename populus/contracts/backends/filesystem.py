@@ -17,21 +17,19 @@ from .base import (
 )
 
 
-class JSONFileRegistrarBackend(BaseContractBackend):
+class JSONFileBackend(BaseContractBackend):
+    @property
     def is_provider(self):
         return self.settings.get('use_as_provider', True)
 
+    @property
     def is_registrar(self):
         return self.settings.get('use_as_registrar', True)
 
     #
     # Registrar API
     #
-    def record_contract(self, contract_identifier, contract_instance):
-        # TODO
-        raise NotImplementedError("Must be implemented by subclasses")
-
-    def record_address(self, key, address):
+    def set_contract_address(self, key, address):
         # TODO
         raise NotImplementedError("Must be implemented by subclasses")
 

@@ -45,7 +45,7 @@ class ContractStore(object):
     @cast_return_to_ordered_dict
     def provider_backends(self):
         for backend_name, backend in self.contract_backends.items():
-            if backend.is_provider():
+            if backend.is_provider:
                 yield backend_name, backend
 
     @property
@@ -61,7 +61,7 @@ class ContractStore(object):
     @cast_return_to_ordered_dict
     def registrar_backends(self):
         for backend_name, backend in self.contract_backends.items():
-            if backend.is_registrar():
+            if backend.is_registrar:
                 yield backend_name, backend
 
     @property

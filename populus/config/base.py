@@ -39,7 +39,7 @@ class Config(object):
             self.validate()
 
     def validate(self):
-        rc, err = anyconfig.validate(self.config_for_read, self.schema)
+        rc, err = anyconfig.validate(self._wrapped, self.schema)
         if err:
             raise ValueError(err)
 

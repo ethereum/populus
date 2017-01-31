@@ -28,12 +28,15 @@ EXAMPLE_PACKAGES_BASE_PATH = './tests/example-packages'
 def with_installed_packages_backend(project_dir):
     config_file_path = get_json_config_file_path(project_dir)
     config = {
+        'version': '1',
         'chains': {
             'tester': {
+                'chain': {'class': 'populus.chain.tester.TesterChain'},
+                'web3': {'provider': {'class': 'web3.providers.tester.EthereumTesterProvider'}},
                 'contracts': {
                     'backends': {
-                        'InstalledPackagesContractBackend': {
-                            "class": "populus.contracts.backends.installed_packages.InstalledPackagesContractBackend",
+                        'InstalledPackages': {
+                            "class": "populus.contracts.backends.installed_packages.InstalledPackagesBackend",
                             "priority": 10
                         }
                     }
@@ -49,7 +52,7 @@ def with_installed_packages_backend(project_dir):
 @pytest.yield_fixture()
 def test_chain(with_installed_packages_backend):
     project = Project(with_installed_packages_backend)
-    assert 'chains.tester.contracts.backends.InstalledPackagesContractBackend' in project.config
+    assert 'chains.tester.contracts.backends.InstalledPackages' in project.config
     with project.get_chain('tester') as chain:
         yield chain
 
@@ -59,7 +62,7 @@ def installed_safe_math_lib_dependency(populus_source_root,
                                        test_chain):
     chain = test_chain
     project = chain.project
-    assert 'InstalledPackagesContractBackend' in chain.store.provider.provider_backends
+    assert 'InstalledPackages' in chain.store.provider.provider_backends
     release_lockfile_path = os.path.join(
         populus_source_root,
         EXAMPLE_PACKAGES_BASE_PATH,

@@ -3,7 +3,7 @@
   "chains": {
     "mainnet": {
       "chain": {
-        "class": "populus.chain.MainnetChain"
+        "class": "populus.chain.geth.MainnetChain"
       },
       "web3": {
         "$ref": "web3.GethIPC"
@@ -18,7 +18,7 @@
     },
     "ropsten": {
       "chain": {
-        "class": "populus.chain.TestnetChain"
+        "class": "populus.chain.geth.TestnetChain"
       },
       "web3": {
         "$ref": "web3.GethIPC"
@@ -33,7 +33,7 @@
     },
     "temp": {
       "chain": {
-        "class": "populus.chain.TemporaryGethChain"
+        "class": "populus.chain.geth.TemporaryGethChain"
       },
       "web3": {
         "$ref": "web3.GethIPC"
@@ -48,7 +48,7 @@
     },
     "tester": {
       "chain": {
-        "class": "populus.chain.TesterChain"
+        "class": "populus.chain.tester.TesterChain"
       },
       "web3": {
         "$ref": "web3.Tester"
@@ -63,7 +63,7 @@
     },
     "testrpc": {
       "chain": {
-        "class": "populus.chain.TestRPCChain"
+        "class": "populus.chain.testrpc.TestRPCChain"
       },
       "web3": {
         "$ref": "web3.TestRPC"

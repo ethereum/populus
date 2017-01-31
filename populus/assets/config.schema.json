@@ -131,12 +131,45 @@
     "ChainConfig": {
       "title": "Configuration for a single project chain",
       "type": "object",
+      "required": ["chain", "web3", "contracts"],
       "properties": {
+        "chain": {"$ref": "#/definitions/ChainClassConfig"},
         "web3": {
           "anyOf": [
             {"$ref": "#/definitions/Reference"},
             {"$ref": "#/definitions/Web3Config"}
           ]
+        },
+        "contracts": {
+          "title": "Configuration for the contract backends this chain will use",
+          "type": "object",
+          "required": ["backends"],
+          "properties": {
+            "backends": {
+              "patternProperties": {
+                "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+                  "anyOf": [
+                    {"$ref": "#/definitions/Reference"},
+                    {"$ref": "#/definitions/ContractBackendConfig"}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ChainClassConfig": {
+      "title": "Configuration for a chain class",
+      "type": "object",
+      "required": ["class"],
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "settings": {
+          "title": "Additional configuration for the chain class",
+          "type": "object"
         }
       }
     },
@@ -167,6 +200,7 @@
     "ProviderConfig": {
       "title": "Configuration for the provider of a web3 instance",
       "type": "object",
+      "required": ["class"],
       "properties": {
         "class": {
           "$ref": "#/definitions/PythonImportPath"

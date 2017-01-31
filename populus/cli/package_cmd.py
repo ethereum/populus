@@ -170,7 +170,7 @@ def package_install(ctx, package_identifiers, save):
 )
 @click.option(
     'contract_instance_names',
-    '--contract-instances',
+    '--contract-instance',
     '-d',
     multiple=True,
     help=(
@@ -179,7 +179,7 @@ def package_install(ctx, package_identifiers, save):
 )
 @click.option(
     'contract_type_names',
-    '--contract-types',
+    '--contract-type',
     '-t',
     multiple=True,
     help=(

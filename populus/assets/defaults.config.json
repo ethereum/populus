@@ -8,9 +8,11 @@
       "web3": {
         "$ref": "web3.GethIPC"
       },
-      "contract_backends": {
-        "JSONFile": {
+      "contracts": {
+        "backends": {
+          "JSONFile": {
             "$ref": "contracts.backends.JSONFile"
+          }
         }
       }
     },
@@ -21,9 +23,11 @@
       "web3": {
         "$ref": "web3.GethIPC"
       },
-      "contract_backends": {
-        "JSONFile": {
+      "contracts": {
+        "backends": {
+          "JSONFile": {
             "$ref": "contracts.backends.JSONFile"
+          }
         }
       }
     },
@@ -34,9 +38,11 @@
       "web3": {
         "$ref": "web3.GethIPC"
       },
-      "contract_backends": {
-        "Memory": {
+      "contracts": {
+        "backends": {
+          "Memory": {
             "$ref": "contracts.backends.Memory"
+          }
         }
       }
     },
@@ -47,9 +53,11 @@
       "web3": {
         "$ref": "web3.Tester"
       },
-      "contract_backends": {
-        "Memory": {
+      "contracts": {
+        "backends": {
+          "Memory": {
             "$ref": "contracts.backends.Memory"
+          }
         }
       }
     },
@@ -60,9 +68,11 @@
       "web3": {
         "$ref": "web3.TestRPC"
       },
-      "contract_backends": {
-        "Memory": {
+      "contracts": {
+        "backends": {
+          "Memory": {
             "$ref": "contracts.backends.Memory"
+          }
         }
       }
     }

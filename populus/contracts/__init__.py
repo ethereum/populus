@@ -51,7 +51,9 @@ class ContractStore(object):
     @property
     def provider(self):
         if not self.provider_backends:
-            raise ValueError("Must have at least one provider backend configured")
+            raise ValueError(
+                "Must have at least one provider backend configured\n{0}".format(self.backend_configs)
+            )
         return Provider(self.chain, self.provider_backends)
 
     #
@@ -67,5 +69,7 @@ class ContractStore(object):
     @property
     def registrar(self):
         if not self.registrar_backends:
-            raise ValueError("Must have at least one registrar backend configured")
+            raise ValueError(
+                "Must have at least one registrar backend configured\n{0}".format(self.backend_configs)
+            )
         return Registrar(self.chain, self.registrar_backends)

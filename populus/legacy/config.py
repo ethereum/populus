@@ -5,8 +5,10 @@ from populus.utils.six import configparser
 from populus.utils.functional import (
     deep_merge_dicts,
 )
-from populus.utils.config import (
+from populus.utils.mapping import (
     set_nested_key,
+)
+from populus.utils.config import (
     get_json_config_file_path,
     check_if_json_config_file_exists,
 )

@@ -4,7 +4,7 @@ from .geth import (
     TemporaryGethChain,
     LocalGethChain,
     MainnetChain,
-    MordenChain,
+    TestnetChain,
 )
 from .external import (
     ExternalChain,
@@ -21,7 +21,7 @@ __all__ = (
     "TemporaryGethChain",
     "LocalGethChain",
     "MainnetChain",
-    "MordenChain",
+    "TestnetChain",
     "ExternalChain",
     "ROPSTEN_BLOCK_0_HASH",
     "MAINNET_BLOCK_0_HASH",

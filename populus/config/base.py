@@ -8,11 +8,13 @@ from populus.utils.functional import (
 from populus.utils.empty import (
     empty,
 )
-from populus.utils.config import (
+from populus.utils.mapping import (
     has_nested_key,
     get_nested_key,
     set_nested_key,
     pop_nested_key,
+)
+from populus.utils.config import (
     get_empty_config,
     flatten_config_items,
     resolve_config,

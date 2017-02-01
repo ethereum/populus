@@ -44,13 +44,13 @@ def split_on_commas(values):
 @click.pass_context
 def package_init(ctx):
     """
-    Initialize the `epm.json` file.
+    Initialize the `ethpm.json` file.
     """
     project = ctx.obj['PROJECT']
 
     if project.has_package_manifest:
         overwrite_msg = (
-            "An `epm.json` file is already present. If you proceed your choices "
+            "An `ethpm.json` file is already present. If you proceed your choices "
             "will overwrite any existing values"
         )
         if not click.confirm(overwrite_msg, default=False):
@@ -73,9 +73,9 @@ def package_init(ctx):
         )
 
     if project.has_package_manifest:
-        click.echo("Updating existing epm.json file.")
+        click.echo("Updating existing ethpm.json file.")
     else:
-        click.echo("Writing new epm.json file.")
+        click.echo("Writing new ethpm.json file.")
 
     # TODO: pull from git configuration if present.
     package_manifest['package_name'] = click.prompt(

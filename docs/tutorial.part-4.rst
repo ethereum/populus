@@ -74,7 +74,7 @@ Configuring your package for publishing
 
 The next thing you'll need to do is rename your package to something other than
 ``mintable-standard-token`` as that package name is already registered on the
-package index.  The package name is set in the ``epm.json`` file located in the
+package index.  The package name is set in the ``ethpm.json`` file located in the
 root of the project.
 
 

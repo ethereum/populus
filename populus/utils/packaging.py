@@ -32,12 +32,12 @@ from .functional import (
 SUPPORTED_PACKAGE_MANIFEST_VERSIONS = {'1'}
 
 
-PACKAGE_MANIFEST_FILENAME = './epm.json'
+PACKAGE_MANIFEST_FILENAME = './ethpm.json'
 
 
 def get_project_package_manifest_path(project_dir):
     """
-    Returns filesystem path for the project's package manifest file (epm.json)
+    Returns filesystem path for the project's package manifest file (ethpm.json)
     """
     return os.path.join(project_dir, PACKAGE_MANIFEST_FILENAME)
 

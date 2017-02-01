@@ -16,12 +16,12 @@ Project Manifest
 In order to take advantage of the packaging features you will first need to
 create a package manifest for your project.  This can either be done manually
 or using the command line helper ``$ populus package init`` which will present
-an interactive prompt for creating the ``epm.json`` file.
+an interactive prompt for creating the ``ethpm.json`` file.
 
 .. code-block:: bash
 
     $ populus package init
-    Writing new epm.json file.
+    Writing new ethpm.json file.
     Package Name: fancy-greeter
     Author(s) [[]]: Piper Merriam <pipermerriam@gmail.com>
     Version [1.0.0]:
@@ -29,7 +29,7 @@ an interactive prompt for creating the ``epm.json`` file.
     Description []: A fancy greeter contract
     Keywords [[]]: greeter, greetings
     Links [{}]:
-    Wrote package manifest: epm.json
+    Wrote package manifest: ethpm.json
 
 
 Installing Packages

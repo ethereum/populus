@@ -100,7 +100,7 @@ def test_tree_computation_from_manifest_dependencies(project_dir,
             'standard-token': '1.0.0',
         }
     }
-    write_project_file('epm.json', json.dumps(package_manifest))
+    write_project_file('ethpm.json', json.dumps(package_manifest))
 
     identifier_tree = compute_identifier_tree(
         ['.'],

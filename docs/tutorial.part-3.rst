@@ -84,7 +84,7 @@ command.
 .. code-block::
 
 	$ populus package init
-	Writing new epm.json file.
+	Writing new ethpm.json file.
 	Package Name: mintable-standard-token
 	Author(s) [[]]: Piper Merriam <pipermerriam@gmail.com>
 	Version [1.0.0]:
@@ -92,11 +92,11 @@ command.
 	Description []: Mintable ERC20 token contract
 	Keywords [[]]: ERC20, tokens
 	Links [{}]:
-	Wrote package manifest: epm.json
+	Wrote package manifest: ethpm.json
 
 You will be presented with an interactive prompt to populus various pieces of
 project information.  There will now be a new file in the root of your project
-named ``epm.json`` that should look something like this.
+named ``ethpm.json`` that should look something like this.
 
 .. code-block:: javascript
 
@@ -134,7 +134,7 @@ If you look in your project directory you should also see a new folder
     .
     ├── contracts
     │   └── MintableToken.sol
-    ├── epm.json
+    ├── ethpm.json
     ├── installed_packages
     │   ├── example-package-owned
     │   │   ├── build_identifier.lock
@@ -157,7 +157,7 @@ If you look in your project directory you should also see a new folder
     9 directories, 12 files
 
 
-And if you look in your ``epm.json`` file you should see two dependencies.
+And if you look in your ``ethpm.json`` file you should see two dependencies.
 
 
 .. code-block:: javascript

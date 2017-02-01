@@ -38,6 +38,7 @@ from populus.config import (
     get_default_config_path,
     load_config as _load_config,
     write_config as _write_config,
+    load_config_schema,
     Config,
     ChainConfig,
 )
@@ -57,6 +58,7 @@ class Project(object):
     config_file_path = None
 
     _project_config = None
+    _project_config_schema = None
 
     def write_config(self):
         if self.config_file_path is None:
@@ -100,6 +102,7 @@ class Project(object):
             path_to_load = self.config_file_path
 
         self._project_config = _load_config(path_to_load)
+        self._project_config_schema = load_config_schema()
 
     def reload_config(self):
         self.load_config()
@@ -109,7 +112,10 @@ class Project(object):
     @property
     def config(self):
         if self._config_cache is None:
-            self._config_cache = Config(self._project_config)
+            self._config_cache = Config(
+                config=self._project_config,
+                schema=self._project_config_schema,
+            )
         return self._config_cache
 
     #

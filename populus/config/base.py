@@ -21,10 +21,11 @@ from populus.utils.config import (
 
 class Config(object):
     parent = None
+    schema = None
     default_config_info = None
     _wrapped = None
 
-    def __init__(self, config=None, parent=None):
+    def __init__(self, config=None, parent=None, schema=None):
         if config is None:
             config = get_empty_config()
         elif isinstance(config, dict):
@@ -32,6 +33,16 @@ class Config(object):
 
         self._wrapped = config
         self.parent = parent
+        self.schema = schema
+
+        if self.schema is not None:
+            self.validate()
+
+    def validate(self):
+        # TODO: enumerate all errors by directly using `jsonschema`
+        rc, err = anyconfig.validate(self._wrapped, self.schema)
+        if err:
+            raise ValueError(err)
 
     def get_master_config(self):
         if self.parent is None:

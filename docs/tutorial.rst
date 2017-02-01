@@ -12,3 +12,5 @@ Contents
 
     tutorial.part-1
     tutorial.part-2
+    tutorial.part-3
+    tutorial.part-4

@@ -23,7 +23,7 @@ def test_deploying_contract_with_successful_deploy(project_dir, MATH):
             math_contract = deploy_contract_and_verify(
                 chain,
                 contract_name='Math',
-                ContractFactory=Math,
+                base_contract_factory=Math,
             )
             exports.append(math_contract)
             print("~~{0}~~".format(math_contract.address))
@@ -60,7 +60,7 @@ def test_with_successful_deploy_sans_runtime_bytecode(project_dir,
             math_contract = deploy_contract_and_verify(
                 chain,
                 contract_name='Math',
-                ContractFactory=Math,
+                base_contract_factory=Math,
             )
             exports.append(math_contract)
             print("~~{0}~~".format(math_contract.address))
@@ -90,8 +90,8 @@ def test_deploying_contract_with_error_during_deploy(project_dir, THROWER):
             math_contract = deploy_contract_and_verify(
                 chain,
                 contract_name='Thrower',
-                ContractFactory=Thrower,
-                deploy_args=[True],
+                base_contract_factory=Thrower,
+                deploy_arguments=[True],
             )
             exports.append(math_contract)
             print("~~{0}~~".format(math_contract.address))
@@ -120,8 +120,8 @@ def test_deploying_contract_with_error_during_deploy_sanity_check(project_dir,
             math_contract = deploy_contract_and_verify(
                 chain,
                 contract_name='Thrower',
-                ContractFactory=Thrower,
-                deploy_args=[False],
+                base_contract_factory=Thrower,
+                deploy_arguments=[False],
             )
             exports.append(math_contract)
             print("~~{0}~~".format(math_contract.address))

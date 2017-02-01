@@ -5,10 +5,8 @@ from populus.utils.six import configparser
 from populus.utils.functional import (
     deep_merge_dicts,
 )
-from populus.utils.mapping import (
-    set_nested_key,
-)
 from populus.utils.config import (
+    set_nested_key,
     get_json_config_file_path,
     check_if_json_config_file_exists,
 )
@@ -58,7 +56,7 @@ def translate_legacy_ini_config_file(ini_config_file_path):
         if section == 'populus':
             for key, value in config.items('populus'):
                 if key == 'contracts_dir':
-                    set_nested_key(upgraded_config, 'compilation.contracts_source_dir', value)
+                    set_nested_key(upgraded_config, 'compilation.contracts_dir', value)
                 else:
                     set_nested_key(upgraded_config, 'populus.{0}'.format(key), value)
             continue

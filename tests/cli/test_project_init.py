@@ -2,22 +2,22 @@ import os
 import pytest
 from click.testing import CliRunner
 
-from populus.utils.contracts import (
-    get_contracts_source_dir,
+from populus.utils.filesystem import (
+    get_contracts_dir,
 )
 
 from populus.cli import main
 
 
 def test_initializing_empty_project(project_dir):
-    contracts_source_dir = get_contracts_source_dir(project_dir)
+    contracts_dir = get_contracts_dir(project_dir)
 
-    os.rmdir(contracts_source_dir)
+    os.rmdir(contracts_dir)
 
     expected_paths = (
         os.path.join(project_dir, 'populus.json'),
-        contracts_source_dir,
-        os.path.join(contracts_source_dir, 'Greeter.sol'),
+        contracts_dir,
+        os.path.join(contracts_dir, 'Greeter.sol'),
         os.path.join(project_dir, 'tests'),
         os.path.join(project_dir, 'tests', 'test_greeter.py'),
     )
@@ -35,7 +35,7 @@ def test_initializing_empty_project(project_dir):
 
 
 def test_initializing_with_legacy_ini_config(project_dir, write_project_file):
-    default_contracts_dir = get_contracts_source_dir(project_dir)
+    default_contracts_dir = get_contracts_dir(project_dir)
     os.rmdir(default_contracts_dir)
 
     write_project_file('populus.ini', "[populus]\ncontracts_dir=./custom-contracts-dir")

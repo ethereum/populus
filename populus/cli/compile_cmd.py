@@ -1,7 +1,7 @@
 import click
 
 from populus.utils.cli import (
-    compile_contracts,
+    compile_project_contracts,
     watch_project_contracts,
 )
 from populus.utils.compat import (
@@ -19,7 +19,7 @@ from .main import main
     help="Watch contract source files and recompile on changes",
 )
 @click.pass_context
-def compile_cmd(ctx, watch):
+def compile_contracts(ctx, watch):
     """
     Compile project contracts, storing their output in `./build/contracts.json`
 
@@ -32,7 +32,7 @@ def compile_cmd(ctx, watch):
     project = ctx.obj['PROJECT']
 
     compiler_settings = project.config.get('compilation.settings', {})
-    compile_contracts(project, compiler_settings)
+    compile_project_contracts(project, compiler_settings)
 
     if watch:
         thread = spawn(

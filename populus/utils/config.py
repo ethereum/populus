@@ -1,10 +1,8 @@
 import os
-import collections
 import operator
+import itertools
 
 import anyconfig
-
-from populus import ASSETS_DIR
 
 from .types import (
     is_string,
@@ -17,19 +15,7 @@ from .functional import (
     compose,
     cast_return_to_tuple,
     sort_return,
-    cast_return_to_ordered_dict,
 )
-from .mapping import (
-    has_nested_key,
-    get_nested_key,
-)
-
-
-CONFIG_SCHEMA_FILENAME = "config.schema.json"
-
-
-def get_config_schema_path():
-    return os.path.join(ASSETS_DIR, CONFIG_SCHEMA_FILENAME)
 
 
 JSON_CONFIG_FILENAME = './populus.json'
@@ -103,6 +89,69 @@ def resolve_config(config, master_config):
         return config
 
 
+def set_nested_key(config, key, value):
+    key_head, _, key_tail = key.rpartition('.')
+
+    head_setters = (
+        operator.methodcaller('setdefault', key_part, get_empty_config())
+        for key_part
+        in key_head.split('.')
+        if key_part
+    )
+    tail_setter = operator.methodcaller('__setitem__', key_tail, value)
+
+    setter_fn = compose(*itertools.chain(head_setters, (tail_setter,)))
+
+    # must write to both the config_for_read and config_for_write
+    return setter_fn(config)
+
+
+class empty(object):
+    pass
+
+
+def get_nested_key(config, key):
+    key_head, _, key_tail = key.rpartition('.')
+
+    head_getters = (
+        operator.itemgetter(key_part)
+        for key_part
+        in key_head.split('.')
+        if key_part
+    )
+
+    tail_getter = operator.itemgetter(key_tail)
+
+    getter_fn = compose(*itertools.chain(head_getters, (tail_getter,)))
+
+    return getter_fn(config)
+
+
+def has_nested_key(config, key):
+    try:
+        get_nested_key(config, key)
+    except KeyError:
+        return False
+    else:
+        return True
+
+
+def pop_nested_key(config, key):
+    key_head, _, key_tail = key.rpartition('.')
+
+    head_getters = (
+        operator.itemgetter(key_part)
+        for key_part
+        in key_head.split('.')
+        if key_part
+    )
+    tail_popper = operator.methodcaller('pop', key_tail)
+
+    popper_fn = compose(*itertools.chain(head_getters, (tail_popper,)))
+
+    return popper_fn(config)
+
+
 class ClassImportPath(object):
     def __init__(self, key):
         self.key = key
@@ -122,41 +171,3 @@ class ClassImportPath(object):
                 "Unsupported type.  Must be either a string import path or a "
                 "chain class"
             )
-
-
-@cast_return_to_ordered_dict
-def sort_prioritized_configs(backend_configs, master_config):
-    resolved_backend_configs = tuple(
-        (
-            backend_name,
-            resolve_config(backend_configs.get_config(backend_name), master_config),
-        )
-        for backend_name
-        in backend_configs
-    )
-    backends_with_conflicting_priorities = tuple((
-        backend_name
-        for backend_name, count
-        in collections.Counter((
-            (backend_name, config['priority'])
-            for backend_name, config
-            in resolved_backend_configs
-        )).items()
-        if count > 1
-    ))
-    if backends_with_conflicting_priorities:
-        raise ValueError(
-            "The following package backends have conflicting priority "
-            "values.  '{0}'.  Ensure that all priority values are unique "
-            "across all backends.".format(
-                ', '.join((backends_with_conflicting_priorities))
-            )
-        )
-
-    return sorted(
-        resolved_backend_configs,
-        key=compose(*(
-            operator.itemgetter(1),
-            operator.itemgetter('priority'),
-        )),
-    )

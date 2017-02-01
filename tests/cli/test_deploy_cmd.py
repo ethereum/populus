@@ -3,10 +3,12 @@ import re
 import click
 import pytest
 from click.testing import CliRunner
+from flaky import flaky
 
 from populus.cli import main
 
 
+@flaky
 def test_deployment_command_with_one_specified_contract(project_dir,
                                                         write_project_file,
                                                         MATH,
@@ -15,7 +17,7 @@ def test_deployment_command_with_one_specified_contract(project_dir,
     write_project_file('./contracts/SimpleConstructor.sol', SIMPLE_CONSTRUCTOR['source'])
     runner = CliRunner()
     result = runner.invoke(main, ['deploy', 'Math'], input=(
-        'tester\n'  # select the local chain.
+        'testrpc\n'  # select the local chain.
         '0\n'      # select account to deploy from.
         'Y\n'      # write it to config file
     ))
@@ -27,6 +29,7 @@ def test_deployment_command_with_one_specified_contract(project_dir,
     assert 'WithNoArgumentConstructor' not in result.output
 
 
+@flaky
 def test_deployment_command_with_specified_contracts(project_dir,
                                                      write_project_file,
                                                      MATH,
@@ -37,7 +40,7 @@ def test_deployment_command_with_specified_contracts(project_dir,
     write_project_file('./contracts/Emitter.sol', EMITTER['source'])
     runner = CliRunner()
     result = runner.invoke(main, [
-        'deploy', 'Math', 'Emitter', '--chain', 'tester',
+        'deploy', 'Math', 'Emitter', '--chain', 'testrpc',
     ])
 
     assert result.exit_code == 0, result.output + str(result.exception)
@@ -48,6 +51,7 @@ def test_deployment_command_with_specified_contracts(project_dir,
     assert 'Emitter' in result.output
 
 
+@flaky
 def test_deployment_command_with_prompt_for_contracts(project_dir,
                                                       write_project_file,
                                                       MATH,
@@ -58,7 +62,7 @@ def test_deployment_command_with_prompt_for_contracts(project_dir,
     write_project_file('./contracts/Emitter.sol', EMITTER['source'])
     runner = CliRunner()
     result = runner.invoke(main, [
-        'deploy', '--chain', 'tester',
+        'deploy', '--chain', 'testrpc',
     ], input='Math\n')
 
     assert result.exit_code == 0, result.output + str(result.exception)

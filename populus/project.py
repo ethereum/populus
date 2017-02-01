@@ -1,15 +1,21 @@
 import os
+import hashlib
 import warnings
-import json
 
 from populus.utils.filesystem import (
+    get_contracts_dir,
+    get_build_dir,
+    get_compiled_contracts_file_path,
+    get_blockchains_dir,
+    get_migrations_dir,
     relpath,
-    find_solidity_source_files,
 )
-from populus.utils.packaging import (
-    get_project_package_manifest_path,
-    get_installed_packages_dir,
-    get_installed_dependency_locations,
+from populus.utils.chains import (
+    get_data_dir,
+    get_chaindata_dir,
+    get_dapp_dir,
+    get_geth_ipc_path,
+    get_nodekey_path,
 )
 from populus.utils.config import (
     get_json_config_file_path,
@@ -17,36 +23,21 @@ from populus.utils.config import (
     get_default_project_config_file_path,
 )
 
-from populus.utils.contracts import (
-    get_contracts_source_dir,
+from populus.migrations.migration import (
+    sort_migrations,
 )
-from populus.utils.compiling import (
-    get_build_asset_dir,
-    get_compiled_contracts_asset_path,
+from populus.migrations.loading import (
+    load_project_migrations,
+    find_project_migrations,
 )
-from populus.utils.config import (
-    sort_prioritized_configs,
-)
-from populus.utils.chains import (
-    get_base_blockchain_storage_dir,
-)
-from populus.utils.module_loading import (
-    import_string,
-)
-from populus.utils.functional import (
-    cached_property,
-    cast_return_to_ordered_dict,
-    cast_return_to_dict,
-)
-
 from populus.compilation import (
+    find_project_contracts,
     compile_project_contracts,
 )
 from populus.config import (
     get_default_config_path,
     load_config as _load_config,
     write_config as _write_config,
-    load_config_schema,
     Config,
     ChainConfig,
 )
@@ -66,7 +57,6 @@ class Project(object):
     config_file_path = None
 
     _project_config = None
-    _project_config_schema = None
 
     def write_config(self):
         if self.config_file_path is None:
@@ -110,7 +100,6 @@ class Project(object):
             path_to_load = self.config_file_path
 
         self._project_config = _load_config(path_to_load)
-        self._project_config_schema = load_config_schema()
 
     def reload_config(self):
         self.load_config()
@@ -120,124 +109,48 @@ class Project(object):
     @property
     def config(self):
         if self._config_cache is None:
-            self._config_cache = Config(
-                self._project_config,
-                schema=self._project_config_schema,
-            )
+            self._config_cache = Config(self._project_config)
         return self._config_cache
 
     #
     # Project
     #
     @property
-    @relpath
     def project_dir(self):
         return self.config.get('populus.project_dir', os.getcwd())
 
     #
-    # Packaging: Manifest
+    # Contracts
     #
-    @property
-    def has_package_manifest(self):
-        return os.path.exists(self.package_manifest_path)
-
     @property
     @relpath
-    def package_manifest_path(self):
-        return get_project_package_manifest_path(self.project_dir)
-
-    @property
-    def package_manifest(self):
-        with open(self.package_manifest_path) as package_manifest_file:
-            return json.load(package_manifest_file)
-
-    #
-    # Packaging: Installed Packages
-    #
-    @property
-    def dependencies(self):
-        if self.has_package_manifest:
-            package_manifest = self.package_manifest
+    def contracts_dir(self):
+        if 'compilation.contracts_dir' in self.config:
+            return self.config['compilation.contracts_dir']
         else:
-            package_manifest = {}
-        package_dependencies = package_manifest.get('dependencies', {})
-        return package_dependencies
+            return get_contracts_dir(self.project_dir)
 
     @property
     @relpath
-    def installed_packages_dir(self):
-        return get_installed_packages_dir(self.project_dir)
-
-    @property
-    @cast_return_to_dict
-    def installed_package_locations(self):
-        # TODO: rename to `installed_dependency_locations`
-        return get_installed_dependency_locations(self.installed_packages_dir)
-
-    #
-    # Packaging: Backends
-    #
-    @cast_return_to_ordered_dict
-    def get_package_backend_config(self):
-        package_backend_config = self.config.get_config('packaging.backends')
-        return sort_prioritized_configs(package_backend_config, self.config)
-
-    @cached_property
-    @cast_return_to_ordered_dict
-    def package_backends(self):
-        for backend_name, backend_config in self.get_package_backend_config().items():
-            PackageBackendClass = import_string(backend_config['class'])
-            yield (
-                backend_name,
-                PackageBackendClass(
-                    self,
-                    backend_config.get_config('settings'),
-                ),
-            )
-
-    #
-    # Contract Source and Compilation
-    #
-    @property
-    @relpath
-    def contracts_source_dir(self):
-        return self.config.get(
-            'compilation.contracts_source_dir',
-            get_contracts_source_dir(self.project_dir),
-        )
-
-    @property
-    def contract_source_paths(self):
-        return find_solidity_source_files(self.contracts_source_dir)
-
-    @property
-    @relpath
-    def build_asset_dir(self):
-        return get_build_asset_dir(self.project_dir)
-
-    @property
-    @relpath
-    def compiled_contracts_asset_path(self):
-        return get_compiled_contracts_asset_path(self.build_asset_dir)
-
-    @property
-    def compiled_contract_data(self):
-        # TODO: this should move to the provider.
-        if self.is_compiled_contract_cache_stale():
-            self._cached_compiled_contracts_mtime = self.get_source_modification_time()
-            _, self._cached_compiled_contracts = compile_project_contracts(
-                project=self,
-                compiler_settings=self.config.get('compilation.settings', {})
-            )
-        return self._cached_compiled_contracts
+    def build_dir(self):
+        if 'compilation.build_dir' in self.config:
+            return self.config['compilation.build_dir']
+        else:
+            return get_build_dir(self.project_dir)
 
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None
 
+    def get_source_file_hash(self):
+        source_file_paths = find_project_contracts(self.project_dir, self.contracts_dir)
+        return hashlib.md5(b''.join(
+            open(source_file_path, 'rb').read()
+            for source_file_path
+            in source_file_paths
+        )).hexdigest()
+
     def get_source_modification_time(self):
-        source_file_paths = find_solidity_source_files(
-            self.contracts_source_dir,
-        )
+        source_file_paths = find_project_contracts(self.project_dir, self.contracts_dir)
         return max(
             os.path.getmtime(source_file_path)
             for source_file_path
@@ -265,6 +178,22 @@ class Project(object):
         """
         self._cached_compiled_contracts_mtime = contracts_mtime
         self._cached_compiled_contracts = contracts
+
+    @property
+    @relpath
+    def compiled_contracts_file_path(self):
+        return get_compiled_contracts_file_path(self.project_dir)
+
+    @property
+    def compiled_contracts(self):
+        if self.is_compiled_contract_cache_stale():
+            self._cached_compiled_contracts_mtime = self.get_source_modification_time()
+            _, self._cached_compiled_contracts = compile_project_contracts(
+                project_dir=self.project_dir,
+                contracts_dir=self.contracts_dir,
+                compiler_settings=self.config.get('compilation.settings'),
+            )
+        return self._cached_compiled_contracts
 
     #
     # Local Blockchains
@@ -297,8 +226,38 @@ class Project(object):
         - 'morden': Chain backed by geth running against the public morden
           testnet.
 
-        Alternatively you can specify any chain name that is present in the
-        `chains` configuration key.
+        Alternatively you can specify any of the pre-configured chains from the
+        project's populus.ini configuration file.
+
+        All geth backed chains are subject to up to 10 minutes of wait time
+        during first boot to generate the DAG file if the chain configured to
+        mine.
+
+        * See https://github.com/ethereum/wiki/wiki/Ethash-DAG
+        * These are shared across all Ethereum nodes and live in
+          ``$(HOME)/.ethash/`` folder
+
+        To avoid this long wait time, you can manuall pre-generate the DAG with
+        ``$ geth makedag 0 $HOME/.ethash``
+
+        Example:
+
+        .. code-block:: python
+
+            >>> from populus.project import default_project as my_project
+            >>> with my_project.get_chain('testrpc') as chain:
+            ...     web3 = chain.web3
+            ...     MyContract = chain.contract_factories.MyContract
+            ...     # do things
+
+
+        :param chain_name: The name of the chain that should be returned
+        :param chain_args: Positional arguments that should be passed into the
+                           chain constructor.
+        :param chain_kwargs: Named arguments that should be passed into the
+                             constructor
+
+        :return: :class:`populus.chain.Chain`
         """
         if chain_config is None:
             chain_config = self.get_chain_config(chain_name)
@@ -307,5 +266,48 @@ class Project(object):
 
     @property
     @relpath
-    def base_blockchain_storage_dir(self):
-        return get_base_blockchain_storage_dir(self.project_dir)
+    def blockchains_dir(self):
+        return get_blockchains_dir(self.project_dir)
+
+    @relpath
+    def get_blockchain_data_dir(self, chain_name):
+        return get_data_dir(self.project_dir, chain_name)
+
+    @relpath
+    def get_blockchain_chaindata_dir(self, chain_name):
+        return get_chaindata_dir(self.get_blockchain_data_dir(chain_name))
+
+    @relpath
+    def get_blockchain_dapp_dir(self, chain_name):
+        return get_dapp_dir(self.get_blockchain_data_dir(chain_name))
+
+    @relpath
+    def get_blockchain_ipc_path(self, chain_name):
+        return get_geth_ipc_path(self.get_blockchain_data_dir(chain_name))
+
+    @relpath
+    def get_blockchain_nodekey_path(self, chain_name):
+        return get_nodekey_path(self.get_blockchain_data_dir(chain_name))
+
+    #
+    # Migrations
+    #
+    @property
+    @relpath
+    def migrations_dir(self):
+        return get_migrations_dir(self.project_dir)
+
+    @property
+    def migration_files(self):
+        return list((
+            os.path.relpath(migration_file_path)
+            for migration_file_path
+            in sorted(find_project_migrations(self.project_dir))
+        ))
+
+    @property
+    def migrations(self):
+        return sort_migrations(
+            load_project_migrations(self.project_dir),
+            flatten=True,
+        )

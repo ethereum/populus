@@ -115,14 +115,22 @@ def get_chain_id(web3):
     return web3.eth.getBlock(0)['hash']
 
 
-def get_chain_definition(web3):
+def get_chain_definition(web3, min_block_number=0, num_confirmations=0):
     """
     Return the blockchain URI that
     """
     chain_id = get_chain_id(web3)
-    latest_block_hash = web3.eth.getBlock('latest')['hash']
+    latest_block = web3.eth.getBlock('latest')
+    latest_block_number = latest_block['number']
 
-    return create_block_uri(chain_id, latest_block_hash)
+    target_block_number = latest_block_number - num_confirmations
+    if target_block_number < min_block_number:
+        raise ValueError("Cannot generate chain definition matching given constraints")
+
+    block_for_definition = web3.eth.getBlock(target_block_number)
+    block_hash_for_definition = block_for_definition['hash']
+
+    return create_block_uri(chain_id, block_hash_for_definition)
 
 
 BIP122_URL_REGEX = (

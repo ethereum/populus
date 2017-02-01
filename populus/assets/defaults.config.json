@@ -3,66 +3,76 @@
   "chains": {
     "mainnet": {
       "chain": {
-        "class": "populus.chain.MainnetChain"
+        "class": "populus.chain.geth.MainnetChain"
       },
       "web3": {
         "$ref": "web3.GethIPC"
       },
-      "contract_backends": {
-        "JSONFile": {
+      "contracts": {
+        "backends": {
+          "JSONFile": {
             "$ref": "contracts.backends.JSONFile"
+          }
         }
       }
     },
     "ropsten": {
       "chain": {
-        "class": "populus.chain.TestnetChain"
+        "class": "populus.chain.geth.TestnetChain"
       },
       "web3": {
         "$ref": "web3.GethIPC"
       },
-      "contract_backends": {
-        "JSONFile": {
+      "contracts": {
+        "backends": {
+          "JSONFile": {
             "$ref": "contracts.backends.JSONFile"
+          }
         }
       }
     },
     "temp": {
       "chain": {
-        "class": "populus.chain.TemporaryGethChain"
+        "class": "populus.chain.geth.TemporaryGethChain"
       },
       "web3": {
         "$ref": "web3.GethIPC"
       },
-      "contract_backends": {
-        "Memory": {
+      "contracts": {
+        "backends": {
+          "Memory": {
             "$ref": "contracts.backends.Memory"
+          }
         }
       }
     },
     "tester": {
       "chain": {
-        "class": "populus.chain.TesterChain"
+        "class": "populus.chain.tester.TesterChain"
       },
       "web3": {
         "$ref": "web3.Tester"
       },
-      "contract_backends": {
-        "Memory": {
+      "contracts": {
+        "backends": {
+          "Memory": {
             "$ref": "contracts.backends.Memory"
+          }
         }
       }
     },
     "testrpc": {
       "chain": {
-        "class": "populus.chain.TestRPCChain"
+        "class": "populus.chain.testrpc.TestRPCChain"
       },
       "web3": {
         "$ref": "web3.TestRPC"
       },
-      "contract_backends": {
-        "Memory": {
+      "contracts": {
+        "backends": {
+          "Memory": {
             "$ref": "contracts.backends.Memory"
+          }
         }
       }
     }
@@ -70,11 +80,11 @@
   "contracts": {
     "backends": {
       "InstalledPackages": {
-        "class": "populus.providers.backends.installed_packages.InstalledPackagesProviderBackend",
+        "class": "populus.providers.backends.installed_packages.InstalledPackagesBackend",
         "priority": 20
       },
       "JSONFile": {
-        "class": "populus.contracts.backends.filesystem.JSONFileRegistrar",
+        "class": "populus.contracts.backends.filesystem.JSONFileBackend",
         "priority": 10,
         "settings": {
           "file_path": "./registrar.json"
@@ -117,7 +127,7 @@
           "web3-for-install": {
             "$ref": "web3.InfuraRopsten"
           },
-          "package_index_address": "0xbab799ff7d9e13a50696a8bebb7a1b77ae519586"
+          "package_index_address": "0x8011df4830b4f696cd81393997e5371b93338878"
         }
       }
     }

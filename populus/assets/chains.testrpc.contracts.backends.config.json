@@ -1,5 +1,0 @@
-{
-    "Memory": {
-        "$ref": "contracts.backends.Memory"
-    }
-}

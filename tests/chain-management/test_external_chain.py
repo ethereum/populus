@@ -9,7 +9,7 @@ def test_external_rpc_chain(project_dir, write_project_file):
 
         project.config['chains.external.chain.class'] = 'populus.chain.ExternalChain'
         project.config['chains.external.web3.provider.class'] = 'web3.providers.rpc.HTTPProvider'
-        project.config['chains.external.web3.provider.settings.endpoint_uri'] = 'http://127.0.0.1:{0}'.format(chain.port)
+        project.config['chains.external.web3.provider.settings.endpoint_uri'] = 'http://127.0.0.1:{0}'.format(chain.rpc_port)
         project.config['chains.external.contracts.backends'] = {
             "JSONFile": {
                 "$ref": "contracts.backends.JSONFile"

@@ -156,7 +156,8 @@ def write_package_files(installed_packages_dir, package_data):
 
 def update_project_dependencies(project, installed_dependencies):
     if not project.has_package_manifest:
-        raise ValueError("Cannot update dependencies on project without manifest")
+        with open(project.package_manifest_path, 'w') as package_manifest_file:
+            json.dump({}, package_manifest_file)
 
     package_manifest = project.package_manifest
     package_manifest.setdefault('dependencies', {})

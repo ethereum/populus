@@ -2,7 +2,7 @@ import pytest
 
 import copy
 
-from populus.utils.config import (
+from populus.utils.mapping import (
     get_nested_key,
     set_nested_key,
     pop_nested_key,

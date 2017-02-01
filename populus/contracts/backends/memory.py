@@ -13,17 +13,19 @@ class MemoryBackend(BaseContractBackend):
     def setup_backend(self):
         self.contract_addresses = {}
 
+    @property
     def is_registrar(self):
         return True
 
+    @property
     def is_provider(self):
         return True
 
-    def get_contract_address(self, contract_name):
+    def get_contract_address(self, instance_name):
         try:
-            return self.contract_addresses[contract_name]
+            return self.contract_addresses[instance_name]
         except KeyError:
-            raise NoKnownAddress("No known address for '{0}'".format(contract_name))
+            raise NoKnownAddress("No known address for '{0}'".format(instance_name))
 
-    def set_contract_address(self, contract_name, address):
-        self.contract_addresses[contract_name] = address
+    def set_contract_address(self, instance_name, address):
+        self.contract_addresses[instance_name] = address

@@ -65,7 +65,12 @@
       }
     ],
     "name": "setOwner",
-    "outputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "payable": false,
     "type": "function"
   },
@@ -102,6 +107,19 @@
       {
         "name": "",
         "type": "string"
+      }
+    ],
+    "payable": false,
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getPackageDb",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
       }
     ],
     "payable": false,
@@ -158,6 +176,19 @@
       {
         "name": "",
         "type": "bool"
+      }
+    ],
+    "payable": false,
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getReleaseValidator",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
       }
     ],
     "payable": false,
@@ -348,7 +379,12 @@
       }
     ],
     "name": "setAuthority",
-    "outputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "payable": false,
     "type": "function"
   },
@@ -373,46 +409,7 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "releaseDb",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
     "name": "owner",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "packageDb",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "releaseValidator",
     "outputs": [
       {
         "name": "",
@@ -536,6 +533,19 @@
       {
         "name": "",
         "type": "bool"
+      }
+    ],
+    "payable": false,
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getReleaseDb",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
       }
     ],
     "payable": false,

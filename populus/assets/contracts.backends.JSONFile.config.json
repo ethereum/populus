@@ -1,7 +1,0 @@
-{
-    "class": "populus.contracts.backends.filesystem.JSONFileRegistrar",
-    "priority": 10,
-    "settings": {
-        "file_path": "./registrar.json"
-    }
-}

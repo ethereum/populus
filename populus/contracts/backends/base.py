@@ -1,17 +1,19 @@
 class BaseContractBackend(object):
     chain = None
 
-    def __init__(self, chain, settings):
+    def __init__(self, chain, config):
         self.chain = chain
-        self.settings = settings
+        self.config = config
         self.setup_backend()
 
     #
     # Meta API
     #
+    @property
     def is_provider(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
+    @property
     def is_registrar(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
@@ -26,6 +28,9 @@ class BaseContractBackend(object):
     # Registrar API
     #
     def set_contract_address(self, instance_name, address):
+        """
+        Returns the address for the contract instance in the registrar.
+        """
         raise NotImplementedError("Must be implemented by subclasses")
 
     #

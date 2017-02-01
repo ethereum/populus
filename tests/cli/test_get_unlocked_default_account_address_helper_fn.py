@@ -26,6 +26,7 @@ def local_chain(project_dir):
     project.config['chains.local.web3.provider.settings.ipc_path'] = (
         get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local'))
     )
+    project.config['chains.local.contracts.backends.Memory.$ref'] = "contracts.backends.Memory"
     project.write_config()
 
     chain = project.get_chain('local')

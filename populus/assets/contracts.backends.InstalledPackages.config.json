@@ -1,4 +1,0 @@
-{
-    "class": "populus.providers.backends.installed_packages.InstalledPackagesProviderBackend",
-    "priority": 20
-}

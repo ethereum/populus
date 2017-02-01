@@ -146,11 +146,20 @@ class BasePackageIndexBackend(BasePackageBackend):
 
 
 class PackageIndexBackend(BasePackageIndexBackend):
-    package_index = None
+    package_index_for_install = None
+    package_index_for_publish = None
 
     def setup_backend(self):
-        self.package_index_for_install = self.get_package_index_for_install()
-        self.package_index_for_publish = self.get_package_index_for_publish()
+        if 'web3-for-install' in self.settings:
+            self.package_index_for_install = self.get_package_index_for_install()
+        if 'web3-for-publish' in self.settings:
+            self.package_index_for_publish = self.get_package_index_for_publish()
+
+    def can_translate_package_identifier(self, package_identifier):
+        return 'web3-for-install' in self.settings
+
+    def can_publish_release_lockfile(self, release_lockfile, release_lockfile_uri):
+        return 'web3-for-publish' in self.settings
 
     def publish_release_lockfile(self, release_lockfile, release_lockfile_uri):
         publish_txn_hash = self.package_index_for_publish.release(

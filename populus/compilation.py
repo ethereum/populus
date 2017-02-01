@@ -14,7 +14,6 @@ from populus.utils.filesystem import (
 )
 
 from populus.utils.compiling import (
-    get_compiled_contracts_asset_path,
     compute_project_compilation_arguments,
     normalize_contract_data,
     get_contract_meta,
@@ -58,8 +57,7 @@ def compile_project_contracts(project, compiler_settings=None):
     return project_source_paths, normalized_compiled_contracts
 
 
-def write_compiled_sources(chain_metadata_dir, contract_data):
-    compiled_contracts_asset_path = get_compiled_contracts_asset_path(chain_metadata_dir)
+def write_compiled_sources(compiled_contracts_asset_path, contract_data):
     ensure_file_exists(compiled_contracts_asset_path)
 
     with open(compiled_contracts_asset_path, 'w') as compiled_contracts_asset_file:

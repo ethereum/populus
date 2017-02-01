@@ -15,7 +15,7 @@ def test_simple_config_file(project_dir, write_project_file):
             'project_dir': '/home/ubuntu/my-project',
         },
         'compilation': {
-            'contracts_source_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
+            'contracts_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
         }
     }
 
@@ -36,7 +36,7 @@ def test_config_with_custom_chain_in_chains(project_dir, write_project_file):
             'project_dir': '/home/ubuntu/my-project',
         },
         'compilation': {
-            'contracts_source_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
+            'contracts_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
         },
         'chains': {
             'custom-chain': {
@@ -69,7 +69,7 @@ def test_config_with_named_chain_in_chains(project_dir, write_project_file):
             'project_dir': '/home/ubuntu/my-project',
         },
         'compilation': {
-            'contracts_source_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
+            'contracts_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
         },
         'chains': {
             'ropsten': {
@@ -103,7 +103,7 @@ def test_config_with_rpc_provider_chains(project_dir, write_project_file):
             'project_dir': '/home/ubuntu/my-project',
         },
         'compilation': {
-            'contracts_source_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
+            'contracts_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
         },
         'chains': {
             'ropsten': {
@@ -141,7 +141,7 @@ def test_config_with_rpc_settings_chains(project_dir, write_project_file):
             'project_dir': '/home/ubuntu/my-project',
         },
         'compilation': {
-            'contracts_source_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
+            'contracts_dir': '/home/ubuntu/my-project/some-custom-contracts-dir',
         },
         'chains': {
             'mainnet': {

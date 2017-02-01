@@ -8,13 +8,11 @@ from populus.utils.functional import (
 from populus.utils.empty import (
     empty,
 )
-from populus.utils.mapping import (
+from populus.utils.config import (
     has_nested_key,
     get_nested_key,
     set_nested_key,
     pop_nested_key,
-)
-from populus.utils.config import (
     get_empty_config,
     flatten_config_items,
     resolve_config,
@@ -23,11 +21,10 @@ from populus.utils.config import (
 
 class Config(object):
     parent = None
-    schema = None
     default_config_info = None
     _wrapped = None
 
-    def __init__(self, config=None, parent=None, schema=None):
+    def __init__(self, config=None, parent=None):
         if config is None:
             config = get_empty_config()
         elif isinstance(config, dict):
@@ -35,15 +32,6 @@ class Config(object):
 
         self._wrapped = config
         self.parent = parent
-        self.schema = schema
-
-        if self.schema is not None:
-            self.validate()
-
-    def validate(self):
-        rc, err = anyconfig.validate(self._wrapped, self.schema)
-        if err:
-            raise ValueError(err)
 
     def get_master_config(self):
         if self.parent is None:

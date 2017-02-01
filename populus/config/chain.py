@@ -13,14 +13,14 @@ from .web3 import Web3Config
 
 
 CHAIN_IDENTIFIER_MAP = {
-    'local': 'populus.chain.geth.LocalGethChain',
-    'external': 'populus.chain.external.ExternalChain',
-    'tester': 'populus.chain.tester.TesterChain',
-    'testrpc': 'populus.chain.testrpc.TestRPCChain',
-    'temp': 'populus.chain.geth.TemporaryGethChain',
-    'mainnet': 'populus.chain.geth.MainnetChain',
-    'testnet': 'populus.chain.geth.TestnetChain',
-    'ropsten': 'populus.chain.geth.TestnetChain',
+    'local': 'populus.chain.LocalGethChain',
+    'external': 'populus.chain.ExternalChain',
+    'tester': 'populus.chain.TesterChain',
+    'testrpc': 'populus.chain.TestRPCChain',
+    'temp': 'populus.chain.TemporaryGethChain',
+    'mainnet': 'populus.chain.MainnetChain',
+    'testnet': 'populus.chain.TestnetChain',
+    'ropsten': 'populus.chain.TestnetChain',
 }
 
 

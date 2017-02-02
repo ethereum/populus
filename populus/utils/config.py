@@ -4,6 +4,8 @@ import itertools
 
 import anyconfig
 
+from populus import ASSETS_DIR
+
 from .types import (
     is_string,
     is_object,
@@ -16,6 +18,13 @@ from .functional import (
     cast_return_to_tuple,
     sort_return,
 )
+
+
+CONFIG_SCHEMA_FILENAME = "config.schema.json"
+
+
+def get_config_schema_path():
+    return os.path.join(ASSETS_DIR, CONFIG_SCHEMA_FILENAME)
 
 
 JSON_CONFIG_FILENAME = './populus.json'

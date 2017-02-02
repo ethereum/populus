@@ -75,7 +75,7 @@
     "ChainConfig": {
       "title": "Configuration for a single project chain",
       "type": "object",
-      "required": ["chain", "web3", "contracts"],
+      "required": ["chain", "web3"],
       "properties": {
         "chain": {"$ref": "#/definitions/ChainClassConfig"},
         "web3": {
@@ -121,6 +121,20 @@
         },
         "eth": {
           "$ref": "#/definitions/Web3EthConfig"
+        }
+      }
+    },
+    "ProviderConfig": {
+      "title": "Configuration for the provider of a web3 instance",
+      "type": "object",
+      "required": ["class"],
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "settings": {
+          "title": "Provider specific settings",
+          "type": "object"
         }
       }
     },

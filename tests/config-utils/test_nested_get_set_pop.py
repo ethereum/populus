@@ -6,6 +6,7 @@ from populus.utils.config import (
     get_nested_key,
     set_nested_key,
     pop_nested_key,
+    delete_nested_key,
 )
 
 
@@ -106,3 +107,36 @@ def test_pop_nested_key_with_missing_key(key, expected):
     config = copy.deepcopy(CONFIG_DICT)
     with pytest.raises(KeyError):
         pop_nested_key(config, key)
+
+
+@pytest.mark.parametrize(
+    'key',
+    (
+        ('a', 'z'),
+        ('b.gg', 'yy'),
+        ('c.hh', 'xx'),
+        ('c.oo', 'pp'),
+        ('d.ii.jjj', 'www'),
+        ('d.ii.kkk', 'vvv'),
+    )
+)
+def test_delete_nested_key(key):
+    config = copy.deepcopy(CONFIG_DICT)
+
+    assert has_nested_key(config, key) is True
+    delete_nested_key(config, key)
+    assert has_nested_key(config, key) is False
+
+
+@pytest.mark.parametrize(
+    'key,expected',
+    (
+        ('z', 'arst'),
+        ('b.z', 'arst'),
+        ('d.ii.z', 'arst'),
+    )
+)
+def test_delete_nested_key_with_missing_key(key, expected):
+    config = copy.deepcopy(CONFIG_DICT)
+    with pytest.raises(KeyError):
+        delete_nested_key(config, key)

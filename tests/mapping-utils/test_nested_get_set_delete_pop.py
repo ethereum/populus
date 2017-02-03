@@ -2,11 +2,12 @@ import pytest
 
 import copy
 
-from populus.utils.config import (
+from populus.utils.mappings import (
     get_nested_key,
     set_nested_key,
     pop_nested_key,
     delete_nested_key,
+    has_nested_key,
 )
 
 
@@ -112,12 +113,12 @@ def test_pop_nested_key_with_missing_key(key, expected):
 @pytest.mark.parametrize(
     'key',
     (
-        ('a', 'z'),
-        ('b.gg', 'yy'),
-        ('c.hh', 'xx'),
-        ('c.oo', 'pp'),
-        ('d.ii.jjj', 'www'),
-        ('d.ii.kkk', 'vvv'),
+        'a',
+        'b.gg',
+        'c.hh',
+        'c.oo',
+        'd.ii.jjj',
+        'd.ii.kkk',
     )
 )
 def test_delete_nested_key(key):
@@ -129,14 +130,35 @@ def test_delete_nested_key(key):
 
 
 @pytest.mark.parametrize(
-    'key,expected',
+    'key',
     (
-        ('z', 'arst'),
-        ('b.z', 'arst'),
-        ('d.ii.z', 'arst'),
+        'z',
+        'b.z',
+        'd.ii.z',
     )
 )
-def test_delete_nested_key_with_missing_key(key, expected):
+def test_delete_nested_key_with_missing_key(key):
     config = copy.deepcopy(CONFIG_DICT)
     with pytest.raises(KeyError):
         delete_nested_key(config, key)
+
+
+@pytest.mark.parametrize(
+    'key,expected',
+    (
+        # Existing paths
+        ('a', True),
+        ('b.gg', True),
+        ('c.hh', True),
+        ('c.oo', True),
+        ('d.ii.jjj', True),
+        ('d.ii.kkk', True),
+        # New paths
+        ('z', False),
+        ('b.z', False),
+        ('d.ii.z', False),
+    )
+)
+def test_has_nested_key(key, expected):
+    config = copy.deepcopy(CONFIG_DICT)
+    assert has_nested_key(config, key) is expected

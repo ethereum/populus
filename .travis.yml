@@ -5,21 +5,32 @@ dist: trusty
 sudo: required
 env:
   matrix:
-    # Solc 0.4.6 py35
-    - TOX_ENV=py27-stdlib SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
-    - TOX_ENV=py27-gevent SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
-    # Solc 0.4.6 py34
-    - TOX_ENV=py34-stdlib SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
-    - TOX_ENV=py34-gevent SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
-    # Solc 0.4.6 py35
-    - TOX_ENV=py35-stdlib SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
-    - TOX_ENV=py35-gevent SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.6.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.6
-    # Solc 0.4.1 py35
-    #- TOX_ENV=py35 SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.1.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.1
-    # Solc 0.4.2 py35
-    #- TOX_ENV=py35-stdlib SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.2.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2
-    #- TOX_ENV=py35-gevent SOLC_BINARY=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2/solc SOLC_INSTALL_SCRIPT=$TRAVIS_BUILD_DIR/bin/install_solc-0.4.2.sh LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/solc-versions/solc-0.4.2
-    - TOX_ENV=flake8 SOLC_BINARY=ls SOLC_INSTALL_SCRIPT=/bin/ls
+    #
+    # Solc 0.4.8
+    #
+    # py27
+    - TOX_ENV=py27-stdlib SOLC_VERSION=0.4.8
+    - TOX_ENV=py27-gevent SOLC_VERSION=0.4.8
+    # py34
+    - TOX_ENV=py34-stdlib SOLC_VERSION=0.4.8
+    - TOX_ENV=py34-gevent SOLC_VERSION=0.4.8
+    # py35
+    - TOX_ENV=py35-stdlib SOLC_VERSION=0.4.8
+    - TOX_ENV=py35-gevent SOLC_VERSION=0.4.8
+    #
+    # Solc 0.4.9
+    #
+    # py27
+    - TOX_ENV=py27-stdlib SOLC_VERSION=0.4.9
+    - TOX_ENV=py27-gevent SOLC_VERSION=0.4.9
+    # py34
+    - TOX_ENV=py34-stdlib SOLC_VERSION=0.4.9
+    - TOX_ENV=py34-gevent SOLC_VERSION=0.4.9
+    # py35
+    - TOX_ENV=py35-stdlib SOLC_VERSION=0.4.9
+    - TOX_ENV=py35-gevent SOLC_VERSION=0.4.9
+    # Linting
+    - TOX_ENV=flake8
   global:
     - CHAIN_SYNC_BLOCK_DELTA=100
 cache:
@@ -31,13 +42,14 @@ before_install:
   - sudo add-apt-repository -y ppa:ethereum/ethereum
   - sudo apt-get update
 install:
-  - sudo apt-get install -y tree unzip
-  - /.$SOLC_INSTALL_SCRIPT
+  - if [ -n "$SOLC_VERSION" ]; then export SOLC_BINARY="$TRAVIS_BUILD_DIR/solc-versions/solc-$SOLC_VERSION/solc"; fi
+  - if [ -n "$SOLC_VERSION" ]; then export LD_LIBRARY_PATH="$TRAVIS_BUILD_DIR/solc-versions/solc-$SOLC_VERSION"; fi
+  - if [ -n "$SOLC_VERSION" ]; then sudo apt-get install -y tree unzip; fi
   - travis_retry sudo apt-get install -y ethereum
   - travis_retry pip install setuptools --upgrade
   - travis_retry pip install tox
 before_script:
-  - $SOLC_BINARY --version
+  - if [ -n "$SOLC_BINARY" ]; then $SOLC_BINARY --version; fi
   - mkdir -p $HOME/.ethash
   - geth makedag 0 $HOME/.ethash
 script:

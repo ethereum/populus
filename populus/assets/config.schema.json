@@ -40,6 +40,13 @@
       "properties": {
         "optimize": {
           "type": "boolean"
+        },
+        "output_values": {
+          "title": "Determines which compiler values will be output by the solc compiler",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

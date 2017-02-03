@@ -11,7 +11,8 @@
       "contracts": {
         "backends": {
           "JSONFile": {
-            "$ref": "contracts.backends.JSONFile"
+            "$ref": "contracts.backends.JSONFile",
+            "$ref": "contracts.backends.InstalledPackagesBackend"
           }
         }
       }
@@ -26,7 +27,8 @@
       "contracts": {
         "backends": {
           "JSONFile": {
-            "$ref": "contracts.backends.JSONFile"
+            "$ref": "contracts.backends.JSONFile",
+            "$ref": "contracts.backends.InstalledPackagesBackend"
           }
         }
       }
@@ -41,7 +43,8 @@
       "contracts": {
         "backends": {
           "Memory": {
-            "$ref": "contracts.backends.Memory"
+            "$ref": "contracts.backends.Memory",
+            "$ref": "contracts.backends.InstalledPackagesBackend"
           }
         }
       }
@@ -56,7 +59,8 @@
       "contracts": {
         "backends": {
           "Memory": {
-            "$ref": "contracts.backends.Memory"
+            "$ref": "contracts.backends.Memory",
+            "$ref": "contracts.backends.InstalledPackagesBackend"
           }
         }
       }
@@ -71,7 +75,8 @@
       "contracts": {
         "backends": {
           "Memory": {
-            "$ref": "contracts.backends.Memory"
+            "$ref": "contracts.backends.Memory",
+            "$ref": "contracts.backends.InstalledPackagesBackend"
           }
         }
       }

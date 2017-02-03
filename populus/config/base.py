@@ -139,6 +139,9 @@ class Config(object):
         else:
             return set_nested_key(self._wrapped, key, value)
 
+    def __delitem__(self, key):
+        del self._wrapped[key]
+
     def __contains__(self, key):
         return has_nested_key(self._wrapped, key)
 

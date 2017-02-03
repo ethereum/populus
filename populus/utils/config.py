@@ -136,6 +136,22 @@ def get_nested_key(config, key):
     return getter_fn(config)
 
 
+def delete_nested_key(config, key):
+    key_head, _, key_tail = key.rpartition('.')
+
+    head_getters = (
+        operator.itemgetter(key_part)
+        for key_part
+        in key_head.split('.')
+        if key_part
+    )
+    tail_deleter = operator.methodcaller('__delitem__', key_tail)
+
+    del_fn = compose(*itertools.chain(head_getters, (tail_deleter,)))
+
+    return del_fn(config)
+
+
 def has_nested_key(config, key):
     try:
         get_nested_key(config, key)

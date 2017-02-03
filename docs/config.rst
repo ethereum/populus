@@ -63,6 +63,13 @@ Enable or disable compile optimization.
 * default: ``True``
 
 
+Determine compiler output.
+
+* key: ``compilation.settings.output_values``
+* value: List of strings
+* default: ``['bin', 'bin-runtime', 'abi']``
+
+
 Chains
 ^^^^^^
 

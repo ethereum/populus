@@ -7,6 +7,13 @@ from .functional import (
 )
 
 
+def process_compiler_output(name_from_compiler, data_from_compiler, contract_meta):
+    # TODO: use the source path.
+    _, _, contract_name = name_from_compiler.rpartition(':')
+    contract_data = normalize_contract_data(data_from_compiler, contract_meta)
+    return contract_name, contract_data
+
+
 @cast_return_to_dict
 def normalize_contract_data(contract_data, contract_meta):
     yield 'meta', contract_meta

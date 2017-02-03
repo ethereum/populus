@@ -15,7 +15,7 @@ from populus.utils.filesystem import (
     DEFAULT_CONTRACTS_DIR
 )
 from populus.utils.compile import (
-    normalize_contract_data,
+    process_compiler_output,
     get_contract_meta,
 )
 
@@ -41,11 +41,14 @@ def write_compiled_sources(project_dir, compiled_sources):
     return compiled_contract_path
 
 
+DEFAULT_COMPILER_OUTPUT_VALUES = ['bin', 'bin-runtime', 'abi']
+
+
 def compile_project_contracts(project_dir, contracts_dir, compiler_settings=None):
     if compiler_settings is None:
         compiler_settings = {}
 
-    compiler_settings.setdefault('output_values', ['bin', 'bin-runtime', 'abi'])
+    compiler_settings.setdefault('output_values', DEFAULT_COMPILER_OUTPUT_VALUES)
     contract_source_paths = find_project_contracts(project_dir, contracts_dir)
     try:
         compiled_contracts = compile_files(contract_source_paths, **compiler_settings)
@@ -55,11 +58,11 @@ def compile_project_contracts(project_dir, contracts_dir, compiler_settings=None
     solc_version = get_solc_version()
     contract_meta = get_contract_meta(compiler_settings, solc_version)
 
-    normalized_compiled_contracts = {
-        contract_name: normalize_contract_data(contract_data, contract_meta)
+    normalized_compiled_contracts = dict(
+        process_compiler_output(contract_name, contract_data, contract_meta)
         for contract_name, contract_data
         in compiled_contracts.items()
-    }
+    )
 
     return contract_source_paths, normalized_compiled_contracts
 

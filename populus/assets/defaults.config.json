@@ -11,8 +11,10 @@
       "contracts": {
         "backends": {
           "JSONFile": {
-            "$ref": "contracts.backends.JSONFile",
-            "$ref": "contracts.backends.InstalledPackagesBackend"
+            "$ref": "contracts.backends.JSONFile"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -27,8 +29,10 @@
       "contracts": {
         "backends": {
           "JSONFile": {
-            "$ref": "contracts.backends.JSONFile",
-            "$ref": "contracts.backends.InstalledPackagesBackend"
+            "$ref": "contracts.backends.JSONFile"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -43,8 +47,10 @@
       "contracts": {
         "backends": {
           "Memory": {
-            "$ref": "contracts.backends.Memory",
-            "$ref": "contracts.backends.InstalledPackagesBackend"
+            "$ref": "contracts.backends.Memory"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -59,8 +65,10 @@
       "contracts": {
         "backends": {
           "Memory": {
-            "$ref": "contracts.backends.Memory",
-            "$ref": "contracts.backends.InstalledPackagesBackend"
+            "$ref": "contracts.backends.Memory"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -75,8 +83,10 @@
       "contracts": {
         "backends": {
           "Memory": {
-            "$ref": "contracts.backends.Memory",
-            "$ref": "contracts.backends.InstalledPackagesBackend"
+            "$ref": "contracts.backends.Memory"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -85,7 +95,7 @@
   "contracts": {
     "backends": {
       "InstalledPackages": {
-        "class": "populus.providers.backends.installed_packages.InstalledPackagesBackend",
+        "class": "populus.contracts.backends.installed_packages.InstalledPackagesBackend",
         "priority": 20
       },
       "JSONFile": {

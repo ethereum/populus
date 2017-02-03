@@ -51,8 +51,13 @@ def config_set(ctx, key_value_pairs):
     """
     project = ctx.obj['PROJECT']
     for key, value in key_value_pairs:
+        is_already_present = key in project.config
         project.config[key] = value
-        click.echo("Setting {0} => {1}".format(key, value))
+        click.echo("{0}: {1} ({2})".format(
+            key,
+            value,
+            'updated' if is_already_present else 'added',
+        ))
     project.write_config()
 
 
@@ -69,7 +74,7 @@ def config_get(ctx, keys):
     project = ctx.obj['PROJECT']
     for key in keys:
         try:
-            click.echo("{0} => {1}".format(key, project.config[key]))
+            click.echo("{0}: {1}".format(key, project.config[key]))
         except KeyError:
             click.echo("KeyError: {0}".format(key), err=True)
 
@@ -87,7 +92,7 @@ def config_delete(ctx, keys):
     project = ctx.obj['PROJECT']
     for key in keys:
         try:
-            click.echo("Deleting {0} => {1}".format(key, project.config[key]))
+            click.echo("{0}: {1} (deleted)".format(key, project.config[key]))
             del project.config[key]
         except KeyError:
             click.echo("KeyError: {0}".format(key), err=True)

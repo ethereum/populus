@@ -501,3 +501,44 @@ Tester
 Web3 connection which will use the ``EthereumTesterProvider``.
 
 * key: ``web3.Tester``
+
+
+Command Line Interface
+----------------------
+
+You can manage your configuration using the command line with the ``$ populus
+config`` command.
+
+.. code-block:: bash
+
+    $ populus config
+    Usage: populus config [OPTIONS] COMMAND [ARGS]...
+
+      Manage and run ethereum blockchains.
+
+    Options:
+      -h, --help  Show this message and exit.
+
+    Commands:
+      delete  Deletes the provided key/value pairs from the...
+      get     Gets the provided key/value pairs from the...
+      list    Prints the project configuration out to the...
+      set     Sets the provided key/value pairs in the...
+
+To interact with nested keys simply separate them with a ``.``.
+
+
+.. code-block:: bash
+
+    $ populus config list
+    some.nested.key_a: the_value_a
+    some.nested.key_b: the_value_b
+    $ populus config set some.nested.key_c:the_value_c
+    $ populus config list
+    some.nested.key_a: the_value_a
+    some.nested.key_b: the_value_b
+    some.nested.key_c: the_value_c
+    $ populus config get some.nested.key_a
+    some.nested.key_a: the_value_a
+    $ populus config delete some.nested.key_a
+    some.nested.key_a: the_value_a (deleted)

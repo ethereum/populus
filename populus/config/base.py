@@ -8,13 +8,15 @@ from populus.utils.functional import (
 from populus.utils.empty import (
     empty,
 )
-from populus.utils.config import (
+from populus.utils.mappings import (
     has_nested_key,
     get_nested_key,
     set_nested_key,
     pop_nested_key,
+    flatten_mapping,
+)
+from populus.utils.config import (
     get_empty_config,
-    flatten_config_items,
     resolve_config,
 )
 
@@ -97,7 +99,7 @@ class Config(object):
     @cast_return_to_tuple
     def items(self, flatten=False):
         if flatten:
-            _items = flatten_config_items(self._wrapped)
+            _items = flatten_mapping(self._wrapped)
         else:
             _items = self._wrapped.items()
         for key, value in _items:

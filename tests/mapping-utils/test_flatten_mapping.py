@@ -2,8 +2,8 @@ import pytest
 
 import collections
 
-from populus.utils.config import (
-    flatten_config_items,
+from populus.utils.mappings import (
+    flatten_mapping,
 )
 
 
@@ -55,5 +55,5 @@ NESTED_TWO_LEVELS = collections.OrderedDict((
     )
 )
 def test_flattening_config_items(config, expected):
-    actual = flatten_config_items(config)
+    actual = flatten_mapping(config)
     assert actual == expected

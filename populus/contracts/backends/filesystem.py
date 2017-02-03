@@ -74,7 +74,7 @@ class JSONFileBackend(BaseContractBackend):
         registrar_data = self.registrar_data
         matching_chain_definitions = get_matching_chain_definitions(
             self.chain.web3,
-            registrar_data['deployments'],
+            registrar_data.get('deployments', {}),
         )
         sort_key_fn = functools.partial(chain_definition_sort_key, self.chain.web3)
         ordered_matching_chain_definitions = tuple(sorted(

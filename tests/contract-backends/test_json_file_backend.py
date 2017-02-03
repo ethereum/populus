@@ -4,6 +4,7 @@ import json
 import os
 
 from populus.config import Config
+from populus.contracts.exceptions import NoKnownAddress
 from populus.contracts.backends.filesystem import JSONFileBackend
 
 from populus.utils.chains import (
@@ -69,3 +70,8 @@ def test_getting_an_address(project_dir, backend, web3):
 
     address = backend.get_contract_address('some-key')
     assert address == '0xd3cda913deb6f67967b99d67acdfa1712c293601'
+
+
+def test_getting_an_unknown_address(project_dir, backend, web3):
+    with pytest.raises(NoKnownAddress):
+        backend.get_contract_address('some-key')

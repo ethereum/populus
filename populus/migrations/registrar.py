@@ -34,15 +34,17 @@ REGISTRAR_V4_SOURCE_PATH = os.path.join(BASE_DIR, 'RegistrarV4.sol')
 
 def get_compiled_registrar_contract():
     if is_solc_03x():
-        compiled_contracts = compile_files([REGISTRAR_V3_SOURCE_PATH])
+        registrar_source_path = REGISTRAR_V3_SOURCE_PATH
     elif is_solc_04x():
-        compiled_contracts = compile_files([REGISTRAR_V4_SOURCE_PATH])
+        registrar_source_path = REGISTRAR_V4_SOURCE_PATH
     else:
         raise ValueError(
             "Unsupported version of solc.  Found: {0}.  Only 0.3.x and 0.4.x "
             "are supported".format(get_solc_version())
         )
-    contract_data = compiled_contracts['Registrar']
+    compiled_contracts = compile_files([registrar_source_path])
+    lookup_key = "{0}:Registrar".format(os.path.abspath(registrar_source_path))
+    contract_data = compiled_contracts[lookup_key]
     normalized_data = normalize_contract_data(contract_data, {})
     return normalized_data
 

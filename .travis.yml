@@ -39,12 +39,13 @@ cache:
     - $HOME/.ethash/
     - $TRAVIS_BUILD_DIR/.tox --recreate
 before_install:
-  - sudo add-apt-repository -y ppa:ethereum/ethereum
-  - sudo apt-get update
-install:
   - if [ -n "$SOLC_VERSION" ]; then export SOLC_BINARY="$TRAVIS_BUILD_DIR/solc-versions/solc-$SOLC_VERSION/solc"; fi
   - if [ -n "$SOLC_VERSION" ]; then export LD_LIBRARY_PATH="$TRAVIS_BUILD_DIR/solc-versions/solc-$SOLC_VERSION"; fi
   - if [ -n "$SOLC_VERSION" ]; then sudo apt-get install -y tree unzip; fi
+  - sudo add-apt-repository -y ppa:ethereum/ethereum
+  - sudo apt-get update
+install:
+  - if [ -n "$SOLC_VERSION" ]; then /.$TRAVIS_BUILD_DIR/bin/install_solc.sh; fi
   - travis_retry sudo apt-get install -y ethereum
   - travis_retry pip install setuptools --upgrade
   - travis_retry pip install tox

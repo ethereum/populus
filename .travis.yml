@@ -17,18 +17,6 @@ env:
     # py35
     - TOX_ENV=py35-stdlib SOLC_VERSION=0.4.8
     - TOX_ENV=py35-gevent SOLC_VERSION=0.4.8
-    #
-    # Solc 0.4.9
-    #
-    # py27
-    - TOX_ENV=py27-stdlib SOLC_VERSION=0.4.9
-    - TOX_ENV=py27-gevent SOLC_VERSION=0.4.9
-    # py34
-    - TOX_ENV=py34-stdlib SOLC_VERSION=0.4.9
-    - TOX_ENV=py34-gevent SOLC_VERSION=0.4.9
-    # py35
-    - TOX_ENV=py35-stdlib SOLC_VERSION=0.4.9
-    - TOX_ENV=py35-gevent SOLC_VERSION=0.4.9
     # Linting
     - TOX_ENV=flake8
   global:

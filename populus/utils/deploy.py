@@ -1,12 +1,19 @@
 import itertools
 from collections import OrderedDict
 
+import toposort
+
 from populus.utils.contracts import (
     get_shallow_dependency_graph,
-    get_contract_deploy_order,
     get_recursive_contract_dependencies,
+)
+from populus.utils.linking import (
     link_bytecode,
 )
+
+
+def compute_deploy_order(dependency_graph):
+    return toposort.toposort_flatten(dependency_graph)
 
 
 def get_deploy_order(contracts_to_deploy, compiled_contracts):
@@ -26,7 +33,7 @@ def get_deploy_order(contracts_to_deploy, compiled_contracts):
     deploy_order = [
         (contract_name, compiled_contracts[contract_name])
         for contract_name
-        in get_contract_deploy_order(dependency_graph)
+        in compute_deploy_order(dependency_graph)
         if contract_name in all_contracts_to_deploy
     ]
     return OrderedDict(deploy_order)

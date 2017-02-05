@@ -4,9 +4,10 @@ from web3.utils.string import (
     force_text,
 )
 
-from populus.utils.contracts import (
+from populus.legacy.contracts import (
     get_contract_library_dependencies,
 )
+
 from populus.utils.deploy import (
     deploy_contract,
 )

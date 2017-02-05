@@ -4,8 +4,8 @@ import pytest
 from populus.utils.filesystem import (
     remove_file_if_exists,
 )
-from populus.utils.contracts import (
-    link_bytecode,
+from populus.utils.linking import (
+    link_bytecode_by_name,
 )
 from populus.chain import (
     NoKnownAddress,
@@ -202,8 +202,8 @@ def test_get_contract_factory_with_declared_dependency(tester_chain):
         },
     )
 
-    expected_code = link_bytecode(MULTIPLY_13['code'], Library13='0xd3cda913deb6f67967b99d67acdfa1712c293601')
-    expected_runtime = link_bytecode(MULTIPLY_13['code_runtime'], Library13='0xd3cda913deb6f67967b99d67acdfa1712c293601')
+    expected_code = link_bytecode_by_name(MULTIPLY_13['code'], Library13='0xd3cda913deb6f67967b99d67acdfa1712c293601')
+    expected_runtime = link_bytecode_by_name(MULTIPLY_13['code_runtime'], Library13='0xd3cda913deb6f67967b99d67acdfa1712c293601')
 
     assert Multiply13.code == expected_code
     assert Multiply13.code_runtime == expected_runtime
@@ -223,8 +223,8 @@ def test_get_contract_factory_with_registrar_dependency(tester_chain,
     MULTIPLY_13 = chain.project.compiled_contracts['Multiply13']
     Multiply13 = chain.get_contract_factory('Multiply13')
 
-    expected_code = link_bytecode(MULTIPLY_13['code'], Library13=library_13.address)
-    expected_runtime = link_bytecode(MULTIPLY_13['code_runtime'], Library13=library_13.address)
+    expected_code = link_bytecode_by_name(MULTIPLY_13['code'], Library13=library_13.address)
+    expected_runtime = link_bytecode_by_name(MULTIPLY_13['code_runtime'], Library13=library_13.address)
 
     assert Multiply13.code == expected_code
     assert Multiply13.code_runtime == expected_runtime

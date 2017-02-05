@@ -4,8 +4,8 @@ from populus.compilation import (
     compile_project_contracts,
 )
 
-from populus.utils.filesystem import (
-    get_contracts_dir,
+from populus.utils.contracts import (
+    get_contracts_source_dir,
 )
 
 
@@ -14,7 +14,7 @@ def test_compiling_project_contracts(project_dir, write_project_file, MATH):
 
     source_paths, contract_data = compile_project_contracts(
         project_dir,
-        get_contracts_dir(project_dir),
+        get_contracts_source_dir(project_dir),
     )
 
     assert 'contracts/Math.sol' in source_paths

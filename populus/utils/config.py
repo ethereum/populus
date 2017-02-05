@@ -20,10 +20,6 @@ from .functional import (
     compose,
     cast_return_to_ordered_dict,
 )
-from .mapping import (
-    has_nested_key,
-    get_nested_key,
-)
 
 
 CONFIG_SCHEMA_FILENAME = "config.schema.json"

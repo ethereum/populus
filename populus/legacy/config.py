@@ -5,11 +5,7 @@ from populus.utils.six import configparser
 from populus.utils.functional import (
     deep_merge_dicts,
 )
-<<<<<<< HEAD
 from populus.utils.mappings import (
-=======
-from populus.utils.mapping import (
->>>>>>> cbaf560... make jsonfile backend work
     set_nested_key,
 )
 from populus.utils.config import (

@@ -20,7 +20,7 @@ from populus.utils.config import (
 from populus.utils.contracts import (
     get_contracts_source_dir,
 )
-from populus.utils.compiling import (
+from populus.utils.compile import (
     get_build_asset_dir,
     get_compiled_contracts_asset_path,
 )
@@ -121,11 +121,7 @@ class Project(object):
     def config(self):
         if self._config_cache is None:
             self._config_cache = Config(
-<<<<<<< HEAD
                 config=self._project_config,
-=======
-                self._project_config,
->>>>>>> 3658b23... Packaging implementation
                 schema=self._project_config_schema,
             )
         return self._config_cache

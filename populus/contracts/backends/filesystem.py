@@ -9,7 +9,7 @@ from populus.contracts.exceptions import NoKnownAddress
 from populus.utils.functional import (
     cast_return_to_tuple,
 )
-from populus.utils.mapping import (
+from populus.utils.mappings import (
     set_nested_key,
 )
 from populus.utils.chains import (

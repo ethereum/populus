@@ -21,6 +21,10 @@ from web3 import (
     HTTPProvider,
 )
 
+from populus.legacy.contracts import (
+    get_contract_library_dependencies,
+)
+
 from populus.utils.functional import (
     cached_property,
 )
@@ -37,11 +41,12 @@ from populus.utils.filesystem import (
     get_blockchains_dir,
     tempdir,
 )
+from populus.utils.linking import (
+    link_bytecode_by_name,
+)
 from populus.utils.contracts import (
     construct_contract_factories,
     package_contracts,
-    get_contract_library_dependencies,
-    link_bytecode,
 )
 from populus.utils.chains import (
     get_chaindata_dir,
@@ -307,7 +312,7 @@ class Chain(object):
         }
 
         linked_bytecodes = [
-            link_bytecode(bytecode, **all_link_dependencies)
+            link_bytecode_by_name(bytecode, **all_link_dependencies)
             for bytecode in bytecodes
         ]
         return linked_bytecodes

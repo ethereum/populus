@@ -8,7 +8,7 @@ from solc import (
 from populus.utils.compile import (
     normalize_contract_data,
 )
-from populus.utils.contracts import (
+from populus.utils.linking import (
     link_bytecode,
 )
 
@@ -43,8 +43,7 @@ def get_compiled_registrar_contract():
             "are supported".format(get_solc_version())
         )
     compiled_contracts = compile_files([registrar_source_path])
-    lookup_key = "{0}:Registrar".format(os.path.abspath(registrar_source_path))
-    contract_data = compiled_contracts[lookup_key]
+    contract_data = compiled_contracts['Registrar']
     normalized_data = normalize_contract_data(contract_data, {})
     return normalized_data
 

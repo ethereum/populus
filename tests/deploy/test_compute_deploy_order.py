@@ -1,9 +1,9 @@
-from populus.utils.contracts import (
-    get_contract_deploy_order,
+from populus.utils.deploy import (
+    compute_deploy_order,
 )
 
 
-def test_get_contract_deploy_order():
+def test_compute_deploy_order():
     dependency_graph = {
         'A': {'B', 'C'},
         'C': {'E'},
@@ -16,7 +16,7 @@ def test_get_contract_deploy_order():
     expected_deploy_order_a = ['B', 'E', 'D', 'C', 'A']
     expected_deploy_order_b = ['B', 'E', 'C', 'D', 'A']
 
-    actual_deploy_order = get_contract_deploy_order(dependency_graph)
+    actual_deploy_order = compute_deploy_order(dependency_graph)
 
     assert any((
         actual_deploy_order == expected_deploy_order_a,

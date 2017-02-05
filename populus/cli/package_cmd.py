@@ -2,6 +2,10 @@ import click
 import json
 import os
 
+from populus.utils.functional import (
+    compose,
+    cast_return_to_dict,
+)
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
@@ -38,6 +42,13 @@ def package_cmd(ctx):
 
 def split_on_commas(values):
     return [value.strip() for value in values.split(',') if value]
+
+
+@cast_return_to_dict
+def split_on_colons(values):
+    for kv in values:
+        key, _, value = kv.partition(':')
+        yield key, value
 
 
 @package_cmd.command('init')
@@ -114,7 +125,7 @@ def package_init(ctx):
 
     package_manifest['links'] = click.prompt(
         'Links',
-        value_proc=split_on_commas,
+        value_proc=compose(split_on_commas, split_on_colons),
         default=package_manifest.get('links', {}),
     )
 

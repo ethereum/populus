@@ -12,6 +12,9 @@
         "backends": {
           "JSONFile": {
             "$ref": "contracts.backends.JSONFile"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -27,6 +30,9 @@
         "backends": {
           "JSONFile": {
             "$ref": "contracts.backends.JSONFile"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -42,6 +48,9 @@
         "backends": {
           "Memory": {
             "$ref": "contracts.backends.Memory"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -57,6 +66,9 @@
         "backends": {
           "Memory": {
             "$ref": "contracts.backends.Memory"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -72,6 +84,9 @@
         "backends": {
           "Memory": {
             "$ref": "contracts.backends.Memory"
+          },
+          "InstalledPackages": {
+            "$ref": "contracts.backends.InstalledPackages"
           }
         }
       }
@@ -80,7 +95,7 @@
   "contracts": {
     "backends": {
       "InstalledPackages": {
-        "class": "populus.providers.backends.installed_packages.InstalledPackagesBackend",
+        "class": "populus.contracts.backends.installed_packages.InstalledPackagesBackend",
         "priority": 20
       },
       "JSONFile": {

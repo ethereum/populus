@@ -67,7 +67,7 @@ def construct_release_lockfile(project,
 
     contract_types_names_from_deployments = {
         contract_instance['contract_type']
-        for deployed_instances in deployments
+        for deployed_instances in deployments.values()
         for contract_instance in deployed_instances.values()
         if is_contract_name(contract_instance['contract_type'])
     }
@@ -89,7 +89,7 @@ def construct_deployments(project, chain_names, contract_instance_names):
     for chain_name in chain_names:
         with project.get_chain(chain_name) as chain:
             chain_definition = get_chain_definition(chain.web3)
-            provider = chain.contract_provider
+            provider = chain.store.provider
             deployed_contract_instances = construct_deployments_object(
                 provider,
                 contract_instance_names,

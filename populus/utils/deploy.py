@@ -8,7 +8,7 @@ from populus.utils.contracts import (
     get_recursive_contract_dependencies,
 )
 from populus.utils.linking import (
-    link_bytecode,
+    link_bytecode_by_name,
 )
 
 
@@ -50,8 +50,8 @@ def deploy_contract(chain,
 
     web3 = chain.web3
 
-    code = link_bytecode(contract_factory.code, **link_dependencies)
-    code_runtime = link_bytecode(contract_factory.code_runtime, **link_dependencies)
+    code = link_bytecode_by_name(contract_factory.code, **link_dependencies)
+    code_runtime = link_bytecode_by_name(contract_factory.code_runtime, **link_dependencies)
 
     ContractFactory = web3.eth.contract(
         abi=contract_factory.abi,

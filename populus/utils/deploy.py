@@ -51,7 +51,11 @@ def deploy_contract(chain,
     web3 = chain.web3
 
     code = link_bytecode_by_name(contract_factory.code, **link_dependencies)
-    code_runtime = link_bytecode_by_name(contract_factory.code_runtime, **link_dependencies)
+
+    if contract_factory.code_runtime:
+        code_runtime = link_bytecode_by_name(contract_factory.code_runtime, **link_dependencies)
+    else:
+        code_runtime = None
 
     ContractFactory = web3.eth.contract(
         abi=contract_factory.abi,

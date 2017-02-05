@@ -9,7 +9,7 @@ from populus.utils.compile import (
     normalize_contract_data,
 )
 from populus.utils.linking import (
-    link_bytecode,
+    link_bytecode_by_name,
 )
 
 
@@ -74,7 +74,7 @@ def get_contract_from_registrar(chain,
 
     contract_address = registrar.call().getAddress(registrar_key)
 
-    expected_runtime = link_bytecode(
+    expected_runtime = link_bytecode_by_name(
         contract_factory.code_runtime,
         **link_dependencies
     )

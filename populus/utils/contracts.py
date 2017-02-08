@@ -18,17 +18,17 @@ def get_contracts_source_dir(project_dir):
     return os.path.abspath(contracts_source_dir)
 
 
-def package_contracts(contract_classes):
+def package_contracts(contract_factories):
     _dict = {
-        '__len__': lambda s: len(contract_classes),
-        '__iter__': lambda s: iter(contract_classes.items()),
-        '__contains__': lambda s, k: contract_classes.__contains__(k),
-        '__getitem__': lambda s, k: contract_classes.__getitem__(k),
-        '__setitem__': lambda s, k, v: contract_classes.__setitem__(k, v),
-        'keys': lambda s: contract_classes.keys(),
-        'values': lambda s: contract_classes.values(),
+        '__len__': lambda s: len(contract_factories),
+        '__iter__': lambda s: iter(contract_factories.items()),
+        '__contains__': lambda s, k: contract_factories.__contains__(k),
+        '__getitem__': lambda s, k: contract_factories.__getitem__(k),
+        '__setitem__': lambda s, k, v: contract_factories.__setitem__(k, v),
+        'keys': lambda s: contract_factories.keys(),
+        'values': lambda s: contract_factories.values(),
     }
-    _dict.update(contract_classes)
+    _dict.update(contract_factories)
 
     return type('contracts', (object,), _dict)()
 

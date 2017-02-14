@@ -319,11 +319,11 @@ def deploy_contract_and_verify(chain,
     ))
 
     # Verification
-    deployed_code = web3.eth.getCode(contract_address)
+    deployed_bytecode = web3.eth.getCode(contract_address)
 
-    if contract_factory.code_runtime:
+    if contract_factory.bytecode_runtime:
         click.echo("Verifying deployed bytecode...")
-        is_bytecode_match = deployed_code == contract_factory.code_runtime
+        is_bytecode_match = deployed_bytecode == contract_factory.bytecode_runtime
         if is_bytecode_match:
             click.echo(
                 "Verified contract bytecode @ {0} matches expected runtime "
@@ -335,8 +335,8 @@ def deploy_contract_and_verify(chain,
                 "expected : '{1}'\n"
                 "actual   : '{2}'\n".format(
                     contract_address,
-                    contract_factory.code_runtime,
-                    deployed_code,
+                    contract_factory.bytecode_runtime,
+                    deployed_bytecode,
                 ),
                 err=True,
             )
@@ -346,7 +346,7 @@ def deploy_contract_and_verify(chain,
             "No runtime available.  Falling back to verifying non-empty "
             "bytecode."
         )
-        if len(deployed_code) <= 2:
+        if len(deployed_bytecode) <= 2:
             click.echo(
                 "Bytecode @ {0} is unexpectedly empty.".format(contract_address),
                 err=True,

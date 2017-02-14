@@ -18,9 +18,9 @@ def process_compiler_output(name_from_compiler, data_from_compiler, contract_met
 def normalize_contract_data(contract_data, contract_meta):
     yield 'meta', contract_meta
     if 'bin' in contract_data:
-        yield 'code', add_0x_prefix(contract_data['bin'])
+        yield 'bytecode', add_0x_prefix(contract_data['bin'])
     if 'bin-runtime' in contract_data:
-        yield 'code_runtime', add_0x_prefix(contract_data['bin-runtime'])
+        yield 'bytecode_runtime', add_0x_prefix(contract_data['bin-runtime'])
     if 'abi' in contract_data:
         yield 'abi', contract_data['abi']
     if 'userdoc' in contract_data:

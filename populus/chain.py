@@ -358,14 +358,14 @@ class Chain(object):
 
         chain_bytecode = self.web3.eth.getCode(contract_address)
 
-        is_bytecode_match = chain_bytecode == contract_factory.code_runtime
+        is_bytecode_match = chain_bytecode == contract_factory.bytecode_runtime
         if not is_bytecode_match and raise_on_error:
             raise BytecodeMismatchError(
                 "Bytecode @ {0} does not match expected contract bytecode.\n\n"
                 "expected : '{1}'\n"
                 "actual   : '{2}'\n".format(
                     contract_address,
-                    contract_factory.code_runtime,
+                    contract_factory.bytecode_runtime,
                     chain_bytecode,
                 ),
             )
@@ -417,22 +417,22 @@ class Chain(object):
         base_contract_factory = self.contract_factories[contract_name]
 
         if link_dependencies is not False:
-            code, code_runtime = self._link_code(
+            bytecode, bytecode_runtime = self._link_code(
                 bytecodes=[
-                    base_contract_factory.code,
-                    base_contract_factory.code_runtime,
+                    base_contract_factory.bytecode,
+                    base_contract_factory.bytecode_runtime,
                 ],
                 link_dependencies=link_dependencies,
             )
         else:
-            code, code_runtime = (
-                base_contract_factory.code,
-                base_contract_factory.code_runtime,
+            bytecode, bytecode_runtime = (
+                base_contract_factory.bytecode,
+                base_contract_factory.bytecode_runtime,
             )
 
         contract_factory = self.web3.eth.contract(
-            code=code,
-            code_runtime=code_runtime,
+            bytecode=bytecode,
+            bytecode_runtime=bytecode_runtime,
             abi=base_contract_factory.abi,
             source=base_contract_factory.source,
         )
@@ -524,7 +524,7 @@ class BaseTesterChain(Chain):
         if not registrar.call().exists(contract_key):
             # First dig down into the dependency tree to make the library
             # dependencies available.
-            contract_bytecode = self.contract_factories[contract_name].code
+            contract_bytecode = self.contract_factories[contract_name].bytecode
             contract_dependencies = self._extract_library_dependencies(
                 contract_bytecode, link_dependencies,
             )

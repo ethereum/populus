@@ -20,7 +20,7 @@ def test_deploy_contract_operation_on_math_contract(web3, chain, MATH):
 
     code = web3.eth.getCode(contract_address)
 
-    assert code == MATH['code_runtime']
+    assert code == MATH['bytecode_runtime']
 
 
 def test_deploy_contract_operation_with_arguments(web3, chain,
@@ -40,7 +40,7 @@ def test_deploy_contract_operation_with_arguments(web3, chain,
 
     code = web3.eth.getCode(contract_address)
 
-    assert code == WITH_CONSTRUCTOR_ARGUMENTS['code_runtime']
+    assert code == WITH_CONSTRUCTOR_ARGUMENTS['bytecode_runtime']
 
     ContractFactory = web3.eth.contract(**WITH_CONSTRUCTOR_ARGUMENTS)
     contract = ContractFactory(address=contract_address)

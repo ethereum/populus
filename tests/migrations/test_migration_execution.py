@@ -18,8 +18,8 @@ def test_single_migration_execution(web3, chain, MATH):
 
         compiled_contracts = {
             'Math': {
-                'code': MATH['code'],
-                'code_runtime': MATH['code_runtime'],
+                'bytecode': MATH['bytecode'],
+                'bytecode_runtime': MATH['bytecode_runtime'],
                 'abi': MATH['abi'],
             },
         }

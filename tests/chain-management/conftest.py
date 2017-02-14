@@ -1,14 +1,9 @@
 import pytest
 
-import os
 import json
 
 from populus.utils.compat import (
     Timeout,
-)
-from populus.utils.filesystem import (
-    tempdir,
-    ensure_path_exists,
 )
 from populus.utils.linking import (
     link_bytecode_by_name,
@@ -267,54 +262,34 @@ def MULTIPLY_13(MULTIPLY_13_BYTECODE,
     }
 
 
-@pytest.yield_fixture(scope='session')
-def temp_chain(MATH, LIBRARY_13, MULTIPLY_13):
-    origin_dir = os.getcwd()
-    try:
-        with tempdir() as temporary_dir:
-            os.chdir(temporary_dir)
+@pytest.yield_fixture()
+def temp_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
+    write_project_file('contracts/Math.sol', MATH['source'])
+    write_project_file(
+        'contracts/Multiply13.sol',
+        '\n'.join((LIBRARY_13['source'], MULTIPLY_13['source'])),
+    )
 
-            def write_project_file(filename, content=''):
-                full_path = os.path.join(temporary_dir, filename)
-                file_dir = os.path.dirname(full_path)
-                ensure_path_exists(file_dir)
+    project = Project()
 
-                with open(full_path, 'w') as f:
-                    f.write(content)
+    assert 'Math' in project.compiled_contracts
+    assert 'Library13' in project.compiled_contracts
+    assert 'Multiply13' in project.compiled_contracts
 
-            write_project_file('contracts/Math.sol', MATH['source'])
-            write_project_file(
-                'contracts/Multiply13.sol',
-                '\n'.join((LIBRARY_13['source'], MULTIPLY_13['source'])),
-            )
-
-            project = Project()
-
-            assert 'Math' in project.compiled_contracts
-            assert 'Library13' in project.compiled_contracts
-            assert 'Multiply13' in project.compiled_contracts
-
-            with project.get_chain('temp') as chain:
-                with Timeout(5) as timeout:
-                    while True:
-                        try:
-                            chain.web3.eth.sendTransaction({
-                                'from': chain.web3.eth.coinbase,
-                                'to': chain.web3.eth.coinbase,
-                                'value': 1
-                            })
-                        except ValueError:
-                            timeout.check()
-                        else:
-                            break
-                yield chain
-    finally:
-        os.chdir(origin_dir)
-
-
-@pytest.fixture(autouse=True)
-def reset_temp_chain_registrar(temp_chain):
-    temp_chain._registrar = None
+    with project.get_chain('temp') as chain:
+        with Timeout(5) as timeout:
+            while True:
+                try:
+                    chain.web3.eth.sendTransaction({
+                        'from': chain.web3.eth.coinbase,
+                        'to': chain.web3.eth.coinbase,
+                        'value': 1
+                    })
+                except ValueError:
+                    timeout.check()
+                else:
+                    break
+        yield chain
 
 
 @pytest.fixture()

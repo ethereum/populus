@@ -20,6 +20,6 @@ def test_compiling_project_contracts(project_dir, write_project_file, MATH):
     assert 'contracts/Math.sol' in source_paths
 
     assert 'Math' in contract_data
-    assert 'code' in contract_data['Math']
-    assert 'code_runtime' in contract_data['Math']
+    assert 'bytecode' in contract_data['Math']
+    assert 'bytecode_runtime' in contract_data['Math']
     assert 'abi' in contract_data['Math']

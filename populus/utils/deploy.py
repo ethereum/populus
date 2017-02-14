@@ -19,6 +19,7 @@ def compute_deploy_order(dependency_graph):
 def get_deploy_order(contracts_to_deploy, compiled_contracts):
     # Extract and dependencies that exist due to library linking.
     dependency_graph = get_shallow_dependency_graph(compiled_contracts)
+    global_deploy_order = compute_deploy_order(dependency_graph)
 
     # Compute the full set of dependencies needed to deploy the desired
     # contracts.
@@ -27,23 +28,16 @@ def get_deploy_order(contracts_to_deploy, compiled_contracts):
         for contract_name in contracts_to_deploy
     ))
     all_contracts_to_deploy = all_deploy_dependencies.union(contracts_to_deploy)
-    dependency_deploy_order = compute_deploy_order(dependency_graph)
 
     # Now compute the order that the contracts should be deployed based on
     # their dependencies.
-    dependency_deploy_order = [
+    deploy_order = [
         (contract_name, compiled_contracts[contract_name])
         for contract_name
-        in dependency_deploy_order
+        in global_deploy_order
         if contract_name in all_contracts_to_deploy
     ]
-    primary_deploy_order = [
-        (contract_name, compiled_contracts[contract_name])
-        for contract_name
-        in all_contracts_to_deploy
-        if contract_name not in dependency_deploy_order
-    ]
-    return OrderedDict(dependency_deploy_order + primary_deploy_order)
+    return OrderedDict(deploy_order)
 
 
 def deploy_contract(chain,

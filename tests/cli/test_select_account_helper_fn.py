@@ -12,15 +12,13 @@ from populus.utils.cli import (
 
 @pytest.mark.parametrize(
     ('account_index'),
-    (0, 1, 2, 3),
+    (0, 1),
 )
 def test_select_account_helper_with_indexes(project_dir, account_index):
     project = Project()
     chain = project.get_chain('temp')
 
     # create 3 new accounts
-    create_new_account(chain.geth.data_dir, b'a-test-password')
-    create_new_account(chain.geth.data_dir, b'a-test-password')
     create_new_account(chain.geth.data_dir, b'a-test-password')
 
 
@@ -42,15 +40,13 @@ def test_select_account_helper_with_indexes(project_dir, account_index):
 
 @pytest.mark.parametrize(
     ('account_index'),
-    (0, 1, 2, 3),
+    (0, 1),
 )
 def test_select_account_helper_with_accounts(project_dir, account_index):
     project = Project()
     chain = project.get_chain('temp')
 
     # create 3 new accounts
-    create_new_account(chain.geth.data_dir, b'a-test-password')
-    create_new_account(chain.geth.data_dir, b'a-test-password')
     create_new_account(chain.geth.data_dir, b'a-test-password')
 
 

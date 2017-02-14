@@ -79,12 +79,12 @@ def get_shallow_dependency_graph(contracts):
     """
     link_dependencies = {
         contract_name: set(ref.full_name for ref in find_link_references(
-            contract_data['code'],
+            contract_data['bytecode'],
             contracts.keys(),
         ))
         for contract_name, contract_data
         in contracts.items()
-        if is_string(contract_data.get('code'))
+        if is_string(contract_data.get('bytecode'))
     }
     return link_dependencies
 

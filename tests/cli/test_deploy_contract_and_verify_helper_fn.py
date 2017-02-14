@@ -51,9 +51,9 @@ def test_with_successful_deploy_sans_runtime_bytecode(project_dir,
     with chain:
         Math = chain.web3.eth.contract(
             abi=MATH['abi'],
-            code=MATH['code'],
+            bytecode=MATH['bytecode'],
         )
-        assert not Math.code_runtime
+        assert not Math.bytecode_runtime
 
         @click.command()
         def wrapper():

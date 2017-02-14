@@ -77,6 +77,7 @@ def expand_shortened_reference_name(short_name, full_reference_names):
     candidates = [
         full_name for full_name in full_reference_names if full_name.startswith(short_name)
     ]
+    assert False
     if len(candidates) == 1:
         return candidates[0]
     elif len(candidates) > 1:

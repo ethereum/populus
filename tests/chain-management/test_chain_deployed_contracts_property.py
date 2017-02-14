@@ -40,8 +40,8 @@ def math(tester_chain):
     math_deploy_txn = web3.eth.getTransaction(math_deploy_txn_hash)
     math_address = chain.wait.for_contract_address(math_deploy_txn_hash, timeout=30)
 
-    assert math_deploy_txn['input'] == MATH['code']
-    assert web3.eth.getCode(math_address) == MATH['code_runtime']
+    assert math_deploy_txn['input'] == MATH['bytecode']
+    assert web3.eth.getCode(math_address) == MATH['bytecode_runtime']
 
     return Math(address=math_address)
 
@@ -58,8 +58,8 @@ def library_13(tester_chain):
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
     library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
 
-    assert library_deploy_txn['input'] == LIBRARY_13['code']
-    assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
+    assert library_deploy_txn['input'] == LIBRARY_13['bytecode']
+    assert web3.eth.getCode(library_13_address) == LIBRARY_13['bytecode_runtime']
 
     return Library13(address=library_13_address)
 
@@ -71,13 +71,13 @@ def multiply_13(tester_chain, library_13):
 
     Multiply13 = chain.contract_factories['Multiply13']
 
-    code = link_bytecode_by_name(Multiply13.code, Library13=library_13.address)
-    code_runtime = link_bytecode_by_name(Multiply13.code_runtime, Library13=library_13.address)
+    bytecode = link_bytecode_by_name(Multiply13.bytecode, Library13=library_13.address)
+    bytecode_runtime = link_bytecode_by_name(Multiply13.bytecode_runtime, Library13=library_13.address)
 
     LinkedMultiply13 = chain.web3.eth.contract(
         abi=Multiply13.abi,
-        code=code,
-        code_runtime=code_runtime,
+        bytecode=bytecode,
+        bytecode_runtime=bytecode_runtime,
         source=Multiply13.source,
     )
 
@@ -85,8 +85,8 @@ def multiply_13(tester_chain, library_13):
     multiply_13_deploy_txn = web3.eth.getTransaction(multiply_13_deploy_txn_hash)
     multiply_13_address = chain.wait.for_contract_address(multiply_13_deploy_txn_hash, timeout=30)
 
-    assert multiply_13_deploy_txn['input'] == LinkedMultiply13.code
-    assert web3.eth.getCode(multiply_13_address) == LinkedMultiply13.code_runtime
+    assert multiply_13_deploy_txn['input'] == LinkedMultiply13.bytecode
+    assert web3.eth.getCode(multiply_13_address) == LinkedMultiply13.bytecode_runtime
 
     return LinkedMultiply13(address=multiply_13_address)
 

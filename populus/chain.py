@@ -758,15 +758,17 @@ class TemporaryGethChain(BaseGethChain):
         return config
 
     has_registrar = True
+    _registrar = None
 
-    @cached_property
+    @property
     def registrar(self):
-        RegistrarFactory = get_registrar(self.web3)
-        deploy_txn_hash = RegistrarFactory.deploy()
-        registrar_address = self.wait.for_contract_address(deploy_txn_hash)
-        registrar = RegistrarFactory(address=registrar_address)
+        if self._registrar is None:
+            RegistrarFactory = get_registrar(self.web3)
+            deploy_txn_hash = RegistrarFactory.deploy()
+            registrar_address = self.wait.for_contract_address(deploy_txn_hash)
+            self._registrar = RegistrarFactory(address=registrar_address)
 
-        return registrar
+        return self._registrar
 
 
 class TestnetChain(BaseGethChain):

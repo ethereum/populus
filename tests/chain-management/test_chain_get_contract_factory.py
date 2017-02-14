@@ -24,36 +24,6 @@ from populus.migrations.writer import (
 from populus import Project
 
 
-@pytest.yield_fixture()
-def tester_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
-    write_project_file('contracts/Math.sol', MATH['source'])
-    write_project_file(
-        'contracts/Multiply13.sol',
-        '\n'.join((LIBRARY_13['source'], MULTIPLY_13['source'])),
-    )
-
-    project = Project()
-
-    assert 'Math' in project.compiled_contracts
-    assert 'Library13' in project.compiled_contracts
-    assert 'Multiply13' in project.compiled_contracts
-
-    with project.get_chain('tester') as chain:
-        yield chain
-
-
-@pytest.fixture()
-def with_math_v2(tester_chain, write_project_file, MATH_V2):
-    project = Project()
-
-    prev_hash = project.get_source_file_hash()
-
-    write_project_file('contracts/Math.sol', MATH_V2['source'])
-
-    assert project.get_source_file_hash() != prev_hash
-    assert 'Math' in project.compiled_contracts
-
-
 @pytest.fixture()
 def library_13(tester_chain):
     chain= tester_chain
@@ -202,8 +172,14 @@ def test_get_contract_factory_with_declared_dependency(tester_chain):
         },
     )
 
-    expected_code = link_bytecode_by_name(MULTIPLY_13['code'], Library13='0xd3cda913deb6f67967b99d67acdfa1712c293601')
-    expected_runtime = link_bytecode_by_name(MULTIPLY_13['code_runtime'], Library13='0xd3cda913deb6f67967b99d67acdfa1712c293601')
+    expected_code = link_bytecode_by_name(
+        MULTIPLY_13['code'],
+        Library13='0xd3cda913deb6f67967b99d67acdfa1712c293601',
+    )
+    expected_runtime = link_bytecode_by_name(
+        MULTIPLY_13['code_runtime'],
+        Library13='0xd3cda913deb6f67967b99d67acdfa1712c293601',
+    )
 
     assert Multiply13.code == expected_code
     assert Multiply13.code_runtime == expected_runtime

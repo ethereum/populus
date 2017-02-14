@@ -40,7 +40,7 @@ def test_wait_for_receipt(project_dir, chain_name):
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
-def test_wait_for_contract_address(project_dir, chain_name, MATH_CODE, MATH_RUNTIME):
+def test_wait_for_contract_address(project_dir, chain_name, MATH_BYTECODE, MATH_RUNTIME):
     project = Project()
 
     with project.get_chain(chain_name) as chain:
@@ -49,10 +49,10 @@ def test_wait_for_contract_address(project_dir, chain_name, MATH_CODE, MATH_RUNT
         web3 = chain.web3
 
         txn_hash = web3.eth.sendTransaction({
-            'data': MATH_CODE,
+            'data': MATH_BYTECODE,
             'gas': 2000000,
         })
         contract_address = chain.wait.for_contract_address(txn_hash)
 
-        chain_code = web3.eth.getCode(contract_address)
-        assert chain_code == MATH_RUNTIME
+        chain_bytecode = web3.eth.getCode(contract_address)
+        assert chain_bytecode == MATH_RUNTIME

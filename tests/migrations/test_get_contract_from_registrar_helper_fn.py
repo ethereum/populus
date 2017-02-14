@@ -38,8 +38,8 @@ def math(deploy_chain):
     math_deploy_txn = web3.eth.getTransaction(math_deploy_txn_hash)
     math_13_address = chain.wait.for_contract_address(math_deploy_txn_hash, timeout=30)
 
-    assert math_deploy_txn['input'] == MATH['code']
-    assert web3.eth.getCode(math_13_address) == MATH['code_runtime']
+    assert math_deploy_txn['input'] == MATH['bytecode']
+    assert web3.eth.getCode(math_13_address) == MATH['bytecode_runtime']
 
     return Math(address=math_13_address)
 
@@ -56,8 +56,8 @@ def library_13(deploy_chain):
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
     library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
 
-    assert library_deploy_txn['input'] == LIBRARY_13['code']
-    assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
+    assert library_deploy_txn['input'] == LIBRARY_13['bytecode']
+    assert web3.eth.getCode(library_13_address) == LIBRARY_13['bytecode_runtime']
 
     return Library13(address=library_13_address)
 

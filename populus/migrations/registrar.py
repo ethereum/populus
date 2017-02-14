@@ -56,7 +56,7 @@ def get_registrar(web3, address=None):
         bytecode_runtime=registrar_contract_data['bytecode_runtime'],
     )
     if address is not None:
-        kwargs['address'] == address
+        kwargs['address'] = address
     return web3.eth.contract(**kwargs)
 
 

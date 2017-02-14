@@ -99,6 +99,8 @@ def deploy(ctx, chain_name, contracts_to_deploy):
         )
 
         # Display Start Message Info.
+        click.echo(deploy_order)
+        click.echo(contracts_to_deploy)
         starting_msg = (
             "Beginning contract deployment.  Deploying {0} total contracts ({1} "
             "Specified, {2} because of library dependencies)."

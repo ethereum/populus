@@ -5,8 +5,8 @@ from populus.cli import main
 
 
 CONTRACT_SOURCES = (
-    ('contracts/owned.sol', 'contract owned { address owner; function Owned() {owner = msg.sender; }}'),
-    ('contracts/mortal.sol', 'import "./owned.sol"; contract mortal is owned { function kill() { suicide(msg.sender); } } contract Immortal is owned { function kill() returns (bool no){ return false; }}'),
+    ('contracts/owned.sol', 'pragma solidity ^0.4.0;\ncontract owned { address owner; function Owned() {owner = msg.sender; }}'),
+    ('contracts/mortal.sol', 'pragma solidity ^0.4.0;\nimport "./owned.sol"; contract mortal is owned { function kill() { suicide(msg.sender); } } contract Immortal is owned { function kill() returns (bool no){ return false; }}'),
 )
 
 

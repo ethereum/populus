@@ -281,7 +281,6 @@ def deploy_contract_and_verify(chain,
                 request_account_unlock(chain, default_account, None)
             web3.eth.defaultAccount = default_account
 
-    # TODO: this needs to do contract linking.
     click.echo("Deploying {0}".format(contract_name))
 
     deploy_txn_hash, contract_factory = deploy_contract(

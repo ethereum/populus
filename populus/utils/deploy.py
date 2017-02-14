@@ -27,16 +27,23 @@ def get_deploy_order(contracts_to_deploy, compiled_contracts):
         for contract_name in contracts_to_deploy
     ))
     all_contracts_to_deploy = all_deploy_dependencies.union(contracts_to_deploy)
+    dependency_deploy_order = compute_deploy_order(dependency_graph)
 
     # Now compute the order that the contracts should be deployed based on
     # their dependencies.
-    deploy_order = [
+    dependency_deploy_order = [
         (contract_name, compiled_contracts[contract_name])
         for contract_name
-        in compute_deploy_order(dependency_graph)
+        in dependency_deploy_order
         if contract_name in all_contracts_to_deploy
     ]
-    return OrderedDict(deploy_order)
+    primary_deploy_order = [
+        (contract_name, compiled_contracts[contract_name])
+        for contract_name
+        in all_contracts_to_deploy
+        if contract_name not in dependency_deploy_order
+    ]
+    return OrderedDict(dependency_deploy_order + primary_deploy_order)
 
 
 def deploy_contract(chain,
@@ -50,17 +57,20 @@ def deploy_contract(chain,
 
     web3 = chain.web3
 
-    code = link_bytecode_by_name(contract_factory.bytecode, **link_dependencies)
+    bytecode = link_bytecode_by_name(contract_factory.bytecode, **link_dependencies)
 
     if contract_factory.bytecode_runtime:
-        code_runtime = link_bytecode_by_name(contract_factory.bytecode_runtime, **link_dependencies)
+        bytecode_runtime = link_bytecode_by_name(
+            contract_factory.bytecode_runtime,
+            **link_dependencies
+        )
     else:
-        code_runtime = None
+        bytecode_runtime = None
 
     ContractFactory = web3.eth.contract(
         abi=contract_factory.abi,
-        code=code,
-        code_runtime=code_runtime,
+        bytecode=bytecode,
+        bytecode_runtime=bytecode_runtime,
         source=contract_factory.source,
     )
 

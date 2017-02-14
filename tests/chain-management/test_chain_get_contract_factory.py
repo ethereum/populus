@@ -121,18 +121,3 @@ def test_bytecode_comes_from_project_if_no_migrations(temp_chain):
     assert Math.abi == MATH['abi']
     assert Math.bytecode == MATH['bytecode']
     assert Math.bytecode_runtime == MATH['bytecode_runtime']
-
-
-def test_it_finds_contracts_with_alternate_registrar_names(temp_chain,
-                                                           migration_0003):
-    project = Project()
-    chain = temp_chain
-
-    assert len(project.migrations) == 3
-
-    MATH = migration_0003.compiled_contracts['Math']
-    Math = chain.get_contract_factory('FancyMath')
-
-    assert Math.abi == MATH['abi']
-    assert Math.bytecode == MATH['bytecode']
-    assert Math.bytecode_runtime == MATH['bytecode_runtime']

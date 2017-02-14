@@ -1,5 +1,9 @@
 from populus.project import Project
 
+from populus.utils.compat import (
+    Timeout,
+)
+
 
 def test_external_rpc_chain(project_dir, write_project_file):
     project = Project()
@@ -27,7 +31,20 @@ def test_external_ipc_chain(project_dir, write_project_file):
 
     with project.get_chain('temp') as chain:
         web3 = chain.web3
-        chain.wait.for_unlock(timeout=30)
+
+        with Timeout(5) as timeout:
+            while True:
+                try:
+                    chain.web3.eth.sendTransaction({
+                        'from': chain.web3.eth.coinbase,
+                        'to': chain.web3.eth.coinbase,
+                        'value': 1
+                    })
+                except ValueError:
+                    timeout.check()
+                else:
+                    break
+
         registrar = chain.registrar
 
         project.config['chains.external.chain.class'] = 'populus.chain.ExternalChain'

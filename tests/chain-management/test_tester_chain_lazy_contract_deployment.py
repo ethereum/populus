@@ -34,10 +34,25 @@ def math(tester_chain):
     math_deploy_txn = web3.eth.getTransaction(math_deploy_txn_hash)
     math_address = chain.wait.for_contract_address(math_deploy_txn_hash, timeout=30)
 
-    assert math_deploy_txn['input'] == MATH['code']
-    assert web3.eth.getCode(math_address) == MATH['code_runtime']
+    assert math_deploy_txn['input'] == MATH['bytecode']
+    assert web3.eth.getCode(math_address) == MATH['bytecode_runtime']
 
     return Math(address=math_address)
+
+
+@pytest.fixture()
+def register_address(tester_chain):
+    chain = tester_chain
+    def _register_address(name, value):
+        if name.startswith('contract/'):
+            contract_key = name
+        else:
+            contract_key = 'contract/{name}'.format(name=name)
+        register_txn_hash = tester_chain.registrar.transact().setAddress(
+            contract_key, value,
+        )
+        chain.wait.for_receipt(register_txn_hash, timeout=120)
+    return _register_address
 
 
 def test_unknown_contract(tester_chain):

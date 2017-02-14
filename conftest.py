@@ -49,3 +49,25 @@ def write_project_file(project_dir):
         with open(full_path, 'w') as f:
             f.write(content)
     return _write_project_file
+
+
+@pytest.fixture()
+def wait_for_unlock():
+    from populus.utils.compat import (
+        Timeout,
+    )
+
+    def _wait_for_unlock(web3):
+        with Timeout(5) as timeout:
+            while True:
+                try:
+                    web3.eth.sendTransaction({
+                        'from': web3.eth.coinbase,
+                        'to': web3.eth.coinbase,
+                        'value': 1
+                    })
+                except ValueError:
+                    timeout.check()
+                else:
+                    break
+    return _wait_for_unlock

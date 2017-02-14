@@ -263,7 +263,7 @@ def MULTIPLY_13(MULTIPLY_13_BYTECODE,
 
 
 @pytest.yield_fixture()
-def temp_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
+def temp_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13, wait_for_unlock):
     write_project_file('contracts/Math.sol', MATH['source'])
     write_project_file(
         'contracts/Multiply13.sol',
@@ -277,18 +277,7 @@ def temp_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
     assert 'Multiply13' in project.compiled_contracts
 
     with project.get_chain('temp') as chain:
-        with Timeout(5) as timeout:
-            while True:
-                try:
-                    chain.web3.eth.sendTransaction({
-                        'from': chain.web3.eth.coinbase,
-                        'to': chain.web3.eth.coinbase,
-                        'value': 1
-                    })
-                except ValueError:
-                    timeout.check()
-                else:
-                    break
+        wait_for_unlock(chain.web3)
         yield chain
 
 

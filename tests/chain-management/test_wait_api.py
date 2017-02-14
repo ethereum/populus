@@ -21,13 +21,14 @@ def test_wait_for_block(project_dir, chain_name):
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
-def test_wait_for_receipt(project_dir, chain_name):
+def test_wait_for_receipt(project_dir, chain_name, wait_for_unlock):
     project = Project()
 
     with project.get_chain(chain_name) as chain:
-        if chain_name == 'temp':
-            chain.wait.for_unlock()
         web3 = chain.web3
+
+        if chain_name == 'temp':
+            wait_for_unlock(web3)
 
         txn_hash = web3.eth.sendTransaction({
             'to': web3.eth.coinbase,
@@ -40,13 +41,19 @@ def test_wait_for_receipt(project_dir, chain_name):
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
-def test_wait_for_contract_address(project_dir, chain_name, MATH_BYTECODE, MATH_RUNTIME):
+def test_wait_for_contract_address(project_dir,
+                                   chain_name,
+                                   MATH_BYTECODE,
+                                   MATH_RUNTIME,
+                                   wait_for_unlock):
     project = Project()
 
     with project.get_chain(chain_name) as chain:
-        if chain_name == 'temp':
-            chain.wait.for_unlock()
         web3 = chain.web3
+
+        if chain_name == 'temp':
+            wait_for_unlock(web3)
+
 
         txn_hash = web3.eth.sendTransaction({
             'data': MATH_BYTECODE,

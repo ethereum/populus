@@ -2,11 +2,9 @@ from __future__ import unicode_literals
 import itertools
 import functools
 
-from web3.utils.encoding import (
-    decode_hex,
-)
-from web3.utils.types import (
+from eth_utils import (
     is_string,
+    decode_hex,
 )
 
 from populus.utils.types import (

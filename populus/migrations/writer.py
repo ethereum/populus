@@ -6,8 +6,8 @@ import codecs
 from io import StringIO
 from collections import OrderedDict
 
-from web3.utils.string import force_text
-from web3.utils.types import (
+from eth_utils import (
+    force_text,
     is_bytes,
     is_text,
 )

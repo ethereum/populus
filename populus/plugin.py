@@ -6,6 +6,7 @@ from populus.migrations.migration import (
 )
 from populus.project import Project
 
+
 CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
 CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
 

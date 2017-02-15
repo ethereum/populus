@@ -1,6 +1,6 @@
 import types
 
-from web3.utils.string import (
+from eth_utils import (
     force_text,
 )
 
@@ -166,8 +166,8 @@ class DeployContract(Operation):
         contract_data = compiled_contracts[contract_name]
         BaseContractFactory = chain.web3.eth.contract(
             abi=contract_data['abi'],
-            code=contract_data['code'],
-            code_runtime=contract_data['code_runtime'],
+            bytecode=contract_data['bytecode'],
+            bytecode_runtime=contract_data['bytecode_runtime'],
             source=contract_data.get('source'),
         )
 
@@ -175,7 +175,7 @@ class DeployContract(Operation):
             set(compiled_contracts.keys())
         )
         library_dependencies = get_contract_library_dependencies(
-            BaseContractFactory.code,
+            BaseContractFactory.bytecode,
             all_known_contract_names,
         )
 
@@ -217,17 +217,17 @@ class DeployContract(Operation):
                 timeout=timeout,
             )
             if verify:
-                code = force_text(chain.web3.eth.getCode(contract_address))
-                expected_code = force_text(contract_factory.code_runtime)
-                if code != expected_code:
+                bytecode = force_text(chain.web3.eth.getCode(contract_address))
+                expected_bytecode = force_text(contract_factory.bytecode_runtime)
+                if bytecode != expected_bytecode:
                     raise ValueError(
                         "Bytecode @ {0} does not match expected contract "
                         "bytecode.\n\n"
                         "expected : '{1}'\n"
                         "actual   : '{2}'\n".format(
                             contract_address,
-                            expected_code,
-                            code,
+                            expected_bytecode,
+                            bytecode,
                         ),
                     )
             return {
@@ -299,8 +299,8 @@ class TransactContract(Operation):
         contract = chain.web3.eth.contract(
             address=contract_address,
             abi=contract_data['abi'],
-            code=contract_data['code'],
-            code_runtime=contract_data['code_runtime'],
+            bytecode=contract_data['bytecode'],
+            bytecode_runtime=contract_data['bytecode_runtime'],
             source=contract_data.get('source'),
         )
 

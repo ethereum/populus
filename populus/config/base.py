@@ -2,9 +2,10 @@ import copy
 
 import anyconfig
 
-from populus.utils.functional import (
-    cast_return_to_tuple,
+from eth_utils import (
+    to_tuple,
 )
+
 from populus.utils.empty import (
     empty,
 )
@@ -91,12 +92,12 @@ class Config(object):
             self[key] = value
             return value
 
-    @cast_return_to_tuple
+    @to_tuple
     def keys(self, flatten=False):
         for key, _ in self.items(flatten=flatten):
             yield key
 
-    @cast_return_to_tuple
+    @to_tuple
     def items(self, flatten=False):
         if flatten:
             _items = flatten_mapping(self._wrapped)

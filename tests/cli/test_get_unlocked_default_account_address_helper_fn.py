@@ -3,11 +3,11 @@ from flaky import flaky
 import click
 from click.testing import CliRunner
 
-from geth.accounts import create_new_account
-
-from web3.utils.string import (
+from eth_utils import (
     force_text,
 )
+
+from geth.accounts import create_new_account
 
 from populus.project import Project
 from populus.utils.chains import (

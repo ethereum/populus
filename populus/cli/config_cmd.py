@@ -1,7 +1,7 @@
 import click
 
-from populus.utils.functional import (
-    cast_return_to_tuple,
+from eth_utils import (
+    to_tuple,
 )
 
 from .main import main
@@ -27,7 +27,7 @@ def config_list(ctx):
         click.echo("{0}: {1}".format(key, value))
 
 
-@cast_return_to_tuple
+@to_tuple
 def validate_key_value(ctx, value):
     for kv in value:
         key, _, value = kv.partition(':')

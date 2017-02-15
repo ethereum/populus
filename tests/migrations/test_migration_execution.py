@@ -5,9 +5,15 @@ from populus.migrations import (
 from populus.migrations.migration import (
     get_migration_classes_for_execution,
 )
+from populus.utils.testing import (
+    load_contract_fixture,
+)
 
 
-def test_single_migration_execution(web3, chain, MATH):
+@load_contract_fixture('Math.sol')
+def test_single_migration_execution(web3, chain):
+    MATH = chain.project.compiled_contracts['Math']
+
     class TestMigration(Migration):
         migration_id = '0001_initial'
         dependencies = []
@@ -18,8 +24,8 @@ def test_single_migration_execution(web3, chain, MATH):
 
         compiled_contracts = {
             'Math': {
-                'code': MATH['code'],
-                'code_runtime': MATH['code_runtime'],
+                'bytecode': MATH['bytecode'],
+                'bytecode_runtime': MATH['bytecode_runtime'],
                 'abi': MATH['abi'],
             },
         }

@@ -26,6 +26,7 @@ setup(
         "click>=6.6",
         "contextlib2>=0.5.4",
         "eth-testrpc>=1.1.0",
+        "ethereum-utils>=0.2.0",
         "jsonschema>=2.5.1",
         "py-geth>=1.7.0",
         "py-solc>=1.0.0",
@@ -34,12 +35,12 @@ setup(
         "pytest>=2.7.2",
         "toposort>=1.4",
         "watchdog>=0.8.3",
-        "web3>=3.5.1",
+        "web3>=3.6.0",
     ],
     extras_require={
         'gevent': [
             "gevent>=1.1.2,<1.2.0",  # https://github.com/gevent/gevent/issues/916
-            "web3[gevent]>=3.5.1",
+            "web3[gevent]>=3.6.0",
             "eth-testrpc[gevent]>=1.1.0",
             "py-geth[gevent]>=1.7.0",
             "py-solc[gevent]>=1.0.0",

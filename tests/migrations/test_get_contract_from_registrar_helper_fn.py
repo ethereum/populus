@@ -5,30 +5,11 @@ from populus import Project
 from populus.migrations.registrar import get_contract_from_registrar
 
 
-@pytest.fixture()
-def prepared_project(project_dir, write_project_file, LIBRARY_13, MATH):
-    write_project_file('contracts/Multiply13.sol', '\n'.join((
-        LIBRARY_13['source'],
-        MATH['source'],
-    )))
-
-    project = Project()
-
-    assert 'Library13' in project.compiled_contracts
-    assert 'Math' in project.compiled_contracts
-
-    return project
-
-
-@pytest.yield_fixture()
-def deploy_chain(prepared_project):
-    with prepared_project.get_chain('testrpc') as chain:
-        yield chain
+_populus_contract_fixtures = ['Library13.sol', 'Math.sol']
 
 
 @pytest.fixture()
-def math(deploy_chain):
-    chain = deploy_chain
+def math(chain):
     web3 = chain.web3
 
     Math = chain.contract_factories.Math
@@ -38,15 +19,14 @@ def math(deploy_chain):
     math_deploy_txn = web3.eth.getTransaction(math_deploy_txn_hash)
     math_13_address = chain.wait.for_contract_address(math_deploy_txn_hash, timeout=30)
 
-    assert math_deploy_txn['input'] == MATH['code']
-    assert web3.eth.getCode(math_13_address) == MATH['code_runtime']
+    assert math_deploy_txn['input'] == MATH['bytecode']
+    assert web3.eth.getCode(math_13_address) == MATH['bytecode_runtime']
 
     return Math(address=math_13_address)
 
 
 @pytest.fixture()
-def library_13(deploy_chain):
-    chain = deploy_chain
+def library_13(chain):
     web3 = chain.web3
 
     Library13 = chain.contract_factories.Library13
@@ -56,15 +36,14 @@ def library_13(deploy_chain):
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
     library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
 
-    assert library_deploy_txn['input'] == LIBRARY_13['code']
-    assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
+    assert library_deploy_txn['input'] == LIBRARY_13['bytecode']
+    assert web3.eth.getCode(library_13_address) == LIBRARY_13['bytecode_runtime']
 
     return Library13(address=library_13_address)
 
 
-def test_getting_contract_that_does_not_exist_in_registrar(deploy_chain):
-    project = deploy_chain.project
-    chain = deploy_chain
+def test_getting_contract_that_does_not_exist_in_registrar(chain):
+    project = chain.project
 
     actual = get_contract_from_registrar(
         chain=chain,
@@ -74,8 +53,7 @@ def test_getting_contract_that_does_not_exist_in_registrar(deploy_chain):
     assert actual is None
 
 
-def test_getting_contract_that_is_in_registrar(deploy_chain, library_13):
-    chain = deploy_chain
+def test_getting_contract_that_is_in_registrar(chain, library_13):
     project = chain.project
     web3 = chain.web3
     registrar = chain.registrar
@@ -92,8 +70,7 @@ def test_getting_contract_that_is_in_registrar(deploy_chain, library_13):
     assert actual.address == library_13.address
 
 
-def test_getting_contract_that_is_in_registrar_with_bytecode_mismatch(deploy_chain, math):
-    chain = deploy_chain
+def test_getting_contract_that_is_in_registrar_with_bytecode_mismatch(chain, math):
     project = chain.project
     web3 = chain.web3
     registrar = chain.registrar
@@ -110,8 +87,7 @@ def test_getting_contract_that_is_in_registrar_with_bytecode_mismatch(deploy_cha
     assert actual is None
 
 
-def test_getting_contract_that_is_in_registrar_with_empty_bytecode(deploy_chain):
-    chain = deploy_chain
+def test_getting_contract_that_is_in_registrar_with_empty_bytecode(chain):
     project = chain.project
     web3 = chain.web3
     registrar = chain.registrar

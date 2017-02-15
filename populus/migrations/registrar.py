@@ -43,19 +43,21 @@ def get_compiled_registrar_contract():
             "are supported".format(get_solc_version())
         )
     compiled_contracts = compile_files([registrar_source_path])
-    contract_data = compiled_contracts['Registrar']
-    normalized_data = normalize_contract_data(contract_data, {})
-    return normalized_data
+    raw_contract_data = compiled_contracts['Registrar']
+    contract_data = normalize_contract_data(raw_contract_data)
+    return contract_data
 
 
 def get_registrar(web3, address=None):
     registrar_contract_data = get_compiled_registrar_contract()
-    return web3.eth.contract(
-        address=address,
+    kwargs = dict(
         abi=registrar_contract_data['abi'],
-        code=registrar_contract_data['code'],
-        code_runtime=registrar_contract_data['code_runtime'],
+        bytecode=registrar_contract_data['bytecode'],
+        bytecode_runtime=registrar_contract_data['bytecode_runtime'],
     )
+    if address is not None:
+        kwargs['address'] = address
+    return web3.eth.contract(**kwargs)
 
 
 def get_contract_from_registrar(chain,
@@ -75,7 +77,7 @@ def get_contract_from_registrar(chain,
     contract_address = registrar.call().getAddress(registrar_key)
 
     expected_runtime = link_bytecode_by_name(
-        contract_factory.code_runtime,
+        contract_factory.bytecode_runtime,
         **link_dependencies
     )
     actual_runtime = web3.eth.getCode(contract_address)

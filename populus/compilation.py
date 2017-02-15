@@ -3,7 +3,6 @@ import json
 
 from solc import (
     compile_files,
-    get_solc_version,
 )
 from solc.exceptions import (
     ContractsNotFound,
@@ -16,7 +15,6 @@ from populus.utils.filesystem import (
 )
 from populus.utils.compile import (
     process_compiler_output,
-    get_contract_meta,
 )
 
 
@@ -41,7 +39,7 @@ def write_compiled_sources(project_dir, compiled_sources):
     return compiled_contract_path
 
 
-DEFAULT_COMPILER_OUTPUT_VALUES = ['bin', 'bin-runtime', 'abi']
+DEFAULT_COMPILER_OUTPUT_VALUES = ['bin', 'bin-runtime', 'abi', 'metadata']
 
 
 def compile_project_contracts(project_dir, contracts_dir, compiler_settings=None):
@@ -55,11 +53,8 @@ def compile_project_contracts(project_dir, contracts_dir, compiler_settings=None
     except ContractsNotFound:
         return contract_source_paths, {}
 
-    solc_version = get_solc_version()
-    contract_meta = get_contract_meta(compiler_settings, solc_version)
-
     normalized_compiled_contracts = dict(
-        process_compiler_output(contract_name, contract_data, contract_meta)
+        process_compiler_output(contract_name, contract_data)
         for contract_name, contract_data
         in compiled_contracts.items()
     )

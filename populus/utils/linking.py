@@ -2,18 +2,16 @@ import re
 import functools
 import collections
 
-
-from .string import (
+from eth_utils import (
     coerce_args_to_text,
-)
-from .formatting import (
     remove_0x_prefix,
     add_0x_prefix,
-    remove_dunderscore_prefix,
-)
-from .functional import (
-    cast_return_to_tuple,
+    to_tuple,
     compose,
+)
+
+from .formatting import (
+    remove_dunderscore_prefix,
 )
 
 
@@ -36,7 +34,7 @@ def remove_dunderscore_wrapper(value):
     return remove_dunderscore_prefix(value.rstrip('_'))
 
 
-@cast_return_to_tuple
+@to_tuple
 @coerce_args_to_text
 def find_link_references(bytecode, full_reference_names):
     """

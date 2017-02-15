@@ -10,30 +10,11 @@ from populus.utils.linking import (
 )
 
 
-@pytest.fixture()
-def prepared_project(project_dir, write_project_file, LIBRARY_13, MULTIPLY_13):
-    write_project_file('contracts/Multiply13.sol', '\n'.join((
-        LIBRARY_13['source'],
-        MULTIPLY_13['source'],
-    )))
-
-    project = Project()
-
-    assert 'Library13' in project.compiled_contracts
-    assert 'Multiply13' in project.compiled_contracts
-
-    return project
-
-
-@pytest.yield_fixture()
-def deploy_chain(prepared_project):
-    with prepared_project.get_chain('tester') as chain:
-        yield chain
+_populus_contract_fixtures = ['Library13.sol', 'Multiply13.sol']
 
 
 @pytest.fixture()
-def library_13(deploy_chain):
-    chain = deploy_chain
+def library_13(chain):
     web3 = chain.web3
 
     Library13 = chain.contract_factories.Library13
@@ -43,15 +24,14 @@ def library_13(deploy_chain):
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
     library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
 
-    assert library_deploy_txn['input'] == LIBRARY_13['code']
-    assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
+    assert library_deploy_txn['input'] == LIBRARY_13['bytecode']
+    assert web3.eth.getCode(library_13_address) == LIBRARY_13['bytecode_runtime']
 
     return Library13(address=library_13_address)
 
 
 @pytest.fixture()
-def verify_multiply_13_linked(library_13, deploy_chain):
-    chain = deploy_chain
+def verify_multiply_13_linked(library_13, chain):
     project = chain.project
     web3 = chain.web3
 
@@ -61,8 +41,8 @@ def verify_multiply_13_linked(library_13, deploy_chain):
     Multiply13 = chain.contract_factories.Multiply13
 
     def do_verify(deploy_operation):
-        assert '__Library13__' in MULTIPLY_13['code']
-        assert '__Library13__' in MULTIPLY_13['code_runtime']
+        assert '__Library13__' in MULTIPLY_13['bytecode']
+        assert '__Library13__' in MULTIPLY_13['bytecode_runtime']
 
         operation_receipt = deploy_operation.execute(
             chain,
@@ -76,19 +56,19 @@ def verify_multiply_13_linked(library_13, deploy_chain):
         deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
         contract_address = chain.wait.for_contract_address(deploy_txn_hash, timeout=30)
 
-        expected_code = link_bytecode_by_name(
-            MULTIPLY_13['code'],
+        expected_bytecode = link_bytecode_by_name(
+            MULTIPLY_13['bytecode'],
             Library13=library_13.address,
         )
         expected_runtime = link_bytecode_by_name(
-            MULTIPLY_13['code_runtime'],
+            MULTIPLY_13['bytecode_runtime'],
             Library13=library_13.address,
         )
 
-        assert '__Library13__' not in expected_code
+        assert '__Library13__' not in expected_bytecode
         assert '__Library13__' not in expected_runtime
 
-        assert deploy_txn['input'] == expected_code
+        assert deploy_txn['input'] == expected_bytecode
         assert web3.eth.getCode(contract_address) == expected_runtime
 
         contract = Multiply13(address=contract_address)
@@ -112,10 +92,9 @@ def test_deployment_linking_with_provided_address(library_13,
     verify_multiply_13_linked(deploy_operation)
 
 
-def test_deployment_linking_with_provided_registrar_value(deploy_chain,
+def test_deployment_linking_with_provided_registrar_value(chain,
                                                           library_13,
                                                           verify_multiply_13_linked):
-    chain = deploy_chain
     web3 = chain.web3
     registrar = chain.registrar
 
@@ -136,10 +115,9 @@ def test_deployment_linking_with_provided_registrar_value(deploy_chain,
     verify_multiply_13_linked(deploy_operation)
 
 
-def test_deployment_linking_with_auto_lookup_from_registrar(deploy_chain,
+def test_deployment_linking_with_auto_lookup_from_registrar(chain,
                                                             library_13,
                                                             verify_multiply_13_linked):
-    chain = deploy_chain
     web3 = chain.web3
     registrar = chain.registrar
 

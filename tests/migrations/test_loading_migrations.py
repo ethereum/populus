@@ -3,6 +3,10 @@ import os
 from populus.utils.filesystem import (
     get_migrations_dir,
 )
+from populus.utils.testing import (
+    load_contract_fixture,
+)
+
 from populus.migrations import (
     Migration,
 )
@@ -14,8 +18,11 @@ from populus.migrations.writer import (
 )
 
 
-def test_load_project_migrations(project_dir, MATH):
-    migrations_dir = get_migrations_dir(project_dir)
+@load_contract_fixture('Math.sol')
+def test_load_project_migrations(project):
+    MATH = project.compiled_contracts['Math']
+
+    migrations_dir = get_migrations_dir(project.project_dir)
     migration_0001_file_path = os.path.join(migrations_dir, '0001_initial.py')
     migration_0002_file_path = os.path.join(migrations_dir, '0002_the_second_migration.py')
     migration_0003_file_path = os.path.join(migrations_dir, '0003_the_third_migration.py')
@@ -53,7 +60,7 @@ def test_load_project_migrations(project_dir, MATH):
     with open(migration_0003_file_path, 'w') as migration_0003_file:
         write_migration(migration_0003_file, MigrationC)
 
-    migration_classes = load_project_migrations(project_dir)
+    migration_classes = load_project_migrations(project.project_dir)
 
     assert len(migration_classes) == 3
     actual_ids = {m.migration_id for m in migration_classes}

@@ -19,6 +19,7 @@ def compute_deploy_order(dependency_graph):
 def get_deploy_order(contracts_to_deploy, compiled_contracts):
     # Extract and dependencies that exist due to library linking.
     dependency_graph = get_shallow_dependency_graph(compiled_contracts)
+    global_deploy_order = compute_deploy_order(dependency_graph)
 
     # Compute the full set of dependencies needed to deploy the desired
     # contracts.
@@ -33,7 +34,7 @@ def get_deploy_order(contracts_to_deploy, compiled_contracts):
     deploy_order = [
         (contract_name, compiled_contracts[contract_name])
         for contract_name
-        in compute_deploy_order(dependency_graph)
+        in global_deploy_order
         if contract_name in all_contracts_to_deploy
     ]
     return OrderedDict(deploy_order)
@@ -50,17 +51,20 @@ def deploy_contract(chain,
 
     web3 = chain.web3
 
-    code = link_bytecode_by_name(contract_factory.code, **link_dependencies)
+    bytecode = link_bytecode_by_name(contract_factory.bytecode, **link_dependencies)
 
-    if contract_factory.code_runtime:
-        code_runtime = link_bytecode_by_name(contract_factory.code_runtime, **link_dependencies)
+    if contract_factory.bytecode_runtime:
+        bytecode_runtime = link_bytecode_by_name(
+            contract_factory.bytecode_runtime,
+            **link_dependencies
+        )
     else:
-        code_runtime = None
+        bytecode_runtime = None
 
     ContractFactory = web3.eth.contract(
         abi=contract_factory.abi,
-        code=code,
-        code_runtime=code_runtime,
+        bytecode=bytecode,
+        bytecode_runtime=bytecode_runtime,
         source=contract_factory.source,
     )
 

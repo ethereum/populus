@@ -2,8 +2,17 @@ from populus.migrations import (
     TransactContract,
 )
 
+from populus.utils.testing import (
+    load_contract_fixture,
+)
 
-def test_transact_contract_operation(web3, chain, math, MATH):
+
+@load_contract_fixture('Math.sol')
+def test_transact_contract_operation(web3, chain):
+    math = chain.get_contract('Math')
+
+    MATH = chain.project.compiled_contracts['Math']
+
     transact_contract_operation = TransactContract(
         contract_name='Math',
         method_name='increment',

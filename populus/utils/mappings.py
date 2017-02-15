@@ -1,12 +1,10 @@
 import operator
 import itertools
 
-from .types import (
-    is_object,
-)
-from .functional import (
+from eth_utils import (
+    is_dict,
     compose,
-    cast_return_to_tuple,
+    to_tuple,
     sort_return,
 )
 
@@ -86,7 +84,7 @@ def pop_nested_key(config, key):
     return popper_fn(config)
 
 
-@cast_return_to_tuple
+@to_tuple
 @sort_return
 def flatten_mapping(config, base_prefix=None):
     """
@@ -105,7 +103,7 @@ def flatten_mapping(config, base_prefix=None):
 
     for key, value in config.items():
         prefix = base_prefix + (key,)
-        if is_object(value):
+        if is_dict(value):
             for sub_key, sub_value in flatten_mapping(value, prefix):
                 yield sub_key, sub_value
         else:

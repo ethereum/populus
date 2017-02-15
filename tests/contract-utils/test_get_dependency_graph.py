@@ -1,10 +1,6 @@
-import pytest
-
-from populus.utils.deploy import (
-    get_deploy_order,
+from populus.utils.contracts import (
+    get_shallow_dependency_graph,
 )
-
-
 #
 # A -> (B, C)
 # B -> null
@@ -21,35 +17,13 @@ CONTRACTS = {
 }
 
 
-@pytest.mark.parametrize(
-    'contracts_to_deploy,expected_deploy_orders',
-    (
-        (['A'], [
-            ['B', 'E', 'C', 'A'],
-            ['B', 'E', 'C', 'A'],
-        ]),
-        (['B'], [['B']]),
-        (['C'], [['B', 'E', 'C']]),
-        (['D'], [['B', 'E', 'D']]),
-        (['E'], [['B', 'E']]),
-        (['C', 'D'], [['B', 'E', 'C', 'D'], ['B', 'E', 'D', 'C']]),
-        (['A', 'D'], [
-            ['B', 'E', 'D', 'C', 'A'],
-            ['B', 'E', 'C', 'D', 'A'],
-            ['B', 'E', 'C', 'A', 'D'],
-        ]),
-        (['A', 'B', 'C', 'D', 'E'], [
-            ['B', 'E', 'D', 'C', 'A'],
-            ['B', 'E', 'C', 'D', 'A'],
-            ['B', 'E', 'C', 'A', 'D'],
-        ]),
-    )
-)
-def test_get_deploy_order(contracts_to_deploy, expected_deploy_orders):
-    actual_deploy_order = list(get_deploy_order(contracts_to_deploy, CONTRACTS).keys())
-
-    assert any([
-        actual_deploy_order == expected_deploy_order
-        for expected_deploy_order
-        in expected_deploy_orders
-    ])
+def test_get_shallow_dependency_graph():
+    expected_graph = {
+        'A': {'B', 'C'},
+        'C': {'E'},
+        'D': {'B', 'E'},
+        'E': {'B'},
+        'B': set(),
+    }
+    actual_graph = get_shallow_dependency_graph(CONTRACTS)
+    assert actual_graph == expected_graph

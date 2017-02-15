@@ -9,8 +9,6 @@ import pytest  # noqa: E402
 import shutil  # noqa: E402
 import itertools  # noqa: E402
 
-from eth_utils import to_tuple  # noqa: E402
-
 from populus import Project  # noqa: E402
 
 
@@ -81,7 +79,6 @@ def wait_for_unlock():
 
 
 @pytest.fixture()
-@to_tuple
 def _loaded_contract_fixtures(populus_source_root, project_dir, request):
     from populus.utils.filesystem import (
         get_contracts_dir,
@@ -117,7 +114,6 @@ def _loaded_contract_fixtures(populus_source_root, project_dir, request):
             raise ValueError("File already present at '{0}'".format(dst_path))
 
         shutil.copy(src_path, dst_path)
-        yield (src_path, dst_path)
 
 
 @pytest.fixture()

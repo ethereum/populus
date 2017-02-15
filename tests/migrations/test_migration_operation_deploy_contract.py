@@ -31,7 +31,7 @@ def test_deploy_contract_operation_on_math_contract(web3, chain):
 
 
 @load_contract_fixture('WithConstructorArguments.sol')
-def test_deploy_contract_operation_with_arguments(web3, chain)
+def test_deploy_contract_operation_with_arguments(web3, chain):
     WITH_CONSTRUCTOR_ARGUMENTS = chain.project.compiled_contracts['WithConstructorArguments']
 
     deploy_contract_operation = DeployContract(

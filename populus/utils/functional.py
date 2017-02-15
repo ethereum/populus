@@ -1,34 +1,9 @@
-import functools
 import itertools
 import collections
 
-
-def noop(*args, **kwargs):
-    pass
-
-
-def identity(value):
-    return value
-
-
-def combine(f, g):
-    return lambda x: f(g(x))
-
-
-def compose(*functions):
-    return functools.reduce(combine, reversed(functions), identity)
-
-
-def apply_formatters_to_return(*formatters):
-    formatter = compose(*formatters)
-
-    def outer(fn):
-        @functools.wraps(fn)
-        def inner(*args, **kwargs):
-            value = fn(*args, **kwargs)
-            return formatter(value)
-        return inner
-    return outer
+from eth_utils import (
+    to_dict,
+)
 
 
 class cached_property(object):
@@ -53,24 +28,7 @@ class cached_property(object):
         return res
 
 
-def cast_return(_type):
-    def outer(fn):
-        @functools.wraps(fn)
-        def inner(*args, **kwargs):
-            return _type(fn(*args, **kwargs))
-
-        return inner
-    return outer
-
-
-cast_return_to_tuple = cast_return(tuple)
-cast_return_to_list = cast_return(list)
-cast_return_to_dict = cast_return(dict)
-sort_return = cast_return(sorted)
-cast_return_to_ordered_dict = cast_return(collections.OrderedDict)
-
-
-@cast_return_to_dict
+@to_dict
 def deep_merge_dicts(*dicts):
     for key in set(itertools.chain(*(_dict.keys() for _dict in dicts))):
         values = tuple((_dict[key] for _dict in dicts if key in _dict))

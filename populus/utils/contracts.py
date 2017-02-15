@@ -2,7 +2,7 @@ import itertools
 import os
 import re
 
-from .types import (
+from eth_utils import (
     is_string,
 )
 from .linking import (

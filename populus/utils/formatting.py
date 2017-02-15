@@ -1,8 +1,14 @@
-from web3.utils.formatting import (  # noqa: F401
-    remove_0x_prefix,
-    add_0x_prefix,
-    is_prefixed,
+from eth_utils import (
+    force_bytes,
+    force_text,
+    is_bytes,
 )
+
+
+def is_prefixed(value, prefix):
+    return value.startswith(
+        force_bytes(prefix) if is_bytes(value) else force_text(prefix)
+    )
 
 
 def is_dunderscore_prefixed(value):

@@ -1,12 +1,12 @@
 import re
 
 
-from web3.utils.types import (  # noqa: F401
+from eth_utils import (
     is_string,
-    is_integer,
     is_boolean,
-    is_object,
+    is_numeric,
 )
+
 from web3.utils.string import (
     force_text,
 )
@@ -17,8 +17,7 @@ def is_primitive_type(value):
         value is None,
         is_boolean(value),
         is_string(value),
-        is_integer(value),
-        isinstance(value, float),
+        is_numeric(value),
     ))
 
 

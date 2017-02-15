@@ -26,6 +26,7 @@ setup(
         "click>=6.6",
         "contextlib2>=0.5.4",
         "eth-testrpc>=1.1.0",
+        "ethereum-utils>=0.2.0",
         "jsonschema>=2.5.1",
         "py-geth>=1.7.0",
         "py-solc>=1.0.0",

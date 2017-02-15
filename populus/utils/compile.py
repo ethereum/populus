@@ -1,9 +1,6 @@
-from web3.utils.formatting import (
+from eth_utils import (
+    to_dict,
     add_0x_prefix,
-)
-
-from .functional import (
-    cast_return_to_dict,
 )
 
 
@@ -14,7 +11,7 @@ def process_compiler_output(name_from_compiler, data_from_compiler, contract_met
     return contract_name, contract_data
 
 
-@cast_return_to_dict
+@to_dict
 def normalize_contract_data(contract_data, contract_meta):
     yield 'meta', contract_meta
     if 'bin' in contract_data:
@@ -29,7 +26,7 @@ def normalize_contract_data(contract_data, contract_meta):
         yield 'devdoc', contract_data['devdoc']
 
 
-@cast_return_to_dict
+@to_dict
 def get_contract_meta(compiler_kwargs, solc_version):
     yield 'type', 'solc'
     yield 'version', solc_version

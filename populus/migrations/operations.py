@@ -1,6 +1,6 @@
 import types
 
-from web3.utils.string import (
+from eth_utils import (
     force_text,
 )
 

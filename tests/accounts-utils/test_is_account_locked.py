@@ -1,8 +1,10 @@
 import pytest
 
-from geth.accounts import create_new_account
+from eth_utils import (
+    force_text,
+)
 
-from web3.utils.string import force_text
+from geth.accounts import create_new_account
 
 from populus.utils.accounts import (
     is_account_locked,

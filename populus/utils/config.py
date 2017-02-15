@@ -2,11 +2,12 @@ import os
 
 import anyconfig
 
-from populus import ASSETS_DIR
-
-from .types import (
+from eth_utils import (
     is_string,
 )
+
+from populus import ASSETS_DIR
+
 from .mappings import (
     get_nested_key,
     has_nested_key,

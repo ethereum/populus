@@ -3,7 +3,7 @@ import functools
 
 from toposort import toposort
 
-from web3.utils.types import is_string
+from eth_utils import is_string
 
 from .deferred import (
     generate_registrar_value_setters,

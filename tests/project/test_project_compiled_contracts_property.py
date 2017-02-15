@@ -11,8 +11,8 @@ def test_project_compiled_contracts_with_no_default_env(project_dir,
     project = Project()
 
     assert 'Math' in project.compiled_contracts
-    assert 'code' in project.compiled_contracts['Math']
-    assert 'code_runtime' in project.compiled_contracts['Math']
+    assert 'bytecode' in project.compiled_contracts['Math']
+    assert 'bytecode_runtime' in project.compiled_contracts['Math']
     assert 'abi' in project.compiled_contracts['Math']
 
     compiled_contracts_object_id = id(project.compiled_contracts)

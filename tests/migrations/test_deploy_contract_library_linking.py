@@ -43,8 +43,8 @@ def library_13(deploy_chain):
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)
     library_13_address = chain.wait.for_contract_address(library_deploy_txn_hash, timeout=30)
 
-    assert library_deploy_txn['input'] == LIBRARY_13['code']
-    assert web3.eth.getCode(library_13_address) == LIBRARY_13['code_runtime']
+    assert library_deploy_txn['input'] == LIBRARY_13['bytecode']
+    assert web3.eth.getCode(library_13_address) == LIBRARY_13['bytecode_runtime']
 
     return Library13(address=library_13_address)
 
@@ -61,8 +61,8 @@ def verify_multiply_13_linked(library_13, deploy_chain):
     Multiply13 = chain.contract_factories.Multiply13
 
     def do_verify(deploy_operation):
-        assert '__Library13__' in MULTIPLY_13['code']
-        assert '__Library13__' in MULTIPLY_13['code_runtime']
+        assert '__Library13__' in MULTIPLY_13['bytecode']
+        assert '__Library13__' in MULTIPLY_13['bytecode_runtime']
 
         operation_receipt = deploy_operation.execute(
             chain,
@@ -76,19 +76,19 @@ def verify_multiply_13_linked(library_13, deploy_chain):
         deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
         contract_address = chain.wait.for_contract_address(deploy_txn_hash, timeout=30)
 
-        expected_code = link_bytecode_by_name(
-            MULTIPLY_13['code'],
+        expected_bytecode = link_bytecode_by_name(
+            MULTIPLY_13['bytecode'],
             Library13=library_13.address,
         )
         expected_runtime = link_bytecode_by_name(
-            MULTIPLY_13['code_runtime'],
+            MULTIPLY_13['bytecode_runtime'],
             Library13=library_13.address,
         )
 
-        assert '__Library13__' not in expected_code
+        assert '__Library13__' not in expected_bytecode
         assert '__Library13__' not in expected_runtime
 
-        assert deploy_txn['input'] == expected_code
+        assert deploy_txn['input'] == expected_bytecode
         assert web3.eth.getCode(contract_address) == expected_runtime
 
         contract = Multiply13(address=contract_address)

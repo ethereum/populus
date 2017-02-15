@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+1.5.1
+-----
+
+- Update upstream ``web3.py`` dependency.
+- Switch to use ``ethereum-utils`` library.
+
 1.5.0
 -----
 

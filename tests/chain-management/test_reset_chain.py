@@ -3,15 +3,12 @@ import os
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
-from populus.project import Project
 from populus.chain import (
     reset_chain,
 )
 
 
-def test_reset_chain_on_empty_project_dir(project_dir, write_project_file):
-    project = Project()
-
+def test_reset_chain_on_empty_project_dir(project):
     data_dir = project.get_blockchain_data_dir('test-chain')
     ensure_path_exists(data_dir)
 
@@ -36,9 +33,7 @@ def test_reset_chain_on_empty_project_dir(project_dir, write_project_file):
     assert not os.path.exists(geth_ipc_path)
 
 
-def test_reset_chain(project_dir, write_project_file):
-    project = Project()
-
+def test_reset_chain(project, write_project_file):
     data_dir = project.get_blockchain_data_dir('test-chain')
     ensure_path_exists(data_dir)
 

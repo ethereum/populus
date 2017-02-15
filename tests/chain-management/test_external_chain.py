@@ -1,9 +1,4 @@
-from populus.project import Project
-
-
-def test_external_rpc_chain(project_dir, write_project_file):
-    project = Project()
-
+def test_external_rpc_chain(project):
     with project.get_chain('testrpc') as chain:
         web3 = chain.web3
         registrar = chain.registrar
@@ -22,9 +17,7 @@ def test_external_rpc_chain(project_dir, write_project_file):
             assert registrar.address == ext_registrar.address
 
 
-def test_external_ipc_chain(project_dir, write_project_file, wait_for_unlock):
-    project = Project()
-
+def test_external_ipc_chain(project, wait_for_unlock):
     with project.get_chain('temp') as chain:
         web3 = chain.web3
         wait_for_unlock(web3)

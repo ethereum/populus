@@ -1,19 +1,10 @@
 import pytest
 
-from populus import Project
 from populus.chain import UnknownContract
 
 
 @pytest.yield_fixture()
-def tester_chain(project_dir, write_project_file, MATH, LIBRARY_13, MULTIPLY_13):
-    write_project_file('contracts/Math.sol', MATH['source'])
-    write_project_file(
-        'contracts/Multiply13.sol',
-        '\n'.join((LIBRARY_13['source'], MULTIPLY_13['source'])),
-    )
-
-    project = Project()
-
+def tester_chain(project):
     assert 'Math' in project.compiled_contracts
     assert 'Library13' in project.compiled_contracts
     assert 'Multiply13' in project.compiled_contracts

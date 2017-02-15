@@ -1,14 +1,10 @@
 import pytest
 
-from populus import Project
-
 
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
-def test_wait_for_block(project_dir, chain_name):
-    project = Project()
-
+def test_wait_for_block(project, chain_name):
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3
 
@@ -21,9 +17,7 @@ def test_wait_for_block(project_dir, chain_name):
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
-def test_wait_for_receipt(project_dir, chain_name, wait_for_unlock):
-    project = Project()
-
+def test_wait_for_receipt(project, chain_name, wait_for_unlock):
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3
 
@@ -41,12 +35,11 @@ def test_wait_for_receipt(project_dir, chain_name, wait_for_unlock):
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
-def test_wait_for_contract_address(project_dir,
-                                   chain_name,
-                                   MATH_BYTECODE,
-                                   MATH_RUNTIME,
+def test_wait_for_contract_address(chain_name,
                                    wait_for_unlock):
     project = Project()
+    MATH_BYTECODE = project.compiled_contracts['Math']['bytecode']
+    MATH_BYTECODE_RUNTIME = project.compiled_contracts['Math']['bytecode_runtime']
 
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3

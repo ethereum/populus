@@ -6,16 +6,13 @@ from click.testing import CliRunner
 from flaky import flaky
 
 from populus.cli import main
+from populus.utils.testing import load_contract_fixture
 
 
 @flaky
-def test_deployment_command_with_one_specified_contract(project_dir,
-                                                        write_project_file,
-                                                        MATH,
-                                                        SIMPLE_CONSTRUCTOR):
-    write_project_file('./contracts/Math.sol', MATH['source'])
-    write_project_file('./contracts/SimpleConstructor.sol', SIMPLE_CONSTRUCTOR['source'])
-    runner = CliRunner()
+@load_contract_fixture('Math.sol')
+@load_contract_fixture('WithNoArgumentConstructor.sol')
+def test_deployment_command_with_one_specified_contract(project):
     result = runner.invoke(main, ['deploy', 'Math'], input=(
         'testrpc\n'  # select the local chain.
         '0\n'      # select account to deploy from.
@@ -30,14 +27,10 @@ def test_deployment_command_with_one_specified_contract(project_dir,
 
 
 @flaky
-def test_deployment_command_with_specified_contracts(project_dir,
-                                                     write_project_file,
-                                                     MATH,
-                                                     SIMPLE_CONSTRUCTOR,
-                                                     EMITTER):
-    write_project_file('./contracts/Math.sol', MATH['source'])
-    write_project_file('./contracts/SimpleConstructor.sol', SIMPLE_CONSTRUCTOR['source'])
-    write_project_file('./contracts/Emitter.sol', EMITTER['source'])
+@load_contract_fixture('Math.sol')
+@load_contract_fixture('WithNoArgumentConstructor.sol')
+@load_contract_fixture('Emitter.sol')
+def test_deployment_command_with_specified_contracts(project):
     runner = CliRunner()
     result = runner.invoke(main, [
         'deploy', 'Math', 'Emitter', '--chain', 'testrpc',
@@ -52,14 +45,10 @@ def test_deployment_command_with_specified_contracts(project_dir,
 
 
 @flaky
-def test_deployment_command_with_prompt_for_contracts(project_dir,
-                                                      write_project_file,
-                                                      MATH,
-                                                      SIMPLE_CONSTRUCTOR,
-                                                      EMITTER):
-    write_project_file('./contracts/Math.sol', MATH['source'])
-    write_project_file('./contracts/SimpleConstructor.sol', SIMPLE_CONSTRUCTOR['source'])
-    write_project_file('./contracts/Emitter.sol', EMITTER['source'])
+@load_contract_fixture('Math.sol')
+@load_contract_fixture('WithNoArgumentConstructor.sol')
+@load_contract_fixture('Emitter.sol')
+def test_deployment_command_with_prompt_for_contracts(project):
     runner = CliRunner()
     result = runner.invoke(main, [
         'deploy', '--chain', 'testrpc',
@@ -72,3 +61,5 @@ def test_deployment_command_with_prompt_for_contracts(project_dir,
     assert 'WithNoArgumentConstructor' in result.output
     assert 'Emitter' in result.output
     assert 'Deploying Math' in result.output
+    assert 'Deploying Emitter' not in result.output
+    assert 'Deploying WithNoArgumentConstructor' not in result.output

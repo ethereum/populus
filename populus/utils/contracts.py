@@ -5,6 +5,10 @@ import re
 from eth_utils import (
     is_string,
 )
+
+from .string import (
+    normalize_class_name,
+)
 from .linking import (
     find_link_references,
 )
@@ -58,7 +62,7 @@ def create_contract_factory(web3, contract_name, contract_data):
         if key in contract_data
     }
     return web3.eth.contract(
-        contract_name=contract_name,
+        contract_name=normalize_class_name(contract_name),
         **factory_kwargs
     )
 

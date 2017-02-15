@@ -6,9 +6,12 @@ from eth_utils import (
     coerce_args_to_text,
     remove_0x_prefix,
     add_0x_prefix,
-    remove_dunderscore_prefix,
     to_tuple,
     compose,
+)
+
+from .formatting import (
+    remove_dunderscore_prefix,
 )
 
 

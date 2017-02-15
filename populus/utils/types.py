@@ -4,7 +4,7 @@ import re
 from eth_utils import (
     is_string,
     is_boolean,
-    is_numeric,
+    is_number,
 )
 
 from web3.utils.string import (
@@ -17,7 +17,7 @@ def is_primitive_type(value):
         value is None,
         is_boolean(value),
         is_string(value),
-        is_numeric(value),
+        is_number(value),
     ))
 
 

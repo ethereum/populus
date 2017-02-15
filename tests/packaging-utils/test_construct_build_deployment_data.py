@@ -42,6 +42,6 @@ def test_construct_deployments_object(project, TestContract):
     assert 'TestContract' in deployments_object
 
     deployed_instance = deployments_object['TestContract']
-    assert deployed_instance['runtime_bytecode'] == contract_data['code_runtime']
+    assert deployed_instance['runtime_bytecode'] == contract_data['bytecode_runtime']
     assert deployed_instance['address'] == test_contract.address
     assert deployed_instance['contract_type'] == 'TestContract'

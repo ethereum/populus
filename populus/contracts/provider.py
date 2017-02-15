@@ -50,12 +50,12 @@ class Provider(object):
 
         base_contract_factory = self.chain.base_contract_factories[contract_name]
 
-        code = self.link_bytecode(base_contract_factory.code)
-        code_runtime = self.link_bytecode(base_contract_factory.code_runtime)
+        bytecode = self.link_bytecode(base_contract_factory.bytecode)
+        bytecode_runtime = self.link_bytecode(base_contract_factory.bytecode_runtime)
 
         contract_factory = self.chain.web3.eth.contract(
-            code=code,
-            code_runtime=code_runtime,
+            bytecode=bytecode,
+            bytecode_runtime=bytecode_runtime,
             abi=base_contract_factory.abi,
             source=base_contract_factory.source,
             contract_name=normalize_class_name(contract_name),
@@ -76,7 +76,7 @@ class Provider(object):
             self.is_contract_available(link_reference.full_name)
             for link_reference
             in find_link_references(
-                BaseContractFactory.code,
+                BaseContractFactory.bytecode,
                 self.all_contract_names,
             )
         )

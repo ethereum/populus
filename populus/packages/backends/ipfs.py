@@ -2,12 +2,11 @@ import json
 
 import ipfsapi
 
-from populus.utils.string import (
+from eth_utils import (
     force_text,
+    to_dict,
 )
-from populus.utils.functional import (
-    cast_return_to_dict,
-)
+
 from populus.utils.packaging import (
     is_aliased_ipfs_uri,
 )
@@ -82,7 +81,7 @@ class IPFSPackageBackend(BaseIPFSPackageBackend):
         ipfs_port = self.settings['port']
         self.ipfs_client = ipfsapi.connect(ipfs_host, ipfs_port)
 
-    @cast_return_to_dict
+    @to_dict
     def resolve_package_source_tree(self, release_lockfile):
         sources = release_lockfile['sources']
 

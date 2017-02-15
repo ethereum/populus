@@ -1,6 +1,11 @@
 import operator
 import hashlib
 
+from eth_utils import (
+    to_dict,
+    compose,
+)
+
 from populus.pb.ipfs_file_pb2 import (
     Data,
     PBNode,
@@ -8,10 +13,6 @@ from populus.pb.ipfs_file_pb2 import (
 
 from .six import (
     parse,
-)
-from .functional import (
-    compose,
-    cast_return_to_dict,
 )
 from .base58 import (
     b58encode,
@@ -76,7 +77,7 @@ def is_file(ipfs_client, ipfs_path):
     return get_ipfs_object_type(ipfs_client, ipfs_path) == 'File'
 
 
-@cast_return_to_dict
+@to_dict
 def walk_ipfs_tree(ipfs_client, ipfs_path, prefix='./'):
     """
     Given an IPFS hash or path, this walks down the filesystem tree and returns

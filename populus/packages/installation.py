@@ -2,13 +2,11 @@ import os
 import json
 import shutil
 
-
-from populus.utils.types import (
+from eth_utils import (
     is_bytes,
+    to_tuple,
 )
-from populus.utils.functional import (
-    cast_return_to_tuple,
-)
+
 from populus.utils.filesystem import (
     tempdir,
     ensure_path_exists,
@@ -59,7 +57,7 @@ def install_packages_to_project(installed_packages_dir, package_identifiers, pac
     return installed_packages
 
 
-@cast_return_to_tuple
+@to_tuple
 def write_installed_packages(installed_packages_dir, package_data_to_install):
     with tempdir() as temporary_dir:
         temp_installed_packages_dir = get_installed_packages_dir(temporary_dir)

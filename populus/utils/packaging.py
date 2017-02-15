@@ -9,11 +9,15 @@ import semver
 
 import jsonschema
 
+from eth_utils import (
+    force_bytes,
+    to_tuple,
+    to_dict,
+    to_ordered_dict,
+)
+
 from populus import ASSETS_DIR
 
-from .string import (
-    force_bytes,
-)
 from .ipfs import (
     is_ipfs_uri,
 )
@@ -21,11 +25,6 @@ from .filesystem import (
     recursive_find_files,
     find_solidity_source_files,
     is_same_path,
-)
-from .functional import (
-    cast_return_to_tuple,
-    cast_return_to_dict,
-    cast_return_to_ordered_dict,
 )
 
 
@@ -539,7 +538,7 @@ def fingerprint_identifier(package_identifier):
     return hashlib.md5(force_bytes(package_identifier)).hexdigest()
 
 
-@cast_return_to_dict
+@to_dict
 def compute_identifier_tree(identifier_set, package_backends, seen_fingerprints=None):
     """
     Compute the directed acyclic graph of the package identifiers.  All leaf
@@ -587,7 +586,7 @@ def compute_identifier_tree(identifier_set, package_backends, seen_fingerprints=
             )
 
 
-@cast_return_to_tuple
+@to_tuple
 def flatten_identifier_tree(identifier_tree):
     """
     Takes the identifier tree produced by `compute_identifier_tree`
@@ -651,7 +650,7 @@ def persist_package_file(file_path, package_backends):
         )
 
 
-@cast_return_to_ordered_dict
+@to_ordered_dict
 def get_publishable_backends(release_lockfile, release_lockfile_uri, package_backends):
     """
     Return the package backends which are capable of publishing the given
@@ -762,7 +761,7 @@ def get_max_version(all_versions):
 EXCLUDE_INSTALLED_PACKAGES_GLOB = "./installed_packages/*"
 
 
-@cast_return_to_tuple
+@to_tuple
 def find_package_source_files(dependency_base_dir):
     """
     Find all of the solidity source files for the given dependency, excluding
@@ -784,7 +783,7 @@ def find_package_source_files(dependency_base_dir):
     )
 
 
-@cast_return_to_tuple
+@to_tuple
 def find_installed_package_locations(installed_packages_dir):
     """
     Return a tuple of all filesystem paths directly under the given
@@ -800,7 +799,7 @@ def find_installed_package_locations(installed_packages_dir):
                 yield dependency_base_dir
 
 
-@cast_return_to_ordered_dict
+@to_ordered_dict
 def get_installed_dependency_locations(installed_packages_dir):
     for dependency_base_dir in find_installed_package_locations(installed_packages_dir):
         yield (
@@ -809,7 +808,7 @@ def get_installed_dependency_locations(installed_packages_dir):
         )
 
 
-@cast_return_to_tuple
+@to_tuple
 def recursive_find_installed_dependency_base_dirs(installed_packages_dir):
     """
     Return a tuple of all filesystem paths directly under the given
@@ -824,7 +823,7 @@ def recursive_find_installed_dependency_base_dirs(installed_packages_dir):
             yield sub_package_base_dir
 
 
-@cast_return_to_dict
+@to_dict
 def extract_build_dependendencies_from_installed_packages(installed_packages_dir):
     """
     Extract the current installed dependencies for creation of the

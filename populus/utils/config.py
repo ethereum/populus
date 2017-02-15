@@ -6,6 +6,8 @@ import anyconfig
 
 from eth_utils import (
     is_string,
+    compose,
+    to_ordered_dict,
 )
 
 from populus import ASSETS_DIR
@@ -16,10 +18,6 @@ from .mappings import (
 )
 from .module_loading import (
     import_string,
-)
-from .functional import (
-    compose,
-    cast_return_to_ordered_dict,
 )
 
 
@@ -96,7 +94,7 @@ class ClassImportPath(object):
             )
 
 
-@cast_return_to_ordered_dict
+@to_ordered_dict
 def sort_prioritized_configs(backend_configs, master_config):
     resolved_backend_configs = tuple(
         (

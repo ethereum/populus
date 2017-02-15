@@ -1,9 +1,12 @@
+from eth_utils import (
+    to_ordered_dict,
+)
+
 from populus.utils.module_loading import (
     import_string,
 )
 from populus.utils.functional import (
     cached_property,
-    cast_return_to_ordered_dict,
 )
 from populus.utils.config import (
     sort_prioritized_configs,
@@ -29,7 +32,7 @@ class ContractStore(object):
         return sort_prioritized_configs(config, self.chain.project.config)
 
     @cached_property
-    @cast_return_to_ordered_dict
+    @to_ordered_dict
     def contract_backends(self):
         for backend_name, backend_config in self.backend_configs.items():
             ProviderBackendClass = import_string(backend_config['class'])
@@ -42,7 +45,7 @@ class ContractStore(object):
     # Provider
     #
     @property
-    @cast_return_to_ordered_dict
+    @to_ordered_dict
     def provider_backends(self):
         for backend_name, backend in self.contract_backends.items():
             if backend.is_provider:
@@ -61,7 +64,7 @@ class ContractStore(object):
     # Registrar
     #
     @cached_property
-    @cast_return_to_ordered_dict
+    @to_ordered_dict
     def registrar_backends(self):
         for backend_name, backend in self.contract_backends.items():
             if backend.is_registrar:

@@ -6,8 +6,8 @@ import os
 
 import jsonschema
 
-from populus.utils.functional import (
-    cast_return_to_dict,
+from eth_utils import (
+    to_dict,
 )
 from populus.utils.packaging import (
     validate_release_lockfile,
@@ -66,7 +66,7 @@ DEFAULT_SCHEMA = {
 }
 
 
-@cast_return_to_dict
+@to_dict
 def build_schema(**kwargs):
     for key in set(itertools.chain(DEFAULT_SCHEMA, kwargs)):
         if key in kwargs:

@@ -2,10 +2,11 @@ import click
 import json
 import os
 
-from populus.utils.functional import (
+from eth_utils import (
     compose,
-    cast_return_to_dict,
+    to_dict,
 )
+
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
@@ -44,7 +45,7 @@ def split_on_commas(values):
     return [value.strip() for value in values.split(',') if value]
 
 
-@cast_return_to_dict
+@to_dict
 def split_on_colons(values):
     for kv in values:
         key, _, value = kv.partition(':')

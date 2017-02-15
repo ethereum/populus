@@ -4,6 +4,10 @@ import os
 import json
 from collections import OrderedDict
 
+from eth_utils import (
+    to_dict,
+)
+
 from populus import Project
 
 from populus.utils.packaging import (
@@ -14,9 +18,6 @@ from populus.utils.packaging import (
     get_release_lockfile_path,
     get_installed_packages_dir,
     load_release_lockfile,
-)
-from populus.utils.functional import (
-    cast_return_to_dict,
 )
 from populus.utils.filesystem import (
     find_solidity_source_files,
@@ -63,7 +64,7 @@ class MockIPFSBackend(BaseIPFSPackageBackend):
     def setup_backend(self):
         self.files = {}
 
-    @cast_return_to_dict
+    @to_dict
     def resolve_package_source_tree(self, release_lockfile):
         sources = release_lockfile['sources']
 

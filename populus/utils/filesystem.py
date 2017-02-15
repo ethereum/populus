@@ -7,8 +7,8 @@ import contextlib
 import functools
 import errno
 
-from populus.utils.functional import (
-    cast_return_to_tuple,
+from eth_utils import (
+    to_tuple,
 )
 
 
@@ -81,7 +81,7 @@ def is_executable_available(program):
     return False
 
 
-@cast_return_to_tuple
+@to_tuple
 def recursive_find_files(base_dir, pattern):
     for dirpath, _, filenames in os.walk(base_dir):
         for filename in filenames:
@@ -89,7 +89,7 @@ def recursive_find_files(base_dir, pattern):
                 yield os.path.join(dirpath, filename)
 
 
-@cast_return_to_tuple
+@to_tuple
 def find_solidity_source_files(contracts_source_dir):
     return (
         os.path.relpath(source_file_path)

@@ -1,11 +1,12 @@
 import os
 import itertools
 
+from eth_utils import (
+    to_dict,
+)
+
 from populus.utils.linking import (
     find_link_references,
-)
-from populus.utils.functional import (
-    cast_return_to_dict,
 )
 from populus.utils.chains import (
     get_chain_definition,
@@ -14,8 +15,8 @@ from populus.utils.contracts import (
     is_contract_name,
     EMPTY_BYTECODE_VALUES,
 )
-from populus.utils.dicts import (
-    dict_merge,
+from populus.utils.mappings import (
+    deep_merge_dicts,
 )
 from populus.utils.packaging import (
     validate_package_manifest,
@@ -24,7 +25,7 @@ from populus.utils.packaging import (
 )
 
 
-@cast_return_to_dict
+@to_dict
 def construct_release_lockfile(project,
                                chain_names,
                                contract_instance_names,
@@ -84,7 +85,7 @@ def construct_release_lockfile(project,
         yield 'contract_types', contract_types
 
 
-@cast_return_to_dict
+@to_dict
 def construct_deployments(project, chain_names, contract_instance_names):
     for chain_name in chain_names:
         with project.get_chain(chain_name) as chain:
@@ -97,7 +98,7 @@ def construct_deployments(project, chain_names, contract_instance_names):
             yield chain_definition, deployed_contract_instances
 
 
-@cast_return_to_dict
+@to_dict
 def construct_build_dependencies(installed_packages_dir, project_dependencies):
     installed_dependencies = extract_build_dependendencies_from_installed_packages(
         installed_packages_dir,
@@ -107,7 +108,7 @@ def construct_build_dependencies(installed_packages_dir, project_dependencies):
             yield dependency_name, dependency_identifier
 
 
-@cast_return_to_dict
+@to_dict
 def construct_contract_types(compiled_contract_data, contract_type_names):
     for contract_type_name in contract_type_names:
         contract_data = compiled_contract_data[contract_type_name]
@@ -118,7 +119,7 @@ def construct_contract_types(compiled_contract_data, contract_type_names):
         yield contract_type_name, contract_type_object
 
 
-@cast_return_to_dict
+@to_dict
 def construct_package_meta_data(package_manifest):
     if 'authors' in package_manifest:
         yield 'authors', package_manifest['authors']
@@ -132,7 +133,7 @@ def construct_package_meta_data(package_manifest):
         yield 'links', package_manifest['links']
 
 
-@cast_return_to_dict
+@to_dict
 def construct_deployed_contract_instance(provider,
                                          contract_name):
     contract_instance = provider.get_contract(contract_name)
@@ -144,7 +145,7 @@ def construct_deployed_contract_instance(provider,
 
     # TODO: populate deploy txn and deploy block
 
-    runtime_bytecode = contract_data['code_runtime']
+    runtime_bytecode = contract_data['bytecode_runtime']
     if runtime_bytecode not in EMPTY_BYTECODE_VALUES:
         yield 'runtime_bytecode', runtime_bytecode
 
@@ -162,7 +163,7 @@ def construct_deployed_contract_instance(provider,
             yield 'link_dependencies', link_dependencies
 
 
-@cast_return_to_dict
+@to_dict
 def construct_deployments_object(provider, contract_names_to_include):
     for contract_name in contract_names_to_include:
         deployed_contract_instance = construct_deployed_contract_instance(
@@ -172,22 +173,22 @@ def construct_deployments_object(provider, contract_names_to_include):
         yield contract_name, deployed_contract_instance
 
 
-@cast_return_to_dict
+@to_dict
 def construct_contract_type_object(contract_data,
                                    contract_type_name):
     yield 'contract_name', contract_type_name
 
-    if contract_data.get('code') not in EMPTY_BYTECODE_VALUES:
-        yield 'bytecode', contract_data['code']
+    if contract_data.get('bytecode') not in EMPTY_BYTECODE_VALUES:
+        yield 'bytecode', contract_data['bytecode']
 
-    if contract_data.get('code_runtime') not in EMPTY_BYTECODE_VALUES:
-        yield 'runtime_bytecode', contract_data['code_runtime']
+    if contract_data.get('bytecode_runtime') not in EMPTY_BYTECODE_VALUES:
+        yield 'runtime_bytecode', contract_data['bytecode_runtime']
 
     if 'abi' in contract_data:
         yield 'abi', contract_data['abi']
 
     if 'userdoc' or 'devdoc' in contract_data:
-        natspec = dict_merge(
+        natspec = deep_merge_dicts(
             contract_data.get('userdoc', {}),
             contract_data.get('devdoc', {}),
         )

@@ -5,8 +5,8 @@ from populus.packages.build import (
 
 CONTRACT_DATA = {
     'abi': [],
-    'code': '0x1234567890abcdef',
-    'code_runtime': '0xdeadbeef',
+    'bytecode': '0x1234567890abcdef',
+    'bytecode_runtime': '0xdeadbeef',
     'meta': {
         'type': 'solc',
         'compiler': '0.4.2+commit.af6afb04.Darwin.appleclang',

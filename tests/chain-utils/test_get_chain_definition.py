@@ -1,7 +1,8 @@
-from populus.utils.formatting import (
+from eth_utils import (
     add_0x_prefix,
     remove_0x_prefix,
 )
+
 from populus.utils.chains import get_chain_definition
 
 

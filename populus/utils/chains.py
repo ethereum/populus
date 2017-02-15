@@ -1,6 +1,12 @@
 import os
 import re
 
+from eth_utils import (
+    add_0x_prefix,
+    remove_0x_prefix,
+    is_integer,
+)
+
 from web3 import (
     Web3,
     RPCProvider,
@@ -9,15 +15,8 @@ from web3 import (
     TestRPCProvider,
 )
 
-from .formatting import (
-    add_0x_prefix,
-    remove_0x_prefix,
-)
 from .six import (
     parse,
-)
-from .types import (
-    is_integer,
 )
 from .module_loading import (
     import_string,

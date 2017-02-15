@@ -1,7 +1,5 @@
 import pytest
 
-from populus.chain import UnknownContract
-from populus import Project
 from populus.contracts.exceptions import (
     UnknownContract,
 )

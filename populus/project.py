@@ -2,6 +2,11 @@ import os
 import warnings
 import json
 
+from eth_utils import (
+    to_ordered_dict,
+    to_dict,
+)
+
 from populus.utils.filesystem import (
     relpath,
     find_solidity_source_files,
@@ -35,8 +40,6 @@ from populus.utils.module_loading import (
 )
 from populus.utils.functional import (
     cached_property,
-    cast_return_to_ordered_dict,
-    cast_return_to_dict,
 )
 
 from populus.compilation import (
@@ -169,7 +172,7 @@ class Project(object):
         return get_installed_packages_dir(self.project_dir)
 
     @property
-    @cast_return_to_dict
+    @to_dict
     def installed_package_locations(self):
         # TODO: rename to `installed_dependency_locations`
         return get_installed_dependency_locations(self.installed_packages_dir)
@@ -177,13 +180,13 @@ class Project(object):
     #
     # Packaging: Backends
     #
-    @cast_return_to_ordered_dict
+    @to_dict
     def get_package_backend_config(self):
         package_backend_config = self.config.get_config('packaging.backends')
         return sort_prioritized_configs(package_backend_config, self.config)
 
     @cached_property
-    @cast_return_to_ordered_dict
+    @to_dict
     def package_backends(self):
         for backend_name, backend_config in self.get_package_backend_config().items():
             PackageBackendClass = import_string(backend_config['class'])

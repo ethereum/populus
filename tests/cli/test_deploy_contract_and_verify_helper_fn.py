@@ -18,7 +18,7 @@ def test_deploying_contract_with_successful_deploy(project):
     exports = []
 
     with chain:
-        Math = chain.contract_factories.Math
+        Math = chain.base_contract_factories.Math
 
         @click.command()
         def wrapper():
@@ -50,7 +50,7 @@ def test_with_successful_deploy_sans_runtime_bytecode(project):
     exports = []
 
     with chain:
-        Math = chain.contract_factories.Math
+        Math = chain.base_contract_factories.Math
 
         Math.bytecode_runtime = None
         assert Math.bytecode_runtime is None
@@ -84,7 +84,7 @@ def test_deploying_contract_with_error_during_deploy(project):
     exports = []
 
     with chain:
-        ThrowsInConstructor = chain.contract_factories.ThrowsInConstructor
+        ThrowsInConstructor = chain.base_contract_factories.ThrowsInConstructor
 
         @click.command()
         def wrapper():
@@ -92,7 +92,7 @@ def test_deploying_contract_with_error_during_deploy(project):
                 chain,
                 contract_name='ThrowsInConstructor',
                 ContractFactory=ThrowsInConstructor,
-                deploy_arguments=[True],
+                deploy_args=[True],
             )
             exports.append(thrower_contract)
             print("~~{0}~~".format(thrower_contract.address))
@@ -115,7 +115,7 @@ def test_deploying_contract_with_error_during_deploy_sanity_check(project):
     exports = []
 
     with chain:
-        ThrowsInConstructor = chain.contract_factories.ThrowsInConstructor
+        ThrowsInConstructor = chain.base_contract_factories.ThrowsInConstructor
 
         @click.command()
         def wrapper():
@@ -123,7 +123,7 @@ def test_deploying_contract_with_error_during_deploy_sanity_check(project):
                 chain,
                 contract_name='ThrowsInConstructor',
                 ContractFactory=ThrowsInConstructor,
-                deploy_arguments=[False],
+                deploy_args=[False],
             )
             exports.append(math_contract)
             print("~~{0}~~".format(math_contract.address))

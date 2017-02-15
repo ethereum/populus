@@ -22,7 +22,7 @@ def test_external_rpc_chain(project):
 def test_external_ipc_chain(project, wait_for_unlock):
     with project.get_chain('temp') as chain:
         web3 = chain.web3
-        registrar = chain.registrar
+        registrar = chain.store.registrar
 
         wait_for_unlock(web3)
 

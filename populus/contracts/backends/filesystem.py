@@ -4,11 +4,12 @@ import functools
 import json
 import os
 
+from eth_utils import (
+    to_tuple,
+)
+
 from populus.contracts.exceptions import NoKnownAddress
 
-from populus.utils.functional import (
-    cast_return_to_tuple,
-)
 from populus.utils.mappings import (
     set_nested_key,
 )
@@ -23,7 +24,7 @@ from .base import (
 )
 
 
-@cast_return_to_tuple
+@to_tuple
 def get_matching_chain_definitions(web3, values):
     for chain_definition in values:
         if check_if_chain_matches_chain_uri(web3, chain_definition):

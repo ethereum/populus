@@ -2,11 +2,9 @@ import os
 import shutil
 
 from populus.utils.six import configparser
-from populus.utils.functional import (
-    deep_merge_dicts,
-)
 from populus.utils.mappings import (
     set_nested_key,
+    deep_merge_dicts,
 )
 from populus.utils.config import (
     get_json_config_file_path,

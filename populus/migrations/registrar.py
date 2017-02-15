@@ -43,9 +43,9 @@ def get_compiled_registrar_contract():
             "are supported".format(get_solc_version())
         )
     compiled_contracts = compile_files([registrar_source_path])
-    contract_data = compiled_contracts['Registrar']
-    normalized_data = normalize_contract_data(contract_data, {})
-    return normalized_data
+    raw_contract_data = compiled_contracts['Registrar']
+    contract_data = normalize_contract_data(raw_contract_data)
+    return contract_data
 
 
 def get_registrar(web3, address=None):

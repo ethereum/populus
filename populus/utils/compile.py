@@ -1,19 +1,23 @@
+import json
+
 from eth_utils import (
     to_dict,
     add_0x_prefix,
+    is_string,
 )
 
 
-def process_compiler_output(name_from_compiler, data_from_compiler, contract_meta):
+def process_compiler_output(name_from_compiler, data_from_compiler):
     # TODO: use the source path.
     _, _, contract_name = name_from_compiler.rpartition(':')
-    contract_data = normalize_contract_data(data_from_compiler, contract_meta)
+    contract_data = normalize_contract_data(data_from_compiler)
     return contract_name, contract_data
 
 
 @to_dict
-def normalize_contract_data(contract_data, contract_meta):
-    yield 'meta', contract_meta
+def normalize_contract_data(contract_data):
+    if 'metadata' in contract_data:
+        yield 'metadata', normalize_contract_metadata(contract_data['metadata'])
     if 'bin' in contract_data:
         yield 'bytecode', add_0x_prefix(contract_data['bin'])
     if 'bin-runtime' in contract_data:
@@ -27,15 +31,8 @@ def normalize_contract_data(contract_data, contract_meta):
 
 
 @to_dict
-def get_contract_meta(compiler_kwargs, solc_version):
-    yield 'type', 'solc'
-    yield 'version', solc_version
+def normalize_contract_metadata(metadata):
+    if is_string(metadata):
+        metadata = json.loads(metadata)
 
-    if 'optimize' in compiler_kwargs:
-        compiler_meta = {
-            key: value
-            for key, value
-            in compiler_kwargs.items()
-            if key in {'optimize', 'optimize_runs'}
-        }
-        yield 'settings', compiler_meta
+    return metadata

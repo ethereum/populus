@@ -7,6 +7,6 @@ contract WithConstructorArguments {
   
   function WithConstructorArguments(uint a, bytes32 b) {
     data_a = a; 
-    ata_b = b;
+    data_b = b;
   }
 }

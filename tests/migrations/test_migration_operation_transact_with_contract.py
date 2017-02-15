@@ -8,7 +8,9 @@ from populus.utils.testing import (
 
 
 @load_contract_fixture('Math.sol')
-def test_transact_contract_operation(web3, chain, math):
+def test_transact_contract_operation(web3, chain):
+    math = chain.get_contract('Math')
+
     MATH = chain.project.compiled_contracts['Math']
 
     transact_contract_operation = TransactContract(

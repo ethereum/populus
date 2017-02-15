@@ -35,9 +35,9 @@ def test_wait_for_receipt(project, chain_name, wait_for_unlock):
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
-def test_wait_for_contract_address(chain_name,
+def test_wait_for_contract_address(project,
+                                   chain_name,
                                    wait_for_unlock):
-    project = Project()
     MATH_BYTECODE = project.compiled_contracts['Math']['bytecode']
     MATH_BYTECODE_RUNTIME = project.compiled_contracts['Math']['bytecode_runtime']
 
@@ -55,4 +55,4 @@ def test_wait_for_contract_address(chain_name,
         contract_address = chain.wait.for_contract_address(txn_hash)
 
         chain_bytecode = web3.eth.getCode(contract_address)
-        assert chain_bytecode == MATH_RUNTIME
+        assert chain_bytecode == MATH_BYTECODE_RUNTIME

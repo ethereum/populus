@@ -1,18 +1,15 @@
 import pytest
 
+from populus.utils.testing import load_contract_fixture
 
-def test_base_contract_factories_fixture(project_dir, write_project_file, request,
-                                         MATH):
-    write_project_file('contracts/Math.sol', MATH['source'])
 
+@load_contract_fixture('Math.sol')
+def test_base_contract_factories_fixture(project, request):
     base_contract_factories = request.getfuncargvalue('base_contract_factories')
 
     assert 'Math' in base_contract_factories
 
 
-def test_deprecated_contracts_fixture(project_dir, write_project_file, request,
-                                      MATH):
-    write_project_file('contracts/Math.sol', MATH['source'])
-
+def test_deprecated_contracts_fixture(project, request):
     with pytest.warns(PendingDeprecationWarning):
         request.getfuncargvalue('contracts')

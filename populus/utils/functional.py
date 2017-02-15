@@ -41,3 +41,7 @@ def deep_merge_dicts(*dicts):
             ))
         else:
             yield key, values[-1]
+
+
+def noop(*args, **kwargs):
+    pass

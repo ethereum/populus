@@ -3,7 +3,6 @@ import warnings
 import json
 
 from eth_utils import (
-    to_ordered_dict,
     to_dict,
 )
 

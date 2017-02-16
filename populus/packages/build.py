@@ -5,9 +5,6 @@ from eth_utils import (
     to_dict,
 )
 
-from populus.utils.linking import (
-    find_link_references,
-)
 from populus.utils.chains import (
     get_chain_definition,
 )
@@ -15,13 +12,18 @@ from populus.utils.contracts import (
     is_contract_name,
     EMPTY_BYTECODE_VALUES,
 )
+from populus.utils.dependencies import (
+    extract_build_dependendencies_from_installed_packages,
+)
+from populus.utils.linking import (
+    find_link_references,
+)
 from populus.utils.mappings import (
     deep_merge_dicts,
 )
 from populus.utils.packaging import (
     validate_package_manifest,
     persist_package_file,
-    extract_build_dependendencies_from_installed_packages,
 )
 
 
@@ -90,7 +92,7 @@ def construct_deployments(project, chain_names, contract_instance_names):
     for chain_name in chain_names:
         with project.get_chain(chain_name) as chain:
             chain_definition = get_chain_definition(chain.web3)
-            provider = chain.store.provider
+            provider = chain.provider
             deployed_contract_instances = construct_deployments_object(
                 provider,
                 contract_instance_names,
@@ -137,30 +139,37 @@ def construct_package_meta_data(package_manifest):
 def construct_deployed_contract_instance(provider,
                                          contract_name):
     contract_instance = provider.get_contract(contract_name)
-    contract_data = provider.chain.project.compiled_contract_data[contract_name]
+    base_contract_factory = provider.chain.store.get_base_contract_factory(contract_name)
 
-    # TODO: handle contract types from dependencies.
-    yield 'contract_type', contract_name
+    yield 'contract_type', contract_instance.populus_meta.contract_type_name
     yield 'address', contract_instance.address
 
-    # TODO: populate deploy txn and deploy block
-
-    runtime_bytecode = contract_data['bytecode_runtime']
+    runtime_bytecode = base_contract_factory.bytecode_runtime
     if runtime_bytecode not in EMPTY_BYTECODE_VALUES:
         yield 'runtime_bytecode', runtime_bytecode
 
-        link_references = find_link_references(runtime_bytecode, provider.all_contract_names)
+        link_references = find_link_references(
+            runtime_bytecode,
+            provider.chain.store.get_all_contract_names(),
+        )
 
         # TODO: scrape all installed package manifests for the names of deployed
         # contracts who's contract class name matches this reference.
         link_dependencies = tuple(
-            {'offset': link_reference.offset, 'value': link_reference.full_name}
+            construct_link_value(provider, link_reference)
             for link_reference
             in link_references
         )
 
         if link_dependencies:
             yield 'link_dependencies', link_dependencies
+
+
+@to_dict
+def construct_link_value(provider, link_reference):
+    yield 'offset', link_reference.offset
+    link_reference_contract_instance = provider.get_contract_factory(link_reference.full_name)
+    yield 'value', link_reference_contract_instance.populus_meta.contract_type_name
 
 
 @to_dict

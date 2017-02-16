@@ -1,10 +1,11 @@
 import pytest
 import json
 
-from populus.utils.packaging import (
+from populus.packages.installation import install_packages_to_project
+
+from populus.utils.dependencies import (
     get_dependency_base_dir,
 )
-from populus.packages.installation import install_packages_to_project
 
 
 @pytest.fixture(autouse=True)

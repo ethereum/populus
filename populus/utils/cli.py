@@ -277,7 +277,7 @@ def deploy_contract_and_verify(chain,
     a different name.
     """
     web3 = chain.web3
-    provider = chain.store.provider
+    provider = chain.provider
 
     if is_account_locked(web3, web3.eth.defaultAccount or web3.eth.coinbase):
         try:

@@ -1,6 +1,7 @@
+import itertools
+import json
 import os
 import warnings
-import json
 
 from eth_utils import (
     to_dict,
@@ -29,13 +30,20 @@ from populus.utils.compile import (
     get_build_asset_dir,
     get_compiled_contracts_asset_path,
     get_contracts_source_dir,
+    get_dependency_source_paths,
     get_project_source_paths,
+    get_test_source_paths,
 )
 from populus.utils.config import (
     check_if_json_config_file_exists,
     get_default_project_config_file_path,
     get_json_config_file_path,
     sort_prioritized_configs,
+)
+from populus.utils.dependencies import (
+    recursive_find_installed_dependency_base_dirs,
+    get_installed_dependency_locations,
+    get_installed_packages_dir,
 )
 from populus.utils.filesystem import (
     relpath,
@@ -48,8 +56,9 @@ from populus.utils.module_loading import (
 )
 from populus.utils.packaging import (
     get_project_package_manifest_path,
-    get_installed_packages_dir,
-    get_installed_dependency_locations,
+)
+from populus.utils.testing import (
+    get_tests_dir,
 )
 
 
@@ -148,6 +157,17 @@ class Project(object):
         return self.config.get('populus.project_dir', os.getcwd())
 
     #
+    # Project
+    #
+    @property
+    @relpath
+    def tests_dir(self):
+        return self.config.get(
+            'populus.test_dir',
+            get_tests_dir(self.project_dir),
+        )
+
+    #
     # Packaging: Manifest
     #
     @property
@@ -183,7 +203,7 @@ class Project(object):
 
     @property
     @to_dict
-    def installed_package_locations(self):
+    def installed_dependency_locations(self):
         # TODO: rename to `installed_dependency_locations`
         return get_installed_dependency_locations(self.installed_packages_dir)
 
@@ -248,12 +268,23 @@ class Project(object):
     _cached_compiled_contracts = None
 
     def get_source_modification_time(self):
-        source_file_paths = get_project_source_paths(self.contracts_source_dir)
+        # TODO: refactor compute_project_compilation_arguments into multiple
+        # functions so that we can only grab the source file paths.
+        dependency_source_paths = tuple(itertools.chain.from_iterable(
+            get_dependency_source_paths(dependency_base_dir)
+            for dependency_base_dir
+            in recursive_find_installed_dependency_base_dirs(self.installed_packages_dir)
+        ))
+        all_source_paths = tuple(itertools.chain(
+            get_project_source_paths(self.contracts_source_dir),
+            get_test_source_paths(self.tests_dir),
+            dependency_source_paths,
+        ))
         return max(
             os.path.getmtime(source_file_path)
             for source_file_path
-            in source_file_paths
-        ) if len(source_file_paths) > 0 else None
+            in all_source_paths
+        ) if len(all_source_paths) > 0 else None
 
     def is_compiled_contract_cache_stale(self):
         if self._cached_compiled_contracts is None:

@@ -2,8 +2,9 @@ import itertools
 import re
 
 from eth_utils import (
-    is_string,
     remove_0x_prefix,
+    is_string,
+    to_dict,
 )
 
 from .filesystem import (
@@ -15,8 +16,8 @@ from .linking import (
 from .mappings import (
     get_nested_key,
 )
-from .string import (
-    normalize_class_name,
+from .packaging import (
+    is_package_name,
 )
 
 
@@ -44,6 +45,15 @@ def is_test_contract(tests_dir, contract_data):
     return is_under_path(tests_dir, contract_source_file_path)
 
 
+def is_dependency_contract(project_installed_packages_dir, contract_data):
+    try:
+        contract_source_file_path = get_contract_source_file_path(contract_data)
+    except KeyError:
+        # TODO: abstract contracts don't have a metadata value.  How do we handle this....
+        return False
+    return is_under_path(project_installed_packages_dir, contract_source_file_path)
+
+
 def package_contracts(contract_factories):
     _dict = {
         '__len__': lambda s: len(contract_factories),
@@ -57,45 +67,6 @@ def package_contracts(contract_factories):
     _dict.update(contract_factories)
 
     return type('contracts', (object,), _dict)()
-
-
-CONTRACT_FACTORY_FIELDS = {
-    'abi',
-    'asm',
-    'ast',
-    'bytecode',
-    'bytecode_runtime',
-    'clone_bin',
-    'dev_doc',
-    'interface',
-    'metadata',
-    'opcodes',
-    'src_map',
-    'src_map_runtime',
-    'user_doc',
-}
-
-
-def create_contract_factory(web3, contract_name, contract_data):
-    factory_kwargs = {
-        key: contract_data[key]
-        for key
-        in CONTRACT_FACTORY_FIELDS
-        if key in contract_data
-    }
-    return web3.eth.contract(
-        contract_name=normalize_class_name(contract_name),
-        **factory_kwargs
-    )
-
-
-def construct_contract_factories(web3, contracts):
-    contract_classes = {
-        contract_name: create_contract_factory(web3, contract_name, contract_data)
-        for contract_name, contract_data
-        in contracts.items()
-    }
-    return package_contracts(contract_classes)
 
 
 def get_shallow_dependency_graph(contracts):
@@ -133,6 +104,40 @@ CONTRACT_NAME_REGEX = '^[_a-zA-Z][_a-zA-Z0-9]*$'
 
 def is_contract_name(value):
     return bool(re.match(CONTRACT_NAME_REGEX, value))
+
+
+def is_dependency_contract_name(value):
+    dependency_name, _, contract_name = value.partition(':')
+    if not is_package_name(dependency_name):
+        return False
+    elif not is_contract_name(contract_name):
+        return False
+    else:
+        return True
+
+
+@to_dict
+def map_contracts_to_source_location(compiled_contract_data, source_locations):
+    source_locations_by_depth = sorted(source_locations, reverse=True)
+    contracts_by_source_path = {
+        contract_name: get_contract_source_file_path(contract_data)
+        for contract_name, contract_data
+        in compiled_contract_data.items()
+    }
+    for contract_name, contract_source_path in contracts_by_source_path.items():
+        for source_location in source_locations_by_depth:
+            if is_under_path(source_location, contract_source_path):
+                yield (contract_name, source_location)
+                break
+        else:
+            raise ValueError(
+                "Contract `{0}` from source path `{1}` could not be mapped to "
+                "any of the following source locations:\n- {2}".format(
+                    contract_name,
+                    contract_source_path,
+                    '\n- '.join(source_locations_by_depth),
+                )
+            )
 
 
 EMPTY_BYTECODE_VALUES = {None, "0x"}

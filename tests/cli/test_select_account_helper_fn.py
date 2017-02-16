@@ -10,6 +10,7 @@ from populus.utils.cli import (
 )
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     ('account_index'),
     (0, 1),
@@ -39,6 +40,7 @@ def test_select_account_helper_with_indexes(project_dir, account_index):
     assert expected in result.output
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     ('account_index'),
     (0, 1),
@@ -68,6 +70,7 @@ def test_select_account_helper_with_accounts(project_dir, account_index):
     assert expected in result.output
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     ('stdin'),
     (20, '0xd3cda913deb6f67967b99d67acdfa1712c293601'),

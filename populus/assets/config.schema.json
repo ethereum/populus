@@ -11,6 +11,12 @@
     "compilation": {
       "$ref": "#/definitions/CompilationConfig"
     },
+    "contracts": {
+      "$ref": "#/definitions/ContractsConfig"
+    },
+    "packaging": {
+      "$ref": "#/definitions/PackagingConfig"
+    },
     "chains": {
       "$ref": "#/definitions/ProjectChainsConfig"
     },
@@ -64,10 +70,60 @@
         }
       }
     },
+    "ContractBackendConfig": {
+      "title": "Configuration for a contract backend",
+      "type": "object",
+      "required": ["class", "priority"],
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "priority": {
+          "title": "The priority of this backend",
+          "type": "integer"
+        },
+        "settings": {
+          "title": "Backend specific settings",
+          "type": "object"
+        }
+      }
+    },
     "PythonImportPath": {
       "title": "The string representation of an import path for a python module or object",
       "type": "string",
       "pattern": "^[a-zA-Z][_a-zA-Z0-9]*(?:\\.[a-zA-Z][_a-zA-Z0-9]*)*$"
+    },
+    "PackagingConfig": {
+      "title": "Configuration for package installation and management",
+      "type": "object",
+      "properties": {
+        "backends": {
+          "title": "Global configurations for project backends which can be used by project chains",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+              "$ref": "#/definitions/PackageBackendConfig"
+            }
+          }
+        }
+      }
+    },
+    "PackageBackendConfig": {
+      "title": "Configuration for a package backend",
+      "type": "object",
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "priority": {
+          "title": "The priority of this backend",
+          "type": "integer"
+        },
+        "settings": {
+          "title": "Backend specific settings",
+          "type": "object"
+        }
+      }
     },
     "ProjectChainsConfig": {
       "title": "The configuration for each chain declared by this project",
@@ -82,7 +138,7 @@
     "ChainConfig": {
       "title": "Configuration for a single project chain",
       "type": "object",
-      "required": ["chain", "web3"],
+      "required": ["chain", "web3", "contracts"],
       "properties": {
         "chain": {"$ref": "#/definitions/ChainClassConfig"},
         "web3": {
@@ -90,6 +146,37 @@
             {"$ref": "#/definitions/Reference"},
             {"$ref": "#/definitions/Web3Config"}
           ]
+        },
+        "contracts": {
+          "title": "Configuration for the contract backends this chain will use",
+          "type": "object",
+          "required": ["backends"],
+          "properties": {
+            "backends": {
+              "patternProperties": {
+                "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+                  "anyOf": [
+                    {"$ref": "#/definitions/Reference"},
+                    {"$ref": "#/definitions/ContractBackendConfig"}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ChainClassConfig": {
+      "title": "Configuration for a chain class",
+      "type": "object",
+      "required": ["class"],
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "settings": {
+          "title": "Additional configuration for the chain class",
+          "type": "object"
         }
       }
     },

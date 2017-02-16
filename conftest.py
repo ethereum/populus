@@ -22,17 +22,19 @@ def temporary_dir(tmpdir):
 def project_dir(tmpdir, monkeypatch):
     from populus.utils.filesystem import (
         ensure_path_exists,
-        get_contracts_dir,
-        get_build_dir,
-        get_blockchains_dir,
+    )
+    from populus.utils.contracts import (
+        get_contracts_source_dir,
+    )
+    from populus.utils.chains import (
+        get_base_blockchain_storage_dir,
     )
 
     _project_dir = str(tmpdir.mkdir("project-dir"))
 
     # setup project directories
-    ensure_path_exists(get_contracts_dir(_project_dir))
-    ensure_path_exists(get_build_dir(_project_dir))
-    ensure_path_exists(get_blockchains_dir(_project_dir))
+    ensure_path_exists(get_contracts_source_dir(_project_dir))
+    ensure_path_exists(get_base_blockchain_storage_dir(_project_dir))
 
     monkeypatch.chdir(_project_dir)
     monkeypatch.syspath_prepend(_project_dir)
@@ -80,8 +82,8 @@ def wait_for_unlock():
 
 @pytest.fixture()
 def _loaded_contract_fixtures(populus_source_root, project_dir, request):
-    from populus.utils.filesystem import (
-        get_contracts_dir,
+    from populus.utils.contracts import (
+        get_contracts_source_dir,
     )
 
     contracts_to_load_from_fn = getattr(request.function, '_populus_contract_fixtures', [])
@@ -107,7 +109,7 @@ def _loaded_contract_fixtures(populus_source_root, project_dir, request):
             raise ValueError("Unable to load contract '{0}'".format(item))
 
         dst_path = os.path.join(
-            get_contracts_dir(project_dir),
+            get_contracts_source_dir(project_dir),
             os.path.basename(item),
         )
         if os.path.exists(dst_path):

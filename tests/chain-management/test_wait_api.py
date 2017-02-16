@@ -38,8 +38,8 @@ def test_wait_for_receipt(project, chain_name, wait_for_unlock):
 def test_wait_for_contract_address(project,
                                    chain_name,
                                    wait_for_unlock):
-    MATH_BYTECODE = project.compiled_contracts['Math']['bytecode']
-    MATH_BYTECODE_RUNTIME = project.compiled_contracts['Math']['bytecode_runtime']
+    MATH_BYTECODE = project.compiled_contract_data['Math']['bytecode']
+    MATH_BYTECODE_RUNTIME = project.compiled_contract_data['Math']['bytecode_runtime']
 
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3

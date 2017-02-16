@@ -207,5 +207,5 @@ class PackageIndexBackend(BasePackageIndexBackend):
 
         return web3.eth.contract(
             abi=package_index_abi,
-            base_contract_factory_class=BasePackageIndexFactory,
+            ContractFactoryClass=BasePackageIndexFactory,
         )

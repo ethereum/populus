@@ -142,9 +142,11 @@ def process_compiler_output(name_from_compiler, data_from_compiler):
     return contract_name, contract_data
 
 
-@to_dict
 def normalize_contract_metadata(metadata):
-    if is_string(metadata):
-        metadata = json.loads(metadata)
-
-    return metadata
+    # TODO: tests
+    if not metadata:
+        return None
+    elif is_string(metadata):
+        return json.loads(metadata)
+    else:
+        raise ValueError("Unknown metadata format '{0}'".format(metadata))

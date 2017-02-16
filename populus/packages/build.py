@@ -195,4 +195,14 @@ def construct_contract_type_object(contract_data,
         yield 'natspec', natspec
 
     if 'runtime_bytecode' in contract_data or 'bytecode' in contract_data:
-        yield 'compiler', contract_data['meta']
+        yield 'compiler', construct_compiler_object(contract_data['metadata'])
+
+
+@to_dict
+def construct_compiler_object(metadata):
+    yield 'type', 'solc'
+    yield 'version', metadata['compiler']['version']
+    yield 'settings', {
+        'optimize': metadata['settings']['optimizer']['enabled'],
+        'optimize_runs': metadata['settings']['optimizer']['runs'],
+    }

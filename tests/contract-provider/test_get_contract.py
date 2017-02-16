@@ -8,8 +8,8 @@ from populus.contracts.exceptions import (
 
 def test_getting_contract_with_no_dependencies(chain,
                                                math):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Math', math.address)
 
@@ -18,7 +18,7 @@ def test_getting_contract_with_no_dependencies(chain,
 
 
 def test_getting_contract_when_not_registered(chain):
-    provider = chain.store.provider
+    provider = chain.provider
 
     with pytest.raises(NoKnownAddress):
         provider.get_contract('Math')
@@ -26,8 +26,8 @@ def test_getting_contract_when_not_registered(chain):
 
 def test_getting_contract_with_missing_dependency(chain,
                                                   multiply_13):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Multiply13', multiply_13.address)
 
@@ -38,8 +38,8 @@ def test_getting_contract_with_missing_dependency(chain,
 def test_getting_contract_with_bytecode_mismatch(chain,
                                                  library_13,
                                                  math):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Math', library_13.address)
 
@@ -50,8 +50,8 @@ def test_getting_contract_with_bytecode_mismatch(chain,
 def test_get_contract_with_bytecode_mismatch_on_dependency(chain,
                                                            multiply_13,
                                                            math):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Multiply13', multiply_13.address)
     registrar.set_contract_address('Library13', math.address)
@@ -63,8 +63,8 @@ def test_get_contract_with_bytecode_mismatch_on_dependency(chain,
 def test_get_contract_with_dependency(chain,
                                       multiply_13,
                                       library_13):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Multiply13', multiply_13.address)
     registrar.set_contract_address('Library13', library_13.address)

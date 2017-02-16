@@ -13,8 +13,14 @@
           "JSONFile": {
             "$ref": "contracts.backends.JSONFile"
           },
+          "ProjectContracts": {
+            "$ref": "contracts.backends.ProjectContracts"
+          },
           "InstalledPackages": {
             "$ref": "contracts.backends.InstalledPackages"
+          },
+          "TestContracts": {
+            "$ref": "contracts.backends.TestContracts"
           }
         }
       }
@@ -31,8 +37,14 @@
           "JSONFile": {
             "$ref": "contracts.backends.JSONFile"
           },
+          "ProjectContracts": {
+            "$ref": "contracts.backends.ProjectContracts"
+          },
           "InstalledPackages": {
             "$ref": "contracts.backends.InstalledPackages"
+          },
+          "TestContracts": {
+            "$ref": "contracts.backends.TestContracts"
           }
         }
       }
@@ -49,8 +61,14 @@
           "Memory": {
             "$ref": "contracts.backends.Memory"
           },
+          "ProjectContracts": {
+            "$ref": "contracts.backends.ProjectContracts"
+          },
           "InstalledPackages": {
             "$ref": "contracts.backends.InstalledPackages"
+          },
+          "TestContracts": {
+            "$ref": "contracts.backends.TestContracts"
           }
         }
       }
@@ -67,8 +85,14 @@
           "Memory": {
             "$ref": "contracts.backends.Memory"
           },
+          "ProjectContracts": {
+            "$ref": "contracts.backends.ProjectContracts"
+          },
           "InstalledPackages": {
             "$ref": "contracts.backends.InstalledPackages"
+          },
+          "TestContracts": {
+            "$ref": "contracts.backends.TestContracts"
           }
         }
       }
@@ -85,8 +109,14 @@
           "Memory": {
             "$ref": "contracts.backends.Memory"
           },
+          "ProjectContracts": {
+            "$ref": "contracts.backends.ProjectContracts"
+          },
           "InstalledPackages": {
             "$ref": "contracts.backends.InstalledPackages"
+          },
+          "TestContracts": {
+            "$ref": "contracts.backends.TestContracts"
           }
         }
       }
@@ -94,10 +124,6 @@
   },
   "contracts": {
     "backends": {
-      "InstalledPackages": {
-        "class": "populus.contracts.backends.installed_packages.InstalledPackagesBackend",
-        "priority": 20
-      },
       "JSONFile": {
         "class": "populus.contracts.backends.filesystem.JSONFileBackend",
         "priority": 10,
@@ -105,9 +131,21 @@
           "file_path": "./registrar.json"
         }
       },
+      "ProjectContracts": {
+        "class": "populus.contracts.backends.project.ProjectContractsBackend",
+        "priority": 20
+      },
+      "InstalledPackages": {
+        "class": "populus.contracts.backends.installed_packages.InstalledPackagesBackend",
+        "priority": 30
+      },
+      "TestContracts": {
+        "class": "populus.contracts.backends.testing.TestContractsBackend",
+        "priority": 40
+      },
       "Memory": {
         "class": "populus.contracts.backends.memory.MemoryBackend",
-        "priority": 40
+        "priority": 50
       }
     }
   },

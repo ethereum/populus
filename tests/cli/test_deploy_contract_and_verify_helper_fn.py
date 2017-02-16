@@ -18,7 +18,7 @@ def test_deploying_contract_with_successful_deploy(project):
     exports = []
 
     with chain:
-        Math = chain.base_contract_factories.Math
+        Math = chain.provider.get_contract_factory('Math')
 
         @click.command()
         def wrapper():
@@ -50,7 +50,7 @@ def test_with_successful_deploy_sans_runtime_bytecode(project):
     exports = []
 
     with chain:
-        Math = chain.base_contract_factories.Math
+        Math = chain.provider.get_contract_factory('Math')
 
         Math.bytecode_runtime = None
         assert Math.bytecode_runtime is None
@@ -84,7 +84,7 @@ def test_deploying_contract_with_error_during_deploy(project):
     exports = []
 
     with chain:
-        ThrowsInConstructor = chain.base_contract_factories.ThrowsInConstructor
+        ThrowsInConstructor = chain.provider.get_contract_factory('ThrowsInConstructor')
 
         @click.command()
         def wrapper():
@@ -115,7 +115,7 @@ def test_deploying_contract_with_error_during_deploy_sanity_check(project):
     exports = []
 
     with chain:
-        ThrowsInConstructor = chain.base_contract_factories.ThrowsInConstructor
+        ThrowsInConstructor = chain.provider.get_contract_factory('ThrowsInConstructor')
 
         @click.command()
         def wrapper():

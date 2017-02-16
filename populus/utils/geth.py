@@ -5,12 +5,14 @@ import datetime
 from .filesystem import (
     remove_dir_if_exists,
     remove_file_if_exists,
+    normpath,
 )
 from .chains import (
     get_base_blockchain_storage_dir,
 )
 
 
+@normpath
 def get_data_dir(project_dir, chain_name):
     base_blockchain_storage_dir = get_base_blockchain_storage_dir(project_dir)
     return os.path.join(base_blockchain_storage_dir, chain_name)
@@ -19,6 +21,7 @@ def get_data_dir(project_dir, chain_name):
 CHAINDATA_DIR = './chaindata'
 
 
+@normpath
 def get_chaindata_dir(data_dir):
     return os.path.join(data_dir, CHAINDATA_DIR)
 
@@ -26,6 +29,7 @@ def get_chaindata_dir(data_dir):
 DAPP_DIR = './dapp'
 
 
+@normpath
 def get_dapp_dir(data_dir):
     return os.path.join(data_dir, DAPP_DIR)
 
@@ -33,6 +37,7 @@ def get_dapp_dir(data_dir):
 NODEKEY_FILENAME = 'nodekey'
 
 
+@normpath
 def get_nodekey_path(data_dir):
     return os.path.join(data_dir, NODEKEY_FILENAME)
 
@@ -40,10 +45,12 @@ def get_nodekey_path(data_dir):
 IPC_FILENAME = 'geth.ipc'
 
 
+@normpath
 def get_geth_ipc_path(data_dir):
     return os.path.join(data_dir, IPC_FILENAME)
 
 
+@normpath
 def get_geth_default_datadir_path(testnet=False):
     if testnet:
         testnet = "ropsten"
@@ -77,6 +84,7 @@ def get_geth_default_datadir_path(testnet=False):
         )
 
 
+@normpath
 def get_geth_default_ipc_path(testnet=False):
     data_dir = get_geth_default_datadir_path(testnet=testnet)
 
@@ -96,6 +104,7 @@ def get_geth_default_ipc_path(testnet=False):
         )
 
 
+@normpath
 def get_geth_logfile_path(project_dir, prefix, suffix):
     logs_dir = os.path.join(project_dir, 'logs')
     logfile_name = datetime.datetime.now().strftime(

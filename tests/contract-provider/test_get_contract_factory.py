@@ -1,18 +1,21 @@
 import os
 import pytest
 
+from populus.utils.testing import (
+    load_example_package,
+)
+from populus.utils.linking import (
+    link_bytecode_by_name,
+)
+
 from populus.contracts.exceptions import (
     BytecodeMismatch,
     NoKnownAddress,
 )
 
-from populus.utils.linking import (
-    link_bytecode_by_name,
-)
-
 
 def test_get_contract_factory_with_no_dependencies(chain):
-    provider = chain.store.provider
+    provider = chain.provider
 
     MATH = chain.project.compiled_contract_data['Math']
     Math = provider.get_contract_factory('Math')
@@ -22,16 +25,16 @@ def test_get_contract_factory_with_no_dependencies(chain):
 
 
 def test_get_contract_factory_with_missing_dependency(chain):
-    provider = chain.store.provider
+    provider = chain.provider
 
     with pytest.raises(NoKnownAddress):
         Multiply13 = provider.get_contract_factory('Multiply13')
 
 
-def test_get_contract_factory_with_registrar_dependency(chain,
-                                                        library_13):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+def test_get_contract_factory_with_dependency(chain,
+                                              library_13):
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Library13', library_13.address)
 
@@ -51,10 +54,10 @@ def test_get_contract_factory_with_registrar_dependency(chain,
     assert Multiply13.bytecode_runtime == expected_runtime
 
 
-def test_with_bytecode_mismatch_in_registrar_dependency(chain,
-                                                        library_13):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+def test_get_contract_factory_with_dependency_bytecode_mismatch(chain,
+                                                                library_13):
+    provider = chain.provider
+    registrar = chain.registrar
 
     # this will not match the expected underlying bytecode for the Library13
     # contract so it will cause a failure.
@@ -62,3 +65,15 @@ def test_with_bytecode_mismatch_in_registrar_dependency(chain,
 
     with pytest.raises(BytecodeMismatch):
         provider.get_contract_factory('Multiply13')
+
+
+@pytest.mark.parametrize(
+    'contract_type_name',
+    ('owned', 'owned:owned'),
+)
+@load_example_package('owned')
+def test_get_contract_factory_from_installed_dependency(chain, contract_type_name):
+    provider = chain.provider
+
+    Owned = provider.get_contract_factory(contract_type_name)
+    assert Owned.bytecode == chain.project.compiled_contract_data['owned']['bytecode']

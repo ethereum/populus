@@ -3,6 +3,14 @@ import json
 
 from populus import Project
 
+from populus.packages.installation import (
+    write_installed_packages,
+    write_package_files,
+)
+
+from populus.utils.dependencies import (
+    get_dependency_base_dir,
+)
 from populus.utils.filesystem import (
     ensure_file_exists,
     ensure_path_exists,
@@ -12,12 +20,6 @@ from populus.utils.packaging import (
     compute_identifier_tree,
     flatten_identifier_tree,
     recursively_resolve_package_data,
-    get_dependency_base_dir,
-)
-
-from populus.packages.installation import (
-    write_installed_packages,
-    write_package_files,
 )
 
 

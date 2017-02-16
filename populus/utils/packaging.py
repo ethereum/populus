@@ -22,9 +22,8 @@ from .ipfs import (
     is_ipfs_uri,
 )
 from .filesystem import (
-    recursive_find_files,
-    find_solidity_source_files,
     is_same_path,
+    normpath,
 )
 
 
@@ -34,122 +33,12 @@ SUPPORTED_PACKAGE_MANIFEST_VERSIONS = {'1'}
 PACKAGE_MANIFEST_FILENAME = './ethpm.json'
 
 
+@normpath
 def get_project_package_manifest_path(project_dir):
     """
     Returns filesystem path for the project's package manifest file (ethpm.json)
     """
     return os.path.join(project_dir, PACKAGE_MANIFEST_FILENAME)
-
-
-INSTALLED_PACKAGES_BASE_DIRNAME = './installed_packages'
-
-
-def get_installed_packages_dir(base_dir):
-    """
-    Returns the `./installed_packages` directory for the given `base_dir`
-    """
-    return os.path.join(base_dir, INSTALLED_PACKAGES_BASE_DIRNAME)
-
-
-def get_dependency_base_dir(installed_packages_dir, dependency_name):
-    """
-    Returns the directory within `./installed_packages` that the dependency
-    would be installed to.
-    """
-    dependency_base_dir = os.path.join(installed_packages_dir, dependency_name)
-    return dependency_base_dir
-
-
-def is_dependency_base_dir(directory_path):
-    """
-    Returns file path where the release lockfile for the current project at the
-    given version.
-    """
-    release_lockfile_path = get_release_lockfile_path(directory_path)
-    return os.path.exists(release_lockfile_path)
-
-
-def extract_dependency_name_from_base_dir(dependency_base_dir):
-    """
-    Extract the dependency name from the directory where the dependency is
-    installed
-    """
-    return os.path.basename(dependency_base_dir.rstrip('/'))
-
-
-RELEASE_LOCKFILE_FILENAME = 'lock.json'
-
-
-def get_release_lockfile_path(dependency_base_dir):
-    """
-    Extract the dependency name from the directory where the dependency is
-    installed
-    """
-    return os.path.join(dependency_base_dir, RELEASE_LOCKFILE_FILENAME)
-
-
-INSTALL_IDENTIFIER_LOCKFILE_NAME = 'install_identifier.lock'
-
-
-def get_install_identifier_lockfile_path(dependency_base_dir):
-    """
-    Returns file path where the root identifier for the installed dependency is stored.
-    """
-    install_identifier_lockfile_path = os.path.join(
-        dependency_base_dir,
-        INSTALL_IDENTIFIER_LOCKFILE_NAME,
-    )
-    return install_identifier_lockfile_path
-
-
-def get_install_identifier(dependency_base_dir):
-    """
-    Gets the install_identifier from the translated identifier lockfile
-    within a dependency's base dir.
-    """
-    install_identifier_lockfile_path = get_install_identifier_lockfile_path(dependency_base_dir)
-    with open(install_identifier_lockfile_path) as install_identifier_lockfile_file:
-        install_identifier = install_identifier_lockfile_file.read().strip()
-    return install_identifier
-
-
-BUILD_IDENTIFIER_LOCKFILE_NAME = 'build_identifier.lock'
-
-
-def get_build_identifier_lockfile_path(dependency_base_dir):
-    """
-    Returns file path where the fully translated identifier for the installed
-    dependency is stored.
-    """
-    build_identifier_lockfile_path = os.path.join(
-        dependency_base_dir,
-        BUILD_IDENTIFIER_LOCKFILE_NAME,
-    )
-    return build_identifier_lockfile_path
-
-
-def get_build_identifier(dependency_base_dir):
-    """
-    Gets the build_identifier from the translated identifier lockfile
-    within a dependency's base dir.
-    """
-    build_identifier_lockfile_path = get_build_identifier_lockfile_path(dependency_base_dir)
-    with open(build_identifier_lockfile_path) as build_identifier_lockfile_file:
-        build_identifier = build_identifier_lockfile_file.read().strip()
-    return build_identifier
-
-
-RELEASE_LOCKFILE_BUILD_FILENAME = '{version}.json'
-
-
-def get_lockfile_build_path(build_asset_dir, version_string):
-    """
-    Returns file path where the release lockfile for the current project at the
-    given version.
-    """
-    filename = RELEASE_LOCKFILE_BUILD_FILENAME.format(version=version_string)
-    release_lockfile_build_path = os.path.join(build_asset_dir, filename)
-    return release_lockfile_build_path
 
 
 PACKAGE_NAME_REGEX = '[a-z][-a-z0-9]{0,213}'
@@ -464,8 +353,12 @@ def validate_release_lockfile(release_lockfile):
     - referenced package names
     - whatever else...
     """
+    # dump and then reload the lockfile to coerce any tuples into lists.
+    # otherwise jsonschema gets mad because it won't accept a tuple in place of
+    # an array.
+    release_lockfile_for_validation = json.loads(json.dumps(release_lockfile))
     release_lockfile_schema = load_release_lockfile_schema()
-    jsonschema.validate(release_lockfile, release_lockfile_schema)
+    jsonschema.validate(release_lockfile_for_validation, release_lockfile_schema)
 
 
 def load_release_lockfile(release_lockfile_path, validate=True):
@@ -495,7 +388,7 @@ def extract_install_identifier(package_identifier_lineage):
         elif is_ipfs_uri(identifier):
             return identifier
     else:
-        raise ValueError("No valid root identifiers found in package identifier lineage")
+        raise ValueError("No valid install identifiers found in package identifier lineage")
 
 
 def extract_package_metadata(package_identifier_lineage,
@@ -756,81 +649,3 @@ def get_max_version(all_versions):
     if not all_versions:
         raise ValueError('Must pass in at least 1 version string.')
     return functools.reduce(semver.max_ver, all_versions)
-
-
-EXCLUDE_INSTALLED_PACKAGES_GLOB = "./installed_packages/*"
-
-
-@to_tuple
-def find_package_source_files(dependency_base_dir):
-    """
-    Find all of the solidity source files for the given dependency, excluding
-    any of the source files that belong to any sub-dependencies.
-    """
-    source_files_to_exclude = recursive_find_files(
-        dependency_base_dir,
-        EXCLUDE_INSTALLED_PACKAGES_GLOB,
-    )
-    return (
-        source_file_path
-        for source_file_path
-        in find_solidity_source_files(dependency_base_dir)
-        if not any(
-            is_same_path(source_file_path, exclude_path)
-            for exclude_path
-            in source_files_to_exclude
-        )
-    )
-
-
-@to_tuple
-def find_installed_package_locations(installed_packages_dir):
-    """
-    Return a tuple of all filesystem paths directly under the given
-    `installed_packages_dir` that look like dependency base dirs.
-    """
-    if os.path.exists(installed_packages_dir):
-        for maybe_package_dir in os.listdir(installed_packages_dir):
-            dependency_base_dir = get_dependency_base_dir(
-                installed_packages_dir,
-                maybe_package_dir,
-            )
-            if is_dependency_base_dir(dependency_base_dir):
-                yield dependency_base_dir
-
-
-@to_ordered_dict
-def get_installed_dependency_locations(installed_packages_dir):
-    for dependency_base_dir in find_installed_package_locations(installed_packages_dir):
-        yield (
-            extract_dependency_name_from_base_dir(dependency_base_dir),
-            dependency_base_dir,
-        )
-
-
-@to_tuple
-def recursive_find_installed_dependency_base_dirs(installed_packages_dir):
-    """
-    Return a tuple of all filesystem paths directly under the given
-    `installed_packages_dir` that look like dependency base dirs including all
-    sub dependencies.
-    """
-    installed_package_locations = find_installed_package_locations(installed_packages_dir)
-    for package_base_dir in installed_package_locations:
-        yield package_base_dir
-        sub_base_dirs = recursive_find_installed_dependency_base_dirs(package_base_dir)
-        for sub_package_base_dir in sub_base_dirs:
-            yield sub_package_base_dir
-
-
-@to_dict
-def extract_build_dependendencies_from_installed_packages(installed_packages_dir):
-    """
-    Extract the current installed dependencies for creation of the
-    `build_dependencies` section of a release lockfile.
-    """
-    installed_package_locations = find_installed_package_locations(installed_packages_dir)
-    for dependency_base_dir in installed_package_locations:
-        dependency_name = extract_dependency_name_from_base_dir(dependency_base_dir)
-        dependency_identifier = get_build_identifier(dependency_base_dir)
-        yield dependency_name, dependency_identifier

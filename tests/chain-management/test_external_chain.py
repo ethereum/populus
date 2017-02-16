@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.mark.slow
 def test_external_rpc_chain(project):
     with project.get_chain('testrpc') as chain:
         web3 = chain.web3
@@ -19,10 +23,11 @@ def test_external_rpc_chain(project):
             assert ext_web3.eth.coinbase == web3.eth.coinbase
 
 
+@pytest.mark.slow
 def test_external_ipc_chain(project, wait_for_unlock):
     with project.get_chain('temp') as chain:
         web3 = chain.web3
-        registrar = chain.store.registrar
+        registrar = chain.registrar
 
         wait_for_unlock(web3)
 

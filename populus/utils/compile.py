@@ -5,19 +5,23 @@ import itertools
 from eth_utils import (
     to_dict,
     to_tuple,
-    compose,
     add_0x_prefix,
     is_string,
 )
 
-from .packaging import (
-    get_installed_packages_dir,
+from .dependencies import (
     recursive_find_installed_dependency_base_dirs,
-    find_package_source_files,
+    get_installed_packages_dir,
     get_installed_dependency_locations,
 )
 from .filesystem import (
+    recursive_find_files,
     find_solidity_source_files,
+    find_solidity_test_files,
+    is_same_path,
+)
+from .functional import (
+    star_zip_return,
 )
 
 
@@ -40,15 +44,43 @@ def get_compiled_contracts_asset_path(build_asset_dir):
     return compiled_contracts_asset_path
 
 
+def get_project_source_paths(contracts_source_dir):
+    project_source_paths = find_solidity_source_files(contracts_source_dir)
+    return project_source_paths
+
+
+def get_test_source_paths(tests_dir):
+    test_source_paths = find_solidity_test_files(tests_dir)
+    return test_source_paths
+
+
+EXCLUDE_INSTALLED_PACKAGES_GLOB = "./installed_packages/*"
+
+
 @to_tuple
-def compute_import_remappings(source_paths, installed_package_locations):
+def get_dependency_source_paths(dependency_base_dir):
+    """
+    Find all of the solidity source files for the given dependency, excluding
+    any of the source files that belong to any sub-dependencies.
+    """
+    source_files_to_exclude = recursive_find_files(
+        dependency_base_dir,
+        EXCLUDE_INSTALLED_PACKAGES_GLOB,
+    )
+    for source_file_path in find_solidity_source_files(dependency_base_dir):
+        for exclude_path in source_files_to_exclude:
+            if is_same_path(source_file_path, exclude_path):
+                continue
+        yield source_file_path
+
+
+@to_tuple
+def compute_import_remappings(source_paths, installed_dependency_locations):
     source_and_remapping_pairs = itertools.product(
         sorted(source_paths),
-        sorted(installed_package_locations.items()),
+        sorted(installed_dependency_locations.items()),
     )
-    # TODO: This needs to take into account sub-packages such that any
-    # recursively installed packages have their imports appropriately remapped
-    # to their nested installed package dirs.
+
     for import_path, (package_name, package_source_dir) in source_and_remapping_pairs:
         yield "{import_path}:{package_name}={package_source_dir}".format(
             import_path=import_path,
@@ -57,58 +89,64 @@ def compute_import_remappings(source_paths, installed_package_locations):
         )
 
 
-def compute_project_compilation_arguments(contracts_source_dir, root_installed_packages_dir):
-    project_source_paths = find_solidity_source_files(contracts_source_dir)
+def compute_project_compilation_arguments(contracts_source_dir,
+                                          installed_packages_dir):
+    project_source_paths = get_project_source_paths(contracts_source_dir)
 
-    # TODO: this should only compute remappings for solidity files which part
-    # of the imports used by the project.  This could be pulled from the AST or
-    # by regex.
-    project_installed_package_locations = get_installed_dependency_locations(
-        root_installed_packages_dir,
+    installed_dependency_locations = get_installed_dependency_locations(
+        installed_packages_dir,
     )
 
     project_import_remappings = compute_import_remappings(
         project_source_paths,
-        project_installed_package_locations,
+        installed_dependency_locations,
+    )
+    return project_source_paths, project_import_remappings
+
+
+def compute_test_compilation_arguments(tests_dir,
+                                       installed_packages_dir):
+    test_source_paths = get_project_source_paths(tests_dir)
+
+    installed_dependency_locations = get_installed_dependency_locations(
+        installed_packages_dir,
     )
 
-    all_installed_dependency_base_dirs = recursive_find_installed_dependency_base_dirs(
-        root_installed_packages_dir,
+    test_import_remappings = compute_import_remappings(
+        test_source_paths,
+        installed_dependency_locations,
+    )
+    return test_source_paths, test_import_remappings
+
+
+@star_zip_return
+@to_tuple
+def compute_installed_packages_compilation_arguments(installed_packages_dir):
+    all_dependency_base_dirs = recursive_find_installed_dependency_base_dirs(
+        installed_packages_dir,
     )
 
-    if all_installed_dependency_base_dirs:
-        package_source_paths, package_import_remappings = map(
-            compose(itertools.chain.from_iterable, tuple),
-            zip(*(
-                compute_installed_package_compilation_arguments(dependency_base_dir)
-                for dependency_base_dir
-                in all_installed_dependency_base_dirs
-            )),
-        )
-    else:
-        package_source_paths, package_import_remappings = tuple(), tuple()
+    for dependency_base_dir in all_dependency_base_dirs:
+        (
+            dependency_source_paths,
+            dependency_import_remappings,
+        ) = compute_dependency_compilation_arguments(dependency_base_dir)
+        yield dependency_source_paths, dependency_import_remappings
 
-    all_import_remappings = itertools.chain(
-        project_import_remappings,
-        package_import_remappings
+
+def compute_dependency_compilation_arguments(dependency_base_dir):
+    dependency_source_paths = get_dependency_source_paths(dependency_base_dir)
+    dependency_installed_packages_dir = get_installed_packages_dir(dependency_base_dir)
+
+    installed_sub_dependencies = get_installed_dependency_locations(
+        dependency_installed_packages_dir,
     )
 
-    return project_source_paths, package_source_paths, all_import_remappings
-
-
-def compute_installed_package_compilation_arguments(dependency_base_dir):
-    package_source_paths = find_package_source_files(dependency_base_dir)
-    package_installed_packages_dir = get_installed_packages_dir(dependency_base_dir)
-
-    package_installed_dependencies = get_installed_dependency_locations(
-        package_installed_packages_dir,
+    dependency_import_remappings = compute_import_remappings(
+        dependency_source_paths,
+        installed_sub_dependencies,
     )
-
-    package_import_remappings = compute_import_remappings(
-        package_source_paths,
-        package_installed_dependencies,
-    )
-    return package_source_paths, package_import_remappings
+    return dependency_source_paths, dependency_import_remappings
 
 
 @to_dict

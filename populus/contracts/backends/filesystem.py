@@ -8,7 +8,9 @@ from eth_utils import (
     to_tuple,
 )
 
-from populus.contracts.exceptions import NoKnownAddress
+from populus.contracts.exceptions import (
+    NoKnownAddress,
+)
 
 from populus.utils.mappings import (
     set_nested_key,
@@ -38,6 +40,8 @@ def chain_definition_sort_key(web3, chain_definitions):
 
 
 class JSONFileBackend(BaseContractBackend):
+    is_store = False
+
     @property
     def is_provider(self):
         return self.config.get('use_as_provider', True)

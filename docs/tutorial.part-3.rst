@@ -210,7 +210,7 @@ the following test code to a new file ``./tests/test_token_minting.py``
     import pytest
 
     def test_minting_tokens(chain, accounts):
-        provider = chain.store.provider
+        provider = chain.provider
         mintable_token, deploy_txn_hash = provider.get_or_deploy_contract(
             'MintableToken',
             deploy_kwargs={"_totalSupply": 0},
@@ -234,7 +234,7 @@ the following test code to a new file ``./tests/test_token_minting.py``
         assert mintable_token.call().totalSupply() == 66666
 
     def test_only_owner_can_mint(chain, accounts):
-        provider = chain.store.provider
+        provider = chain.provider
         mintable_token, deploy_txn_hash = provider.get_or_deploy_contract(
             'MintableToken',
             deploy_kwargs={"_totalSupply": 0},

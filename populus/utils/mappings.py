@@ -2,11 +2,12 @@ import operator
 import itertools
 
 from eth_utils import (
-    is_dict,
-    to_dict,
     compose,
-    to_tuple,
+    force_text,
+    is_dict,
     sort_return,
+    to_dict,
+    to_tuple,
 )
 
 
@@ -41,7 +42,16 @@ def get_nested_key(config, key):
 
     getter_fn = compose(*itertools.chain(head_getters, (tail_getter,)))
 
-    return getter_fn(config)
+    try:
+        return getter_fn(config)
+    except TypeError as err:
+        raise KeyError(
+            "Error getting nested key {0} from {1}: {2}".format(
+                key,
+                force_text(repr(config)),
+                str(err),
+            )
+        )
 
 
 def delete_nested_key(config, key):

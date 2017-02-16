@@ -11,7 +11,6 @@ from .base import (
 
 
 class TestRPCChain(Chain):
-    provider = None
     rpc_port = None
 
     #
@@ -53,8 +52,8 @@ class TestRPCChain(Chain):
 
         self.rpc_port = get_open_port()
 
-        self.provider = self.web3.currentProvider
-        self.rpc_methods = self.provider.server.application.rpc_methods
+        self._web3_provider = self.web3.currentProvider
+        self.rpc_methods = self._web3_provider.server.application.rpc_methods
 
         self.full_reset()
         self.configure('eth_mining', False)
@@ -69,10 +68,10 @@ class TestRPCChain(Chain):
         if not self._running:
             raise ValueError("The TesterChain is not running")
         try:
-            self.provider.server.stop()
-            self.provider.server.close()
-            self.provider.thread.kill()
+            self._web3_provider.server.stop()
+            self._web3_provider.server.close()
+            self._web3_provider.thread.kill()
         except AttributeError:
-            self.provider.server.shutdown()
+            self._web3_provider.server.shutdown()
         finally:
             self._running = False

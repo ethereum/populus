@@ -6,15 +6,15 @@ from populus.contracts.exceptions import (
 
 
 def test_unknown_contract(chain):
-    provider = chain.store.provider
+    provider = chain.provider
 
     with pytest.raises(UnknownContract):
         provider.get_or_deploy_contract('NotAKnownContract')
 
 
 def test_it_uses_existing_address(chain, math):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Math', math.address)
 
@@ -24,7 +24,7 @@ def test_it_uses_existing_address(chain, math):
 
 
 def test_it_lazily_deploys_contract(chain):
-    provider = chain.store.provider
+    provider = chain.provider
 
     math, created = provider.get_or_deploy_contract('Math')
     assert math.address
@@ -34,7 +34,7 @@ def test_it_lazily_deploys_contract(chain):
 
 
 def test_it_handles_library_dependencies(chain):
-    provider = chain.store.provider
+    provider = chain.provider
 
     multiply_13, created = provider.get_or_deploy_contract('Multiply13')
     assert multiply_13.call().multiply13(3) == 39
@@ -42,8 +42,8 @@ def test_it_handles_library_dependencies(chain):
 
 
 def test_it_uses_existing_library_dependencies(chain, library_13):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Library13', library_13.address)
 

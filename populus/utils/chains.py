@@ -15,17 +15,21 @@ from web3 import (
     TestRPCProvider,
 )
 
-from .six import (
-    parse,
+from .filesystem import (
+    normpath,
 )
 from .module_loading import (
     import_string,
+)
+from .six import (
+    parse,
 )
 
 
 BASE_BLOCKCHAIN_STORAGE_DIR = "./chains"
 
 
+@normpath
 def get_base_blockchain_storage_dir(project_dir):
     base_blochcain_storage_dir = os.path.join(project_dir, BASE_BLOCKCHAIN_STORAGE_DIR)
     return base_blochcain_storage_dir

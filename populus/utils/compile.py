@@ -162,7 +162,6 @@ def process_compiler_output(name_from_compiler, data_from_compiler):
     return contract_name, contract_data
 
 
-@to_dict
 def normalize_contract_metadata(metadata):
     if not metadata:
         return None

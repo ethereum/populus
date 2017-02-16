@@ -7,10 +7,16 @@ CONTRACT_DATA = {
     'abi': [],
     'bytecode': '0x1234567890abcdef',
     'bytecode_runtime': '0xdeadbeef',
-    'meta': {
-        'type': 'solc',
-        'compiler': '0.4.2+commit.af6afb04.Darwin.appleclang',
-        'settings': {'optimize': True},
+    'metadata': {
+        'compiler': {
+            'version': '0.4.2+commit.af6afb04.Darwin.appleclang',
+        },
+        'settings': {
+            'optimizer': {
+                'runs': 200,
+                'enabled': True,
+            }
+        }
     },
     'userdoc': {
        "methods" : {

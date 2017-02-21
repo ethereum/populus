@@ -1,13 +1,9 @@
 import re
 
-
 from eth_utils import (
     is_string,
     is_boolean,
     is_number,
-)
-
-from web3.utils.string import (
     force_text,
 )
 

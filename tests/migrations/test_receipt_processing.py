@@ -1,4 +1,4 @@
-from web3.utils.encoding import (
+from eth_utils import (
     encode_hex,
 )
 from populus.migrations.deferred import (

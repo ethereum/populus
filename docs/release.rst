@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+1.5.2
+-----
+
+- Bugfix for remaining ``web3.utils`` imports
+
+
 1.5.1
 -----
 

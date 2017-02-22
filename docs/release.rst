@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+1.5.3
+-----
+
+- Bump ``web3.py`` version to pull in upstream fixes for ``ethereum-abi-utils``
+
+
 1.5.2
 -----
 

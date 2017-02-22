@@ -701,7 +701,10 @@ class BaseGethChain(Chain):
         self.stack.enter_context(self.geth)
 
         if self.geth.is_mining:
-            self.geth.wait_for_dag(600)
+            # On Amazon EC2 2 VCPU small unit you get 32% of DAG generated
+            # within 600 seconds. Estimate is
+            # we can generate whole DAG in 40 minutes.
+            self.geth.wait_for_dag(60*40)
         if self.geth.ipc_enabled:
             self.geth.wait_for_ipc(60)
         if self.geth.rpc_enabled:

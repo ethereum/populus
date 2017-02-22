@@ -88,7 +88,7 @@ def select_account(chain):
 
     account_choice = click.prompt(
         pick_account_message,
-        default=chain.web3.eth.defaultAccount,
+        default=chain.web3.eth.defaultAccount or chain.web3.eth.coinbase,
     )
 
     if account_choice in set(all_accounts):
@@ -216,7 +216,7 @@ def configure_chain(project, chain_name):
         choose_default_account_msg = (
             "This chain will default to sending transactions from "
             "{0}.  Would you like to set a different default "
-            "account?".format(web3.eth.defaultAccount)
+            "account?".format(web3.eth.defaultAccount or web3.eth.coinbase)
         )
         if click.confirm(choose_default_account_msg, default=True):
             default_account = select_account(chain)
@@ -272,9 +272,9 @@ def deploy_contract_and_verify(chain,
     if base_contract_factory is None:
         base_contract_factory = chain.contract_factories[contract_name]
 
-    if is_account_locked(web3, web3.eth.defaultAccount):
+    if is_account_locked(web3, web3.eth.defaultAccount or web3.eth.coinbase):
         try:
-            chain.wait.for_unlock(web3.eth.defaultAccount, 5)
+            chain.wait.for_unlock(web3.eth.defaultAccount or web3.eth.coinbase, 5)
         except Timeout:
             default_account = select_account(chain)
             if is_account_locked(web3, default_account):

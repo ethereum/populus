@@ -2,7 +2,7 @@ import pytest
 
 from flaky import flaky
 
-from populus.chain import (
+from populus.chain.geth import (
     TESTNET_BLOCK_1_HASH,
     MAINNET_BLOCK_1_HASH,
 )

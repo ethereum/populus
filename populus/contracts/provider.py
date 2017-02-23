@@ -1,12 +1,5 @@
 from pylru import lrucache
 
-from populus.utils.string import (
-    normalize_class_name,
-)
-from populus.utils.linking import (
-    link_bytecode,
-    find_link_references,
-)
 from populus.utils.contracts import (
     package_contracts,
     get_shallow_dependency_graph,
@@ -16,9 +9,12 @@ from populus.utils.contracts import (
 from populus.utils.deploy import (
     compute_deploy_order,
 )
+from populus.utils.linking import (
+    link_bytecode,
+    find_link_references,
+)
 
 from .exceptions import (
-    UnknownContract,
     NoKnownAddress,
     BytecodeMismatch,
 )
@@ -35,55 +31,44 @@ class Provider(object):
         self.provider_backends = provider_backends
         self._factory_cache = lrucache(128)
 
-    def get_contract_factory(self, contract_name):
-        if contract_name in self._factory_cache:
-            return self._factory_cache[contract_name]
+    def get_contract_factory(self, contract_identifier):
+        if contract_identifier in self._factory_cache:
+            return self._factory_cache[contract_identifier]
 
-        if contract_name not in self.all_contract_names:
-            raise UnknownContract(
-                "No contract found with the name '{0}'.\n\n"
-                "Available contracts are: {1}".format(
-                    contract_name,
-                    ', '.join((name for name in self.all_contract_names)),
-                )
-            )
+        BaseContractFactory = self.chain.store.get_base_contract_factory(contract_identifier)
 
-        base_contract_factory = self.chain.base_contract_factories[contract_name]
+        bytecode = self.link_bytecode(BaseContractFactory.bytecode)
+        bytecode_runtime = self.link_bytecode(BaseContractFactory.bytecode_runtime)
 
-        bytecode = self.link_bytecode(base_contract_factory.bytecode)
-        bytecode_runtime = self.link_bytecode(base_contract_factory.bytecode_runtime)
-
-        contract_factory = self.chain.web3.eth.contract(
+        ContractFactory = BaseContractFactory.factory(
+            web3=BaseContractFactory.web3,
             bytecode=bytecode,
             bytecode_runtime=bytecode_runtime,
-            abi=base_contract_factory.abi,
-            source=base_contract_factory.source,
-            contract_name=normalize_class_name(contract_name),
         )
 
-        self._factory_cache[contract_name] = contract_factory
-        return contract_factory
+        self._factory_cache[contract_identifier] = ContractFactory
+        return ContractFactory
 
-    def is_contract_available(self, contract_name):
+    def is_contract_available(self, contract_identifier):
         try:
-            contract_address = self.get_contract_address(contract_name)
+            contract_address = self.get_contract_address(contract_identifier)
         except NoKnownAddress:
             return False
 
-        BaseContractFactory = self.chain.base_contract_factories[contract_name]
+        BaseContractFactory = self.chain.store.get_base_contract_factory(contract_identifier)
 
         all_dependencies_are_available = all(
             self.is_contract_available(link_reference.full_name)
             for link_reference
             in find_link_references(
                 BaseContractFactory.bytecode,
-                self.all_contract_names,
+                set(self.chain.project.compiled_contract_data.keys())
             )
         )
         if not all_dependencies_are_available:
             return False
 
-        ContractFactory = self.get_contract_factory(contract_name)
+        ContractFactory = self.get_contract_factory(contract_identifier)
         try:
             verify_contract_bytecode(self.chain.web3, ContractFactory, contract_address)
         except (BytecodeMismatch, ValueError):
@@ -91,12 +76,12 @@ class Provider(object):
 
         return True
 
-    def are_contract_factory_dependencies_available(self, contract_name):
+    def are_contract_factory_dependencies_available(self, contract_identifier):
         full_dependency_graph = get_shallow_dependency_graph(
             self.chain.project.compiled_contract_data,
         )
         contract_dependencies = get_recursive_contract_dependencies(
-            contract_name,
+            contract_identifier,
             full_dependency_graph,
         )
 
@@ -113,16 +98,16 @@ class Provider(object):
         else:
             return True
 
-    def get_contract(self, contract_name):
-        ContractFactory = self.get_contract_factory(contract_name)
-        contract_address = self.get_contract_address(contract_name)
+    def get_contract(self, contract_identifier):
+        ContractFactory = self.get_contract_factory(contract_identifier)
+        contract_address = self.get_contract_address(contract_identifier)
 
         verify_contract_bytecode(self.chain.web3, ContractFactory, contract_address)
 
         return ContractFactory(address=contract_address)
 
     def get_or_deploy_contract(self,
-                               contract_name,
+                               contract_identifier,
                                deploy_transaction=None,
                                deploy_args=None,
                                deploy_kwargs=None):
@@ -130,12 +115,12 @@ class Provider(object):
         Same as get_contract but it will also lazily deploy the contract with
         the provided deployment arguments
         """
-        if not self.is_contract_available(contract_name):
+        if not self.is_contract_available(contract_identifier):
             full_dependency_graph = get_shallow_dependency_graph(
                 self.chain.project.compiled_contract_data,
             )
             contract_dependencies = get_recursive_contract_dependencies(
-                contract_name,
+                contract_identifier,
                 full_dependency_graph,
             )
 
@@ -148,27 +133,29 @@ class Provider(object):
             for dependency_name in dependency_deploy_order:
                 self.get_or_deploy_contract(dependency_name)
 
-            ContractFactory = self.get_contract_factory(contract_name)
+            ContractFactory = self.get_contract_factory(contract_identifier)
             deploy_transaction_hash = ContractFactory.deploy(
                 transaction=deploy_transaction,
                 args=deploy_args,
                 kwargs=deploy_kwargs,
             )
             contract_address = self.chain.wait.for_contract_address(deploy_transaction_hash)
-            registrar = self.chain.store.registrar
-            registrar.set_contract_address(contract_name, contract_address)
+            registrar = self.chain.registrar
+            registrar.set_contract_address(contract_identifier, contract_address)
         else:
             deploy_transaction_hash = None
 
-        return self.get_contract(contract_name), deploy_transaction_hash
+        return self.get_contract(contract_identifier), deploy_transaction_hash
 
-    def get_contract_address(self, contract_name):
+    def get_contract_address(self, contract_identifier):
         """
         Retrieve a contract address from the provider backends.
         """
+        # TODO: this should really evaluate *all* addresses returned and then
+        # figure out if any of them are the correct addresses.
         for provider in self.provider_backends.values():
             try:
-                return provider.get_contract_address(contract_name)
+                return provider.get_contract_address(contract_identifier)
             except NoKnownAddress:
                 continue
         else:
@@ -177,10 +164,6 @@ class Provider(object):
     #
     # Utility
     #
-    @property
-    def all_contract_names(self):
-        return set(self.chain.base_contract_factories.keys())
-
     def link_bytecode(self, bytecode):
         """
         Return the fully linked contract bytecode.
@@ -193,7 +176,10 @@ class Provider(object):
         resolved_link_references = tuple((
             (link_reference, self.get_contract(link_reference.full_name).address)
             for link_reference
-            in find_link_references(bytecode, self.all_contract_names)
+            in find_link_references(
+                bytecode,
+                self.chain.store.get_all_contract_names(),
+            )
         ))
 
         linked_bytecode = link_bytecode(bytecode, resolved_link_references)
@@ -202,8 +188,9 @@ class Provider(object):
     @property
     def deployed_contracts(self):
         contract_classes = {
-            contract_name: self.get_contract(contract_name)
-            for contract_name in self.all_contract_names
-            if self.is_contract_available(contract_name)
+            contract_identifier: self.get_contract(contract_identifier)
+            for contract_identifier
+            in self.chain.store.get_all_contract_names()
+            if self.is_contract_available(contract_identifier)
         }
         return package_contracts(contract_classes)

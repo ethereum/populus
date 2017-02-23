@@ -10,29 +10,31 @@ from eth_utils import (
 
 from populus import Project
 
-from populus.utils.packaging import (
-    is_aliased_ipfs_uri,
+from populus.packages.backends.ipfs import BaseIPFSPackageBackend
+from populus.packages.backends.index import BasePackageIndexBackend
+from populus.packages.backends.manifest import LocalManifestBackend
+from populus.packages.backends.lockfile import LocalFilesystemLockfileBackend
+
+from populus.utils.filesystem import (
+    find_solidity_source_files,
+    is_same_path,
+)
+from populus.utils.dependencies import (
     get_dependency_base_dir,
     get_build_identifier,
     get_install_identifier,
     get_release_lockfile_path,
     get_installed_packages_dir,
-    load_release_lockfile,
-)
-from populus.utils.filesystem import (
-    find_solidity_source_files,
-    is_same_path,
 )
 from populus.utils.ipfs import (
     is_ipfs_uri,
     generate_file_hash,
     extract_ipfs_path_from_uri,
 )
-
-from populus.packages.backends.ipfs import BaseIPFSPackageBackend
-from populus.packages.backends.index import BasePackageIndexBackend
-from populus.packages.backends.manifest import LocalManifestBackend
-from populus.packages.backends.lockfile import LocalFilesystemLockfileBackend
+from populus.utils.packaging import (
+    is_aliased_ipfs_uri,
+    load_release_lockfile,
+)
 
 
 class MockPackageIndexBackend(BasePackageIndexBackend):
@@ -85,12 +87,6 @@ class MockIPFSBackend(BaseIPFSPackageBackend):
     def get_file_from_ipfs(self, ipfs_path):
         file_contents = self.files[ipfs_path]
         return file_contents
-
-
-@pytest.fixture()
-def project(project_dir):
-    _project = Project()
-    return _project
 
 
 @pytest.fixture()

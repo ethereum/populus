@@ -10,9 +10,11 @@ from populus.utils.config import (
 from populus.utils.chains import (
     get_chain_definition,
 )
+from populus.utils.dependencies import (
+    get_release_lockfile_path,
+)
 from populus.utils.packaging import (
     extract_package_metadata,
-    get_release_lockfile_path,
     load_release_lockfile,
     write_release_lockfile,
 )
@@ -62,7 +64,7 @@ def installed_safe_math_lib_dependency(populus_source_root,
                                        test_chain):
     chain = test_chain
     project = chain.project
-    assert 'InstalledPackages' in chain.store.provider.provider_backends
+    assert 'InstalledPackages' in chain.provider.provider_backends
     release_lockfile_path = os.path.join(
         populus_source_root,
         EXAMPLE_PACKAGES_BASE_PATH,
@@ -92,7 +94,7 @@ def installed_safe_math_lib_dependency(populus_source_root,
         'dependencies': tuple(),
     }
     write_installed_packages(project.installed_packages_dir, [package_data])
-    assert 'safe-math-lib' in project.installed_package_locations
+    assert 'safe-math-lib' in project.installed_dependency_locations
     project._cached_compiled_contracts = None
     assert 'SafeMathLib' in project.compiled_contract_data
 
@@ -101,11 +103,11 @@ def installed_safe_math_lib_dependency(populus_source_root,
 def deployed_safe_math_lib(test_chain, installed_safe_math_lib_dependency):
     chain = test_chain
     project = chain.project
-    provider = chain.store.provider
+    provider = chain.provider
     assert not provider.is_contract_available('SafeMathLib')
 
     release_lockfile_path = get_release_lockfile_path(
-        project.installed_package_locations['safe-math-lib'],
+        project.installed_dependency_locations['safe-math-lib'],
     )
 
     release_lockfile = load_release_lockfile(release_lockfile_path)
@@ -129,4 +131,4 @@ def deployed_safe_math_lib(test_chain, installed_safe_math_lib_dependency):
 def test_getting_contract_address_from_installed_package(test_chain,
                                                          deployed_safe_math_lib):
     chain = test_chain
-    assert chain.store.provider.is_contract_available('SafeMathLib')
+    assert chain.provider.is_contract_available('SafeMathLib')

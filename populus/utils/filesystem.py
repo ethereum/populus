@@ -90,11 +90,20 @@ def recursive_find_files(base_dir, pattern):
 
 
 @to_tuple
-def find_solidity_source_files(contracts_source_dir):
+def find_solidity_source_files(base_dir):
     return (
         os.path.relpath(source_file_path)
         for source_file_path
-        in recursive_find_files(contracts_source_dir, "*.sol")
+        in recursive_find_files(base_dir, "*.sol")
+    )
+
+
+@to_tuple
+def find_solidity_test_files(base_dir):
+    return (
+        os.path.relpath(source_file_path)
+        for source_file_path
+        in recursive_find_files(base_dir, "Test*.sol")
     )
 
 
@@ -134,3 +143,19 @@ def relpath(fn):
         path = fn(*args, **kwargs)
         return os.path.relpath(path)
     return wrapper
+
+
+def normpath(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        path = fn(*args, **kwargs)
+        return os.path.normpath(path)
+    return wrapper
+
+
+def is_under_path(base_path, path):
+    if is_same_path(base_path, path):
+        return False
+    absolute_base_path = os.path.abspath(base_path)
+    absolute_path = os.path.abspath(path)
+    return absolute_path.startswith(absolute_base_path)

@@ -7,19 +7,6 @@ from eth_utils import (
     to_dict,
 )
 
-from populus.utils.filesystem import (
-    ensure_path_exists,
-)
-from populus.utils.packaging import (
-    SUPPORTED_PACKAGE_MANIFEST_VERSIONS,
-    validate_package_manifest,
-    get_lockfile_build_path,
-    validate_release_lockfile,
-    get_publishable_backends,
-    load_release_lockfile,
-    write_release_lockfile,
-)
-
 from populus.packages.build import (
     persist_package_file,
     construct_release_lockfile,
@@ -27,6 +14,21 @@ from populus.packages.build import (
 from populus.packages.installation import (
     install_packages_to_project,
     update_project_dependencies,
+)
+
+from populus.utils.filesystem import (
+    ensure_path_exists,
+)
+from populus.utils.dependencies import (
+    get_lockfile_build_path,
+)
+from populus.utils.packaging import (
+    SUPPORTED_PACKAGE_MANIFEST_VERSIONS,
+    validate_package_manifest,
+    validate_release_lockfile,
+    get_publishable_backends,
+    load_release_lockfile,
+    write_release_lockfile,
 )
 
 from .main import main

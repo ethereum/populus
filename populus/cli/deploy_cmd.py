@@ -83,8 +83,8 @@ def deploy(ctx, chain_name, contracts_to_deploy):
         contracts_to_deploy = [select_project_contract(project)]
 
     with chain:
-        provider = chain.store.provider
-        registrar = chain.store.registrar
+        provider = chain.provider
+        registrar = chain.registrar
 
         if chain_name in {'mainnet', 'morden'}:
             show_chain_sync_progress(chain)
@@ -132,10 +132,6 @@ def deploy(ctx, chain_name, contracts_to_deploy):
                     )
                 )
                 if click.prompt(found_existing_contract_prompt, default=True):
-                    provider.set_static_link_value(
-                        contract_name,
-                        existing_contract_instance.address,
-                    )
                     continue
 
             # We don't have an existing version of this contract available so

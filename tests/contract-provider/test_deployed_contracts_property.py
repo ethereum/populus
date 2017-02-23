@@ -6,14 +6,14 @@ from populus.contracts.exceptions import (
 
 
 def test_with_no_deployed_contracts(chain, math):
-    provider = chain.store.provider
+    provider = chain.provider
 
     assert len(provider.deployed_contracts) == 0
 
 
 def test_with_single_deployed_contract(chain, math):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Math', math.address)
 
@@ -26,8 +26,8 @@ def test_with_multiple_deployed_contracts(chain,
                                           math,
                                           library_13,
                                           multiply_13):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Math', math.address)
     registrar.set_contract_address('Library13', library_13.address)
@@ -49,8 +49,8 @@ def test_contracts_with_missing_dependencies_ignored(chain,
                                                      math,
                                                      library_13,
                                                      multiply_13):
-    provider = chain.store.provider
-    registrar = chain.store.registrar
+    provider = chain.provider
+    registrar = chain.registrar
 
     registrar.set_contract_address('Math', math.address)
     registrar.set_contract_address('Multiply13', multiply_13.address)

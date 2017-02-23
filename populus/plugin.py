@@ -3,6 +3,14 @@ import warnings
 
 from populus.project import Project
 
+from populus.contracts.contract import (
+    construct_contract_factory,
+)
+
+from populus.utils.contracts import (
+    package_contracts,
+)
+
 
 CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
 CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
@@ -38,7 +46,12 @@ def web3(chain):
 
 @pytest.fixture()
 def base_contract_factories(chain):
-    return chain.base_contract_factories
+    # TODO: figure out what to do with this fixture.
+    return package_contracts({
+        contract_name: construct_contract_factory(chain, contract_name, contract_data)
+        for contract_name, contract_data
+        in chain.store.get_all_contract_data().items()
+    })
 
 
 @pytest.fixture()

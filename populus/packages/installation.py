@@ -7,22 +7,25 @@ from eth_utils import (
     to_tuple,
 )
 
+from populus.utils.dependencies import (
+    get_build_identifier_lockfile_path,
+    get_dependency_base_dir,
+    get_install_identifier_lockfile_path,
+    get_installed_packages_dir,
+    get_release_lockfile_path,
+)
 from populus.utils.filesystem import (
-    tempdir,
-    ensure_path_exists,
     ensure_file_exists,
+    ensure_path_exists,
+    is_under_path,
     remove_dir_if_exists,
+    tempdir,
 )
 from populus.utils.packaging import (
-    get_installed_packages_dir,
-    get_dependency_base_dir,
-    get_release_lockfile_path,
-    get_build_identifier_lockfile_path,
-    get_install_identifier_lockfile_path,
     compute_identifier_tree,
+    construct_dependency_identifier,
     flatten_identifier_tree,
     recursively_resolve_package_data,
-    construct_dependency_identifier,
 )
 
 
@@ -103,8 +106,12 @@ def write_package_files(installed_packages_dir, package_data):
         # Write the package source tree.
         package_source_tree = package_data['source_tree']
         for rel_source_path, source_content in package_source_tree.items():
-            # TODO: enforce that this directory doesn't traverse out of the root directory.
             source_path = os.path.join(temp_install_location, rel_source_path)
+            if not is_under_path(temp_install_location, source_path):
+                raise ValueError(
+                    "Package is attempting to write files outside of the "
+                    "installation directory.\n'{0}'".format(rel_source_path)
+                )
             ensure_file_exists(source_path)
             mode = 'wb' if is_bytes(source_content) else 'w'
             with open(source_path, mode) as source_file:

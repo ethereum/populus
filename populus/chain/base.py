@@ -1,3 +1,5 @@
+import warnings
+
 from __future__ import absolute_import
 import itertools
 
@@ -7,12 +9,6 @@ from populus.legacy.contracts import (
     get_contract_library_dependencies,
 )
 
-from populus.migrations.migration import (
-    get_compiled_contracts_from_migrations,
-)
-from populus.migrations.registrar import (
-    get_registrar,
-)
 from populus.contracts.exceptions import (
     NoKnownAddress,
     BytecodeMismatchError,
@@ -81,13 +77,12 @@ class BaseChain(object):
 
     @cached_property
     def contract_factories(self):
-        if self.project.migrations:
-            compiled_contracts = get_compiled_contracts_from_migrations(
-                self.project.migrations,
-                self,
-            )
-        else:
-            compiled_contracts = self.project.compiled_contracts
+        warnings.warn(DeprecationWarning(
+            "The `contract_factories` property has been deprecated.  Please use "
+            "the `chain.store` and `chain.provider` API to access contract "
+            "factory data"
+        ))
+        compiled_contracts = self.project.compiled_contracts
 
         return construct_contract_factories(
             self.web3,

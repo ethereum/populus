@@ -21,8 +21,3 @@ class TesterChain(BaseChain):
         self.rpc_methods = self.web3.currentProvider.rpc_methods
 
         return self
-
-    def __exit__(self, *exc_info):
-        if not self._running:
-            raise ValueError("The TesterChain is not running")
-        self._running = False

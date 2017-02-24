@@ -8,10 +8,6 @@ import sys
 import tempfile as _tempfile
 
 from eth_utils import (
-    to_tuple
-)
-
-from eth_utils import (
     to_tuple,
 )
 

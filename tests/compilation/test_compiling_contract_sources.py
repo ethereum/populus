@@ -2,7 +2,7 @@ from populus.compilation import (
     compile_project_contracts,
 )
 
-from populus.utils.contracts import (
+from populus.utils.compile import (
     get_contracts_source_dir,
 )
 from populus.utils.testing import (

@@ -72,6 +72,7 @@ def get_test_source_paths(tests_dir):
     return test_source_paths
 
 
+@to_tuple
 def get_dependency_source_paths(dependency_base_dir):
     """
     Find all of the solidity source files for the given dependency, excluding

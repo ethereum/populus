@@ -139,7 +139,7 @@ def construct_package_meta_data(package_manifest):
 def construct_deployed_contract_instance(provider,
                                          contract_name):
     contract_instance = provider.get_contract(contract_name)
-    base_contract_factory = provider.chain.store.get_base_contract_factory(contract_name)
+    base_contract_factory = provider.get_base_contract_factory(contract_name)
 
     yield 'contract_type', contract_instance.populus_meta.contract_type_name
     yield 'address', contract_instance.address
@@ -150,7 +150,7 @@ def construct_deployed_contract_instance(provider,
 
         link_references = find_link_references(
             runtime_bytecode,
-            provider.chain.store.get_all_contract_names(),
+            provider.get_all_contract_names(),
         )
 
         # TODO: scrape all installed package manifests for the names of deployed

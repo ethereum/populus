@@ -13,13 +13,14 @@ from populus import ASSETS_DIR
 from .versions import (
     V1,
     V2,
-    LATEST_VERSION,
+    V3,
+    LATEST_VERSION
 )
-
 
 CONFIG_SCHEMA_FILENAMES = {
     V1: "config.v1.schema.json",
     V2: "config.v2.schema.json",
+    V3: "config.v3.schema.json",
 }
 
 
@@ -51,7 +52,7 @@ def get_validation_errors(config, version=None):
         version = LATEST_VERSION
     schema = load_config_schema(version)
     validator = jsonschema.Draft4Validator(schema)
-    for error in validator.iter_errors(config):
+    for error in validator.iter_errors(dict(config)):
         yield error
 
 

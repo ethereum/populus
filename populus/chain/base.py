@@ -65,6 +65,8 @@ class BaseChain(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self._running:
+            raise ValueError("The TesterChain is not running")
         self._running = False
 
     #

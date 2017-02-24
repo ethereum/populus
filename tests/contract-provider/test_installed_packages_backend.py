@@ -52,9 +52,14 @@ def with_installed_packages_backend(project_dir):
 
 
 @pytest.yield_fixture()
-def test_chain(with_installed_packages_backend):
-    project = Project(with_installed_packages_backend)
-    assert 'chains.tester.contracts.backends.InstalledPackages' in project.config
+def test_chain(project):
+    project.config['chains.tester.contracts.backends'] = {
+        'InstalledPackages': {'$ref': 'contracts.backends.InstalledPackages'},
+        'Memory': {'$ref': 'contracts.backends.Memory'},
+    }
+    project.write_config()
+    project.load_config()
+
     with project.get_chain('tester') as chain:
         yield chain
 

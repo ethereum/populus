@@ -7,8 +7,8 @@ from web3.contract import Contract
 
 from populus import ASSETS_DIR
 
-from populus.utils.chains import (
-    setup_web3_from_config,
+from populus.config import (
+    Web3Config,
 )
 from populus.utils.packaging import (
     is_direct_package_identifier,
@@ -182,8 +182,8 @@ class PackageIndexBackend(BasePackageIndexBackend):
     # Internal API
     #
     def get_web3_for_install(self):
-        web3_config = self.settings.get_config('web3-for-install')
-        web3 = setup_web3_from_config(web3_config)
+        web3_config = self.settings.get_config('web3-for-install', config_class=Web3Config)
+        web3 = web3_config.get_web3()
         return web3
 
     def get_package_index_for_install(self):
@@ -192,8 +192,8 @@ class PackageIndexBackend(BasePackageIndexBackend):
         return PackageIndexFactory(address=package_index_address)
 
     def get_web3_for_publish(self):
-        web3_config = self.settings.get_config('web3-for-publish')
-        web3 = setup_web3_from_config(web3_config)
+        web3_config = self.settings.get_config('web3-for-publish', config_class=Web3Config)
+        web3 = web3_config.get_web3()
         return web3
 
     def get_package_index_for_publish(self):

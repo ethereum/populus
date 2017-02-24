@@ -1,10 +1,7 @@
 from eth_utils import (
     is_boolean,
     is_number,
-<<<<<<< HEAD
     is_string,
-=======
->>>>>>> Packaging implementation
 )
 
 

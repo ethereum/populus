@@ -1,13 +1,9 @@
 import pytest
 
 import copy
-import json
 
 from populus.config.defaults import (
     load_default_config,
-)
-from populus.config.upgrade import (
-    upgrade_config,
 )
 from populus.config.upgrade.v1 import (
     upgrade_v1_to_v2,
@@ -17,9 +13,6 @@ from populus.config.versions import (
     V2,
 )
 
-from populus.utils.config import (
-    get_json_config_file_path,
-)
 from populus.utils.mappings import (
     deep_merge_dicts,
 )
@@ -27,21 +20,6 @@ from populus.utils.mappings import (
 
 V1_DEFAULT_CONFIG = load_default_config(version=V1)
 V2_DEFAULT_CONFIG = load_default_config(version=V2)
-
-
-@pytest.mark.parametrize(
-    'upgrade_fn,upgrade_args',
-    (
-        (upgrade_v1_to_v2, tuple()),
-        (upgrade_config, (V2,)),
-    )
-)
-def test_default_config_upgrade(upgrade_fn, upgrade_args):
-    v1_default_config = copy.deepcopy(V1_DEFAULT_CONFIG)
-    v2_default_config = copy.deepcopy(V2_DEFAULT_CONFIG)
-
-    upgraded_v1_config = upgrade_fn(v1_default_config, *upgrade_args)
-    assert upgraded_v1_config == v2_default_config
 
 
 BASE_V1_CONFIG = {
@@ -112,8 +90,8 @@ BASE_V1_CONFIG = {
       }
     },
     "InfuraMainnet": {
-      "eth": {  # custom
-        "default_account": "0xd3cda913deb6f67967b99d67acdfa1712c293601"
+      "eth": {
+        "default_account": "0xd3cda913deb6f67967b99d67acdfa1712c293601"  # custom
       },
       "provider": {
         "class": "web3.providers.rpc.HTTPProvider",
@@ -155,37 +133,9 @@ EXPECTED_V2_CONFIG = deep_merge_dicts(
 )
 
 
-@pytest.mark.parametrize(
-    'upgrade_fn,upgrade_args',
-    (
-        (upgrade_v1_to_v2, tuple()),
-        (upgrade_config, (V2,)),
-    )
-)
-def test_non_default_config_upgrade(upgrade_fn, upgrade_args):
+def test_non_default_v1_config_upgrade():
     v1_config = copy.deepcopy(BASE_V1_CONFIG)
     v2_default_config = copy.deepcopy(V2_DEFAULT_CONFIG)
 
-    upgraded_config = upgrade_fn(v1_config, *upgrade_args)
-    assert upgraded_config == EXPECTED_V2_CONFIG
-
-
-@pytest.mark.parametrize(
-    'upgrade_fn,upgrade_args',
-    (
-        (upgrade_v1_to_v2, tuple()),
-        (upgrade_config, (V2,)),
-    )
-)
-def test_upgrade_works_with_config_objects(project, upgrade_fn, upgrade_args):
-    v1_config = copy.deepcopy(BASE_V1_CONFIG)
-
-    config_file_path = get_json_config_file_path(project.project_dir)
-    with open(config_file_path, 'w') as config_file:
-        json.dump(v1_config, config_file)
-    project.load_config()
-    assert 'web3.Ropsten' in project.config
-
-    upgraded_config = upgrade_fn(v1_config, *upgrade_args)
-
+    upgraded_config = upgrade_v1_to_v2(v1_config)
     assert upgraded_config == EXPECTED_V2_CONFIG

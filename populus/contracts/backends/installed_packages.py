@@ -1,5 +1,6 @@
 from eth_utils import (
     compose,
+    to_tuple,
 )
 
 from populus.contracts.exceptions import (
@@ -30,6 +31,7 @@ from populus.utils.packaging import (
 from .base import BaseContractBackend
 
 
+@to_tuple
 def get_deployed_contract_instances_from_installed_packages(web3,
                                                             installed_packages_dir,
                                                             instance_name):
@@ -45,8 +47,7 @@ def get_deployed_contract_instances_from_installed_packages(web3,
             if not check_if_chain_matches_chain_uri(web3, chain_uri):
                 continue
             if instance_name in deployed_contract_instances:
-                return deployed_contract_instances[instance_name]['address']
-    raise NoKnownAddress("No known address for '{0}'".format(instance_name))
+                yield deployed_contract_instances[instance_name]
 
 
 class InstalledPackagesBackend(BaseContractBackend):
@@ -54,23 +55,31 @@ class InstalledPackagesBackend(BaseContractBackend):
     A contract backend that only acts as a provider sourcing contracts from
     installed packages.
     """
-    is_registrar = False
+    is_registrar = True
     is_provider = True
     is_store = True
 
     #
-    # Provider API
+    # Registrar API
     #
-    def get_contract_address(self, instance_name):
+    def get_contract_addresses(self, instance_name):
         web3 = self.chain.web3
-        return get_deployed_contract_instances_from_installed_packages(
+        deployed_instances = get_deployed_contract_instances_from_installed_packages(
             web3,
             self.chain.project.installed_packages_dir,
             instance_name,
         )
+        if not deployed_instances:
+            raise NoKnownAddress("No deployed instances of {0} found".format(instance_name))
+        return tuple(
+            deployed_instance['address'] for deployed_instance in deployed_instances
+        )
+
+    def set_contract_address(self, *args, **kwargs):
+        pass
 
     #
-    # Store API
+    # Provider API
     #
     def get_contract_identifier(self, contract_name):
         if is_dependency_contract_name(contract_name):

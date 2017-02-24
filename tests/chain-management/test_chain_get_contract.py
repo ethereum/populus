@@ -6,6 +6,7 @@ from populus.chain import (
 )
 
 
+@pytest.mark.slow
 def test_getting_contract_with_no_dependencies(temp_chain,
                                                math,
                                                register_address):
@@ -17,6 +18,7 @@ def test_getting_contract_with_no_dependencies(temp_chain,
     assert math.call().multiply7(3) == 21
 
 
+@pytest.mark.slow
 def test_getting_contract_when_not_registered(temp_chain):
     chain = temp_chain
 
@@ -24,6 +26,7 @@ def test_getting_contract_when_not_registered(temp_chain):
         chain.get_contract('Math')
 
 
+@pytest.mark.slow
 def test_getting_contract_with_missing_dependency(temp_chain,
                                                   multiply_13,
                                                   register_address):
@@ -35,6 +38,7 @@ def test_getting_contract_with_missing_dependency(temp_chain,
         chain.get_contract('Multiply13')
 
 
+@pytest.mark.slow
 def test_getting_contract_with_bytecode_mismatch(temp_chain,
                                                  library_13,
                                                  math,
@@ -47,6 +51,7 @@ def test_getting_contract_with_bytecode_mismatch(temp_chain,
         chain.get_contract('Math')
 
 
+@pytest.mark.slow
 def test_get_contract_skipping_bytecode_validation(temp_chain,
                                                    library_13,
                                                    math,
@@ -58,6 +63,7 @@ def test_get_contract_skipping_bytecode_validation(temp_chain,
     math = chain.get_contract('Math', validate_bytecode=False)
 
 
+@pytest.mark.slow
 def test_get_contract_with_bytecode_mismatch_on_dependency(temp_chain,
                                                            multiply_13,
                                                            math,
@@ -71,6 +77,7 @@ def test_get_contract_with_bytecode_mismatch_on_dependency(temp_chain,
         chain.get_contract('Multiply13')
 
 
+@pytest.mark.slow
 def test_get_contract_with_dependency(temp_chain,
                                       multiply_13,
                                       library_13,
@@ -84,6 +91,7 @@ def test_get_contract_with_dependency(temp_chain,
     assert multiply_13.call().multiply13(3) == 39
 
 
+@pytest.mark.slow
 def test_get_contract_with_declared_dependency(temp_chain,
                                                multiply_13,
                                                library_13,

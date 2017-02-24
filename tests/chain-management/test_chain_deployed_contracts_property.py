@@ -10,12 +10,14 @@ from populus.chain import (
 from populus import Project
 
 
+@pytest.mark.slow
 def test_with_no_deployed_contracts(temp_chain, math, register_address):
     chain = temp_chain
 
     assert len(chain.deployed_contracts) == 0
 
 
+@pytest.mark.slow
 def test_with_single_deployed_contract(temp_chain, math, register_address):
     chain = temp_chain
 
@@ -26,6 +28,7 @@ def test_with_single_deployed_contract(temp_chain, math, register_address):
     assert chain.deployed_contracts.Math.call().multiply7(3) == 21
 
 
+@pytest.mark.slow
 def test_with_multiple_deployed_contracts(temp_chain,
                                           math,
                                           library_13,
@@ -49,6 +52,7 @@ def test_with_multiple_deployed_contracts(temp_chain,
     assert chain.deployed_contracts.Multiply13.call().multiply13(3) == 39
 
 
+@pytest.mark.slow
 def test_missing_dependencies_ignored(temp_chain,
                                       math,
                                       library_13,

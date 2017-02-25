@@ -11,7 +11,6 @@ from web3.contract import (
 from populus.utils.contracts import (
     is_project_contract,
     is_test_contract,
-    is_dependency_contract,
 )
 from populus.utils.functional import (
     to_object,
@@ -31,10 +30,6 @@ def build_populus_meta(chain, contract_identifier, contract_data):
     yield (
         'is_project_contract',
         is_project_contract(chain.project.contracts_source_dir, contract_data),
-    )
-    yield (
-        'is_dependency_contract',
-        is_dependency_contract(chain.project.installed_packages_dir, contract_data),
     )
     yield (
         'is_test_contract',

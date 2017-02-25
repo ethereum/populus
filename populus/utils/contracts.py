@@ -6,11 +6,17 @@ from eth_utils import (
     is_string,
 )
 
-from .string import (
-    normalize_class_name,
+from .filesystem import (
+    is_under_path,
 )
 from .linking import (
     find_link_references,
+)
+from .mappings import (
+    get_nested_key,
+)
+from .string import (
+    normalize_class_name,
 )
 
 
@@ -20,6 +26,30 @@ DEFAULT_CONTRACTS_DIR = "./contracts/"
 def get_contracts_source_dir(project_dir):
     contracts_source_dir = os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)
     return os.path.abspath(contracts_source_dir)
+
+
+def get_contract_source_file_path(contract_data):
+    compilation_target = get_nested_key(contract_data, 'metadata.settings.compilationTarget')
+    assert len(compilation_target) == 1
+    return tuple(compilation_target.keys())[0]
+
+
+def is_project_contract(contracts_source_dir, contract_data):
+    try:
+        contract_source_file_path = get_contract_source_file_path(contract_data)
+    except KeyError:
+        # TODO: abstract contracts don't have a metadata value.  How do we handle this....
+        return False
+    return is_under_path(contracts_source_dir, contract_source_file_path)
+
+
+def is_test_contract(tests_dir, contract_data):
+    try:
+        contract_source_file_path = get_contract_source_file_path(contract_data)
+    except KeyError:
+        # TODO: abstract contracts don't have a metadata value.  How do we handle this....
+        return False
+    return is_under_path(tests_dir, contract_source_file_path)
 
 
 def package_contracts(contract_factories):

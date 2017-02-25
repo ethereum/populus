@@ -7,6 +7,10 @@ import contextlib
 import functools
 import errno
 
+from eth_utils import (
+    to_tuple,
+)
+
 
 if sys.version_info.major == 2:
     FileNotFoundError = OSError
@@ -130,6 +134,24 @@ def recursive_find_files(base_dir, pattern):
                 yield os.path.join(dirpath, filename)
 
 
+@to_tuple
+def find_solidity_source_files(base_dir):
+    return (
+        os.path.relpath(source_file_path)
+        for source_file_path
+        in recursive_find_files(base_dir, "*.sol")
+    )
+
+
+@to_tuple
+def find_solidity_test_files(base_dir):
+    return (
+        os.path.relpath(source_file_path)
+        for source_file_path
+        in recursive_find_files(base_dir, "Test*.sol")
+    )
+
+
 @contextlib.contextmanager
 def tempdir():
     directory = tempfile.mkdtemp()
@@ -164,3 +186,11 @@ def normpath(fn):
         path = fn(*args, **kwargs)
         return os.path.normpath(path)
     return wrapper
+
+
+def is_under_path(base_path, path):
+    if is_same_path(base_path, path):
+        return False
+    absolute_base_path = os.path.abspath(base_path)
+    absolute_path = os.path.abspath(path)
+    return absolute_path.startswith(absolute_base_path)

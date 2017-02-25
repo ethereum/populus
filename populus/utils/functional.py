@@ -1,8 +1,13 @@
 import itertools
+import functools
 import collections
 
 from eth_utils import (
     to_dict,
+)
+
+from .string import (
+    normalize_class_name,
 )
 
 
@@ -45,3 +50,16 @@ def deep_merge_dicts(*dicts):
 
 def noop(*args, **kwargs):
     pass
+
+
+def to_object(class_name, bases=None):
+    if bases is None:
+        bases = (object,)
+
+    def outer(fn):
+        @functools.wraps(fn)
+        def inner(*args, **kwargs):
+            props = fn(*args, **kwargs)
+            return type(normalize_class_name(class_name), bases, props)
+        return inner
+    return outer

@@ -1,9 +1,6 @@
 import os
 import pytest
 
-from populus.utils.testing import (
-    load_example_package,
-)
 from populus.utils.linking import (
     link_bytecode_by_name,
 )
@@ -65,15 +62,3 @@ def test_get_contract_factory_with_dependency_bytecode_mismatch(chain,
 
     with pytest.raises(BytecodeMismatch):
         provider.get_contract_factory('Multiply13')
-
-
-@pytest.mark.parametrize(
-    'contract_type_name',
-    ('owned', 'owned:owned'),
-)
-@load_example_package('owned')
-def test_get_contract_factory_from_installed_dependency(chain, contract_type_name):
-    provider = chain.provider
-
-    Owned = provider.get_contract_factory(contract_type_name)
-    assert Owned.bytecode == chain.project.compiled_contract_data['owned']['bytecode']

@@ -2,20 +2,21 @@ import pytest
 
 from flaky import flaky
 
-from populus.chain.geth import (
-    TESTNET_BLOCK_1_HASH,
-    MAINNET_BLOCK_1_HASH,
-)
 from populus.project import (
     Project,
 )
-from populus.utils.chains import (
+
+from populus.utils.geth import (
     get_geth_ipc_path,
     get_data_dir as get_local_chain_datadir,
 )
 from populus.utils.networking import (
     get_open_port,
 )
+
+
+TESTNET_BLOCK_1_HASH = '0xad47413137a753b2061ad9b484bf7b0fc061f654b951b562218e9f66505be6ce'
+MAINNET_BLOCK_1_HASH = '0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6'
 
 
 @flaky

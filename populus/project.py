@@ -18,10 +18,11 @@ from populus.legacy.config import (
     check_if_ini_config_file_exists,
 )
 
-from populus.utils.filesystem import (
-    get_contracts_dir,
+from populus.utils.compile import (
     get_build_dir,
-    get_compiled_contracts_file_path,
+    get_compiled_contracts_asset_path,
+)
+from populus.utils.filesystem import (
     get_blockchains_dir,
     relpath,
 )
@@ -122,11 +123,26 @@ class Project(object):
     #
     @property
     @relpath
-    def contracts_dir(self):
+    def compiled_contracts_asset_path(self):
+        # TODO: this is wrong.
+        # TODO: update config value to be `compiled_contracts_asset_path`
+        # instead of `contracts_dir`
         if 'compilation.contracts_dir' in self.config:
             return self.config['compilation.contracts_dir']
         else:
-            return get_contracts_dir(self.project_dir)
+            return get_compiled_contracts_asset_path(self.project_dir)
+
+    @property
+    @relpath
+    def contracts_dir(self):
+        # TODO: this is wrong.
+        warnings.warn(DeprecationWarning(
+            "The `contracts_dir` property has been renamed to "
+            "`compiled_contracts_asset_path`.  Please update your code to use "
+            "this property.  The `contracts_dir` property will be removed in "
+            "subsequent releases"
+        ))
+        return self.compiled_contracts_asset_path
 
     @property
     @relpath

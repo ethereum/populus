@@ -4,7 +4,7 @@ from populus.utils.filesystem import (
     is_same_path,
 )
 from populus.utils.compile import (
-    get_contracts_dir,
+    get_compiled_contracts_asset_path,
     get_build_dir,
     get_compiled_contracts_file_path,
     get_blockchains_dir,
@@ -19,8 +19,8 @@ from populus.utils.geth import (
 def test_project_directory_properties(project_dir):
     project = Project()
 
-    contracts_dir = get_contracts_dir(project_dir)
-    assert is_same_path(project.contracts_dir, contracts_dir)
+    compiled_contracts_asset_path = get_compiled_contracts_asset_path(project_dir)
+    assert is_same_path(project.compiled_contracts_asset_path, compiled_contracts_asset_path)
 
     build_dir = get_build_dir(project_dir)
     assert is_same_path(project.build_dir, build_dir)

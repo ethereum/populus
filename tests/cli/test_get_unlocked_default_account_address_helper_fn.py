@@ -10,12 +10,13 @@ from eth_utils import (
 from geth.accounts import create_new_account
 
 from populus.project import Project
-from populus.utils.chains import (
-    get_geth_ipc_path,
-    get_data_dir as get_local_chain_datadir,
-)
+
 from populus.utils.cli import (
     get_unlocked_default_account_address,
+)
+from populus.utils.geth import (
+    get_geth_ipc_path,
+    get_data_dir as get_local_chain_datadir,
 )
 
 

@@ -2,34 +2,6 @@ import os
 import hashlib
 import warnings
 
-from populus.utils.filesystem import (
-    get_contracts_dir,
-    get_build_dir,
-    get_compiled_contracts_file_path,
-    get_blockchains_dir,
-    get_migrations_dir,
-    relpath,
-)
-from populus.utils.chains import (
-    get_data_dir,
-    get_chaindata_dir,
-    get_dapp_dir,
-    get_geth_ipc_path,
-    get_nodekey_path,
-)
-from populus.utils.config import (
-    get_json_config_file_path,
-    check_if_json_config_file_exists,
-    get_default_project_config_file_path,
-)
-
-from populus.migrations.migration import (
-    sort_migrations,
-)
-from populus.migrations.loading import (
-    load_project_migrations,
-    find_project_migrations,
-)
 from populus.compilation import (
     find_project_contracts,
     compile_project_contracts,
@@ -44,6 +16,26 @@ from populus.config import (
 )
 from populus.legacy.config import (
     check_if_ini_config_file_exists,
+)
+
+from populus.utils.filesystem import (
+    get_contracts_dir,
+    get_build_dir,
+    get_compiled_contracts_file_path,
+    get_blockchains_dir,
+    relpath,
+)
+from populus.utils.config import (
+    get_json_config_file_path,
+    check_if_json_config_file_exists,
+    get_default_project_config_file_path,
+)
+from populus.utils.geth import (
+    get_data_dir,
+    get_chaindata_dir,
+    get_dapp_dir,
+    get_geth_ipc_path,
+    get_nodekey_path,
 )
 
 
@@ -294,26 +286,3 @@ class Project(object):
     @relpath
     def get_blockchain_nodekey_path(self, chain_name):
         return get_nodekey_path(self.get_blockchain_data_dir(chain_name))
-
-    #
-    # Migrations
-    #
-    @property
-    @relpath
-    def migrations_dir(self):
-        return get_migrations_dir(self.project_dir)
-
-    @property
-    def migration_files(self):
-        return list((
-            os.path.relpath(migration_file_path)
-            for migration_file_path
-            in sorted(find_project_migrations(self.project_dir))
-        ))
-
-    @property
-    def migrations(self):
-        return sort_migrations(
-            load_project_migrations(self.project_dir),
-            flatten=True,
-        )

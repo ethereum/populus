@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import os
 import itertools
 import random
@@ -10,7 +12,7 @@ from .deploy import (
 from .accounts import (
     is_account_locked,
 )
-from .chains import (
+from .geth import (
     get_data_dir as get_local_chain_datadir,
     get_geth_ipc_path,
 )

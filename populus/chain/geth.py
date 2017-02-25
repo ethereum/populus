@@ -23,7 +23,7 @@ from populus.migrations.registrar import (
     get_registrar,
 )
 
-from populus.utils.chains import (
+from populus.utils.geth import (
     get_chaindata_dir,
     get_dapp_dir,
     get_nodekey_path,

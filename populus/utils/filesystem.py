@@ -156,3 +156,11 @@ def relpath(fn):
         path = fn(*args, **kwargs)
         return os.path.relpath(path)
     return wrapper
+
+
+def normpath(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        path = fn(*args, **kwargs)
+        return os.path.normpath(path)
+    return wrapper

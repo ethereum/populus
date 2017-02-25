@@ -3,10 +3,6 @@ import pytest
 from populus.utils.linking import (
     link_bytecode_by_name,
 )
-from populus.chain import (
-    NoKnownAddress,
-    BytecodeMismatchError,
-)
 from populus import Project
 
 

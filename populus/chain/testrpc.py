@@ -6,11 +6,11 @@ from populus.utils.networking import (
 )
 
 from .base import (
-    BaseTesterChain,
+    BaseChain,
 )
 
 
-class TestRPCChain(BaseTesterChain):
+class TestRPCChain(BaseChain):
     port = None
 
     def get_web3_config(self):
@@ -28,8 +28,7 @@ class TestRPCChain(BaseTesterChain):
 
         self._running = True
 
-        self.provider = self.web3.currentProvider
-        self.rpc_methods = self.provider.server.application.rpc_methods
+        self.rpc_methods = self.currentProvider.server.application.rpc_methods
 
         self.rpc_methods.full_reset()
         self.rpc_methods.rpc_configure('eth_mining', False)

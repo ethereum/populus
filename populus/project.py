@@ -3,7 +3,6 @@ import hashlib
 import warnings
 
 from populus.compilation import (
-    find_project_contracts,
     compile_project_contracts,
 )
 from populus.config import (
@@ -18,12 +17,16 @@ from populus.legacy.config import (
     check_if_ini_config_file_exists,
 )
 
+from populus.utils.chains import (
+    get_base_blockchain_storage_dir,
+)
 from populus.utils.compile import (
-    get_build_dir,
+    get_build_asset_dir,
+    get_contracts_source_dir,
+    get_project_source_paths,
     get_compiled_contracts_asset_path,
 )
 from populus.utils.filesystem import (
-    get_blockchains_dir,
     relpath,
 )
 from populus.utils.config import (
@@ -95,7 +98,9 @@ class Project(object):
             path_to_load = self.config_file_path
 
         self._project_config = _load_config(path_to_load)
-        self._project_config_schema = load_config_schema()
+
+        config_version = self._project_config['version']
+        self._project_config_schema = load_config_schema(config_version)
 
     def reload_config(self):
         self.load_config()
@@ -124,39 +129,60 @@ class Project(object):
     @property
     @relpath
     def compiled_contracts_asset_path(self):
-        # TODO: this is wrong.
-        # TODO: update config value to be `compiled_contracts_asset_path`
-        # instead of `contracts_dir`
-        if 'compilation.contracts_dir' in self.config:
-            return self.config['compilation.contracts_dir']
-        else:
-            return get_compiled_contracts_asset_path(self.project_dir)
+        return get_compiled_contracts_asset_path(self.project_dir)
 
     @property
-    @relpath
-    def contracts_dir(self):
-        # TODO: this is wrong.
+    def compiled_contracts_file_path(self):
         warnings.warn(DeprecationWarning(
-            "The `contracts_dir` property has been renamed to "
+            "The `compiled_contracts_file_path` property has been renamed to "
             "`compiled_contracts_asset_path`.  Please update your code to use "
-            "this property.  The `contracts_dir` property will be removed in "
-            "subsequent releases"
+            "this property.  The `compiled_contracts_file_path` property will "
+            "be removed in subsequent releases"
         ))
         return self.compiled_contracts_asset_path
 
     @property
     @relpath
-    def build_dir(self):
+    def contracts_source_dir(self):
+        if 'compilation.contracts_dir' in self.config:
+            return self.config['compilation.contracts_dir']
+        else:
+            return get_contracts_source_dir(self.project_dir)
+
+    @property
+    @relpath
+    def contracts_dir(self):
+        warnings.warn(DeprecationWarning(
+            "The `contracts_dir` property has been renamed to "
+            "`contracts_source_dir`.  Please update your code to use "
+            "this property.  The `contracts_dir` property will be removed in "
+            "subsequent releases"
+        ))
+        return self.contracts_source_dir
+
+    @property
+    @relpath
+    def build_asset_dir(self):
         if 'compilation.build_dir' in self.config:
             return self.config['compilation.build_dir']
         else:
-            return get_build_dir(self.project_dir)
+            return get_build_asset_dir(self.project_dir)
+
+    @property
+    def build_dir(self):
+        warnings.warn(DeprecationWarning(
+            "The `contracts_dir` property has been renamed to "
+            "`contracts_source_dir`.  Please update your code to use "
+            "this property.  The `contracts_dir` property will be removed in "
+            "subsequent releases"
+        ))
+        return self.build_asset_dir
 
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None
 
     def get_source_file_hash(self):
-        source_file_paths = find_project_contracts(self.project_dir, self.contracts_dir)
+        source_file_paths = get_project_source_paths(self.contracts_source_dir)
         return hashlib.md5(b''.join(
             open(source_file_path, 'rb').read()
             for source_file_path
@@ -164,7 +190,7 @@ class Project(object):
         )).hexdigest()
 
     def get_source_modification_time(self):
-        source_file_paths = find_project_contracts(self.project_dir, self.contracts_dir)
+        source_file_paths = get_project_source_paths(self.contracts_source_dir)
         return max(
             os.path.getmtime(source_file_path)
             for source_file_path
@@ -194,17 +220,11 @@ class Project(object):
         self._cached_compiled_contracts = contracts
 
     @property
-    @relpath
-    def compiled_contracts_file_path(self):
-        return get_compiled_contracts_file_path(self.project_dir)
-
-    @property
     def compiled_contracts(self):
         if self.is_compiled_contract_cache_stale():
             self._cached_compiled_contracts_mtime = self.get_source_modification_time()
             _, self._cached_compiled_contracts = compile_project_contracts(
-                project_dir=self.project_dir,
-                contracts_dir=self.contracts_dir,
+                project=self,
                 compiler_settings=self.config.get('compilation.settings'),
             )
         return self._cached_compiled_contracts
@@ -281,24 +301,44 @@ class Project(object):
     @property
     @relpath
     def blockchains_dir(self):
-        return get_blockchains_dir(self.project_dir)
+        return get_base_blockchain_storage_dir(self.project_dir)
 
     @relpath
     def get_blockchain_data_dir(self, chain_name):
+        warnings.warn(DeprecationWarning(
+            "The `get_blockchain_data_dir` function has been deprecated and "
+            "will be removed in subsequent releases"
+        ))
         return get_data_dir(self.project_dir, chain_name)
 
     @relpath
     def get_blockchain_chaindata_dir(self, chain_name):
+        warnings.warn(DeprecationWarning(
+            "The `get_blockchain_chaindata_dir` function has been deprecated and "
+            "will be removed in subsequent releases"
+        ))
         return get_chaindata_dir(self.get_blockchain_data_dir(chain_name))
 
     @relpath
     def get_blockchain_dapp_dir(self, chain_name):
+        warnings.warn(DeprecationWarning(
+            "The `get_blockchain_dapp_dir` function has been deprecated and "
+            "will be removed in subsequent releases"
+        ))
         return get_dapp_dir(self.get_blockchain_data_dir(chain_name))
 
     @relpath
     def get_blockchain_ipc_path(self, chain_name):
+        warnings.warn(DeprecationWarning(
+            "The `get_blockchain_ipc_path` function has been deprecated and "
+            "will be removed in subsequent releases"
+        ))
         return get_geth_ipc_path(self.get_blockchain_data_dir(chain_name))
 
     @relpath
     def get_blockchain_nodekey_path(self, chain_name):
+        warnings.warn(DeprecationWarning(
+            "The `get_blockchain_nodekey_path` function has been deprecated and "
+            "will be removed in subsequent releases"
+        ))
         return get_nodekey_path(self.get_blockchain_data_dir(chain_name))

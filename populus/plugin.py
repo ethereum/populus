@@ -1,9 +1,6 @@
 import pytest
 import warnings
 
-from populus.migrations.migration import (
-    get_migration_classes_for_execution,
-)
 from populus.project import Project
 
 
@@ -28,50 +25,19 @@ def project(request):
 
 
 @pytest.yield_fixture()
-def _unmigrated_chain(request, project):
-    # TODO: pull chain name from configuration.
+def chain(project):
     with project.get_chain('tester') as chain:
         yield chain
 
 
 @pytest.fixture()
-def unmigrated_chain(_unmigrated_chain):
-    warnings.warn(PendingDeprecationWarning(
-        "The migrations API has been deprecated.  Please switch to using the "
-        "`chain` fixture as the `unmigrated_chain` fixture will be removed in "
-        "upcoming releases"
-    ))
-    return _unmigrated_chain
+def web3(chain):
+    return chain.web3
 
 
 @pytest.fixture()
-def chain(_unmigrated_chain):
-    # Determine if we have any migrations to run.
-    migrations_to_execute = get_migration_classes_for_execution(
-        _unmigrated_chain.project.migrations,
-        _unmigrated_chain,
-    )
-
-    if migrations_to_execute:
-        warnings.warn(PendingDeprecationWarning(
-            "The migrations API is deprecated and will be removed in the near "
-            "future"
-        ))
-
-    for migration in migrations_to_execute:
-        migration.execute()
-
-    return _unmigrated_chain
-
-
-@pytest.fixture()
-def web3(_unmigrated_chain):
-    return _unmigrated_chain.web3
-
-
-@pytest.fixture()
-def base_contract_factories(_unmigrated_chain):
-    return _unmigrated_chain.contract_factories
+def base_contract_factories(chain):
+    return chain.contract_factories
 
 
 @pytest.fixture()

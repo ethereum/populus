@@ -21,10 +21,13 @@ from populus.utils.config import (
     resolve_config,
 )
 
+from .validation import (
+    validate_config,
+)
+
 
 class Config(object):
     parent = None
-    schema = None
     default_config_info = None
     _wrapped = None
 
@@ -42,10 +45,12 @@ class Config(object):
             self.validate()
 
     def validate(self):
-        # TODO: enumerate all errors by directly using `jsonschema`
-        rc, err = anyconfig.validate(self._wrapped, self.schema)
-        if err:
-            raise ValueError(err)
+        errors = validate_config(self._wrapped)
+        if errors:
+            error_message = '\n'.join(
+                error.message for error in errors
+            )
+            raise ValueError(error_message)
 
     def get_master_config(self):
         if self.parent is None:

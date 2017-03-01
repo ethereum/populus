@@ -4,17 +4,16 @@ def test_external_rpc_chain(project):
         registrar = chain.registrar
 
         project.config['chains.external.chain.class'] = 'populus.chain.ExternalChain'
-        project.config['chains.external.registrar'] = registrar.address
         project.config['chains.external.web3.provider.class'] = 'web3.providers.rpc.HTTPProvider'
         project.config['chains.external.web3.provider.settings.endpoint_uri'] = 'http://127.0.0.1:{0}'.format(chain.port)
+        project.config['chains.external.contracts.backends.Memory.class'] = 'populus.contracts.backends.memory.MemoryBackend'
+        project.config['chains.external.contracts.backends.Memory.priority'] = 10
         project.write_config()
 
         with project.get_chain('external') as external_chain:
             ext_web3 = external_chain.web3
-            ext_registrar = external_chain.registrar
 
             assert ext_web3.eth.coinbase == web3.eth.coinbase
-            assert registrar.address == ext_registrar.address
 
 
 def test_external_ipc_chain(project, wait_for_unlock):
@@ -25,9 +24,10 @@ def test_external_ipc_chain(project, wait_for_unlock):
         registrar = chain.registrar
 
         project.config['chains.external.chain.class'] = 'populus.chain.ExternalChain'
-        project.config['chains.external.registrar'] = registrar.address
         project.config['chains.external.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
         project.config['chains.external.web3.provider.settings.ipc_path'] = chain.geth.ipc_path
+        project.config['chains.external.contracts.backends.Memory.class'] = 'populus.contracts.backends.memory.MemoryBackend'
+        project.config['chains.external.contracts.backends.Memory.priority'] = 10
         project.write_config()
 
         with project.get_chain('external') as external_chain:
@@ -35,4 +35,3 @@ def test_external_ipc_chain(project, wait_for_unlock):
             ext_registrar = external_chain.registrar
 
             assert ext_web3.eth.coinbase == web3.eth.coinbase
-            assert registrar.address == ext_registrar.address

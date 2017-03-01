@@ -8,6 +8,10 @@ from eth_utils import (
     to_ordered_dict,
 )
 
+from populus.config.backend import (
+    ContractBackendConfig,
+)
+
 from populus.contracts.provider import (
     Provider,
 )
@@ -86,9 +90,15 @@ class BaseChain(object):
     # +--------------+
     #
     @property
+    @to_ordered_dict
     def contract_backend_configs(self):
-        config = self.config.get_config('contracts.backends')
-        return sort_prioritized_configs(config, self.project.config)
+        backend_configs = self.config.get_config('contracts.backends')
+        sorted_backend_configs = sort_prioritized_configs(
+            backend_configs,
+            self.project.config
+        )
+        for backend_name, base_backend_config in sorted_backend_configs.items():
+            yield backend_name, ContractBackendConfig(base_backend_config)
 
     @cached_property
     @to_ordered_dict
@@ -115,7 +125,7 @@ class BaseChain(object):
         if not self.provider_backends:
             raise ValueError(
                 "Must have at least one provider backend "
-                "configured\n{0}".format(self.backend_configs)
+                "configured\n{0}".format(self.contract_backend_configs)
             )
         return Provider(self, self.provider_backends)
 
@@ -134,7 +144,7 @@ class BaseChain(object):
         if not self.registrar_backends:
             raise ValueError(
                 "Must have at least one registrar backend "
-                "configured\n{0}".format(self.backend_configs)
+                "configured\n{0}".format(self.contract_backend_configs)
             )
         return Registrar(self, self.registrar_backends)
 
@@ -153,7 +163,7 @@ class BaseChain(object):
         if not self.store_backends:
             raise ValueError(
                 "Must have at least one store backend "
-                "configured\n{0}".format(self.backend_configs)
+                "configured\n{0}".format(self.contract_backend_configs)
             )
         return Store(self, self.store_backends)
 

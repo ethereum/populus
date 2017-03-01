@@ -1,11 +1,15 @@
 import os
 
-from populus.compilation import find_project_contracts
-from populus.utils.filesystem import mkdir
+from populus.utils.compile import (
+    get_project_source_paths,
+)
+from populus.utils.filesystem import (
+    mkdir,
+)
 
 
 def test_gets_correct_files_default_dir(project_dir, write_project_file):
-    file_names = find_project_contracts(project_dir)
+    file_names = get_project_source_paths(project_dir)
 
     should_match = {
         'contracts/SolidityContract.sol',
@@ -33,7 +37,7 @@ def test_gets_correct_files_default_dir(project_dir, write_project_file):
 def test_gets_correct_files_custom_dir(project_dir, write_project_file):
     custom_dir = "my_custom_dir"
     mkdir(os.path.join(project_dir, custom_dir))
-    file_names = find_project_contracts(project_dir, custom_dir)
+    file_names = get_project_source_paths(project_dir, custom_dir)
 
     should_match = {
         '{}/SolidityContract.sol'.format(custom_dir),

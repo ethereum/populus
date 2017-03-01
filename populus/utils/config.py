@@ -10,8 +10,6 @@ from eth_utils import (
     compose,
 )
 
-from populus import ASSETS_DIR
-
 from .mappings import (
     get_nested_key,
     has_nested_key,
@@ -19,13 +17,6 @@ from .mappings import (
 from .module_loading import (
     import_string,
 )
-
-
-CONFIG_SCHEMA_FILENAME = "config.schema.json"
-
-
-def get_config_schema_path():
-    return os.path.join(ASSETS_DIR, CONFIG_SCHEMA_FILENAME)
 
 
 JSON_CONFIG_FILENAME = './populus.json'

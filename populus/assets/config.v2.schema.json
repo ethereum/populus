@@ -1,0 +1,194 @@
+{
+  "title": "Populus configuration file schema",
+  "type": "object",
+  "version": "1",
+  "required": ["version"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "enum": ["2"]
+    },
+    "chains": {
+      "$ref": "#/definitions/ProjectChainsConfig"
+    },
+    "compilation": {
+      "$ref": "#/definitions/CompilationConfig"
+    },
+    "contracts": {
+      "$ref": "#/definitions/ContractsConfig"
+    },
+    "web3": {
+      "$ref": "#/definitions/ProjectWeb3Config"
+    }
+  },
+  "definitions": {
+    "ChainClassConfig": {
+      "title": "Configuration for a chain class",
+      "type": "object",
+      "required": ["class"],
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "settings": {
+          "title": "Additional configuration for the chain class",
+          "type": "object"
+        }
+      }
+    },
+    "ChainConfig": {
+      "title": "Configuration for a single project chain",
+      "type": "object",
+      "required": ["chain", "web3"],
+      "properties": {
+        "chain": {"$ref": "#/definitions/ChainClassConfig"},
+        "web3": {
+          "anyOf": [
+            {"$ref": "#/definitions/Reference"},
+            {"$ref": "#/definitions/Web3Config"}
+          ]
+        }
+      }
+    },
+    "CompilationConfig": {
+      "title": "Configuration for how populus compiles source files",
+      "type": "object",
+      "properties": {
+        "contracts_source_dir": {
+          "title": "The root filesystem path under which the projects source files can be found",
+          "type": "string"
+        },
+        "settings": {
+          "anyOf": [
+            {"$ref": "#/definitions/SolcCompilerSettings"}
+          ]
+        }
+      }
+    },
+    "ContractsConfig": {
+      "title": "Configuration for the contract store",
+      "properties": {
+        "backends": {
+          "title": "The contract backends used by this project",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+              "$ref": "#/definitions/ContractBackendConfig"
+            }
+          }
+        }
+      }
+    },
+    "ContractBackendConfig": {
+      "title": "Configuration for a contract backend",
+      "type": "object",
+      "required": ["class", "priority"],
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "priority": {
+          "title": "The priority of this backend",
+          "type": "integer"
+        },
+        "settings": {
+          "title": "Backend specific settings",
+          "type": "object"
+        }
+      }
+    },
+    "EthereumAddress": {
+      "title": "An Ethereum address",
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "PythonImportPath": {
+      "title": "The string representation of an import path for a python module or object",
+      "type": "string",
+      "pattern": "^[a-zA-Z][_a-zA-Z0-9]*(?:\\.[a-zA-Z][_a-zA-Z0-9]*)*$"
+    },
+    "ProjectChainsConfig": {
+      "title": "The configuration for each chain declared by this project",
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+          "$ref": "#/definitions/ChainConfig"
+        }
+      }
+    },
+    "ProjectWeb3Config": {
+      "title": "Project level web3 configurations",
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+          "$ref": "#/definitions/Web3Config"
+        }
+      }
+    },
+    "ProviderConfig": {
+      "title": "Configuration for the provider of a web3 instance",
+      "type": "object",
+      "required": ["class"],
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "settings": {
+          "title": "Provider specific settings",
+          "type": "object"
+        }
+      }
+    },
+    "Reference": {
+      "title": "A reference to another section in the configuration file",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "$ref":  {
+          "title": "Dotted path from the root of the config file to the referenced configuration",
+          "type": "string",
+          "pattern": "^[a-zA-Z][_a-zA-Z0-9]*(?:\\.[a-zA-Z][_a-zA-Z0-9]*)*$"
+        }
+      }
+    },
+    "SolcCompilerSettings": {
+      "title": "Settings for the solc command line compiler",
+      "type": "object",
+      "properties": {
+        "optimize": {
+          "type": "boolean"
+        },
+        "output_values": {
+          "title": "Determines which compiler values will be output by the solc compiler",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Web3Config": {
+      "title": "Configuration for a web instance",
+      "type": "object",
+      "properties": {
+        "provider": {
+          "$ref": "#/definitions/ProviderConfig"
+        },
+        "eth": {
+          "$ref": "#/definitions/Web3EthConfig"
+        }
+      }
+    },
+    "Web3EthConfig": {
+      "title": "Configuration for the eth module of a web3 instance",
+      "type": "object",
+      "properties": {
+        "default_account": {
+          "$ref": "#/definitions/EthereumAddress"
+        }
+      }
+    }
+  }
+}

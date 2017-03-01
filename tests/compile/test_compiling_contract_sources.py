@@ -4,9 +4,6 @@ from populus.compilation import (
     compile_project_contracts,
 )
 
-from populus.utils.filesystem import (
-    get_contracts_dir,
-)
 from populus.utils.testing import (
     load_contract_fixture,
 )

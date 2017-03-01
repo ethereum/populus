@@ -4,7 +4,6 @@ import json
 
 import os
 
-from populus.utils.filesystem import DEFAULT_CONTRACTS_DIR
 from populus.compilation import (
     compile_and_write_contracts,
 )
@@ -46,7 +45,7 @@ def test_compilation(project_dir, write_project_file):
     write_project_file('contracts/ContractB.sol', CONTRACT_B_SOURCE)
     write_project_file('contracts/ContractC.sol', CONTRACT_C_SOURCE)
 
-    source_paths, compiled_sources, outfile_path = compile_and_write_contracts(project_dir, DEFAULT_CONTRACTS_DIR)
+    source_paths, compiled_sources, outfile_path = compile_and_write_contracts(project)
 
     with open(outfile_path) as outfile:
         compiled_contract_data = json.load(outfile)

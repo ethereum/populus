@@ -477,8 +477,7 @@ def compile_project_contracts(project, compiler_settings=None):
     click.echo("> Loading source files from: ./{0}\n".format(project.contracts_dir))
 
     result = compile_and_write_contracts(
-        project.project_dir,
-        project.contracts_dir,
+        project,
         compiler_settings=compiler_settings,
     )
     contract_source_paths, compiled_sources, output_file_path = result

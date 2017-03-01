@@ -1,5 +1,4 @@
 import itertools
-import os
 import re
 
 from eth_utils import (
@@ -18,14 +17,6 @@ from .mappings import (
 from .string import (
     normalize_class_name,
 )
-
-
-DEFAULT_CONTRACTS_DIR = "./contracts/"
-
-
-def get_contracts_source_dir(project_dir):
-    contracts_source_dir = os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)
-    return os.path.abspath(contracts_source_dir)
 
 
 def get_contract_source_file_path(contract_data):

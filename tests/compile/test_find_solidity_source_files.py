@@ -1,9 +1,11 @@
 import os
 
 from populus import Project
+from populus.utils.compile import (
+    find_solidity_source_files,
+)
 from populus.utils.filesystem import (
     mkdir,
-    find_solidity_source_files,
     is_same_path,
 )
 

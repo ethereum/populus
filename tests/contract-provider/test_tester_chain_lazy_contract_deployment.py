@@ -31,21 +31,6 @@ def math(tester_chain):
     return Math(address=math_address)
 
 
-@pytest.fixture()
-def register_address(tester_chain):
-    chain = tester_chain
-    def _register_address(name, value):
-        if name.startswith('contract/'):
-            contract_key = name
-        else:
-            contract_key = 'contract/{name}'.format(name=name)
-        register_txn_hash = tester_chain.registrar.transact().setAddress(
-            contract_key, value,
-        )
-        chain.wait.for_receipt(register_txn_hash, timeout=120)
-    return _register_address
-
-
 def test_unknown_contract(tester_chain):
     chain = tester_chain
 
@@ -53,12 +38,10 @@ def test_unknown_contract(tester_chain):
         chain.get_contract('NotAKnownContract')
 
 
-def test_it_uses_existing_address(tester_chain, math, register_address):
+def test_it_uses_existing_address(tester_chain, math):
     chain = tester_chain
 
-    register_address('contract/Math', math.address)
-    # sanity check
-    assert chain.registrar.call().exists('contract/Math')
+    chain.registrar.set_contract_address('Math', math.address)
 
     actual_math = chain.get_contract('Math')
     assert actual_math.address == math.address

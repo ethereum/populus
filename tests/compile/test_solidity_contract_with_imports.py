@@ -40,7 +40,7 @@ CONTRACT_C_SOURCE = textwrap.dedent(("""
 """))
 
 
-def test_compilation(project_dir, write_project_file):
+def test_compilation(project, write_project_file):
     write_project_file('contracts/ContractA.sol', CONTRACT_A_SOURCE)
     write_project_file('contracts/ContractB.sol', CONTRACT_B_SOURCE)
     write_project_file('contracts/ContractC.sol', CONTRACT_C_SOURCE)

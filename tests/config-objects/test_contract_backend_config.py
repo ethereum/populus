@@ -24,7 +24,7 @@ def test_backend_class_property():
     contract_backend_config = ContractBackendConfig({
         'class': 'populus.contracts.backends.memory.MemoryBackend',
     })
-    assert contract_backend_config.backend_config is MemoryBackend
+    assert contract_backend_config.backend_class is MemoryBackend
 
 
 @pytest.mark.parametrize(
@@ -41,7 +41,7 @@ def test_backend_class_property():
         (JSONFileBackend, 'populus.contracts.backends.filesystem.JSONFileBackend'),
     )
 )
-def test_set_chain_class_api(value, expected):
-    chain_config = ChainConfig()
-    chain_config.set_chain_class(value)
-    assert chain_config['chain.class'] == expected
+def test_set_backend_class_api(value, expected):
+    chain_config = ContractBackendConfig()
+    chain_config.set_backend_class(value)
+    assert chain_config['class'] == expected

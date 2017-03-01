@@ -10,7 +10,6 @@ from web3.contract import (
 
 from populus.utils.contracts import (
     is_project_contract,
-    is_test_contract,
 )
 from populus.utils.functional import (
     to_object,
@@ -30,10 +29,6 @@ def build_populus_meta(chain, contract_identifier, contract_data):
     yield (
         'is_project_contract',
         is_project_contract(chain.project.contracts_source_dir, contract_data),
-    )
-    yield (
-        'is_test_contract',
-        is_test_contract(chain.project.tests_dir, contract_data),
     )
     yield 'contract_type_name', normalize_class_name(contract_identifier)
 

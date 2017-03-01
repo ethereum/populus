@@ -1,7 +1,5 @@
 import pytest
 
-from flaky import flaky
-
 from populus.project import (
     Project,
 )
@@ -19,7 +17,7 @@ TESTNET_BLOCK_1_HASH = '0xad47413137a753b2061ad9b484bf7b0fc061f654b951b562218e9f
 MAINNET_BLOCK_1_HASH = '0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6'
 
 
-@flaky
+@pytest.mark.slow
 def test_project_tester_chain(project_dir):
     project = Project()
 
@@ -30,7 +28,7 @@ def test_project_tester_chain(project_dir):
         assert web3.version.node.startswith('TestRPC')
 
 
-@flaky
+@pytest.mark.slow
 def test_project_testrpc_chain(project_dir):
     project = Project()
 
@@ -41,7 +39,7 @@ def test_project_testrpc_chain(project_dir):
         assert web3.version.node.startswith('TestRPC')
 
 
-@flaky
+@pytest.mark.slow
 def test_project_temp_chain(project_dir):
     project = Project()
 
@@ -53,8 +51,8 @@ def test_project_temp_chain(project_dir):
         assert web3.version.node.startswith('Geth')
 
 
-#@flaky
 @pytest.mark.skip("Morden no longer exists")
+@pytest.mark.slow
 def test_project_morden_chain(project_dir):
     project = Project()
 
@@ -70,7 +68,7 @@ def test_project_morden_chain(project_dir):
         assert block_1['hash'] == TESTNET_BLOCK_1_HASH
 
 
-@flaky
+@pytest.mark.slow
 def test_project_local_chain_ipc(project_dir):
     project = Project()
 
@@ -95,7 +93,7 @@ def test_project_local_chain_ipc(project_dir):
         assert block_1['miner'] == web3.eth.coinbase
 
 
-@flaky
+@pytest.mark.slow
 def test_project_local_chain_rpc(project_dir):
     project = Project()
     rpc_port = str(get_open_port())

@@ -1,5 +1,4 @@
 import pytest
-from flaky import flaky
 import click
 from click.testing import CliRunner
 
@@ -34,6 +33,7 @@ def local_chain(project_dir):
 
     return chain
 
+
 @pytest.fixture()
 def second_account(local_chain):
     # create a new account
@@ -41,7 +41,7 @@ def second_account(local_chain):
     return force_text(account)
 
 
-@flaky
+@pytest.mark.slow
 def test_get_unlocked_default_account_address_with_no_config(local_chain, second_account):
     project = local_chain.project
 
@@ -62,7 +62,7 @@ def test_get_unlocked_default_account_address_with_no_config(local_chain, second
         assert project.config['chains.local.web3.eth.default_account'] == second_account
 
 
-@flaky
+@pytest.mark.slow
 def test_helper_fn_with_unlocked_pre_configured_account(local_chain, second_account):
     project = local_chain.project
 
@@ -87,7 +87,7 @@ def test_helper_fn_with_unlocked_pre_configured_account(local_chain, second_acco
         assert project.config['chains.local.web3.eth.default_account'] == web3.eth.coinbase
 
 
-@flaky
+@pytest.mark.slow
 def test_helper_fn_with_locked_pre_configured_account(local_chain, second_account):
     project = local_chain.project
     project.config['chains.local.web3.eth.default_account'] = second_account

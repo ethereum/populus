@@ -11,10 +11,7 @@ from populus.utils.testing import (
 
 @load_contract_fixture('Math.sol')
 def test_compiling_project_contracts(project):
-    source_paths, contract_data = compile_project_contracts(
-        project.project_dir,
-        project.contracts_dir,
-    )
+    source_paths, contract_data = compile_project_contracts(project)
 
     assert 'contracts/Math.sol' in source_paths
 

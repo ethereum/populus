@@ -4,6 +4,7 @@ import pytest
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
+@pytest.mark.slow
 def test_wait_for_block(project, chain_name):
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3
@@ -17,6 +18,7 @@ def test_wait_for_block(project, chain_name):
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
+@pytest.mark.slow
 def test_wait_for_receipt(project, chain_name, wait_for_unlock):
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3
@@ -35,6 +37,7 @@ def test_wait_for_receipt(project, chain_name, wait_for_unlock):
 @pytest.mark.parametrize(
     'chain_name', ('temp', 'testrpc', 'tester'),
 )
+@pytest.mark.slow
 def test_wait_for_contract_address(project,
                                    chain_name,
                                    wait_for_unlock):

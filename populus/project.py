@@ -220,7 +220,7 @@ class Project(object):
         self._cached_compiled_contracts = contracts
 
     @property
-    def compiled_contracts(self):
+    def compiled_contract_data(self):
         if self.is_compiled_contract_cache_stale():
             self._cached_compiled_contracts_mtime = self.get_source_modification_time()
             _, self._cached_compiled_contracts = compile_project_contracts(
@@ -228,6 +228,16 @@ class Project(object):
                 compiler_settings=self.config.get('compilation.settings'),
             )
         return self._cached_compiled_contracts
+
+    @property
+    def compiled_contracts(self):
+        warnings.warn(DeprecationWarning(
+            "The `compiled_contracts` property has been renamed to "
+            "`compiled_contract_data`.  Please update your code to use "
+            "this property.  The `compiled_contracts` property will be removed in "
+            "subsequent releases"
+        ))
+        return self.compiled_contract_data
 
     #
     # Local Blockchains

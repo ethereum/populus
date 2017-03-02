@@ -1,4 +1,5 @@
 import copy
+import json
 
 from populus.config.defaults import (
     load_default_config,
@@ -7,6 +8,9 @@ from populus.config.upgrade import (
     upgrade_v1_to_v2,
 )
 
+from populus.utils.config import (
+    get_json_config_file_path,
+)
 from populus.utils.mappings import (
     deep_merge_dicts,
 )
@@ -136,4 +140,22 @@ def test_non_default_config_upgrade():
 
 
     upgraded_config = upgrade_v1_to_v2(v1_config)
+    assert upgraded_config == expected_v2_config
+
+
+def test_upgrade_works_with_config_objects(project):
+    config_file_path = get_json_config_file_path(project.project_dir)
+    with open(config_file_path, 'w') as config_file:
+        json.dump(BASE_V1_CONFIG, config_file)
+    project.load_config()
+    assert 'web3.Ropsten' in project.config
+    upgraded_config = upgrade_v1_to_v2(project.config)
+
+    expected_v2_config = deep_merge_dicts(
+        v2_default_config,
+        {'web3': {'Ropsten': v1_config['web3']['Ropsten']}},
+        {'web3': {'InfuraMainnet': {'eth': v1_config['web3']['InfuraMainnet']['eth']}}},
+        {'compilation': {'contracts_source_dir': v1_config['compilation']['contracts_dir']}},
+        {'chains': {'ropsten': {'web3': v1_config['chains']['ropsten']['web3']}}},
+    )
     assert upgraded_config == expected_v2_config

@@ -4,6 +4,10 @@ from eth_utils import (
     to_tuple,
 )
 
+from populus.config.defaults import (
+    LATEST_VERSION,
+)
+
 from .main import main
 
 
@@ -97,3 +101,24 @@ def config_delete(ctx, keys):
         except KeyError:
             click.echo("KeyError: {0}".format(key), err=True)
     project.write_config()
+
+
+@config_cmd.command('upgrade')
+@click.pass_context
+@click.option(
+    '-t',
+    '--to-version',
+    default=LATEST_VERSION,
+)
+def config_upgrade(ctx, version):
+    """
+    Upgrades the current populus config file to the specifed version.
+    """
+    project = ctx.obj['PROJECT']
+    # TODO: write this code
+    version = project.config['version']
+    if version == LATEST_VERSION:
+        click.echo("Already at latest version: v{0}".format(version))
+    elif version == '1' and LATEST_VERSION == '2':
+        # TODO: make this generic.
+        assert False

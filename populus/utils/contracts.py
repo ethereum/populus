@@ -3,6 +3,7 @@ import re
 
 from eth_utils import (
     is_string,
+    remove_0x_prefix,
 )
 
 from .filesystem import (

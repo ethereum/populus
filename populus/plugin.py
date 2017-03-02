@@ -31,12 +31,28 @@ def chain(project):
 
 
 @pytest.fixture()
+def store(chain):
+    return chain.store
+
+
+@pytest.fixture()
+def registrar(chain):
+    return chain.registrar
+
+
+@pytest.fixture()
+def provider(chain):
+    return chain.provider
+
+
+@pytest.fixture()
 def web3(chain):
     return chain.web3
 
 
 @pytest.fixture()
 def base_contract_factories(chain):
+    # TODO: figure out what to do with thi API
     return chain.contract_factories
 
 

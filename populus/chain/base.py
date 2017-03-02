@@ -21,6 +21,9 @@ from populus.contracts.registrar import (
 from populus.contracts.store import (
     Store,
 )
+from populus.wait import (
+    Wait,
+)
 
 from populus.utils.config import (
     sort_prioritized_configs,
@@ -33,9 +36,6 @@ from populus.utils.functional import (
 )
 from populus.utils.module_loading import (
     import_string,
-)
-from populus.utils.wait import (
-    Wait,
 )
 
 

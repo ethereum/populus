@@ -1,6 +1,6 @@
 .. _chain-contracts:
 
+Accessing Contracts
+-------------------
 
-Introduction to Chains
-======================
-
+Pop

@@ -4,6 +4,7 @@ Chain API
 =========
 
 .. module:: populus.chain.base
+.. currentmodule:: populus.chain.base
 
 .. py:class:: BaseChain
 
@@ -11,27 +12,31 @@ Chain API
     class and expose the following API.
 
 
-.. py:attribute:: web3
+.. py:attribute:: BaseChain.web3
 
-    Provides access to the :class:`~web3.Web3` instance that this chain is
+    Accessor for the :class:`~web3.Web3` instance that this chain is
     configured to use.
 
 
-.. py:attribute:: wait
+.. _chain-api-wait:
+.. py:attribute:: BaseChain.wait
 
-    Accessor for to the :ref:`Wait API <chain-wait>`.
-
-
-.. py:attribute:: store
-
-    Accessor for to the :ref:`Store API <chain-store>`.
+    Accessor for the :ref:`Wait API <chain-wait>`.
 
 
-.. py:attribute:: registrar
+.. _chain-api-store:
+.. py:attribute:: BaseChain.store
 
-    Accessor for to the :ref:`Registrar API <chain-registrar>`.
+    Accessor for the :ref:`Store API <chain-store>`.
 
 
-.. py:attribute:: provider
+.. _chain-api-registrar:
+.. py:attribute:: BaseChain.registrar
 
-    Accessor for to the :ref:`Provider API <chain-provider>`.
+    Accessor for the :ref:`Registrar API <chain-registrar>`.
+
+
+.. _chain-api-provider:
+.. py:attribute:: BaseChain.provider
+
+    Accessor for the :ref:`Provider API <chain-provider>`.

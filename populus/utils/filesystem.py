@@ -2,7 +2,7 @@ import os
 import sys
 import shutil
 import fnmatch
-import tempfile
+import tempfile as _tempfile
 import contextlib
 import functools
 import errno
@@ -59,52 +59,6 @@ def mkdir(path):
             raise
 
 
-DEFAULT_CONTRACTS_DIR = "./contracts/"
-
-
-def get_contracts_dir(project_dir):
-    contracts_dir = os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)
-    return os.path.abspath(contracts_dir)
-
-
-BUILD_DIR = "./build/"
-
-
-def get_build_dir(project_dir):
-    build_dir = os.path.join(project_dir, BUILD_DIR)
-    ensure_path_exists(build_dir)
-    return build_dir
-
-
-COMPILED_CONTRACTS_FILENAME = "contracts.json"
-
-
-def get_compiled_contracts_file_path(project_dir):
-    build_dir = get_build_dir(project_dir)
-    return os.path.join(build_dir, COMPILED_CONTRACTS_FILENAME)
-
-
-BLOCKCHAIN_DIR = "./chains/"
-
-
-def get_blockchains_dir(project_dir):
-    blockchains_dir = os.path.abspath(os.path.join(project_dir, BLOCKCHAIN_DIR))
-    ensure_path_exists(blockchains_dir)
-    return blockchains_dir
-
-
-MIGRATIONS_DIR = "./migrations/"
-
-
-def get_migrations_dir(project_dir, lazy_create=True):
-    migrations_dir = os.path.abspath(os.path.join(project_dir, MIGRATIONS_DIR))
-    if lazy_create:
-        init_file_path = os.path.join(migrations_dir, '__init__.py')
-        ensure_path_exists(migrations_dir)
-        ensure_file_exists(init_file_path)
-    return migrations_dir
-
-
 def is_executable_available(program):
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
@@ -132,12 +86,22 @@ def recursive_find_files(base_dir, pattern):
 
 @contextlib.contextmanager
 def tempdir():
-    directory = tempfile.mkdtemp()
+    directory = _tempfile.mkdtemp()
 
     try:
         yield directory
     finally:
         shutil.rmtree(directory)
+
+
+@contextlib.contextmanager
+def tempfile(*args, **kwargs):
+    _, file_path = _tempfile.mkstemp(*args, **kwargs)
+
+    try:
+        yield file_path
+    finally:
+        remove_file_if_exists(file_path)
 
 
 def is_same_path(p1, p2):
@@ -156,3 +120,19 @@ def relpath(fn):
         path = fn(*args, **kwargs)
         return os.path.relpath(path)
     return wrapper
+
+
+def normpath(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        path = fn(*args, **kwargs)
+        return os.path.normpath(path)
+    return wrapper
+
+
+def is_under_path(base_path, path):
+    if is_same_path(base_path, path):
+        return False
+    absolute_base_path = os.path.abspath(base_path)
+    absolute_path = os.path.abspath(path)
+    return absolute_path.startswith(absolute_base_path)

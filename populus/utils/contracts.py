@@ -1,25 +1,47 @@
 import itertools
-import os
 import re
 
 from eth_utils import (
     is_string,
+    remove_0x_prefix,
 )
 
-from .string import (
-    normalize_class_name,
+from .filesystem import (
+    is_under_path,
 )
 from .linking import (
     find_link_references,
 )
+from .mappings import (
+    get_nested_key,
+)
+from .string import (
+    normalize_class_name,
+)
 
 
-DEFAULT_CONTRACTS_DIR = "./contracts/"
+def get_contract_source_file_path(contract_data):
+    compilation_target = get_nested_key(contract_data, 'metadata.settings.compilationTarget')
+    assert len(compilation_target) == 1
+    return tuple(compilation_target.keys())[0]
 
 
-def get_contracts_source_dir(project_dir):
-    contracts_source_dir = os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)
-    return os.path.abspath(contracts_source_dir)
+def is_project_contract(contracts_source_dir, contract_data):
+    try:
+        contract_source_file_path = get_contract_source_file_path(contract_data)
+    except KeyError:
+        # TODO: abstract contracts don't have a metadata value.  How do we handle this....
+        return False
+    return is_under_path(contracts_source_dir, contract_source_file_path)
+
+
+def is_test_contract(tests_dir, contract_data):
+    try:
+        contract_source_file_path = get_contract_source_file_path(contract_data)
+    except KeyError:
+        # TODO: abstract contracts don't have a metadata value.  How do we handle this....
+        return False
+    return is_under_path(tests_dir, contract_source_file_path)
 
 
 def package_contracts(contract_factories):
@@ -116,6 +138,53 @@ def is_contract_name(value):
 EMPTY_BYTECODE_VALUES = {None, "0x"}
 
 
+SWARM_HASH_PREFIX = "a165627a7a72305820"
+SWARM_HASH_SUFFIX = "0029"
+EMBEDDED_SWARM_HASH_REGEX = (
+    SWARM_HASH_PREFIX +
+    "[0-9a-zA-Z]{64}" +
+    SWARM_HASH_SUFFIX +
+    "$"
+)
+
+SWARM_HASH_REPLACEMENT = (
+    SWARM_HASH_PREFIX +
+    "<" +
+    "-" * 20 +
+    "swarm-hash-placeholder" +
+    "-" * 20 +
+    ">" +
+    SWARM_HASH_SUFFIX
+)
+
+
+def compare_bytecode(left, right):
+    unprefixed_left = remove_0x_prefix(left)
+    unprefixed_right = remove_0x_prefix(right)
+
+    norm_left = re.sub(EMBEDDED_SWARM_HASH_REGEX, SWARM_HASH_REPLACEMENT, unprefixed_left)
+    norm_right = re.sub(EMBEDDED_SWARM_HASH_REGEX, SWARM_HASH_REPLACEMENT, unprefixed_right)
+
+    if len(norm_left) != len(unprefixed_left) or len(norm_right) != len(unprefixed_right):
+        raise ValueError(
+            "Invariant.  Normalized bytecodes are not the correct lengths:" +
+            "\n- left  (original)  :" +
+            left, +
+            "\n- left  (unprefixed):" +
+            unprefixed_left +
+            "\n- left  (normalized):" +
+            norm_left +
+            "\n- right (original)  :" +
+            right +
+            "\n- right (unprefixed):" +
+            unprefixed_right +
+            "\n- right (normalized):" +
+            norm_right
+        )
+
+    return norm_left == norm_right
+
+
 def verify_contract_bytecode(web3, ContractFactory, address):
     """
     TODO: write tests for this.
@@ -135,7 +204,7 @@ def verify_contract_bytecode(web3, ContractFactory, address):
         raise BytecodeMismatch(
             "No bytecode found at address: {0}".format(address)
         )
-    elif chain_bytecode != ContractFactory.bytecode_runtime:
+    elif not compare_bytecode(chain_bytecode, ContractFactory.bytecode_runtime):
         raise BytecodeMismatch(
             "Bytecode found at {0} does not match compiled bytecode:\n"
             " - chain_bytecode: {1}\n"

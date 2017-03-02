@@ -6,11 +6,11 @@ from populus.utils.networking import (
 )
 
 from .base import (
-    BaseTesterChain,
+    BaseChain,
 )
 
 
-class TestRPCChain(BaseTesterChain):
+class TestRPCChain(BaseChain):
     port = None
 
     def get_web3_config(self):
@@ -28,8 +28,7 @@ class TestRPCChain(BaseTesterChain):
 
         self._running = True
 
-        self.provider = self.web3.currentProvider
-        self.rpc_methods = self.provider.server.application.rpc_methods
+        self.rpc_methods = self.web3.currentProvider.server.application.rpc_methods
 
         self.rpc_methods.full_reset()
         self.rpc_methods.rpc_configure('eth_mining', False)
@@ -44,11 +43,11 @@ class TestRPCChain(BaseTesterChain):
         if not self._running:
             raise ValueError("The TesterChain is not running")
         try:
-            self.provider.server.stop()
-            self.provider.server.close()
-            self.provider.thread.kill()
+            self.web3.currentProvider.server.stop()
+            self.web3.currentProvider.server.close()
+            self.web3.currentProvider.thread.kill()
         except AttributeError:
-            self.provider.server.shutdown()
-            self.provider.server.server_close()
+            self.web3.currentProvider.server.shutdown()
+            self.web3.currentProvider.server.server_close()
         finally:
             self._running = False

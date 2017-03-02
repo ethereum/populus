@@ -1,10 +1,57 @@
+import os
 import json
 
 from eth_utils import (
+    to_tuple,
     to_dict,
     add_0x_prefix,
     is_string,
 )
+
+from .filesystem import (
+    recursive_find_files,
+)
+
+
+DEFAULT_CONTRACTS_DIR = "./contracts/"
+
+
+def get_contracts_source_dir(project_dir):
+    contracts_source_dir = os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)
+    return os.path.abspath(contracts_source_dir)
+
+
+BUILD_ASSET_DIR = "./build"
+
+
+def get_build_asset_dir(project_dir):
+    build_asset_dir = os.path.join(project_dir, BUILD_ASSET_DIR)
+    return build_asset_dir
+
+
+COMPILED_CONTRACTS_ASSET_FILENAME = './contracts.json'
+
+
+def get_compiled_contracts_asset_path(build_asset_dir):
+    compiled_contracts_asset_path = os.path.join(
+        build_asset_dir,
+        COMPILED_CONTRACTS_ASSET_FILENAME,
+    )
+    return compiled_contracts_asset_path
+
+
+@to_tuple
+def find_solidity_source_files(base_dir):
+    return (
+        os.path.relpath(source_file_path)
+        for source_file_path
+        in recursive_find_files(base_dir, "*.sol")
+    )
+
+
+def get_project_source_paths(contracts_source_dir):
+    project_source_paths = find_solidity_source_files(contracts_source_dir)
+    return project_source_paths
 
 
 def process_compiler_output(name_from_compiler, data_from_compiler):

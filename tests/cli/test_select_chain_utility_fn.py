@@ -3,7 +3,8 @@ import click
 from click.testing import CliRunner
 
 from populus.project import Project
-from populus.utils.chains import (
+
+from populus.utils.geth import (
     get_geth_ipc_path,
     get_data_dir as get_local_chain_datadir,
 )

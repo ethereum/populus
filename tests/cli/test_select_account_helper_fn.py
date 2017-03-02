@@ -14,6 +14,7 @@ from populus.utils.cli import (
     ('account_index'),
     (0, 1),
 )
+@pytest.mark.slow
 def test_select_account_helper_with_indexes(project_dir, account_index):
     project = Project()
     chain = project.get_chain('temp')
@@ -42,6 +43,7 @@ def test_select_account_helper_with_indexes(project_dir, account_index):
     ('account_index'),
     (0, 1),
 )
+@pytest.mark.slow
 def test_select_account_helper_with_accounts(project_dir, account_index):
     project = Project()
     chain = project.get_chain('temp')
@@ -70,6 +72,7 @@ def test_select_account_helper_with_accounts(project_dir, account_index):
     ('stdin'),
     (20, '0xd3cda913deb6f67967b99d67acdfa1712c293601'),
 )
+@pytest.mark.slow
 def test_select_account_with_invalid_option(project_dir, stdin):
     project = Project()
     chain = project.get_chain('temp')

@@ -1,7 +1,7 @@
 from populus.contracts.exceptions import (  # noqa: F401
     NoKnownAddress,
     UnknownContract,
-    BytecodeMismatchError,
+    BytecodeMismatch,
 )
 
 from .geth import (  # noqa: F401

@@ -19,34 +19,25 @@ from web3 import (
     HTTPProvider,
 )
 
-from populus.migrations.registrar import (
-    get_registrar,
-)
-
 from populus.utils.chains import (
+    get_base_blockchain_storage_dir,
+)
+from populus.utils.filesystem import (
+    remove_file_if_exists,
+    remove_dir_if_exists,
+    tempdir,
+)
+from populus.utils.geth import (
     get_chaindata_dir,
     get_dapp_dir,
     get_nodekey_path,
     get_geth_ipc_path,
     get_geth_logfile_path,
 )
-from populus.utils.filesystem import (
-    remove_file_if_exists,
-    remove_dir_if_exists,
-    get_blockchains_dir,
-    tempdir,
-)
-from populus.utils.functional import (
-    cached_property,
-)
 
 from .base import (
     BaseChain,
 )
-
-
-TESTNET_BLOCK_1_HASH = '0xad47413137a753b2061ad9b484bf7b0fc061f654b951b562218e9f66505be6ce'
-MAINNET_BLOCK_1_HASH = '0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6'
 
 
 def reset_chain(data_dir):
@@ -150,26 +141,22 @@ class BaseGethChain(BaseChain):
         self.stack = ExitStack()
         self.geth = self.get_geth_process_instance()
 
+    def get_web3_config(self):
+        base_config = super(BaseGethChain, self).get_web3_config()
+        config = copy.deepcopy(base_config)
+        if issubclass(base_config.provider_class, IPCProvider):
+            config['provider.settings.ipc_path'] = self.geth.ipc_path
+        elif issubclass(base_config.provider_class, HTTPProvider):
+            config['provider.settings.endpoint_uri'] = "http://127.0.0.1:{0}".format(
+                self.geth.rpc_port,
+            )
+        else:
+            raise ValueError("Unknown provider type")
+        return config
+
     @property
     def geth_kwargs(self):
         return self.config.get('chain.settings', {})
-
-    @property
-    def has_registrar(self):
-        return 'registrar' in self.config
-
-    @cached_property
-    def registrar(self):
-        if not self.has_registrar:
-            raise KeyError(
-                "The configuration for the {0} chain does not include a "
-                "registrar.  Please set this value to the address of the "
-                "deployed registrar contract.".format(self.chain_name)
-            )
-        return get_registrar(
-            self.web3,
-            address=self.config['registrar'],
-        )
 
     def get_geth_process_instance(self):
         raise NotImplementedError("Must be implemented by subclasses")
@@ -202,24 +189,11 @@ class LocalGethChain(BaseGethChain):
             overrides=self.geth_kwargs,
         )
 
-    def get_web3_config(self):
-        base_config = super(LocalGethChain, self).get_web3_config()
-        config = copy.deepcopy(base_config)
-        if issubclass(base_config.provider_class, IPCProvider):
-            config['provider.settings.ipc_path'] = self.geth.ipc_path
-        elif issubclass(base_config.provider_class, HTTPProvider):
-            config['provider.settings.endpoint_uri'] = "http://127.0.0.1:{0}".format(
-                self.geth.rpc_port,
-            )
-        else:
-            raise ValueError("Unknown provider type")
-        return config
-
 
 class TemporaryGethChain(BaseGethChain):
     def get_geth_process_instance(self):
         tmp_project_dir = self.stack.enter_context(tempdir())
-        blockchains_dir = get_blockchains_dir(tmp_project_dir)
+        blockchains_dir = get_base_blockchain_storage_dir(tmp_project_dir)
 
         return LoggedDevGethProcess(
             project_dir=self.project.project_dir,
@@ -227,25 +201,6 @@ class TemporaryGethChain(BaseGethChain):
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
         )
-
-    def get_web3_config(self):
-        base_config = super(TemporaryGethChain, self).get_web3_config()
-        config = copy.deepcopy(base_config)
-        config['provider.settings.ipc_path'] = self.geth.ipc_path
-        return config
-
-    has_registrar = True
-    _registrar = None
-
-    @property
-    def registrar(self):
-        if self._registrar is None:
-            RegistrarFactory = get_registrar(self.web3)
-            deploy_txn_hash = RegistrarFactory.deploy()
-            registrar_address = self.wait.for_contract_address(deploy_txn_hash)
-            self._registrar = RegistrarFactory(address=registrar_address)
-
-        return self._registrar
 
 
 class TestnetChain(BaseGethChain):

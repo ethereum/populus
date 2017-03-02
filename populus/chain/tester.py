@@ -1,17 +1,16 @@
 from .base import (
-    BaseTesterChain,
+    BaseChain,
 )
 
 
-class TesterChain(BaseTesterChain):
+class TesterChain(BaseChain):
     def __enter__(self):
         if self._running:
             raise ValueError("The TesterChain is already running")
 
         self._running = True
 
-        self.provider = self.web3.currentProvider
-        self.rpc_methods = self.provider.rpc_methods
+        self.rpc_methods = self.web3.currentProvider.rpc_methods
 
         self.rpc_methods.full_reset()
         self.rpc_methods.rpc_configure('eth_mining', False)

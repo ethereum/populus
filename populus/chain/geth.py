@@ -141,6 +141,19 @@ class BaseGethChain(BaseChain):
         self.stack = ExitStack()
         self.geth = self.get_geth_process_instance()
 
+    def get_web3_config(self):
+        base_config = super(BaseGethChain, self).get_web3_config()
+        config = copy.deepcopy(base_config)
+        if issubclass(base_config.provider_class, IPCProvider):
+            config['provider.settings.ipc_path'] = self.geth.ipc_path
+        elif issubclass(base_config.provider_class, HTTPProvider):
+            config['provider.settings.endpoint_uri'] = "http://127.0.0.1:{0}".format(
+                self.geth.rpc_port,
+            )
+        else:
+            raise ValueError("Unknown provider type")
+        return config
+
     @property
     def geth_kwargs(self):
         return self.config.get('chain.settings', {})
@@ -176,19 +189,6 @@ class LocalGethChain(BaseGethChain):
             overrides=self.geth_kwargs,
         )
 
-    def get_web3_config(self):
-        base_config = super(LocalGethChain, self).get_web3_config()
-        config = copy.deepcopy(base_config)
-        if issubclass(base_config.provider_class, IPCProvider):
-            config['provider.settings.ipc_path'] = self.geth.ipc_path
-        elif issubclass(base_config.provider_class, HTTPProvider):
-            config['provider.settings.endpoint_uri'] = "http://127.0.0.1:{0}".format(
-                self.geth.rpc_port,
-            )
-        else:
-            raise ValueError("Unknown provider type")
-        return config
-
 
 class TemporaryGethChain(BaseGethChain):
     def get_geth_process_instance(self):
@@ -201,12 +201,6 @@ class TemporaryGethChain(BaseGethChain):
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
         )
-
-    def get_web3_config(self):
-        base_config = super(TemporaryGethChain, self).get_web3_config()
-        config = copy.deepcopy(base_config)
-        config['provider.settings.ipc_path'] = self.geth.ipc_path
-        return config
 
 
 class TestnetChain(BaseGethChain):

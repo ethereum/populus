@@ -3,6 +3,7 @@ import itertools
 
 from eth_utils import (
     is_dict,
+    to_dict,
     compose,
     to_tuple,
     sort_return,
@@ -108,3 +109,18 @@ def flatten_mapping(config, base_prefix=None):
                 yield sub_key, sub_value
         else:
             yield '.'.join(prefix), value
+
+
+@to_dict
+def deep_merge_dicts(*dicts):
+    for key in set(itertools.chain(*(_dict.keys() for _dict in dicts))):
+        values = tuple((_dict[key] for _dict in dicts if key in _dict))
+        if is_dict(values[-1]):
+            yield key, deep_merge_dicts(*(
+                _dict[key]
+                for _dict
+                in dicts
+                if is_dict(_dict.get(key))
+            ))
+        else:
+            yield key, values[-1]

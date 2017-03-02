@@ -39,7 +39,11 @@ def load_config_schema(version=LATEST_VERSION):
 
 
 @to_tuple
-def validate_config(config, version=LATEST_VERSION):
+def validate_config(config, version=None):
+    if version is None and 'version' in config:
+        version = config['version']
+    elif version is None:
+        version = LATEST_VERSION
     schema = load_config_schema(version)
     validator = jsonschema.Draft4Validator(schema)
     for error in validator.iter_errors(config):

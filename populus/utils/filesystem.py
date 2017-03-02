@@ -2,7 +2,7 @@ import os
 import sys
 import shutil
 import fnmatch
-import tempfile
+import tempfile as _tempfile
 import contextlib
 import functools
 import errno
@@ -86,12 +86,22 @@ def recursive_find_files(base_dir, pattern):
 
 @contextlib.contextmanager
 def tempdir():
-    directory = tempfile.mkdtemp()
+    directory = _tempfile.mkdtemp()
 
     try:
         yield directory
     finally:
         shutil.rmtree(directory)
+
+
+@contextlib.contextmanager
+def tempfile(*args, **kwargs):
+    _, file_path = _tempfile.mkstemp(*args, **kwargs)
+
+    try:
+        yield file_path
+    finally:
+        remove_file_if_exists(file_path)
 
 
 def is_same_path(p1, p2):

@@ -1,4 +1,4 @@
-from populus.utils.functional import (
+from populus.utils.mappings import (
     deep_merge_dicts,
 )
 

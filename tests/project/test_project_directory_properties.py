@@ -26,12 +26,12 @@ def test_project_directory_properties(project_dir):
     contracts_source_dir = get_contracts_source_dir(project_dir)
     assert is_same_path(project.contracts_source_dir, contracts_source_dir)
     with pytest.warns(DeprecationWarning):
-        assert is_same_path(project.contracts_dir, contracts_dir)
+        assert is_same_path(project.contracts_dir, contracts_source_dir)
 
     build_asset_dir = get_build_asset_dir(project_dir)
     assert is_same_path(project.build_asset_dir, build_asset_dir)
     with pytest.warns(DeprecationWarning):
-        assert is_same_path(project.build_dir, build_dir)
+        assert is_same_path(project.build_dir, build_asset_dir)
 
     compiled_contracts_asset_path = get_compiled_contracts_asset_path(project_dir)
     assert is_same_path(project.compiled_contracts_asset_path, compiled_contracts_asset_path)

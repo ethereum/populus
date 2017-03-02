@@ -137,6 +137,53 @@ def is_contract_name(value):
 EMPTY_BYTECODE_VALUES = {None, "0x"}
 
 
+SWARM_HASH_PREFIX = "a165627a7a72305820"
+SWARM_HASH_SUFFIX = "0029"
+EMBEDDED_SWARM_HASH_REGEX = (
+    SWARM_HASH_PREFIX +
+    "[0-9a-zA-Z]{64}" +
+    SWARM_HASH_SUFFIX +
+    "$"
+)
+
+SWARM_HASH_REPLACEMENT = (
+    SWARM_HASH_PREFIX +
+    "<" +
+    "-" * 20 +
+    "swarm-hash-placeholder" +
+    "-" * 20 +
+    ">" +
+    SWARM_HASH_SUFFIX
+)
+
+
+def compare_bytecode(left, right):
+    unprefixed_left = remove_0x_prefix(left)
+    unprefixed_right = remove_0x_prefix(right)
+
+    norm_left = re.sub(EMBEDDED_SWARM_HASH_REGEX, SWARM_HASH_REPLACEMENT, unprefixed_left)
+    norm_right = re.sub(EMBEDDED_SWARM_HASH_REGEX, SWARM_HASH_REPLACEMENT, unprefixed_right)
+
+    if len(norm_left) != len(unprefixed_left) or len(norm_right) != len(unprefixed_right):
+        raise ValueError(
+            "Invariant.  Normalized bytecodes are not the correct lengths:" +
+            "\n- left  (original)  :" +
+            left, +
+            "\n- left  (unprefixed):" +
+            unprefixed_left +
+            "\n- left  (normalized):" +
+            norm_left +
+            "\n- right (original)  :" +
+            right +
+            "\n- right (unprefixed):" +
+            unprefixed_right +
+            "\n- right (normalized):" +
+            norm_right
+        )
+
+    return norm_left == norm_right
+
+
 def verify_contract_bytecode(web3, ContractFactory, address):
     """
     TODO: write tests for this.
@@ -156,7 +203,7 @@ def verify_contract_bytecode(web3, ContractFactory, address):
         raise BytecodeMismatch(
             "No bytecode found at address: {0}".format(address)
         )
-    elif chain_bytecode != ContractFactory.bytecode_runtime:
+    elif not compare_bytecode(chain_bytecode, ContractFactory.bytecode_runtime):
         raise BytecodeMismatch(
             "Bytecode found at {0} does not match compiled bytecode:\n"
             " - chain_bytecode: {1}\n"

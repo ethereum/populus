@@ -118,7 +118,7 @@
     }
   },
   "compilation": {
-    "contracts_dir": "./contracts",
+    "contracts_source_dir": "./contracts",
     "settings": {
       "optimize": true
     }

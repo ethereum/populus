@@ -310,8 +310,17 @@ class Project(object):
 
     @property
     @relpath
-    def blockchains_dir(self):
+    def base_blockchain_storage_dir(self):
         return get_base_blockchain_storage_dir(self.project_dir)
+
+    @property
+    def blockchains_dir(self):
+        warnings.warn(DeprecationWarning(
+            "The `blockchains_dir` property has been renamed to "
+            "`base_blockchain_storage_dir`.  Please update your code as the "
+            "`blockchains_dir` property will be removed in subsequent releases"
+        ))
+        return self.base_blockchain_storage_dir
 
     @relpath
     def get_blockchain_data_dir(self, chain_name):

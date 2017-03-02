@@ -106,6 +106,44 @@ class Provider(object):
 
         return ContractFactory(address=contract_address)
 
+    def deploy_contract(self,
+                        contract_identifier,
+                        deploy_transaction=None,
+                        deploy_args=None,
+                        deploy_kwargs=None):
+        """
+        Same as get_contract but it will also lazily deploy the contract with
+        the provided deployment arguments
+        """
+        full_dependency_graph = get_shallow_dependency_graph(
+            self.chain.project.compiled_contract_data,
+        )
+        contract_dependencies = get_recursive_contract_dependencies(
+            contract_identifier,
+            full_dependency_graph,
+        )
+
+        dependency_deploy_order = [
+            dependency_name
+            for dependency_name
+            in compute_deploy_order(full_dependency_graph)
+            if dependency_name in contract_dependencies
+        ]
+        for dependency_name in dependency_deploy_order:
+            self.get_or_deploy_contract(dependency_name)
+
+        ContractFactory = self.get_contract_factory(contract_identifier)
+        deploy_transaction_hash = ContractFactory.deploy(
+            transaction=deploy_transaction,
+            args=deploy_args,
+            kwargs=deploy_kwargs,
+        )
+        contract_address = self.chain.wait.for_contract_address(deploy_transaction_hash)
+        registrar = self.chain.registrar
+        registrar.set_contract_address(contract_identifier, contract_address)
+
+        return self.get_contract(contract_identifier), deploy_transaction_hash
+
     def get_or_deploy_contract(self,
                                contract_identifier,
                                deploy_transaction=None,
@@ -116,36 +154,17 @@ class Provider(object):
         the provided deployment arguments
         """
         if not self.is_contract_available(contract_identifier):
-            full_dependency_graph = get_shallow_dependency_graph(
-                self.chain.project.compiled_contract_data,
+            return self.deploy_contract(
+                contract_identifier=contract_identifier,
+                deploy_transaction=deploy_transaction,
+                deploy_args=deploy_args,
+                deploy_kwargs=deploy_kwargs,
             )
-            contract_dependencies = get_recursive_contract_dependencies(
-                contract_identifier,
-                full_dependency_graph,
-            )
-
-            dependency_deploy_order = [
-                dependency_name
-                for dependency_name
-                in compute_deploy_order(full_dependency_graph)
-                if dependency_name in contract_dependencies
-            ]
-            for dependency_name in dependency_deploy_order:
-                self.get_or_deploy_contract(dependency_name)
-
-            ContractFactory = self.get_contract_factory(contract_identifier)
-            deploy_transaction_hash = ContractFactory.deploy(
-                transaction=deploy_transaction,
-                args=deploy_args,
-                kwargs=deploy_kwargs,
-            )
-            contract_address = self.chain.wait.for_contract_address(deploy_transaction_hash)
-            registrar = self.chain.registrar
-            registrar.set_contract_address(contract_identifier, contract_address)
         else:
-            deploy_transaction_hash = None
-
-        return self.get_contract(contract_identifier), deploy_transaction_hash
+            return (
+                self.get_contract(contract_identifier),
+                None,
+            )
 
     def get_contract_address(self, contract_identifier):
         """

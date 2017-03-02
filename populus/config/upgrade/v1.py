@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import copy
+import pprint
 
 from populus.utils.mappings import (
     set_nested_key,
@@ -9,11 +10,16 @@ from populus.utils.mappings import (
     pop_nested_key,
 )
 
-from .defaults import (
+from populus.config.defaults import (
     load_default_config,
 )
-from .validation import (
-    validate_config,
+from populus.config.validation import (
+    get_validation_errors,
+    format_errors,
+)
+from populus.config.versions import (
+    V1,
+    V2,
 )
 
 
@@ -43,17 +49,17 @@ def upgrade_v1_to_v2(v1_config):
     """
     Upgrade a v1 config file to a v2 config file.
     """
-    errors = validate_config(v1_config, version='1')
+    errors = get_validation_errors(v1_config, version=V1)
     if errors:
         raise ValueError(
             "Cannot upgrade invalid config.  Please ensure that your current "
             "configuration file is valid:\n\n{0}".format(
-                "\n- ".join(errors),
+                format_errors(errors),
             )
         )
 
-    v1_default_config = load_default_config(version='1')
-    v2_default_config = load_default_config(version='2')
+    v1_default_config = load_default_config(version=V1)
+    v2_default_config = load_default_config(version=V2)
 
     if v1_config == v1_default_config:
         return v2_default_config
@@ -92,8 +98,22 @@ def upgrade_v1_to_v2(v1_config):
             )
 
     # bump the version
-    set_nested_key(upgraded_v1_config, 'version', '2')
+    set_nested_key(upgraded_v1_config, 'version', V2)
 
-    validate_config(upgraded_v1_config, version='2')
+    errors = get_validation_errors(upgraded_v1_config, version=V2)
+    if errors:
+        raise ValueError(
+            "Upgraded configuration did not pass validation:\n\n"
+            "\n=============Original-Configuration============\n"
+            "{0}"
+            "\n=============Upgraded-Configuration============\n"
+            "{1}"
+            "\n=============Validation-Errors============\n"
+            "{2}".format(
+                pprint.pformat(dict(v1_config)),
+                pprint.pformat(dict(upgraded_v1_config)),
+                format_errors(errors),
+            )
+        )
 
     return upgraded_v1_config

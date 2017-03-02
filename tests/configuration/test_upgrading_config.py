@@ -1,3 +1,5 @@
+import pytest
+
 import copy
 import json
 
@@ -5,7 +7,14 @@ from populus.config.defaults import (
     load_default_config,
 )
 from populus.config.upgrade import (
+    upgrade_config,
+)
+from populus.config.upgrade.v1 import (
     upgrade_v1_to_v2,
+)
+from populus.config.versions import (
+    V1,
+    V2,
 )
 
 from populus.utils.config import (
@@ -16,11 +25,22 @@ from populus.utils.mappings import (
 )
 
 
-def test_default_config_upgrade():
-    v1_default_config = load_default_config(version='1')
-    v2_default_config = load_default_config(version='2')
+V1_DEFAULT_CONFIG = load_default_config(version=V1)
+V2_DEFAULT_CONFIG = load_default_config(version=V2)
 
-    upgraded_v1_config = upgrade_v1_to_v2(v1_default_config)
+
+@pytest.mark.parametrize(
+    'upgrade_fn,upgrade_args',
+    (
+        (upgrade_v1_to_v2, tuple()),
+        (upgrade_config, (V2,)),
+    )
+)
+def test_default_config_upgrade(upgrade_fn, upgrade_args):
+    v1_default_config = copy.deepcopy(V1_DEFAULT_CONFIG)
+    v2_default_config = copy.deepcopy(V2_DEFAULT_CONFIG)
+
+    upgraded_v1_config = upgrade_fn(v1_default_config, *upgrade_args)
     assert upgraded_v1_config == v2_default_config
 
 
@@ -126,36 +146,46 @@ BASE_V1_CONFIG = {
   }
 }
 
+EXPECTED_V2_CONFIG = deep_merge_dicts(
+    V2_DEFAULT_CONFIG,
+    {'web3': {'Ropsten': BASE_V1_CONFIG['web3']['Ropsten']}},
+    {'web3': {'InfuraMainnet': {'eth': BASE_V1_CONFIG['web3']['InfuraMainnet']['eth']}}},
+    {'compilation': {'contracts_source_dir': BASE_V1_CONFIG['compilation']['contracts_dir']}},
+    {'chains': {'ropsten': {'web3': BASE_V1_CONFIG['chains']['ropsten']['web3']}}},
+)
 
-def test_non_default_config_upgrade():
-    v1_config = copy.deepcopy(BASE_V1_CONFIG)
-    v2_default_config = load_default_config(version='2')
-    expected_v2_config = deep_merge_dicts(
-        v2_default_config,
-        {'web3': {'Ropsten': v1_config['web3']['Ropsten']}},
-        {'web3': {'InfuraMainnet': {'eth': v1_config['web3']['InfuraMainnet']['eth']}}},
-        {'compilation': {'contracts_source_dir': v1_config['compilation']['contracts_dir']}},
-        {'chains': {'ropsten': {'web3': v1_config['chains']['ropsten']['web3']}}},
+
+@pytest.mark.parametrize(
+    'upgrade_fn,upgrade_args',
+    (
+        (upgrade_v1_to_v2, tuple()),
+        (upgrade_config, (V2,)),
     )
+)
+def test_non_default_config_upgrade(upgrade_fn, upgrade_args):
+    v1_config = copy.deepcopy(BASE_V1_CONFIG)
+    v2_default_config = copy.deepcopy(V2_DEFAULT_CONFIG)
+
+    upgraded_config = upgrade_fn(v1_config, *upgrade_args)
+    assert upgraded_config == EXPECTED_V2_CONFIG
 
 
-    upgraded_config = upgrade_v1_to_v2(v1_config)
-    assert upgraded_config == expected_v2_config
+@pytest.mark.parametrize(
+    'upgrade_fn,upgrade_args',
+    (
+        (upgrade_v1_to_v2, tuple()),
+        (upgrade_config, (V2,)),
+    )
+)
+def test_upgrade_works_with_config_objects(project, upgrade_fn, upgrade_args):
+    v1_config = copy.deepcopy(BASE_V1_CONFIG)
 
-
-def test_upgrade_works_with_config_objects(project):
     config_file_path = get_json_config_file_path(project.project_dir)
     with open(config_file_path, 'w') as config_file:
-        json.dump(BASE_V1_CONFIG, config_file)
+        json.dump(v1_config, config_file)
     project.load_config()
     assert 'web3.Ropsten' in project.config
-    upgraded_config = upgrade_v1_to_v2(project.config)
 
-    expected_v2_config = deep_merge_dicts(
-        v2_default_config,
-        {'web3': {'Ropsten': v1_config['web3']['Ropsten']}},
-        {'web3': {'InfuraMainnet': {'eth': v1_config['web3']['InfuraMainnet']['eth']}}},
-        {'compilation': {'contracts_source_dir': v1_config['compilation']['contracts_dir']}},
-        {'chains': {'ropsten': {'web3': v1_config['chains']['ropsten']['web3']}}},
-    )
-    assert upgraded_config == expected_v2_config
+    upgraded_config = upgrade_fn(v1_config, *upgrade_args)
+
+    assert upgraded_config == EXPECTED_V2_CONFIG

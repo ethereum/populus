@@ -116,6 +116,19 @@ class Project(object):
             )
         return self._config_cache
 
+    @config.setter
+    def config(self, value):
+        if isinstance(value, Config):
+            self._config_cache = Config
+        else:
+            self._project_config = value
+            config_version = self._project_config['version']
+            self._project_config_schema = load_config_schema(config_version)
+            self._config_cache = Config(
+                config=self._project_config,
+                schema=self._project_config_schema,
+            )
+
     #
     # Project
     #

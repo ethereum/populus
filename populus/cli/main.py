@@ -1,5 +1,6 @@
 import os
 import sys
+import warnings
 
 import click
 
@@ -13,6 +14,9 @@ from populus.legacy.config import (
     upgrade_legacy_config_file,
     check_if_ini_config_file_exists,
 )
+from populus.config.versions import (
+    LATEST_VERSION,
+)
 
 
 CONTEXT_SETTINGS = dict(
@@ -25,6 +29,7 @@ CONTEXT_SETTINGS = dict(
 @click.option(
     '--config',
     '-c',
+    'config_file_path',
     help=(
         "Specify a populus configuration file to be used.  No other "
         "configuration files will be loaded"
@@ -32,11 +37,11 @@ CONTEXT_SETTINGS = dict(
     type=click.Path(exists=True, dir_okay=False),
 )
 @click.pass_context
-def main(ctx, config):
+def main(ctx, config_file_path):
     """
     Populus
     """
-    if not config and check_if_ini_config_file_exists():
+    if not config_file_path and check_if_ini_config_file_exists():
         click.echo("Attempting to upgrade legacy `populus.ini` config file")
         try:
             backup_ini_config_file_path = upgrade_legacy_config_file(os.getcwd())
@@ -53,7 +58,15 @@ def main(ctx, config):
                 "to `{0}`".format(backup_ini_config_file_path)
             )
 
-    project = Project(config)
+    project = Project(config_file_path)
+
+    config_version = project.config['version']
+    if config_version != LATEST_VERSION:
+        warnings.warn(DeprecationWarning(
+            "Your populus config file is current at version {0}. "
+            "The current version is {1}.  You can use the `populus config "
+            "upgrade` command to upgrade your config file to the latest version"
+        ))
 
     if not any(is_same_path(p, project.project_dir) for p in sys.path):
         # ensure that the project directory is in the sys.path

@@ -39,7 +39,7 @@ def load_config_schema(version=LATEST_VERSION):
 
 
 @to_tuple
-def validate_config(config, version=None):
+def get_validation_errors(config, version=None):
     if version is None and 'version' in config:
         version = config['version']
     elif version is None:
@@ -48,3 +48,19 @@ def validate_config(config, version=None):
     validator = jsonschema.Draft4Validator(schema)
     for error in validator.iter_errors(config):
         yield error
+
+
+def validate_config(config, version=None):
+    errors = get_validation_errors(config, version)
+    if errors:
+        error_message = format_errors(errors)
+        raise ValueError(error_message)
+
+
+def format_errors(errors):
+    return '\n'.join((
+        '\n--------------------{e.path}-----------------\n{e.message}\n'.format(
+            e=error,
+        )
+        for error in errors
+    ))

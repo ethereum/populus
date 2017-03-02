@@ -45,12 +45,7 @@ class Config(object):
             self.validate()
 
     def validate(self):
-        errors = validate_config(self._wrapped)
-        if errors:
-            error_message = '\n'.join(
-                error.message for error in errors
-            )
-            raise ValueError(error_message)
+        validate_config(self._wrapped)
 
     def get_master_config(self):
         if self.parent is None:

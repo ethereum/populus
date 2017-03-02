@@ -7,6 +7,9 @@ from eth_utils import (
 from populus.config.defaults import (
     LATEST_VERSION,
 )
+from populus.config.upgrade import (
+    upgrade_config,
+)
 
 from .main import main
 
@@ -108,17 +111,26 @@ def config_delete(ctx, keys):
 @click.option(
     '-t',
     '--to-version',
+    'to_version',
     default=LATEST_VERSION,
 )
-def config_upgrade(ctx, version):
+def config_upgrade(ctx, to_version):
     """
     Upgrades the current populus config file to the specifed version.
     """
     project = ctx.obj['PROJECT']
-    # TODO: write this code
-    version = project.config['version']
-    if version == LATEST_VERSION:
-        click.echo("Already at latest version: v{0}".format(version))
-    elif version == '1' and LATEST_VERSION == '2':
-        # TODO: make this generic.
-        assert False
+
+    from_version = project.config['version']
+    if from_version == LATEST_VERSION:
+        click.echo("Already at latest version: v{0}".format(from_version))
+        return
+
+    upgraded_config = upgrade_config(project.config, to_version=to_version)
+    click.echo(
+        "Upgraded config from v{0} -> v{1}".format(from_version, to_version)
+    )
+    project.config = upgraded_config
+    config_file_path = project.write_config()
+    click.echo(
+        "Wrote updated config to: `{0}`".format(config_file_path)
+    )

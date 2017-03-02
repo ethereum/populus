@@ -1,4 +1,5 @@
 import pytest
+import sys
 
 from populus.project import Project
 
@@ -20,6 +21,7 @@ from populus.utils.geth import (
 )
 
 
+@pytest.mark.skipif(sys.version_info.major == 2, reason="warning assertions are broken in py27")
 def test_project_directory_properties(project_dir):
     project = Project()
 

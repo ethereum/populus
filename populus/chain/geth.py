@@ -144,14 +144,15 @@ class BaseGethChain(BaseChain):
     def get_web3_config(self):
         base_config = super(BaseGethChain, self).get_web3_config()
         config = copy.deepcopy(base_config)
-        if issubclass(base_config.provider_class, IPCProvider):
-            config['provider.settings.ipc_path'] = self.geth.ipc_path
-        elif issubclass(base_config.provider_class, HTTPProvider):
-            config['provider.settings.endpoint_uri'] = "http://127.0.0.1:{0}".format(
-                self.geth.rpc_port,
-            )
-        else:
-            raise ValueError("Unknown provider type")
+        if not config.get('provider.settings'):
+            if issubclass(base_config.provider_class, IPCProvider):
+                config['provider.settings.ipc_path'] = self.geth.ipc_path
+            elif issubclass(base_config.provider_class, HTTPProvider):
+                config['provider.settings.endpoint_uri'] = "http://127.0.0.1:{0}".format(
+                    self.geth.rpc_port,
+                )
+            else:
+                raise ValueError("Unknown provider type")
         return config
 
     @property

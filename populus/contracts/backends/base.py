@@ -77,14 +77,8 @@ class BaseContractBackend(object):
                 )
             )
 
-        try:
-            contract_data = self.get_all_contract_data()[contract_identifier]
-        except KeyError:
-            raise UnknownContract(
-                "No contract available for the identifier '{0}'".format(
-                    contract_identifier,
-                )
-            )
+        contract_data = self.get_contract_data(contract_identifier)
+
         base_contract_factory = construct_contract_factory(
             chain=self.chain,
             contract_identifier=contract_identifier,
@@ -97,6 +91,15 @@ class BaseContractBackend(object):
         Returns all contract data available from this store.
         """
         raise NotImplementedError("Must be implemented by subclasses")
+
+    def get_contract_data(self, contract_name):
+        contract_identifier = self.get_contract_identifier(contract_name)
+        try:
+            return self.get_all_contract_data()[contract_identifier]
+        except KeyError:
+            raise UnknownContract(
+                "No contract found for the name '{0}'".format(contract_name)
+            )
 
     def get_all_contract_names(self):
         return set(self.get_all_contract_data().keys())

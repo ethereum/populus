@@ -144,4 +144,4 @@ Here is an example of running the ``tester`` blockchain.
     blockNumber: 4
     blockNumber: 2
 
-The ``testrpc`` chain can be run in the same manner.
+.. note:: The ``testrpc`` chain can be run in the same manner.

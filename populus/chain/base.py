@@ -30,6 +30,7 @@ from populus.utils.config import (
 )
 from populus.utils.contracts import (
     construct_contract_factories,
+    package_contracts,
 )
 from populus.utils.functional import (
     cached_property,
@@ -199,7 +200,7 @@ class BaseChain(object):
     def get_contract_factory(self, contract_identifier, link_dependencies=None):
         warnings.warn(DeprecationWarning(
             "The `get_contract_factory` API has been relocated to "
-            "`chain.provider.get_contract_factory`.  Please update your code to "
+            "`chain.store.get_contract_factory`.  Please update your code to "
             "use this new API.  The `chain.get_contract_factory` API will be "
             "removed in subsequent releases."
         ))
@@ -209,7 +210,7 @@ class BaseChain(object):
                 "manually provide link addresses they should be loaded into the "
                 "`Memory` contract backend prior to linking"
             )
-        return self.provider.get_contract_factory(contract_identifier)
+        return self.store.get_contract_factory(contract_identifier)
 
     def is_contract_available(self,
                               contract_identifier,
@@ -262,4 +263,10 @@ class BaseChain(object):
             "use this new API.  The `chain.deployed_contracts` API will be "
             "removed in subsequent releases."
         ))
-        return self.provider.deployed_contracts
+        contract_classes = {
+            contract_identifier: self.provider.get_contract(contract_identifier)
+            for contract_identifier
+            in self.store.get_all_contract_names()
+            if self.provider.is_contract_available(contract_identifier)
+        }
+        return package_contracts(contract_classes)

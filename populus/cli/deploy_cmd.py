@@ -108,7 +108,7 @@ def deploy(ctx, chain_name, contracts_to_deploy):
         click.echo(starting_msg)
 
         for contract_name, _ in deploy_order.items():
-            if not provider.are_contract_factory_dependencies_available(contract_name):
+            if not provider.are_contract_dependencies_available(contract_name):
                 raise ValueError(
                     "Something is wrong with the deploy order.  Some "
                     "dependencies for {0} are not "

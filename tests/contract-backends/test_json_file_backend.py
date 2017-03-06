@@ -33,20 +33,6 @@ def test_is_provider_and_registrar_by_default(project_dir, chain, backend_config
     assert backend.is_registrar is True
 
 
-def test_setting_as_only_provider(project_dir, chain, backend_config):
-    backend_config['use_as_registrar'] = False
-    backend = JSONFileBackend(chain, backend_config)
-    assert backend.is_provider is True
-    assert backend.is_registrar is False
-
-
-def test_setting_as_only_registrar(project_dir, chain, backend_config):
-    backend_config['use_as_provider'] = False
-    backend = JSONFileBackend(chain, backend_config)
-    assert backend.is_provider is False
-    assert backend.is_registrar is True
-
-
 def test_setting_an_address(project_dir, backend, web3):
     backend.set_contract_address('some-key', '0xd3cda913deb6f67967b99d67acdfa1712c293601')
 
@@ -68,7 +54,9 @@ def test_setting_an_address(project_dir, backend, web3):
 def test_getting_an_address(project_dir, backend, web3):
     backend.set_contract_address('some-key', '0xd3cda913deb6f67967b99d67acdfa1712c293601')
 
-    address = backend.get_contract_address('some-key')
+    addresses = backend.get_contract_address('some-key')
+    assert len(addresses) == 1
+    address = addresses[0]
     assert address == '0xd3cda913deb6f67967b99d67acdfa1712c293601'
 
 

@@ -40,15 +40,8 @@ def chain_definition_sort_key(web3, chain_definitions):
 
 
 class JSONFileBackend(BaseContractBackend):
-    is_store = False
-
-    @property
-    def is_provider(self):
-        return self.config.get('use_as_provider', True)
-
-    @property
-    def is_registrar(self):
-        return self.config.get('use_as_registrar', True)
+    is_registrar = True
+    is_provider = False
 
     #
     # Registrar API
@@ -72,10 +65,8 @@ class JSONFileBackend(BaseContractBackend):
                 separators=(',', ': '),
             )
 
-    #
-    # ProviderAPI
-    #
-    def get_contract_address(self, instance_identifier):
+    @to_tuple
+    def get_contract_addresses(self, instance_identifier):
         registrar_data = self.registrar_data
         matching_chain_definitions = get_matching_chain_definitions(
             self.chain.web3,
@@ -88,11 +79,18 @@ class JSONFileBackend(BaseContractBackend):
             reverse=True,
         ))
 
+        identifier_exists = any(
+            instance_identifier in registrar_data['deployments'][chain_definition]
+            for chain_definition
+            in ordered_matching_chain_definitions
+        )
+        if not identifier_exists:
+            raise NoKnownAddress("No known address for '{0}'".format(instance_identifier))
+
         for chain_definition in ordered_matching_chain_definitions:
             chain_deployments = registrar_data['deployments'][chain_definition]
             if instance_identifier in chain_deployments:
-                return chain_deployments[instance_identifier]
-        raise NoKnownAddress("No known address for '{0}'".format(instance_identifier))
+                yield chain_deployments[instance_identifier]
 
     #
     # Private API

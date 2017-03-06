@@ -24,12 +24,6 @@ Chain API
     Accessor for the :ref:`Wait API <chain-wait>`.
 
 
-.. _chain-api-store:
-.. py:attribute:: BaseChain.store
-
-    Accessor for the :ref:`Store API <chain-store>`.
-
-
 .. _chain-api-registrar:
 .. py:attribute:: BaseChain.registrar
 

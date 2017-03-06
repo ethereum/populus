@@ -25,10 +25,6 @@ class BaseContractBackend(object):
     def is_registrar(self):
         raise NotImplementedError("Must be implemented by subclasses")
 
-    @property
-    def is_source(self):
-        raise NotImplementedError("Must be implemented by subclasses")
-
     def setup_backend(self):
         """
         Hook for subclasses to do backend initialization without having to
@@ -45,17 +41,14 @@ class BaseContractBackend(object):
         """
         raise NotImplementedError("Must be implemented by subclasses")
 
-    #
-    # Provider API
-    #
-    def get_contract_address(self, instance_name):
+    def get_contract_addresses(self, instance_name):
         """
-        Returns the known address of the requested contract instance.
+        Returns all known address of the requested contract instance.
         """
         raise NotImplementedError("Must be implemented by subclasses")
 
     #
-    # Source API
+    # Provider API
     #
     def get_contract_identifier(self, contract_name):
         """
@@ -93,6 +86,9 @@ class BaseContractBackend(object):
         raise NotImplementedError("Must be implemented by subclasses")
 
     def get_contract_data(self, contract_name):
+        """
+        Returns the raw contract data.
+        """
         contract_identifier = self.get_contract_identifier(contract_name)
         try:
             return self.get_all_contract_data()[contract_identifier]
@@ -102,4 +98,7 @@ class BaseContractBackend(object):
             )
 
     def get_all_contract_names(self):
+        """
+        Returns a set of all of thec ontract names for this backend.
+        """
         return set(self.get_all_contract_data().keys())

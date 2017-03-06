@@ -11,9 +11,8 @@ Chains are how populus interacts with the Ethereum blockchain.
 
     chain.introduction
     chain.contracts
-    chain.api
-    chain.wait
-    chain.store
     chain.registrar
     chain.provider
+    chain.wait
+    chain.api
     chain.legacy

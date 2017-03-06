@@ -31,11 +31,6 @@ def chain(project):
 
 
 @pytest.fixture()
-def store(chain):
-    return chain.store
-
-
-@pytest.fixture()
 def registrar(chain):
     return chain.registrar
 

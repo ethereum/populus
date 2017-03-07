@@ -5,6 +5,7 @@
 
 .. py:class:: BaseChain
 
+
 Accessing Contracts
 ===================
 
@@ -12,8 +13,8 @@ The :class:`~populus.chain.base.BaseChain` object is the entry point for the Pro
 and Registrar APIs which collectively give access to your project contracts and
 related information.
 
-* The :ref:`Provider API <chain-provider>` gives access to both the raw compiler output, the contract factories and the deployed instances of your contracts.  This api can be accessed from the :attr:`BaseChain.provider` property.
-* The :ref:`Registrar API <chain-registrar>` records the addresses of deployed contract instances for later retrieval.  This api can be accessed from the :attr:`BaseChain.registrar` property.
+* The Provider API gives access to both the raw compiler output, the contract factories and the deployed instances of your contracts.  This api can be accessed from the :attr:`BaseChain.provider` property.
+* The Registrar API records the addresses of deployed contract instances for later retrieval.  This api can be accessed from the :attr:`BaseChain.registrar` property.
 
 
 Getting the raw compiled data

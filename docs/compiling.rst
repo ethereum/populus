@@ -205,3 +205,20 @@ names to the compiled assets for that contract.
             }
         }
     }
+
+
+Configuration
+-------------
+
+The following configuration options can be set to control aspects of how
+Populus compiles your project contracts.
+
+
+* ``compilation.contracts_source_dir``
+
+  Defaults to ``./contracts``.  This sets the root path where populus will
+  search for contract source files.
+
+* ``compilation.settings.optimize``
+
+  Defaults to ``True``.  Determines if the optimizer will be enabled during compilation.

@@ -6,12 +6,12 @@ Release Notes
 1.6.0
 -----
 
-- Introduce new :ref:`Store API <chain-store>`.
 - Introduce new :ref:`Registrar API <chain-registrar>`.
 - Introduce new :ref:`Provider API <chain-provider>`.
 - Deprecate ``Chain.get_contract_factory``, ``Chain.get_contract`` and ``Chain.is_contract_available`` APIs.
 - Deprecate ``Chain.contract_factories`` API.
 - Deprecate ``Chain.deployed_contracts`` API.
+- Remove deprecated migrations API.
 
 
 1.5.3

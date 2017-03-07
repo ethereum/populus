@@ -2,7 +2,7 @@ Legacy Chain API
 ================
 
 Previously, chain objects provided an API for accessing your contract compile
-and deploy artifacts.  This API was moved to the :ref:`Provider API <chain-provider>` 
+and deploy artifacts.  This API was moved to the :ref:`Provider API <chain-contracts>` 
 in the :ref:`1.6.0 Release <v1.6.0-release-notes>`.
 
 Access To Contracts

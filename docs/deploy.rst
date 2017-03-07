@@ -6,9 +6,16 @@ Deploy
 Introduction
 ------------
 
-The deployment functionality exposed by Populus is meant for one-off
-deployments of simple contracts.  The deployment process includes some, or all
-of the following steps.
+Populus provides a command line interface for contract deployments which is
+suitable for simple contract deployments which do not involve constructor
+arguments as well as APIs for performing more complex deployments using python.
+
+
+Deploying A Contract with the Command Line
+------------------------------------------
+
+Deployment is handled through the ``$ populus deploy`` command.  All of the
+following are handled automatically.
 
 #. Selection of which chain should be deployed to.
 #. Running the given chain.
@@ -16,16 +23,6 @@ of the following steps.
 #. Derivation of library dependencies.
 #. Library linking.
 #. Individual contract deployment.
-
-.. note::
-
-    The command line deployment command cannot be used to deploy contracts which require constructor arguments.
-
-
-Deploying A Contract
---------------------
-
-Deployment is handled through the ``$ populus deploy`` command.
 
 
 Lets deploy a simple Wallet contract.  First we'll need a contract in our
@@ -79,7 +76,9 @@ Above you can see the output for a basic deployment.
 Programmatically deploy a contract
 ----------------------------------
 
-You can also deploy contracts using a Python script. This is a suitable method if your contracts need more complex initialization calls.
+You can also deploy contracts using a Python script. This is a suitable method
+if your contracts take constructor arguments or need more complex
+initialization calls.
 
 Example (``deploy_testnet.py``):
 

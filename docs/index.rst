@@ -16,7 +16,6 @@ Contents
     compiling
     testing
     deploy
-    migrations
     project
     config
     chain

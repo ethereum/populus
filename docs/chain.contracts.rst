@@ -8,7 +8,7 @@
 Accessing Contracts
 ===================
 
-The `~populus.chain.base.BaseChain` object is the entry point for the Provider
+The :class:`~populus.chain.base.BaseChain` object is the entry point for the Provider
 and Registrar APIs which collectively give access to your project contracts and
 related information.
 

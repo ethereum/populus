@@ -88,21 +88,31 @@ Chain
 
 * ``chain``
 
-The same chain from the ``unmigrated_chain`` fixture except it has had all
-migrations run ion it.
+A running ``'tester'`` test chain.
 
 
 .. code-block:: python
 
     def test_greeter(chain):
-        greeter = chain.get_contract('Greeter')
+        greeter, _ = chain.get_or_deploy_contract('Greeter')
 
         assert greeter.call().greet() == "Hello"
 
-    def test_deploying_greeter(chain):
-        GreeterFactory = chain.get_contract_factory('Greeter')
-        deploy_txn_hash = GreeterFactory.deploy()
-        ...
+
+Registrar
+~~~~~
+
+* ``registrar``
+
+Convenience fixture for the ``chain.registrar`` property.
+
+
+Provider
+~~~~~
+
+* ``provider``
+
+Convenience fixture for the ``chain.provider`` property.
 
 
 Web3
@@ -110,7 +120,8 @@ Web3
 
 * ``web3``
 
-A Web3.py instance configured to connect to ``chain`` fixture.
+Convenience fixture for the ``chain.provider`` property.  A Web3.py instance
+configured to connect to ``chain`` fixture.
 
 .. code-block:: python
 

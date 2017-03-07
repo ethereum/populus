@@ -28,18 +28,20 @@ class Registrar(object):
             for registrar in self.registrar_backends.values()
         ]
 
-    @to_tuple
-    @chain_return
     def get_contract_addresses(self, contract_identifier):
         """
         Retrieve a contract address from the registrar
         """
-        # TODO: this should really evaluate *all* addresses returned and then
-        # figure out if any of them are the correct addresses.
+        known_addresses = self._get_contract_addresses_from_backends(contract_identifier)
+        if not known_addresses:
+            raise NoKnownAddress("No known address for contract")
+        return known_addresses
+
+    @to_tuple
+    @chain_return
+    def _get_contract_addresses_from_backends(self, contract_identifier):
         for registrar in self.registrar_backends.values():
             try:
                 yield registrar.get_contract_addresses(contract_identifier)
             except NoKnownAddress:
                 continue
-        else:
-            raise NoKnownAddress("No known address for contract")

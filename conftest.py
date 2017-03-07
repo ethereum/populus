@@ -136,7 +136,7 @@ def populus_source_root():
 
 @pytest.fixture()
 def math(chain):
-    Math = chain.store.get_contract_factory('Math')
+    Math = chain.provider.get_contract_factory('Math')
 
     math_address = chain.wait.for_contract_address(Math.deploy())
 
@@ -145,7 +145,7 @@ def math(chain):
 
 @pytest.fixture()
 def library_13(chain):
-    Library13 = chain.store.get_contract_factory('Library13')
+    Library13 = chain.provider.get_contract_factory('Library13')
 
     library_13_address = chain.wait.for_contract_address(Library13.deploy())
 

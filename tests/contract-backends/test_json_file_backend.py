@@ -29,7 +29,7 @@ def backend(project_dir, chain, backend_config):
 
 def test_is_provider_and_registrar_by_default(project_dir, chain, backend_config):
     backend = JSONFileBackend(chain, backend_config)
-    assert backend.is_provider is True
+    assert backend.is_provider is False
     assert backend.is_registrar is True
 
 
@@ -54,7 +54,7 @@ def test_setting_an_address(project_dir, backend, web3):
 def test_getting_an_address(project_dir, backend, web3):
     backend.set_contract_address('some-key', '0xd3cda913deb6f67967b99d67acdfa1712c293601')
 
-    addresses = backend.get_contract_address('some-key')
+    addresses = backend.get_contract_addresses('some-key')
     assert len(addresses) == 1
     address = addresses[0]
     assert address == '0xd3cda913deb6f67967b99d67acdfa1712c293601'
@@ -62,4 +62,4 @@ def test_getting_an_address(project_dir, backend, web3):
 
 def test_getting_an_unknown_address(project_dir, backend, web3):
     with pytest.raises(NoKnownAddress):
-        backend.get_contract_address('some-key')
+        backend.get_contract_addresses('some-key')

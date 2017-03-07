@@ -14,12 +14,11 @@ class ProjectContractsBackend(BaseContractBackend):
     Provides access to compiled contract assets sources from the project
     `contracts_source_dir`
     """
-    is_provider = False
+    is_provider = True
     is_registrar = False
-    is_store = True
 
     #
-    # Store API
+    # Provider API
     #
     def get_contract_identifier(self, contract_name):
         return contract_name

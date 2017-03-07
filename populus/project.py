@@ -142,7 +142,7 @@ class Project(object):
     @property
     @relpath
     def compiled_contracts_asset_path(self):
-        return get_compiled_contracts_asset_path(self.project_dir)
+        return get_compiled_contracts_asset_path(self.build_asset_dir)
 
     @property
     def compiled_contracts_file_path(self):

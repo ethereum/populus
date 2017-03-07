@@ -77,23 +77,6 @@ names to the compiled assets for that contract.
         "Greeter": {
             "abi": [
                 {
-                    "constant": true,
-                    "inputs": [
-                        {
-                            "name": "name",
-                            "type": "bytes"
-                        }
-                    ],
-                    "name": "greet",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "bytes"
-                        }
-                    ],
-                    "type": "function"
-                },
-                {
                     "constant": false,
                     "inputs": [
                         {
@@ -103,6 +86,7 @@ names to the compiled assets for that contract.
                     ],
                     "name": "setGreeting",
                     "outputs": [],
+                    "payable": false,
                     "type": "function"
                 },
                 {
@@ -115,6 +99,7 @@ names to the compiled assets for that contract.
                             "type": "string"
                         }
                     ],
+                    "payable": false,
                     "type": "function"
                 },
                 {
@@ -127,20 +112,113 @@ names to the compiled assets for that contract.
                             "type": "string"
                         }
                     ],
+                    "payable": false,
                     "type": "function"
                 },
                 {
                     "inputs": [],
+                    "payable": false,
                     "type": "constructor"
                 }
             ],
-            "code": "0x...",
-            "code_runtime": "0x...",
-            "meta": {
-                "compilerVersion": "0.3.5-9da08ac3",
+            "bytecode": "0x6060604052....",
+            "bytecode_runtime": "0x6060604052....",
+            "metadata": {
+                "compiler": {
+                    "version": "0.4.8+commit.60cc1668.Darwin.appleclang"
+                },
                 "language": "Solidity",
-                "languageVersion": "0"
-            },
-            "source": null
+                "output": {
+                    "abi": [
+                        {
+                            "constant": false,
+                            "inputs": [
+                                {
+                                    "name": "_greeting",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "setGreeting",
+                            "outputs": [],
+                            "payable": false,
+                            "type": "function"
+                        },
+                        {
+                            "constant": true,
+                            "inputs": [],
+                            "name": "greet",
+                            "outputs": [
+                                {
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "payable": false,
+                            "type": "function"
+                        },
+                        {
+                            "constant": true,
+                            "inputs": [],
+                            "name": "greeting",
+                            "outputs": [
+                                {
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "payable": false,
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "payable": false,
+                            "type": "constructor"
+                        }
+                    ],
+                    "devdoc": {
+                        "methods": {}
+                    },
+                    "userdoc": {
+                        "methods": {}
+                    }
+                },
+                "settings": {
+                    "compilationTarget": {
+                        "contracts/Greeter.sol": "Greeter"
+                    },
+                    "libraries": {},
+                    "optimizer": {
+                        "enabled": true,
+                        "runs": 200
+                    },
+                    "remappings": []
+                },
+                "sources": {
+                    "contracts/Greeter.sol": {
+                        "keccak256": "0xe7900e8d25304f64a90939d1d9f90bb21268c4755140dc396b8b4b5bdd21755a",
+                        "urls": [
+                            "bzzr://7d6c0ce214a43b81f423edff8b18e18ad7154b7f364316bbd3801930308c1984"
+                        ]
+                    }
+                },
+                "version": 1
+            }
         }
     }
+
+
+Configuration
+-------------
+
+The following configuration options can be set to control aspects of how
+Populus compiles your project contracts.
+
+
+* ``compilation.contracts_source_dir``
+
+  Defaults to ``./contracts``.  This sets the root path where populus will
+  search for contract source files.
+
+* ``compilation.settings.optimize``
+
+  Defaults to ``True``.  Determines if the optimizer will be enabled during compilation.

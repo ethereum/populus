@@ -27,11 +27,16 @@ of your project named ``populus.json`` with the following contents
       "chains": {
         "horton": {
           "chain": {
-            "class": 'populus.chain.LocalGethChain'
+            "class": 'populus.chain.geth.LocalGethChain'
           },
           "web3": {
             "provider": {
               "class": "web3.providers.ipc.IPCProvider"
+            }
+          },
+          "contracts": {
+            "backends": {
+              "JSONFile": {"$ref": "contracts.backends.JSONFile"}
             }
           }
         }

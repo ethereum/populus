@@ -18,8 +18,8 @@ from populus.contracts.provider import (
 from populus.contracts.registrar import (
     Registrar,
 )
-from populus.contracts.store import (
-    Store,
+from populus.wait import (
+    Wait,
 )
 
 from populus.utils.config import (
@@ -27,15 +27,13 @@ from populus.utils.config import (
 )
 from populus.utils.contracts import (
     construct_contract_factories,
+    package_contracts,
 )
 from populus.utils.functional import (
     cached_property,
 )
 from populus.utils.module_loading import (
     import_string,
-)
-from populus.utils.wait import (
-    Wait,
 )
 
 
@@ -67,6 +65,9 @@ class BaseChain(object):
     # Required Public API
     #
     def get_web3_config(self):
+        """
+        Return the config object for the web3 instance used by this chain.
+        """
         web3_config = self.config.get_web3_config()
         return web3_config
 
@@ -149,25 +150,6 @@ class BaseChain(object):
         return Registrar(self, self.registrar_backends)
 
     #
-    # Source
-    #
-    @property
-    @to_ordered_dict
-    def store_backends(self):
-        for backend_name, backend in self.contract_backends.items():
-            if backend.is_store:
-                yield backend_name, backend
-
-    @property
-    def store(self):
-        if not self.store_backends:
-            raise ValueError(
-                "Must have at least one store backend "
-                "configured\n{0}".format(self.contract_backend_configs)
-            )
-        return Store(self, self.store_backends)
-
-    #
     # Running the chain
     #
     _running = None
@@ -186,7 +168,7 @@ class BaseChain(object):
     def contract_factories(self):
         warnings.warn(DeprecationWarning(
             "The `contract_factories` property has been deprecated.  Please use "
-            "the `chain.store` and `chain.provider` API to access contract "
+            "the `chain.provider` and `chain.provider` API to access contract "
             "factory data"
         ))
         compiled_contracts = self.project.compiled_contracts
@@ -262,4 +244,10 @@ class BaseChain(object):
             "use this new API.  The `chain.deployed_contracts` API will be "
             "removed in subsequent releases."
         ))
-        return self.provider.deployed_contracts
+        contract_classes = {
+            contract_identifier: self.provider.get_contract(contract_identifier)
+            for contract_identifier
+            in self.provider.get_all_contract_names()
+            if self.provider.is_contract_available(contract_identifier)
+        }
+        return package_contracts(contract_classes)

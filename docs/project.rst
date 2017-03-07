@@ -3,11 +3,15 @@ Project
 
 .. contents:: :local:
 
+.. module:: populus.project
+.. currentmodule:: populus.project
 
 Introduction
 ------------
 
-The Project API is the common entry point to all aspects of
+.. py:class:: BaseChain
+
+The :class:`~Project` class is the primary entry point to all aspects of
 your populus project.
 
 
@@ -57,10 +61,28 @@ The project object is the entry point for almost everything that populus can do.
     0x4949dce962e182bc148448efa93e73c6ba163f03
 
 
-Chain API
----------
+Configuration
+-------------
 
-- ``get_chain(chain_name, chain_config=None)``
+.. py:attribute:: Project.config
+
+    Returns the current project configuration.
+
+
+.. py:method:: Project.load_config()
+
+    Loads the project configuration from disk, populating :attr:`Project.config`.
+
+
+.. py:method:: Project.write_config()
+
+    Writes the current project configuration from :attr:`Project.config` to disk.
+
+
+Chains
+------
+
+.. py:method:: Project.get_chain(chain_name, chain_config=None)``
 
     Returns a ``populus.chain.Chain`` instance.  You may provide
     ``chain_config`` in which case the chain will be configured using the

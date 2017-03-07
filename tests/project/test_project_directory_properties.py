@@ -35,7 +35,7 @@ def test_project_directory_properties(project_dir):
     with pytest.warns(DeprecationWarning):
         assert is_same_path(project.build_dir, build_asset_dir)
 
-    compiled_contracts_asset_path = get_compiled_contracts_asset_path(project_dir)
+    compiled_contracts_asset_path = get_compiled_contracts_asset_path(build_asset_dir)
     assert is_same_path(project.compiled_contracts_asset_path, compiled_contracts_asset_path)
     with pytest.warns(DeprecationWarning):
         assert is_same_path(project.compiled_contracts_file_path, compiled_contracts_asset_path)

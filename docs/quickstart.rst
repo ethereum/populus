@@ -147,13 +147,13 @@ following.
 .. code-block:: python
 
     def test_greeter(chain):
-        greeter = chain.get_contract('Greeter')
+        greeter, _ = chain.get_or_deploy_contract('Greeter')
 
         greeting = greeter.call().greet()
         assert greeting == 'Hello'
 
     def test_custom_greeting(chain):
-        greeter = chain.get_contract('Greeter')
+        greeter, _ = chain.get_or_deploy_contract('Greeter')
 
         set_txn_hash = greeter.transact().setGreeting('Guten Tag')
         chain.wait.for_receipt(set_txn_hash)

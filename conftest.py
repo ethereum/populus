@@ -11,6 +11,10 @@ import itertools  # noqa: E402
 
 from populus import Project  # noqa: E402
 
+from populus.utils.linking import (  # noqa: E402
+    link_bytecode_by_name,
+)
+
 
 @pytest.fixture()
 def temporary_dir(tmpdir):
@@ -128,3 +132,40 @@ def project(project_dir, _loaded_contract_fixtures):
 @pytest.fixture()
 def populus_source_root():
     return os.path.dirname(__file__)
+
+
+@pytest.fixture()
+def math(chain):
+    Math = chain.provider.get_contract_factory('Math')
+
+    math_address = chain.wait.for_contract_address(Math.deploy())
+
+    return Math(address=math_address)
+
+
+@pytest.fixture()
+def library_13(chain):
+    Library13 = chain.provider.get_contract_factory('Library13')
+
+    library_13_address = chain.wait.for_contract_address(Library13.deploy())
+
+    return Library13(address=library_13_address)
+
+
+@pytest.fixture()
+def multiply_13(chain, library_13):
+    Multiply13 = chain.project.compiled_contract_data['Multiply13']
+
+    bytecode = link_bytecode_by_name(
+        Multiply13['bytecode'],
+        Library13=library_13.address,
+    )
+
+    LinkedMultiply13 = chain.web3.eth.contract(
+        abi=Multiply13['abi'],
+        bytecode=bytecode,
+    )
+
+    multiply_13_address = chain.wait.for_contract_address(LinkedMultiply13.deploy())
+
+    return LinkedMultiply13(address=multiply_13_address)

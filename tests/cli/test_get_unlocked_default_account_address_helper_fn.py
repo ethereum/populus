@@ -24,9 +24,6 @@ def local_chain(project_dir):
     project = Project()
     project.config['chains.local.chain.class'] = 'populus.chain.LocalGethChain'
     project.config['chains.local.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
-    project.config['chains.local.web3.provider.settings.ipc_path'] = (
-        get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local'))
-    )
     project.write_config()
 
     chain = project.get_chain('local')

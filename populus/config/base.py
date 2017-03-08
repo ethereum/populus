@@ -34,7 +34,7 @@ class Config(object):
     def __init__(self, config=None, parent=None, schema=None):
         if config is None:
             config = get_empty_config()
-        elif isinstance(config, dict):
+        elif isinstance(config, dict) and hasattr(anyconfig, 'to_container'):
             config = anyconfig.to_container(config)
 
         self._wrapped = config

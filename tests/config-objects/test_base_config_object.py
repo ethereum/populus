@@ -17,6 +17,10 @@ def test_checking_config_truthyness():
     assert bool(non_empty_config) is True
 
 
+@pytest.mark.skipif(
+    not hasattr(anyconfig, 'to_container'),
+    reason="`to_container` removed in latest versions of anyconfig"
+)
 def test_checking_config_equality():
     config = Config({'a': 1, 'b': 2})
     other_config = Config({'a': 1, 'b': 2})

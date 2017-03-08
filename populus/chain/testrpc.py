@@ -11,20 +11,20 @@ from .base import (
 
 
 class TestRPCChain(BaseChain):
-    port = None
+    rpc_port = None
 
     def get_web3_config(self):
         base_config = super(TestRPCChain, self).get_web3_config()
         config = copy.deepcopy(base_config)
-        config['provider.settings.port'] = self.port
+        config['provider.settings.port'] = self.rpc_port
         return config
 
     def __enter__(self):
         if self._running:
             raise ValueError("The TesterChain is already running")
 
-        if self.port is None:
-            self.port = get_open_port()
+        if self.rpc_port is None:
+            self.rpc_port = get_open_port()
 
         self._running = True
 
@@ -36,7 +36,7 @@ class TestRPCChain(BaseChain):
         self.rpc_methods.rpc_configure('net_version', 1)
         self.rpc_methods.evm_mine()
 
-        wait_for_connection('127.0.0.1', self.port)
+        wait_for_connection('127.0.0.1', self.rpc_port)
         return self
 
     def __exit__(self, *exc_info):

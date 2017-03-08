@@ -16,9 +16,9 @@ from populus.utils.linking import (
 )
 
 from .exceptions import (
-    UnknownContract,
-    NoKnownAddress,
     BytecodeMismatch,
+    NoKnownAddress,
+    UnknownContract,
 )
 
 
@@ -225,8 +225,8 @@ class Provider(object):
 
         BaseContractFactory = self.get_base_contract_factory(contract_identifier)
 
-        bytecode = self.link_bytecode(BaseContractFactory.bytecode)
-        bytecode_runtime = self.link_bytecode(BaseContractFactory.bytecode_runtime)
+        bytecode = self._link_bytecode(BaseContractFactory.bytecode)
+        bytecode_runtime = self._link_bytecode(BaseContractFactory.bytecode_runtime)
 
         ContractFactory = BaseContractFactory.factory(
             web3=BaseContractFactory.web3,
@@ -240,7 +240,7 @@ class Provider(object):
     #
     # Private API
     #
-    def link_bytecode(self, bytecode):
+    def _link_bytecode(self, bytecode):
         """
         Return the fully linked contract bytecode.
 

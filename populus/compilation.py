@@ -11,9 +11,12 @@ from populus.utils.compile import (
     process_compiler_output,
     get_project_source_paths,
 )
+from populus.utils.filesystem import (
+    ensure_file_exists,
+)
 
 
-DEFAULT_COMPILER_OUTPUT_VALUES = ['bin', 'bin-runtime', 'abi', 'metadata']
+DEFAULT_COMPILER_OUTPUT_VALUES = ['abi', 'bin', 'bin-runtime', 'devdoc', 'metadata', 'userdoc']
 
 
 def compile_project_contracts(project, compiler_settings=None):
@@ -38,20 +41,9 @@ def compile_project_contracts(project, compiler_settings=None):
     return contract_source_paths, normalized_compiled_contracts
 
 
-def compile_and_write_contracts(project, compiler_settings=None):
-    contract_source_paths, compiled_sources = compile_project_contracts(
-        project=project,
-        compiler_settings=compiler_settings,
-    )
-
-    output_file_path = write_compiled_sources(
-        project.compiled_contracts_asset_path,
-        compiled_sources
-    )
-    return contract_source_paths, compiled_sources, output_file_path
-
-
 def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):
+    ensure_file_exists(compiled_contracts_asset_path)
+
     with open(compiled_contracts_asset_path, 'w') as outfile:
         outfile.write(
             json.dumps(compiled_sources,

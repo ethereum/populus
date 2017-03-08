@@ -6,11 +6,23 @@ import random
 
 import click
 
-from .deploy import (
-    deploy_contract,
+from populus.compilation import (
+    compile_project_contracts,
+    write_compiled_sources,
 )
+from populus.config import (
+    Config,
+)
+
 from .accounts import (
     is_account_locked,
+)
+from .compat import (
+    Timeout,
+    sleep,
+)
+from .contracts import (
+    verify_contract_bytecode,
 )
 from .geth import (
     get_data_dir as get_local_chain_datadir,
@@ -18,17 +30,6 @@ from .geth import (
 )
 from .observers import (
     DirWatcher,
-)
-from .compat import (
-    Timeout,
-    sleep,
-)
-
-from populus.compilation import (
-    compile_and_write_contracts,
-)
-from populus.config import (
-    Config,
 )
 
 
@@ -205,13 +206,15 @@ def configure_chain(project, chain_name):
 
     # Save config so that we can spin this chain up.
     project.config['chains'][chain_name] = chain_config
+    project.write_config()
+    project.load_config()
 
-    if chain_config.get('is_external', False):
+    if chain_config.is_external:
         is_chain_ready_msg = (
             "Populus needs to connect to the chain.  Press [Enter] when the "
             "chain is ready for populus"
         )
-        click.confirm(is_chain_ready_msg)
+        click.prompt(is_chain_ready_msg)
 
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3
@@ -253,10 +256,10 @@ def request_account_unlock(chain, account, timeout):
 
 def deploy_contract_and_verify(chain,
                                contract_name,
-                               base_contract_factory=None,
+                               ContractFactory=None,
                                deploy_transaction=None,
-                               deploy_arguments=None,
-                               link_dependencies=None):
+                               deploy_args=None,
+                               deploy_kwargs=None):
     """
     This is a *loose* wrapper around `populus.utils.deploy.deploy_contract`
     that handles the various concerns and logging that need to be present when
@@ -266,13 +269,10 @@ def deploy_contract_and_verify(chain,
     happens.  This also verifies that the deployed contract's bytecode matches
     the expected value.
     """
-    if link_dependencies is None:
-        link_dependencies = {}
-
     web3 = chain.web3
 
-    if base_contract_factory is None:
-        base_contract_factory = chain.contract_factories[contract_name]
+    if ContractFactory is None:
+        ContractFactory = chain.provider.get_contract_factory(contract_name)
 
     if is_account_locked(web3, web3.eth.defaultAccount or web3.eth.coinbase):
         try:
@@ -285,13 +285,10 @@ def deploy_contract_and_verify(chain,
 
     click.echo("Deploying {0}".format(contract_name))
 
-    deploy_txn_hash, contract_factory = deploy_contract(
-        chain=chain,
-        contract_name=contract_name,
-        contract_factory=base_contract_factory,
-        deploy_transaction=deploy_transaction,
-        deploy_arguments=deploy_arguments,
-        link_dependencies=link_dependencies,
+    deploy_txn_hash = ContractFactory.deploy(
+        transaction=deploy_transaction,
+        args=deploy_args,
+        kwargs=deploy_kwargs,
     )
     deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
 
@@ -322,26 +319,9 @@ def deploy_contract_and_verify(chain,
     # Verification
     deployed_bytecode = web3.eth.getCode(contract_address)
 
-    if contract_factory.bytecode_runtime:
-        click.echo("Verifying deployed bytecode...")
-        is_bytecode_match = deployed_bytecode == contract_factory.bytecode_runtime
-        if is_bytecode_match:
-            click.echo(
-                "Verified contract bytecode @ {0} matches expected runtime "
-                "bytecode".format(contract_address)
-            )
-        else:
-            click.echo(
-                "Bytecode @ {0} does not match expected contract bytecode.\n\n"
-                "expected : '{1}'\n"
-                "actual   : '{2}'\n".format(
-                    contract_address,
-                    contract_factory.bytecode_runtime,
-                    deployed_bytecode,
-                ),
-                err=True,
-            )
-            raise click.ClickException("Error deploying contract")
+    if ContractFactory.bytecode_runtime:
+        verify_contract_bytecode(web3, ContractFactory, contract_address)
+        click.echo("Verified contract bytecode @ {0}".format(contract_address))
     else:
         click.echo(
             "No runtime available.  Falling back to verifying non-empty "
@@ -357,7 +337,7 @@ def deploy_contract_and_verify(chain,
             click.echo(
                 "Verified bytecode @ {0} is non-empty".format(contract_address)
             )
-    return contract_factory(address=contract_address)
+    return ContractFactory(address=contract_address)
 
 
 def show_chain_sync_progress(chain):
@@ -472,15 +452,18 @@ def get_unlocked_default_account_address(chain):
     return account
 
 
-def compile_project_contracts(project, compiler_settings=None):
+def compile_contracts(project, compiler_settings=None):
     click.echo("============ Compiling ==============")
     click.echo("> Loading source files from: ./{0}\n".format(project.contracts_dir))
 
-    result = compile_and_write_contracts(
+    contract_source_paths, compiled_sources = compile_project_contracts(
         project,
         compiler_settings=compiler_settings,
     )
-    contract_source_paths, compiled_sources, output_file_path = result
+    output_file_path = write_compiled_sources(
+        project.compiled_contracts_asset_path,
+        compiled_sources,
+    )
 
     click.echo("> Found {0} contract source files".format(
         len(contract_source_paths)
@@ -506,7 +489,7 @@ def watch_project_contracts(project, compiler_settings):
     def callback(file_path, event_name):
         if event_name in {'modified', 'created'}:
             click.echo("Change detected in: {0}".format(file_path))
-            compile_project_contracts(project, compiler_settings)
+            compile_contracts(project, compiler_settings)
 
     watcher = DirWatcher(project.contracts_dir, callback)
     watcher.start()
@@ -519,7 +502,7 @@ def watch_project_contracts(project, compiler_settings):
 
 
 def select_project_contract(project):
-    contract_names = sorted(project.compiled_contracts.keys())
+    contract_names = sorted(project.compiled_contract_data.keys())
     contract_choices = [
         " {idx}: {name}".format(
             idx=str(idx).rjust(3),
@@ -529,12 +512,12 @@ def select_project_contract(project):
     ]
     select_contract_message = (
         "Please select the desired contract:\n\n"
-        "{0}".format(
+        "{0}\n\n".format(
             '\n'.join(contract_choices)
         )
     )
     contract_name = click.prompt(select_contract_message)
-    if contract_name in project.compiled_contracts:
+    if contract_name in project.compiled_contract_data:
         return contract_name
     elif contract_name.isdigit() and int(contract_name) < len(contract_names):
         return contract_names[int(contract_name)]

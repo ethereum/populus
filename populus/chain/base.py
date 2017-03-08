@@ -62,6 +62,18 @@ class BaseChain(object):
         pass
 
     #
+    # Running the chain
+    #
+    _running = None
+
+    def __enter__(self):
+        self._running = True
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._running = False
+
+    #
     # Required Public API
     #
     def get_web3_config(self):
@@ -148,18 +160,6 @@ class BaseChain(object):
                 "configured\n{0}".format(self.contract_backend_configs)
             )
         return Registrar(self, self.registrar_backends)
-
-    #
-    # Running the chain
-    #
-    _running = None
-
-    def __enter__(self):
-        self._running = True
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._running = False
 
     #
     # !!!! Deprecated !!!!

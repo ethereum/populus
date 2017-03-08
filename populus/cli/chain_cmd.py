@@ -5,10 +5,12 @@ import click
 
 from populus.chain import (
     BaseGethChain,
-    reset_chain,
 )
 from populus.utils.compat import (
     sleep,
+)
+from populus.utils.geth import (
+    reset_chain,
 )
 
 from .main import main

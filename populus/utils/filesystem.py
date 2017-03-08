@@ -1,11 +1,15 @@
-import os
-import sys
-import shutil
-import fnmatch
-import tempfile as _tempfile
 import contextlib
-import functools
 import errno
+import fnmatch
+import functools
+import os
+import shutil
+import sys
+import tempfile as _tempfile
+
+from eth_utils import (
+    to_tuple
+)
 
 
 if sys.version_info.major == 2:
@@ -77,6 +81,7 @@ def is_executable_available(program):
     return False
 
 
+@to_tuple
 def recursive_find_files(base_dir, pattern):
     for dirpath, _, filenames in os.walk(base_dir):
         for filename in filenames:
@@ -85,13 +90,13 @@ def recursive_find_files(base_dir, pattern):
 
 
 @contextlib.contextmanager
-def tempdir():
-    directory = _tempfile.mkdtemp()
+def tempdir(*args, **kwargs):
+    directory = _tempfile.mkdtemp(*args, **kwargs)
 
     try:
         yield directory
     finally:
-        shutil.rmtree(directory)
+        remove_dir_if_exists(directory)
 
 
 @contextlib.contextmanager

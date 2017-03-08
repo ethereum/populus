@@ -48,7 +48,7 @@ def echo_post_deploy_message(web3, deployed_contracts):
 )
 @click.argument('contracts_to_deploy', nargs=-1)
 @click.pass_context
-def deploy(ctx, chain_name, contracts_to_deploy):
+def deploy_cmd(ctx, chain_name, contracts_to_deploy):
     """
     Deploys the specified contracts to a chain.
     """
@@ -80,11 +80,10 @@ def deploy(ctx, chain_name, contracts_to_deploy):
         # Potentially display the currently deployed status.
         contracts_to_deploy = [select_project_contract(project)]
 
-    chain = project.get_chain(chain_name)
-    provider = chain.provider
-    registrar = chain.registrar
+    with project.get_chain(chain_name) as chain:
+        provider = chain.provider
+        registrar = chain.registrar
 
-    with chain:
         if chain_name in {'mainnet', 'morden'}:
             show_chain_sync_progress(chain)
 

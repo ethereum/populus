@@ -1,4 +1,5 @@
 import pytest
+
 import click
 from click.testing import CliRunner
 
@@ -24,6 +25,7 @@ def local_chain(project_dir):
     project = Project()
     project.config['chains.local.chain.class'] = 'populus.chain.LocalGethChain'
     project.config['chains.local.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
+    project.config['chains.local.contracts.backends.Memory.$ref'] = 'contracts.backends.Memory'
     project.write_config()
 
     chain = project.get_chain('local')

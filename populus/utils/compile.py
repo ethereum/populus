@@ -2,10 +2,10 @@ import os
 import json
 
 from eth_utils import (
-    to_tuple,
-    to_dict,
     add_0x_prefix,
     is_string,
+    to_dict,
+    to_tuple,
 )
 
 from .filesystem import (
@@ -61,6 +61,13 @@ def process_compiler_output(name_from_compiler, data_from_compiler):
     return contract_name, contract_data
 
 
+def _load_json_if_string(value):
+    if is_string(value):
+        return json.loads(value)
+    else:
+        return value
+
+
 @to_dict
 def normalize_contract_data(contract_data):
     if 'metadata' in contract_data:
@@ -70,16 +77,18 @@ def normalize_contract_data(contract_data):
     if 'bin-runtime' in contract_data:
         yield 'bytecode_runtime', add_0x_prefix(contract_data['bin-runtime'])
     if 'abi' in contract_data:
-        yield 'abi', contract_data['abi']
+        yield 'abi', _load_json_if_string(contract_data['abi'])
     if 'userdoc' in contract_data:
-        yield 'userdoc', contract_data['userdoc']
+        yield 'userdoc', _load_json_if_string(contract_data['userdoc'])
     if 'devdoc' in contract_data:
-        yield 'devdoc', contract_data['devdoc']
+        yield 'devdoc', _load_json_if_string(contract_data['devdoc'])
 
 
 @to_dict
 def normalize_contract_metadata(metadata):
-    if is_string(metadata):
-        metadata = json.loads(metadata)
-
-    return metadata
+    if not metadata:
+        return None
+    elif is_string(metadata):
+        return json.loads(metadata)
+    else:
+        raise ValueError("Unknown metadata format '{0}'".format(metadata))

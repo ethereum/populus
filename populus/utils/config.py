@@ -1,13 +1,13 @@
-import os
-import operator
 import collections
+import operator
+import os
 
 import anyconfig
 
 from eth_utils import (
+    compose,
     is_string,
     to_ordered_dict,
-    compose,
 )
 
 from .mappings import (

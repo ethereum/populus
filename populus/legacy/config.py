@@ -1,6 +1,14 @@
 import os
 import shutil
 
+from populus.config import (
+    load_default_config,
+    write_config,
+)
+from populus.config.versions import (
+    V1,
+)
+
 from populus.utils.six import configparser
 from populus.utils.mappings import (
     set_nested_key,
@@ -9,10 +17,6 @@ from populus.utils.mappings import (
 from populus.utils.config import (
     get_json_config_file_path,
     check_if_json_config_file_exists,
-)
-from populus.config import (
-    load_default_config,
-    write_config,
 )
 
 
@@ -164,7 +168,7 @@ def upgrade_legacy_config_file(project_dir):
 
     upgraded_config = translate_legacy_ini_config_file(ini_config_file_path)
 
-    default_config = load_default_config()
+    default_config = load_default_config(version=V1)
     config = deep_merge_dicts(default_config, upgraded_config)
 
     write_config(

@@ -1,4 +1,6 @@
 V1 = '1'
 V2 = '2'
+
 KNOWN_VERSIONS = {V1, V2}
+
 LATEST_VERSION = V2

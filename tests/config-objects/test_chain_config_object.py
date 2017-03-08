@@ -72,3 +72,11 @@ def test_set_chain_class_api(value, expected):
     chain_config = ChainConfig()
     chain_config.set_chain_class(value)
     assert chain_config['chain.class'] == expected
+
+
+def test_is_external_property():
+    chain_config = ChainConfig()
+    chain_config.set_chain_class('local')
+    assert chain_config.is_external is False
+    chain_config.set_chain_class('external')
+    assert chain_config.is_external is True

@@ -56,9 +56,9 @@ GREETER_FILE_CONTENTS = """pragma solidity ^0.4.0;
 """
 
 
-@main.command()
+@main.command('init')
 @click.pass_context
-def init(ctx):
+def init_cmd(ctx):
     """
     Generate project layout with an example contract.
     """
@@ -86,14 +86,14 @@ def init(ctx):
 
     project.load_config()
 
-    if ensure_path_exists(project.contracts_dir):
+    if ensure_path_exists(project.contracts_source_dir):
         click.echo(
             "Created Directory: ./{0}".format(
-                os.path.relpath(project.contracts_dir)
+                os.path.relpath(project.contracts_source_dir)
             )
         )
 
-    example_contract_path = os.path.join(project.contracts_dir, 'Greeter.sol')
+    example_contract_path = os.path.join(project.contracts_source_dir, 'Greeter.sol')
     if not os.path.exists(example_contract_path):
         with open(example_contract_path, 'w') as example_contract_file:
             example_contract_file.write(GREETER_FILE_CONTENTS)

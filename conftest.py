@@ -1,18 +1,28 @@
+from __future__ import absolute_import
+
+import gevent_monkeypatch  # noqa: F401
+
 import os
 
-if os.environ.get('THREADING_BACKEND', 'stdlib') == 'gevent':
-    from gevent import monkey
-    monkey.patch_socket()
+import pytest
 
-import pytest  # noqa: E402
+import shutil
+import itertools
 
-import shutil  # noqa: E402
-import itertools  # noqa: E402
+from populus import Project
 
-from populus import Project  # noqa: E402
-
-from populus.utils.linking import (  # noqa: E402
+from populus.utils.linking import (
     link_bytecode_by_name,
+)
+from populus.utils.chains import (
+    get_base_blockchain_storage_dir,
+)
+from populus.utils.compile import (
+    get_contracts_source_dir,
+    get_build_asset_dir,
+)
+from populus.utils.filesystem import (
+    ensure_path_exists,
 )
 
 
@@ -24,17 +34,6 @@ def temporary_dir(tmpdir):
 
 @pytest.fixture()
 def project_dir(tmpdir, monkeypatch):
-    from populus.utils.chains import (
-        get_base_blockchain_storage_dir,
-    )
-    from populus.utils.compile import (
-        get_contracts_source_dir,
-        get_build_asset_dir,
-    )
-    from populus.utils.filesystem import (
-        ensure_path_exists,
-    )
-
     _project_dir = str(tmpdir.mkdir("project-dir"))
 
     # setup project directories
@@ -50,10 +49,6 @@ def project_dir(tmpdir, monkeypatch):
 
 @pytest.fixture()
 def write_project_file(project_dir):
-    from populus.utils.filesystem import (
-        ensure_path_exists,
-    )
-
     def _write_project_file(filename, content=''):
         full_path = os.path.join(project_dir, filename)
         file_dir = os.path.dirname(full_path)
@@ -88,10 +83,6 @@ def wait_for_unlock():
 
 @pytest.fixture()
 def _loaded_contract_fixtures(populus_source_root, project_dir, request):
-    from populus.utils.compile import (
-        get_contracts_source_dir,
-    )
-
     contracts_to_load_from_fn = getattr(request.function, '_populus_contract_fixtures', [])
     contracts_to_load_from_module = getattr(request.module, '_populus_contract_fixtures', [])
 
@@ -99,8 +90,11 @@ def _loaded_contract_fixtures(populus_source_root, project_dir, request):
         contracts_to_load_from_fn,
         contracts_to_load_from_module,
     )
+    contracts_source_dir = get_contracts_source_dir(project_dir)
 
     for item in contracts_to_load:
+        ensure_path_exists(contracts_source_dir)
+
         fixture_path = os.path.join(
             populus_source_root,
             'tests',
@@ -114,10 +108,8 @@ def _loaded_contract_fixtures(populus_source_root, project_dir, request):
         else:
             raise ValueError("Unable to load contract '{0}'".format(item))
 
-        dst_path = os.path.join(
-            get_contracts_source_dir(project_dir),
-            os.path.basename(item),
-        )
+        dst_path = os.path.join(contracts_source_dir, os.path.basename(item))
+
         if os.path.exists(dst_path):
             raise ValueError("File already present at '{0}'".format(dst_path))
 

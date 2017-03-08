@@ -10,12 +10,17 @@ from eth_utils import (
 
 from populus import ASSETS_DIR
 
+from .versions import (
+    V1,
+    V2,
+    LATEST_VERSION,
+)
+
 
 CONFIG_SCHEMA_FILENAMES = {
-    '1': "config.v1.schema.json",
-    '2': "config.v2.schema.json",
+    V1: "config.v1.schema.json",
+    V2: "config.v2.schema.json",
 }
-LATEST_VERSION = '2'
 
 
 assert LATEST_VERSION in CONFIG_SCHEMA_FILENAMES

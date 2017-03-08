@@ -56,3 +56,4 @@ def apply_to_return_value(callback):
 
 
 chain_return = apply_to_return_value(itertools.chain.from_iterable)
+to_set = apply_to_return_value(set)

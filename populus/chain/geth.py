@@ -99,39 +99,6 @@ class LoggedMainnetGethProcess(LoggingMixin, LiveGethProcess):
         )
 
 
-GETH_KWARGS = {
-    'data_dir',
-    'geth_executable',
-    'max_peers',
-    'network_id',
-    'no_discover',
-    'mine',
-    'autodag',
-    'miner_threads',
-    'nice',
-    'unlock',
-    'password',
-    'port',
-    'verbosity',
-    'ipc_disable',
-    'ipc_path',
-    'ipc_api',
-    'ws_enabled',
-    'ws_enabled',
-    'ws_addr',
-    'ws_origins',
-    'ws_port',
-    'ws_api',
-    'rpc_enabled',
-    'rpc_addr',
-    'rpc_port',
-    'rpc_api',
-    'prefix_cmd',
-    'suffix_args',
-    'suffix_kwargs',
-}
-
-
 class BaseGethChain(BaseChain):
     stack = None
     geth = None
@@ -185,7 +152,7 @@ class LocalGethChain(BaseGethChain):
     def get_geth_process_instance(self):
         return LoggedDevGethProcess(
             project_dir=self.project.project_dir,
-            blockchains_dir=self.project.blockchains_dir,
+            blockchains_dir=self.project.base_blockchain_storage_dir,
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
         )
@@ -194,11 +161,11 @@ class LocalGethChain(BaseGethChain):
 class TemporaryGethChain(BaseGethChain):
     def get_geth_process_instance(self):
         tmp_project_dir = self.stack.enter_context(tempdir())
-        blockchains_dir = get_base_blockchain_storage_dir(tmp_project_dir)
+        base_blockchain_storage_dir = get_base_blockchain_storage_dir(tmp_project_dir)
 
         return LoggedDevGethProcess(
             project_dir=self.project.project_dir,
-            blockchains_dir=blockchains_dir,
+            blockchains_dir=base_blockchain_storage_dir,
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
         )

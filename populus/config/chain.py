@@ -63,3 +63,8 @@ class ChainConfig(Config):
     @registrar.setter
     def registrar(self, value):
         self['registrar'] = value
+
+    @property
+    def is_external(self):
+        from populus.chain import ExternalChain
+        return self.chain_class is ExternalChain

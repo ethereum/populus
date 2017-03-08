@@ -70,7 +70,7 @@ class Config(object):
         if config_class is None:
             config_class = Config
         try:
-            return config_class(self.resolve(self[key]), parent=self)
+            return config_class(copy.deepcopy(self.resolve(self[key])), parent=self)
         except KeyError:
             return config_class(get_empty_config(), parent=self)
 

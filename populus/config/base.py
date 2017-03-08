@@ -34,7 +34,7 @@ class Config(object):
     def __init__(self, config=None, parent=None, schema=None):
         if config is None:
             config = get_empty_config()
-        elif isinstance(config, dict):
+        elif isinstance(config, dict) and hasattr(anyconfig, 'to_container'):
             config = anyconfig.to_container(config)
 
         self._wrapped = config
@@ -70,7 +70,7 @@ class Config(object):
         if config_class is None:
             config_class = Config
         try:
-            return config_class(self.resolve(self[key]), parent=self)
+            return config_class(copy.deepcopy(self.resolve(self[key])), parent=self)
         except KeyError:
             return config_class(get_empty_config(), parent=self)
 

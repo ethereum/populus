@@ -42,7 +42,10 @@ get_default_project_config_file_path = get_json_config_file_path
 
 
 def get_empty_config():
-    empty_config = anyconfig.to_container({})
+    if hasattr(anyconfig, 'to_container'):
+        empty_config = anyconfig.to_container({})
+    else:
+        empty_config = {}
     return empty_config
 
 

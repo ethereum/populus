@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+.. _v1.6.1-release-notes:
+
+1.6.1
+-----
+
+- Fix warning message for outdated config file so that it actually shows up in terminal.
+
 .. _v1.6.0-release-notes:
 
 1.6.0

@@ -62,11 +62,18 @@ def main(ctx, config_file_path):
 
     config_version = project.config['version']
     if config_version != LATEST_VERSION:
-        warnings.warn(DeprecationWarning(
+        old_config_version_msg = (
+            "================ warning =================\n"
             "Your populus config file is current at version {0}. "
-            "The current version is {1}.  You can use the `populus config "
-            "upgrade` command to upgrade your config file to the latest version"
-        ))
+            "The latest version is {1}.  You can use the `populus config "
+            "upgrade` command to upgrade your config file to the latest version\n"
+            "================ warning =================\n\n".format(
+                config_version,
+                LATEST_VERSION,
+            )
+        )
+        warnings.warn(DeprecationWarning(old_config_version_msg))
+        click.echo(old_config_version_msg, err=True)
 
     if not any(is_same_path(p, project.project_dir) for p in sys.path):
         # ensure that the project directory is in the sys.path

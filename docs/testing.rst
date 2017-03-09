@@ -94,7 +94,7 @@ A running ``'tester'`` test chain.
 .. code-block:: python
 
     def test_greeter(chain):
-        greeter, _ = chain.get_or_deploy_contract('Greeter')
+        greeter, _ = chain.provider.get_or_deploy_contract('Greeter')
 
         assert greeter.call().greet() == "Hello"
 

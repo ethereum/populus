@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _v1.6.2-release-notes:
+
+1.6.2
+-----
+
+- Fix incorrect example test file from ``$ populus init`` command.
+
+
 .. _v1.6.1-release-notes:
 
 1.6.1

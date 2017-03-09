@@ -9,11 +9,20 @@ The Populus framework provides some powerful utilities for testing your
 contracts.  Testing in Populus is powered by the python testing framework
 ``py.test``.
 
-All tests are run against an in-memory blockchain from ``pyethereum.tester``.
+By default tests are run against an in-memory ethereum blockchain.
 
 The convention for tests is to place them in the ``./tests/`` directory in the
 root of your project.  In order for ``py.test`` to find your tests modules
 their module name must start with ``test_``.
+
+
+Test Contracts
+--------------
+
+Populus supports writing contracts that are specifically for testing.  These
+contract filenames should match the glob pattern ``Test*.sol`` and be located
+anywhere under your project tests directory ``./tests/``.
+
 
 Running Tests With Pytest
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,8 +41,8 @@ Or to run a specific test
     $ py.test tests/test_greeter.py
 
 
-Fixtures
---------
+Pytest Fixtures
+---------------
 
 The test fixtures provided by populus are what make testing easy.  In order to
 use a fixture in your tests all you have to do add an argument with the same

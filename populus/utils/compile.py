@@ -54,6 +54,11 @@ def get_project_source_paths(contracts_source_dir):
     return project_source_paths
 
 
+def get_test_source_paths(tests_dir):
+    test_source_paths = find_solidity_source_files(tests_dir)
+    return test_source_paths
+
+
 def process_compiler_output(name_from_compiler, data_from_compiler):
     # TODO: use the source path.
     _, _, contract_name = name_from_compiler.rpartition(':')

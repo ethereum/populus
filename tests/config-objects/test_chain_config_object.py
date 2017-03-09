@@ -26,7 +26,7 @@ def test_web3_config_property():
 
 def test_chain_class_property():
     chain_config = ChainConfig({
-        'chain': {'class': 'populus.chain.ExternalChain'},
+        'chain': {'class': 'populus.chain.external.ExternalChain'},
         'web3': {'provider': {'class': 'web3.providers.ipc.IPCProvider'}},
     })
     assert chain_config.chain_class is ExternalChain
@@ -34,7 +34,7 @@ def test_chain_class_property():
 
 def test_getting_chain_instance(project):
     chain_config = ChainConfig({
-        'chain': {'class': 'populus.chain.ExternalChain'},
+        'chain': {'class': 'populus.chain.external.ExternalChain'},
         'web3': {'provider': {'class': 'web3.providers.ipc.IPCProvider'}},
     })
     chain = chain_config.get_chain(project, 'test-chain')

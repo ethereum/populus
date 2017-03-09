@@ -24,6 +24,9 @@ from populus.utils.compile import (
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
+from populus.utils.testing import (
+    get_tests_dir,
+)
 
 
 @pytest.fixture()
@@ -117,7 +120,45 @@ def _loaded_contract_fixtures(populus_source_root, project_dir, request):
 
 
 @pytest.fixture()
-def project(project_dir, _loaded_contract_fixtures):
+def _loaded_test_contract_fixtures(populus_source_root, project_dir, request):
+    test_contracts_to_load_from_fn = getattr(request.function, '_populus_test_contract_fixtures', [])
+    test_contracts_to_load_from_module = getattr(request.module, '_populus_test_contract_fixtures', [])
+
+    test_contracts_to_load = itertools.chain(
+        test_contracts_to_load_from_fn,
+        test_contracts_to_load_from_module,
+    )
+
+    tests_dir = get_tests_dir(project_dir)
+
+    for item in test_contracts_to_load:
+        ensure_path_exists(tests_dir)
+
+        fixture_path = os.path.join(
+            populus_source_root,
+            'tests',
+            'fixtures',
+            item,
+        )
+        if os.path.exists(item):
+            src_path = item
+        elif os.path.exists(fixture_path):
+            src_path = fixture_path
+        else:
+            raise ValueError("Unable to load test contract '{0}'".format(item))
+
+        dst_path = os.path.join(tests_dir, os.path.basename(item))
+
+        if os.path.exists(dst_path):
+            raise ValueError("File already present at '{0}'".format(dst_path))
+
+        shutil.copy(src_path, dst_path)
+
+
+@pytest.fixture()
+def project(project_dir,
+            _loaded_contract_fixtures,
+            _loaded_test_contract_fixtures):
     return Project()
 
 

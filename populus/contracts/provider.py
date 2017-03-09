@@ -167,9 +167,6 @@ class Provider(object):
                 None,
             )
 
-    #
-    # Store API
-    #
     def get_base_contract_factory(self, contract_identifier):
         """
         Returns the base contract factory for the given `contract_identifier`.

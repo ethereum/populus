@@ -10,7 +10,6 @@ from .geth import (  # noqa: F401
     MainnetChain,
     TemporaryGethChain,
     TestnetChain,
-    reset_chain,
 )
 from .external import (  # noqa: F401
     ExternalChain,

@@ -6,17 +6,20 @@ from populus import ASSETS_DIR
 from .versions import (
     V1,
     V2,
+    V3,
     LATEST_VERSION
 )
 
 
 DEFAULT_V1_CONFIG_FILENAME = "defaults.v1.config.json"
 DEFAULT_V2_CONFIG_FILENAME = "defaults.v2.config.json"
+DEFAULT_V3_CONFIG_FILENAME = "defaults.v3.config.json"
 
 
 DEFAULT_CONFIG_FILENAMES = {
     V1: DEFAULT_V1_CONFIG_FILENAME,
     V2: DEFAULT_V2_CONFIG_FILENAME,
+    V3: DEFAULT_V3_CONFIG_FILENAME,
 }
 
 

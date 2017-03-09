@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _v1.6.3-release-notes:
+
+1.6.3
+-----
+
+- Add ``TestContractsBackend`` for loading test contracts.
+
+
 .. _v1.6.2-release-notes:
 
 1.6.2

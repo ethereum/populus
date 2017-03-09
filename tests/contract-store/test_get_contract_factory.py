@@ -1,13 +1,13 @@
 import os
 import pytest
 
-from populus.utils.linking import (
-    link_bytecode_by_name,
-)
-
 from populus.contracts.exceptions import (
     BytecodeMismatch,
     NoKnownAddress,
+)
+
+from populus.utils.linking import (
+    link_bytecode_by_name,
 )
 
 

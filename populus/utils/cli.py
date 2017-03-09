@@ -460,10 +460,6 @@ def compile_contracts(project, compiler_settings=None):
         project,
         compiler_settings=compiler_settings,
     )
-    output_file_path = write_compiled_sources(
-        project.compiled_contracts_asset_path,
-        compiled_sources,
-    )
 
     click.echo("> Found {0} contract source files".format(
         len(contract_source_paths)
@@ -476,10 +472,15 @@ def compile_contracts(project, compiler_settings=None):
     for contract_name in sorted(compiled_sources.keys()):
         click.echo("- {0}".format(contract_name))
 
+    build_asset_path = write_compiled_sources(
+        project.compiled_contracts_asset_path,
+        compiled_sources,
+    )
+
     click.echo("")
     click.echo(
         "> Wrote compiled assets to: ./{0}".format(
-            os.path.relpath(output_file_path)
+            os.path.relpath(build_asset_path)
         )
     )
 

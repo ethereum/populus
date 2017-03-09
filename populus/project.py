@@ -1,5 +1,5 @@
 import os
-import hashlib
+import itertools
 import warnings
 
 from populus.compilation import (
@@ -25,6 +25,7 @@ from populus.utils.compile import (
     get_compiled_contracts_asset_path,
     get_contracts_source_dir,
     get_project_source_paths,
+    get_test_source_paths,
 )
 from populus.utils.filesystem import (
     relpath,
@@ -40,6 +41,9 @@ from populus.utils.geth import (
     get_data_dir,
     get_geth_ipc_path,
     get_nodekey_path,
+)
+from populus.utils.testing import (
+    get_tests_dir,
 )
 
 
@@ -136,6 +140,11 @@ class Project(object):
     def project_dir(self):
         return self.config.get('populus.project_dir', os.getcwd())
 
+    @property
+    @relpath
+    def tests_dir(self):
+        return get_tests_dir(self.project_dir)
+
     #
     # Contracts
     #
@@ -194,21 +203,16 @@ class Project(object):
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None
 
-    def get_source_file_hash(self):
-        source_file_paths = get_project_source_paths(self.contracts_source_dir)
-        return hashlib.md5(b''.join(
-            open(source_file_path, 'rb').read()
-            for source_file_path
-            in source_file_paths
-        )).hexdigest()
-
     def get_source_modification_time(self):
-        source_file_paths = get_project_source_paths(self.contracts_source_dir)
+        all_source_paths = tuple(itertools.chain(
+            get_project_source_paths(self.contracts_source_dir),
+            get_test_source_paths(self.tests_dir),
+        ))
         return max(
             os.path.getmtime(source_file_path)
             for source_file_path
-            in source_file_paths
-        ) if len(source_file_paths) > 0 else None
+            in all_source_paths
+        ) if len(all_source_paths) > 0 else None
 
     def is_compiled_contract_cache_stale(self):
         if self._cached_compiled_contracts is None:

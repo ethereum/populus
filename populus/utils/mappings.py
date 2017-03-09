@@ -3,8 +3,8 @@ import itertools
 
 from eth_utils import (
     compose,
-    is_dict,
     force_text,
+    is_dict,
     sort_return,
     to_dict,
     to_tuple,

@@ -10,17 +10,21 @@ from eth_utils import (
 from populus.config.versions import (
     V1,
     V2,
+    V3,
     KNOWN_VERSIONS,
     LATEST_VERSION,
 )
 from .v1 import upgrade_v1_to_v2
+from .v2 import upgrade_v2_to_v3
 
 
 UPGRADE_SEQUENCE = {
     V1: V2,
+    V2: V3,
 }
 UPGRADE_FUNCTIONS = {
     V1: upgrade_v1_to_v2,
+    V2: upgrade_v2_to_v3,
 }
 
 

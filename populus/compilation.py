@@ -1,3 +1,4 @@
+import itertools
 import json
 
 from solc import (
@@ -10,6 +11,7 @@ from solc.exceptions import (
 from populus.utils.compile import (
     process_compiler_output,
     get_project_source_paths,
+    get_test_source_paths,
 )
 from populus.utils.filesystem import (
     ensure_file_exists,
@@ -25,12 +27,18 @@ def compile_project_contracts(project, compiler_settings=None):
 
     compiler_settings.setdefault('output_values', DEFAULT_COMPILER_OUTPUT_VALUES)
 
-    contract_source_paths = get_project_source_paths(project.contracts_source_dir)
+    project_contract_source_paths = get_project_source_paths(project.contracts_source_dir)
+    test_contract_source_paths = get_test_source_paths(project.tests_dir)
+
+    all_source_paths = tuple(itertools.chain(
+        project_contract_source_paths,
+        test_contract_source_paths,
+    ))
 
     try:
-        compiled_contracts = compile_files(contract_source_paths, **compiler_settings)
+        compiled_contracts = compile_files(all_source_paths, **compiler_settings)
     except ContractsNotFound:
-        return contract_source_paths, {}
+        return all_source_paths, {}
 
     normalized_compiled_contracts = dict(
         process_compiler_output(contract_name, contract_data)
@@ -38,7 +46,7 @@ def compile_project_contracts(project, compiler_settings=None):
         in compiled_contracts.items()
     )
 
-    return contract_source_paths, normalized_compiled_contracts
+    return all_source_paths, normalized_compiled_contracts
 
 
 def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):

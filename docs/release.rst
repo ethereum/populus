@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _v1.6.4-release-notes:
+
+1.6.4
+-----
+
+- Bugfix for ``project.config`` setter function not setting correct value.
+
+
 .. _v1.6.3-release-notes:
 
 1.6.3

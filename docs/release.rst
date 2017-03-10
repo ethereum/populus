@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _v1.6.5-release-notes:
+
+1.6.5
+-----
+
+- Bugfix for compilation of abstract contracts.
+
+
 .. _v1.6.4-release-notes:
 
 1.6.4

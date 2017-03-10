@@ -2,14 +2,12 @@ from __future__ import absolute_import
 
 import itertools
 import logging
-import os
 import random
 
 import click
 
 from populus.compilation import (
     compile_project_contracts,
-    write_compiled_sources,
 )
 from populus.config import (
     Config,
@@ -21,6 +19,9 @@ from .accounts import (
 from .compat import (
     Timeout,
     sleep,
+)
+from .compile import (
+    write_compiled_sources,
 )
 from .contracts import (
     verify_contract_bytecode,
@@ -454,48 +455,25 @@ def get_unlocked_default_account_address(chain):
     return account
 
 
-def compile_contracts(project, compiler_settings=None):
-    logger = logging.getLogger('populus.utils.cli.compile_contracts')
-
-    logger.info("============ Compiling ==============")
-    logger.info("> Loading source files from: ./{0}\n".format(project.contracts_dir))
-
-    contract_source_paths, compiled_sources = compile_project_contracts(
-        project,
-        compiler_settings=compiler_settings,
-    )
-
-    logger.info("> Found {0} contract source files".format(
-        len(contract_source_paths)
-    ))
-    for path in contract_source_paths:
-        logger.info("- {0}".format(os.path.relpath(path)))
-    logger.info("")
-    logger.info("> Compiled {0} contracts".format(len(compiled_sources)))
-
-    for contract_name in sorted(compiled_sources.keys()):
-        logger.info("- {0}".format(contract_name))
-
-    build_asset_path = write_compiled_sources(
-        project.compiled_contracts_asset_path,
-        compiled_sources,
-    )
-
-    logger.info("")
-    logger.info(
-        "> Wrote compiled assets to: ./{0}".format(
-            os.path.relpath(build_asset_path)
-        )
-    )
-
-
 def watch_project_contracts(project, compiler_settings):
     logger = logging.getLogger('populus.utils.cli.watch_project_contracts')
 
     def callback(file_path, event_name):
         if event_name in {'modified', 'created'}:
-            logger.info("Change detected in: {0}".format(file_path))
-            compile_contracts(project, compiler_settings)
+            logger.info("============ Compiling ==============")
+            logger.info("> Change detected in: %s", file_path)
+            logger.info("> Loading source files from: %s", project.contracts_source_dir)
+
+            contract_source_paths, compiled_sources = compile_project_contracts(
+                project,
+                compiler_settings=compiler_settings,
+            )
+            write_compiled_sources(
+                project.compiled_contracts_asset_path,
+                compiled_sources,
+            )
+
+            logger.info("> Watching ...")
 
     watcher = DirWatcher(project.contracts_dir, callback)
     watcher.start()

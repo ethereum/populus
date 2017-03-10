@@ -25,8 +25,8 @@ def test_deployment_command_with_one_specified_contract(project):
     assert result.exit_code == 0, result.output + str(result.exception)
 
     # weak assertion but not sure what to do here.
-    assert 'Math' in result.output
-    assert 'WithNoArgumentConstructor' not in result.output
+    assert 'Deploying Math' in result.output
+    assert 'Deploying WithNoArgumentConstructor' not in result.output
 
 
 @pytest.mark.slow
@@ -42,9 +42,9 @@ def test_deployment_command_with_specified_contracts(project):
     assert result.exit_code == 0, result.output + str(result.exception)
 
     # weak assertion but not sure what to do here.
-    assert 'Math' in result.output
-    assert 'WithNoArgumentConstructor' not in result.output
-    assert 'Emitter' in result.output
+    assert 'Deploying Math' in result.output
+    assert 'Deploying WithNoArgumentConstructor' not in result.output
+    assert 'Deploying Emitter' in result.output
 
 
 @pytest.mark.slow
@@ -59,10 +59,6 @@ def test_deployment_command_with_prompt_for_contracts(project):
 
     assert result.exit_code == 0, result.output + str(result.exception)
 
-    # weak assertion but not sure what to do here.
-    assert 'Math' in result.output
-    assert 'WithNoArgumentConstructor' in result.output
-    assert 'Emitter' in result.output
     assert 'Deploying Math' in result.output
     assert 'Deploying Emitter' not in result.output
     assert 'Deploying WithNoArgumentConstructor' not in result.output

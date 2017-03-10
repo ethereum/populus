@@ -1,11 +1,17 @@
 import click
 
+from populus.compilation import (
+    compile_project_contracts,
+)
+
 from populus.utils.cli import (
-    compile_contracts,
     watch_project_contracts,
 )
 from populus.utils.compat import (
     spawn,
+)
+from populus.utils.compile import (
+    write_compiled_sources,
 )
 
 from .main import main
@@ -32,7 +38,8 @@ def compile_cmd(ctx, watch):
     project = ctx.obj['PROJECT']
 
     compiler_settings = project.config.get('compilation.settings', {})
-    compile_contracts(project, compiler_settings)
+    _, compiled_contract_data = compile_project_contracts(project, compiler_settings)
+    write_compiled_sources(project.compiled_contracts_asset_path, compiled_contract_data)
 
     if watch:
         thread = spawn(

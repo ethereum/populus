@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 
 from eth_utils import (
     add_0x_prefix,
@@ -10,6 +11,7 @@ from eth_utils import (
 
 from .filesystem import (
     recursive_find_files,
+    ensure_file_exists,
 )
 
 
@@ -96,3 +98,23 @@ def normalize_contract_metadata(metadata):
         return json.loads(metadata)
     else:
         raise ValueError("Unknown metadata format '{0}'".format(metadata))
+
+
+def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):
+    logger = logging.getLogger('populus.compilation.write_compiled_sources')
+    ensure_file_exists(compiled_contracts_asset_path)
+
+    with open(compiled_contracts_asset_path, 'w') as outfile:
+        outfile.write(
+            json.dumps(compiled_sources,
+                       sort_keys=True,
+                       indent=4,
+                       separators=(',', ': '))
+        )
+
+    logger.info(
+        "> Wrote compiled assets to: %s",
+        os.path.relpath(compiled_contracts_asset_path)
+    )
+
+    return compiled_contracts_asset_path

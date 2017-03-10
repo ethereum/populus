@@ -123,7 +123,7 @@ class Project(object):
     @config.setter
     def config(self, value):
         if isinstance(value, Config):
-            self._config_cache = Config
+            self._config_cache = value
         else:
             self._project_config = value
             config_version = self._project_config['version']

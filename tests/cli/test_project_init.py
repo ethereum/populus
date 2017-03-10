@@ -29,6 +29,7 @@ def test_initializing_empty_project(project_dir):
     result = runner.invoke(main, ['init'])
 
     assert result.exit_code == 0, result.output + str(result.exception)
+    assert 'Created Example Contract' in result.output
 
     for path in expected_paths:
         assert os.path.exists(path)

@@ -18,6 +18,10 @@ from populus.config.versions import (
     LATEST_VERSION,
 )
 
+from populus.utils.logging import (
+    get_logger_with_click_handler,
+)
+
 
 CONTEXT_SETTINGS = dict(
     # Support -h as a shortcut for --help
@@ -41,18 +45,20 @@ def main(ctx, config_file_path):
     """
     Populus
     """
+    logger = get_logger_with_click_handler('populus')
+
     if not config_file_path and check_if_ini_config_file_exists():
-        click.echo("Attempting to upgrade legacy `populus.ini` config file")
+        logger.info("Attempting to upgrade legacy `populus.ini` config file")
         try:
             backup_ini_config_file_path = upgrade_legacy_config_file(os.getcwd())
         except:
-            click.echo(
+            logger.error(
                 "The following error occured while trying to upgrade the legacy "
                 "`populus.ini` config file:"
             )
             raise
         else:
-            click.echo(
+            logger.info(
                 "Project configuration upgraded.  New config file "
                 "`populus.json` has been written.  Old config file was renamed "
                 "to `{0}`".format(backup_ini_config_file_path)
@@ -61,7 +67,9 @@ def main(ctx, config_file_path):
     project = Project(config_file_path)
 
     config_version = project.config['version']
-    if config_version != LATEST_VERSION:
+    subcommand_bypasses_config_version = ctx.invoked_subcommand in {'config', 'init'}
+
+    if not subcommand_bypasses_config_version and config_version != LATEST_VERSION:
         old_config_version_msg = (
             "================ warning =================\n"
             "Your populus config file is current at version {0}. "
@@ -73,7 +81,13 @@ def main(ctx, config_file_path):
             )
         )
         warnings.warn(DeprecationWarning(old_config_version_msg))
-        click.echo(old_config_version_msg, err=True)
+        logger.warning(old_config_version_msg)
+        proceed_msg = (
+            "Without and up-to-date configuration file Populus may not function "
+            "correctly.  Would you still like to proceed?"
+        )
+        if not click.confirm(proceed_msg):
+            ctx.exit(1)
 
     if not any(is_same_path(p, project.project_dir) for p in sys.path):
         # ensure that the project directory is in the sys.path

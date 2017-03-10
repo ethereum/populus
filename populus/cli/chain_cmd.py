@@ -1,11 +1,12 @@
+import logging
 import random
-import functools
 
 import click
 
 from populus.chain import (
     BaseGethChain,
 )
+
 from populus.utils.compat import (
     sleep,
 )
@@ -61,13 +62,14 @@ def chain_run(ctx, chain_name, mine, verbosity):
     """
     Run the named chain.
     """
+    logger = logging.getLogger('populus.cli.chain.run')
     project = ctx.obj['PROJECT']
 
     chain = project.get_chain(chain_name)
 
     if isinstance(chain, BaseGethChain):
-        chain.geth.register_stdout_callback(click.echo)
-        chain.geth.register_stderr_callback(functools.partial(click.echo, err=True))
+        chain.geth.register_stdout_callback(logger.info)
+        chain.geth.register_stderr_callback(logger.error)
 
     with chain:
         try:

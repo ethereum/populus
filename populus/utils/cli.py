@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
-import os
 import itertools
+import logging
+import os
 import random
 
 import click
@@ -125,8 +126,9 @@ def configure_chain(project, chain_name):
         status="existing" if is_existing_chain else "**new**",
         chain_name=chain_name,
     )
-    click.echo(start_msg)
-    click.echo('-' * len(start_msg))
+    logger = logging.getLogger('populus.cli.utils.configure_chain')
+    logger.info(start_msg)
+    logger.info('-' * len(start_msg))
 
     if is_existing_chain:
         current_configuration_msg = "\n".join(itertools.chain((
@@ -135,7 +137,7 @@ def configure_chain(project, chain_name):
             "  {key} = {value}".format(key=key, value=value)
             for key, value in chain_config.items()
         )))
-        click.echo(current_configuration_msg)
+        logger.info(current_configuration_msg)
 
     # Internal or External
     internal_or_external_msg = (
@@ -228,9 +230,9 @@ def configure_chain(project, chain_name):
             default_account_key = 'chains.{0}.web3.eth.default_account'.format(chain_name)
             project.config[default_account_key] = default_account
 
-    click.echo("Writing project configuration ...")
+    logger.info("Writing project configuration ...")
     project.write_config()
-    click.echo("Success!")
+    logger.info("Success!")
 
 
 def request_account_unlock(chain, account, timeout):
@@ -270,6 +272,7 @@ def deploy_contract_and_verify(chain,
     the expected value.
     """
     web3 = chain.web3
+    logger = logging.getLogger('populus.utils.cli.deploy_contract_and_verify')
 
     if ContractFactory is None:
         ContractFactory = chain.provider.get_contract_factory(contract_name)
@@ -283,7 +286,7 @@ def deploy_contract_and_verify(chain,
                 request_account_unlock(chain, default_account, None)
             web3.eth.defaultAccount = default_account
 
-    click.echo("Deploying {0}".format(contract_name))
+    logger.info("Deploying {0}".format(contract_name))
 
     deploy_txn_hash = ContractFactory.deploy(
         transaction=deploy_transaction,
@@ -292,8 +295,8 @@ def deploy_contract_and_verify(chain,
     )
     deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
 
-    click.echo("Deploy Transaction Sent: {0}".format(deploy_txn_hash))
-    click.echo("Waiting for confirmation...")
+    logger.info("Deploy Transaction Sent: {0}".format(deploy_txn_hash))
+    logger.info("Waiting for confirmation...")
 
     contract_address = chain.wait.for_contract_address(
         deploy_txn_hash,
@@ -301,7 +304,7 @@ def deploy_contract_and_verify(chain,
     )
     deploy_receipt = web3.eth.getTransactionReceipt(deploy_txn_hash)
 
-    click.echo((
+    logger.info((
         "\n"
         "Transaction Mined\n"
         "=================\n"
@@ -321,20 +324,17 @@ def deploy_contract_and_verify(chain,
 
     if ContractFactory.bytecode_runtime:
         verify_contract_bytecode(web3, ContractFactory, contract_address)
-        click.echo("Verified contract bytecode @ {0}".format(contract_address))
+        logger.info("Verified contract bytecode @ {0}".format(contract_address))
     else:
-        click.echo(
+        logger.info(
             "No runtime available.  Falling back to verifying non-empty "
             "bytecode."
         )
         if len(deployed_bytecode) <= 2:
-            click.echo(
-                "Bytecode @ {0} is unexpectedly empty.".format(contract_address),
-                err=True,
-            )
+            logger.error("Bytecode @ {0} is unexpectedly empty.".format(contract_address))
             raise click.ClickException("Error deploying contract")
         else:
-            click.echo(
+            logger.info(
                 "Verified bytecode @ {0} is non-empty".format(contract_address)
             )
     return ContractFactory(address=contract_address)
@@ -345,16 +345,17 @@ def show_chain_sync_progress(chain):
     Display the syncing status of a chain as a progress bar
     """
     web3 = chain.web3
+    logger = logging.getLogger('populus.utils.cli.show_chain_sync_progress')
 
     if not web3.net.peerCount:
-        click.echo("Waiting for peer connections.")
+        logger.info("Waiting for peer connections.")
         try:
             chain.wait.for_peers(timeout=240)
         except Timeout:
             raise click.ClickException("Never connected to any peers.")
 
     if not web3.eth.syncing:
-        click.echo("Waiting for synchronization to start.")
+        logger.info("Waiting for synchronization to start.")
         try:
             chain.wait.for_syncing(timeout=240)
         except Timeout:
@@ -408,6 +409,7 @@ def get_unlocked_default_account_address(chain):
     If not in config, asks if it should be set as default.
     If not unlocked, askes for password to unlock.
     """
+    logger = logging.getLogger('populus.utils.cli.get_unlocked_default_account_address')
     web3 = chain.web3
     chain_config = chain.config
     chain_name = chain.chain_name
@@ -438,7 +440,7 @@ def get_unlocked_default_account_address(chain):
         if click.confirm(set_as_default_account_msg):
             config['chains.{0}.web3.eth.default_account'.format(chain_name)] = account
             project.write_config()
-            click.echo("Wrote updated chain configuration")
+            logger.info("Wrote updated chain configuration")
 
     # Unlock the account if needed.
     if is_account_locked(web3, account):
@@ -453,32 +455,34 @@ def get_unlocked_default_account_address(chain):
 
 
 def compile_contracts(project, compiler_settings=None):
-    click.echo("============ Compiling ==============")
-    click.echo("> Loading source files from: ./{0}\n".format(project.contracts_dir))
+    logger = logging.getLogger('populus.utils.cli.compile_contracts')
+
+    logger.info("============ Compiling ==============")
+    logger.info("> Loading source files from: ./{0}\n".format(project.contracts_dir))
 
     contract_source_paths, compiled_sources = compile_project_contracts(
         project,
         compiler_settings=compiler_settings,
     )
 
-    click.echo("> Found {0} contract source files".format(
+    logger.info("> Found {0} contract source files".format(
         len(contract_source_paths)
     ))
     for path in contract_source_paths:
-        click.echo("- {0}".format(os.path.relpath(path)))
-    click.echo("")
-    click.echo("> Compiled {0} contracts".format(len(compiled_sources)))
+        logger.info("- {0}".format(os.path.relpath(path)))
+    logger.info("")
+    logger.info("> Compiled {0} contracts".format(len(compiled_sources)))
 
     for contract_name in sorted(compiled_sources.keys()):
-        click.echo("- {0}".format(contract_name))
+        logger.info("- {0}".format(contract_name))
 
     build_asset_path = write_compiled_sources(
         project.compiled_contracts_asset_path,
         compiled_sources,
     )
 
-    click.echo("")
-    click.echo(
+    logger.info("")
+    logger.info(
         "> Wrote compiled assets to: ./{0}".format(
             os.path.relpath(build_asset_path)
         )
@@ -486,10 +490,11 @@ def compile_contracts(project, compiler_settings=None):
 
 
 def watch_project_contracts(project, compiler_settings):
+    logger = logging.getLogger('populus.utils.cli.watch_project_contracts')
 
     def callback(file_path, event_name):
         if event_name in {'modified', 'created'}:
-            click.echo("Change detected in: {0}".format(file_path))
+            logger.info("Change detected in: {0}".format(file_path))
             compile_contracts(project, compiler_settings)
 
     watcher = DirWatcher(project.contracts_dir, callback)

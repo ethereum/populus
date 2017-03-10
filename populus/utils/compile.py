@@ -89,7 +89,6 @@ def normalize_contract_data(contract_data):
         yield 'devdoc', _load_json_if_string(contract_data['devdoc'])
 
 
-@to_dict
 def normalize_contract_metadata(metadata):
     if not metadata:
         return None

@@ -27,7 +27,7 @@ def test_compiling_project_contracts(project):
 @load_contract_fixture('ImportTestB.sol')
 @load_contract_fixture('ImportTestC.sol')
 def test_compiling_with_local_project_imports(project):
-    source_paths, contract_data = compile_project_contracts(project)
+    _, contract_data = compile_project_contracts(project)
 
     assert 'ImportTestA' in contract_data
     assert 'ImportTestB' in contract_data
@@ -39,3 +39,19 @@ def test_compiling_with_test_contracts(project):
     source_paths, contract_data = compile_project_contracts(project)
 
     assert 'TestMath' in contract_data
+
+
+@load_contract_fixture('Abstract.sol')
+def test_compiling_with_abstract_contract(project):
+    _, contract_data = compile_project_contracts(project)
+
+    assert 'Abstract' in contract_data
+
+
+@load_contract_fixture('Abstract.sol')
+@load_contract_fixture('UsesAbstract.sol')
+def test_compiling_with_abstract_contract_inhereted(project):
+    _, contract_data = compile_project_contracts(project)
+
+    assert 'Abstract' in contract_data
+    assert 'UsesAbstract' in contract_data

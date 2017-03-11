@@ -1,3 +1,4 @@
+import logging
 import os
 
 import click
@@ -62,12 +63,13 @@ def init_cmd(ctx):
     """
     Generate project layout with an example contract.
     """
+    logger = logging.getLogger('populus.cli.init_cmd')
     project = ctx.obj['PROJECT']
 
     has_json_config = check_if_json_config_file_exists(project.project_dir)
 
     if has_json_config:
-        click.echo(
+        logger.info(
             "Found existing `populus.json` file.  Not writing default config."
         )
     else:
@@ -78,7 +80,7 @@ def init_cmd(ctx):
             default_config,
             json_config_file_path,
         )
-        click.echo(
+        logger.info(
             "Wrote default populus configuration to `./{0}`.".format(
                 os.path.relpath(json_config_file_path, project.project_dir),
             )
@@ -87,7 +89,7 @@ def init_cmd(ctx):
     project.load_config()
 
     if ensure_path_exists(project.contracts_source_dir):
-        click.echo(
+        logger.info(
             "Created Directory: ./{0}".format(
                 os.path.relpath(project.contracts_source_dir)
             )
@@ -97,18 +99,18 @@ def init_cmd(ctx):
     if not os.path.exists(example_contract_path):
         with open(example_contract_path, 'w') as example_contract_file:
             example_contract_file.write(GREETER_FILE_CONTENTS)
-        click.echo("Created Example Contract: ./{0}".format(
+        logger.info("Created Example Contract: ./{0}".format(
             os.path.relpath(example_contract_path)
         ))
 
     tests_dir = os.path.join(project.project_dir, 'tests')
     if ensure_path_exists(tests_dir):
-        click.echo("Created Directory: ./{0}".format(os.path.relpath(tests_dir)))
+        logger.info("Created Directory: ./{0}".format(os.path.relpath(tests_dir)))
 
     example_tests_path = os.path.join(tests_dir, 'test_greeter.py')
     if not os.path.exists(example_tests_path):
         with open(example_tests_path, 'w') as example_tests_file:
             example_tests_file.write(TEST_FILE_CONTENTS)
-        click.echo("Created Example Tests: ./{0}".format(
+        logger.info("Created Example Tests: ./{0}".format(
             os.path.relpath(example_tests_path)
         ))

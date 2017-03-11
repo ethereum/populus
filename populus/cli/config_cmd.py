@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+
+import logging
+
 import click
 
 from eth_utils import (
@@ -29,9 +33,11 @@ def config_list(ctx):
     """
     Prints the project configuration out to the terminal
     """
+    logger = logging.getLogger('populus.cli.config.list')
+
     project = ctx.obj['PROJECT']
     for key, value in project.config.items(flatten=True):
-        click.echo("{0}: {1}".format(key, value))
+        logger.info("{0}: {1}".format(key, value))
 
 
 @to_tuple
@@ -56,11 +62,12 @@ def config_set(ctx, key_value_pairs):
     """
     Sets the provided key/value pairs in the project config.
     """
+    logger = logging.getLogger('populus.cli.config.set')
     project = ctx.obj['PROJECT']
     for key, value in key_value_pairs:
         is_already_present = key in project.config
         project.config[key] = value
-        click.echo("{0}: {1} ({2})".format(
+        logger.info("{0}: {1} ({2})".format(
             key,
             value,
             'updated' if is_already_present else 'added',
@@ -78,12 +85,13 @@ def config_get(ctx, keys):
     """
     Gets the provided key/value pairs from the project config.
     """
+    logger = logging.getLogger('populus.cli.config.get')
     project = ctx.obj['PROJECT']
     for key in keys:
         try:
-            click.echo("{0}: {1}".format(key, project.config[key]))
+            logger.info("{0}: {1}".format(key, project.config[key]))
         except KeyError:
-            click.echo("KeyError: {0}".format(key), err=True)
+            logger.error("KeyError: {0}".format(key), err=True)
 
 
 @config_cmd.command('delete')
@@ -96,13 +104,14 @@ def config_delete(ctx, keys):
     """
     Deletes the provided key/value pairs from the project config.
     """
+    logger = logging.getLogger('populus.cli.config.delete')
     project = ctx.obj['PROJECT']
     for key in keys:
         try:
-            click.echo("{0}: {1} (deleted)".format(key, project.config[key]))
+            logger.info("{0}: {1} (deleted)".format(key, project.config[key]))
             del project.config[key]
         except KeyError:
-            click.echo("KeyError: {0}".format(key), err=True)
+            logger.error("KeyError: {0}".format(key), err=True)
     project.write_config()
 
 
@@ -118,19 +127,20 @@ def config_upgrade(ctx, to_version):
     """
     Upgrades the current populus config file to the specifed version.
     """
+    logger = logging.getLogger('populus.cli.config.upgrade')
     project = ctx.obj['PROJECT']
 
     from_version = project.config['version']
     if from_version == LATEST_VERSION:
-        click.echo("Already at latest version: v{0}".format(from_version))
+        logger.info("Already at latest version: v{0}".format(from_version))
         return
 
     upgraded_config = upgrade_config(project.config, to_version=to_version)
-    click.echo(
+    logger.info(
         "Upgraded config from v{0} -> v{1}".format(from_version, to_version)
     )
     project.config = upgraded_config
     config_file_path = project.write_config()
-    click.echo(
+    logger.info(
         "Wrote updated config to: `{0}`".format(config_file_path)
     )

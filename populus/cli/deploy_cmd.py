@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+
+import logging
+
 import click
 
 from populus.utils.cli import (
@@ -14,20 +18,21 @@ from .main import main
 
 
 def echo_post_deploy_message(web3, deployed_contracts):
-    # TODO: update this message.
+    logger = logging.getLogger('populus.cli.deploy.echo_post_deploy_message')
+
     message = (
         "========== Deploy Completed ==========\n"
         "Deployed {n} contracts:"
     ).format(
         n=len(deployed_contracts),
     )
-    click.echo(message)
+    logger.info(message)
     for contract_name, deployed_contract in deployed_contracts:
         deploy_receipt = web3.eth.getTransactionReceipt(deployed_contract.deploy_txn_hash)
         gas_used = deploy_receipt['gasUsed']
         deploy_txn = web3.eth.getTransaction(deploy_receipt['transactionHash'])
         gas_provided = deploy_txn['gas']
-        click.echo("- {0} ({1}) gas: {2} / {3}".format(
+        logger.info("- {0} ({1}) gas: {2} / {3}".format(
             contract_name,
             deployed_contract.address,
             gas_used,
@@ -53,6 +58,7 @@ def deploy_cmd(ctx, chain_name, contracts_to_deploy):
     Deploys the specified contracts to a chain.
     """
     project = ctx.obj['PROJECT']
+    logger = logging.getLogger('populus.cli.deploy')
 
     # Determine which chain should be used.
     if not chain_name:
@@ -104,7 +110,7 @@ def deploy_cmd(ctx, chain_name, contracts_to_deploy):
             len(contracts_to_deploy),
             len(deploy_order) - len(contracts_to_deploy),
         )
-        click.echo(starting_msg)
+        logger.info(starting_msg)
 
         for contract_name, _ in deploy_order.items():
             if not provider.are_contract_dependencies_available(contract_name):
@@ -146,4 +152,4 @@ def deploy_cmd(ctx, chain_name, contracts_to_deploy):
         success_msg = (
             "Deployment Successful."
         )
-        click.echo(success_msg)
+        logger.info(success_msg)

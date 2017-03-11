@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import itertools
 import logging
 import os
@@ -14,9 +16,6 @@ from populus.utils.compile import (
     process_compiler_output,
     get_project_source_paths,
     get_test_source_paths,
-)
-from populus.utils.filesystem import (
-    ensure_file_exists,
 )
 
 

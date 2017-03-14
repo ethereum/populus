@@ -324,7 +324,7 @@ def deploy_contract_and_verify(chain,
     deployed_bytecode = web3.eth.getCode(contract_address)
 
     if ContractFactory.bytecode_runtime:
-        verify_contract_bytecode(web3, ContractFactory, contract_address)
+        verify_contract_bytecode(web3, ContractFactory.bytecode_runtime, contract_address)
         logger.info("Verified contract bytecode @ {0}".format(contract_address))
     else:
         logger.info(

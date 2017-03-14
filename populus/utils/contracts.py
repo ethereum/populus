@@ -185,14 +185,14 @@ def compare_bytecode(left, right):
     return norm_left == norm_right
 
 
-def verify_contract_bytecode(web3, ContractFactory, address):
+def verify_contract_bytecode(web3, expected_bytecode, address):
     """
     TODO: write tests for this.
     """
     from populus.contracts.exceptions import BytecodeMismatch
 
     # Check that the contract has bytecode
-    if ContractFactory.bytecode_runtime in EMPTY_BYTECODE_VALUES:
+    if expected_bytecode in EMPTY_BYTECODE_VALUES:
         raise ValueError(
             "Contract instances which contain an address cannot have empty "
             "runtime bytecode"
@@ -204,13 +204,38 @@ def verify_contract_bytecode(web3, ContractFactory, address):
         raise BytecodeMismatch(
             "No bytecode found at address: {0}".format(address)
         )
-    elif not compare_bytecode(chain_bytecode, ContractFactory.bytecode_runtime):
+    elif not compare_bytecode(chain_bytecode, expected_bytecode):
         raise BytecodeMismatch(
             "Bytecode found at {0} does not match compiled bytecode:\n"
             " - chain_bytecode: {1}\n"
             " - compiled_bytecode: {2}".format(
                 address,
                 chain_bytecode,
-                ContractFactory.bytecode_runtime,
+                expected_bytecode,
             )
         )
+
+
+def find_deploy_block_number(web3, address):
+    chain_bytecode = web3.eth.getCode(address, "latest")
+    if chain_bytecode in EMPTY_BYTECODE_VALUES:
+        raise NotImplementedError("Cannot find deploy transaction for address with empty code")
+
+    left = 0
+    right = web3.eth.blockNumber
+
+    while left + 1 < right:
+        middle = (left + right) // 2
+        middle_code = web3.eth.getCode(address, block_identifier=middle)
+
+        if middle_code in EMPTY_BYTECODE_VALUES:
+            left = middle
+        else:
+            right = middle
+
+    code_at_right = web3.eth.getCode(address, block_identifier=right)
+    if code_at_right in EMPTY_BYTECODE_VALUES:
+        raise ValueError(
+            "Something went wrong with the binary search to find the deploy block"
+        )
+    return right

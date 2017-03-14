@@ -1,7 +1,12 @@
+import functools
+
 from eth_utils import (
     to_tuple,
 )
 
+from populus.utils.contracts import (
+    find_deploy_block_number,
+)
 from populus.utils.functional import chain_return
 
 from .exceptions import (
@@ -35,7 +40,12 @@ class Registrar(object):
         known_addresses = self._get_contract_addresses_from_backends(contract_identifier)
         if not known_addresses:
             raise NoKnownAddress("No known address for contract")
-        return known_addresses
+        sorted_known_addresses = tuple(sorted(
+            set(known_addresses),
+            key=functools.partial(find_deploy_block_number, self.chain.web3),
+            reverse=True,
+        ))
+        return sorted_known_addresses
 
     @to_tuple
     @chain_return

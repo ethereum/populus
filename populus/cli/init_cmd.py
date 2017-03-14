@@ -1,7 +1,10 @@
 import logging
 import os
+import shutil
 
 import click
+
+from populus import ASSETS_DIR
 
 from populus.config import (
     load_default_config,
@@ -19,42 +22,8 @@ from populus.utils.filesystem import (
 from .main import main
 
 
-TEST_FILE_CONTENTS = """def test_greeter(chain):
-    greeter, _ = chain.provider.get_or_deploy_contract('Greeter')
-
-    greeting = greeter.call().greet()
-    assert greeting == 'Hello'
-
-
-def test_custom_greeting(chain):
-    greeter, _ = chain.provider.get_or_deploy_contract('Greeter')
-
-    set_txn_hash = greeter.transact().setGreeting('Guten Tag')
-    chain.wait.for_receipt(set_txn_hash)
-
-    greeting = greeter.call().greet()
-    assert greeting == 'Guten Tag'
-"""
-
-
-GREETER_FILE_CONTENTS = """pragma solidity ^0.4.0;
-
-    contract Greeter {
-    string public greeting;
-
-    function Greeter() {
-        greeting = 'Hello';
-    }
-
-    function setGreeting(string _greeting) public {
-        greeting = _greeting;
-    }
-
-    function greet() constant returns (string) {
-        return greeting;
-    }
-}
-"""
+GREETER_SOURCE_PATH = os.path.join(ASSETS_DIR, 'Greeter.sol')
+GREETER_TEST_PATH = os.path.join(ASSETS_DIR, 'test_greeter.py')
 
 
 @main.command('init')
@@ -97,8 +66,7 @@ def init_cmd(ctx):
 
     example_contract_path = os.path.join(project.contracts_source_dir, 'Greeter.sol')
     if not os.path.exists(example_contract_path):
-        with open(example_contract_path, 'w') as example_contract_file:
-            example_contract_file.write(GREETER_FILE_CONTENTS)
+        shutil.copy(GREETER_SOURCE_PATH, example_contract_path)
         logger.info("Created Example Contract: ./{0}".format(
             os.path.relpath(example_contract_path)
         ))
@@ -109,8 +77,7 @@ def init_cmd(ctx):
 
     example_tests_path = os.path.join(tests_dir, 'test_greeter.py')
     if not os.path.exists(example_tests_path):
-        with open(example_tests_path, 'w') as example_tests_file:
-            example_tests_file.write(TEST_FILE_CONTENTS)
+        shutil.copy(GREETER_TEST_PATH, example_tests_path)
         logger.info("Created Example Tests: ./{0}".format(
             os.path.relpath(example_tests_path)
         ))

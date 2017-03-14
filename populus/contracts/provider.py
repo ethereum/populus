@@ -79,9 +79,6 @@ class Provider(object):
 
         if not bytecode_matched_addresses:
             return False
-        else:
-            # TODO: don't just default to the first address.
-            return bytecode_matched_addresses[0]
 
         return True
 

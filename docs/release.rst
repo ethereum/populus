@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+.. _v1.6.6-release-notes:
+
+1.6.6
+-----
+
+- Add support to contract provider to handle case where registrar has more than
+  one address for a given contract.
+
+
 .. _v1.6.5-release-notes:
 
 1.6.5

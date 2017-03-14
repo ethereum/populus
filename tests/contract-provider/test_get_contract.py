@@ -17,6 +17,20 @@ def test_getting_contract_with_no_dependencies(chain,
     assert math.call().multiply7(3) == 21
 
 
+def test_latest_deployed_version_is_used(chain):
+    provider = chain.provider
+
+    math_1, deploy_txn_1 = provider.deploy_contract('Math')
+    math_2, deploy_txn_2 = provider.deploy_contract('Math')
+
+    assert math_1.address != math_2.address
+
+    math = provider.get_contract('Math')
+    assert math.call().multiply7(3) == 21
+
+    assert math.address == math_2.address
+
+
 def test_getting_contract_when_not_registered(chain):
     provider = chain.provider
 

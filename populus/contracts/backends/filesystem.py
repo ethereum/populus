@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import functools
 import json
 import os
 
@@ -16,7 +15,6 @@ from populus.utils.mappings import (
     set_nested_key,
 )
 from populus.utils.chains import (
-    parse_BIP122_uri,
     get_chain_definition,
     check_if_chain_matches_chain_uri,
 )
@@ -31,12 +29,6 @@ def get_matching_chain_definitions(web3, values):
     for chain_definition in values:
         if check_if_chain_matches_chain_uri(web3, chain_definition):
             yield chain_definition
-
-
-def chain_definition_sort_key(web3, chain_definitions):
-    _, _, block_hash = parse_BIP122_uri(chain_definitions)
-    block = web3.eth.getBlock(block_hash)
-    return block['number']
 
 
 class JSONFileBackend(BaseContractBackend):
@@ -72,22 +64,16 @@ class JSONFileBackend(BaseContractBackend):
             self.chain.web3,
             registrar_data.get('deployments', {}),
         )
-        sort_key_fn = functools.partial(chain_definition_sort_key, self.chain.web3)
-        ordered_matching_chain_definitions = tuple(sorted(
-            matching_chain_definitions,
-            key=sort_key_fn,
-            reverse=True,
-        ))
 
         identifier_exists = any(
             instance_identifier in registrar_data['deployments'][chain_definition]
             for chain_definition
-            in ordered_matching_chain_definitions
+            in matching_chain_definitions
         )
         if not identifier_exists:
             raise NoKnownAddress("No known address for '{0}'".format(instance_identifier))
 
-        for chain_definition in ordered_matching_chain_definitions:
+        for chain_definition in matching_chain_definitions:
             chain_deployments = registrar_data['deployments'][chain_definition]
             if instance_identifier in chain_deployments:
                 yield chain_deployments[instance_identifier]

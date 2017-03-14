@@ -2,6 +2,10 @@ import itertools
 
 from pylru import lrucache
 
+from eth_utils import (
+    to_tuple,
+)
+
 from populus.utils.contracts import (
     get_shallow_dependency_graph,
     get_recursive_contract_dependencies,
@@ -35,6 +39,17 @@ def get_base_contract_factory(contract_identifier, store_backends):
         )
 
 
+@to_tuple
+def filter_addresses_by_bytecode_match(web3, expected_bytecode, addresses):
+    for address in addresses:
+        try:
+            verify_contract_bytecode(web3, expected_bytecode, address)
+        except BytecodeMismatch:
+            continue
+        else:
+            yield address
+
+
 class Provider(object):
     """
     Abstraction for retrieving contracts on a given chain.
@@ -52,20 +67,17 @@ class Provider(object):
         except NoKnownAddress:
             return False
 
-        if len(contract_addresses) == 1:
-            contract_address = contract_addresses[0]
-        else:
-            raise NotImplementedError(
-                "Handling of multiple contract addresses has not been implemented"
-            )
-
         if not self.are_contract_dependencies_available(contract_identifier):
             return False
 
         ContractFactory = self.get_contract_factory(contract_identifier)
-        try:
-            verify_contract_bytecode(self.chain.web3, ContractFactory, contract_address)
-        except (BytecodeMismatch, ValueError):
+        bytecode_matched_addresses = filter_addresses_by_bytecode_match(
+            self.chain.web3,
+            ContractFactory.bytecode_runtime,
+            contract_addresses,
+        )
+
+        if not bytecode_matched_addresses:
             return False
 
         return True
@@ -96,14 +108,16 @@ class Provider(object):
         ContractFactory = self.get_contract_factory(contract_identifier)
         contract_addresses = self.chain.registrar.get_contract_addresses(contract_identifier)
 
-        if len(contract_addresses) == 1:
-            contract_address = contract_addresses[0]
+        bytecode_matched_addresses = filter_addresses_by_bytecode_match(
+            self.chain.web3,
+            ContractFactory.bytecode_runtime,
+            contract_addresses,
+        )
+        if not bytecode_matched_addresses:
+            raise BytecodeMismatch("None of the known addresses matched the expected bytecode")
         else:
-            raise NotImplementedError(
-                "Handling of multiple contract addresses has not been implemented"
-            )
-
-        verify_contract_bytecode(self.chain.web3, ContractFactory, contract_address)
+            # TODO: don't just default to the first address.
+            contract_address = contract_addresses[0]
 
         return ContractFactory(address=contract_address)
 

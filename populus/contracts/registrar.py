@@ -1,10 +1,12 @@
 import functools
+import itertools
 
 from eth_utils import (
     to_tuple,
 )
 
 from populus.utils.contracts import (
+    EMPTY_BYTECODE_VALUES,
     find_deploy_block_number,
 )
 from populus.utils.functional import chain_return
@@ -37,15 +39,33 @@ class Registrar(object):
         """
         Retrieve a contract address from the registrar
         """
-        known_addresses = self._get_contract_addresses_from_backends(contract_identifier)
-        if not known_addresses:
+        found_addresses = self._get_contract_addresses_from_backends(contract_identifier)
+        if not found_addresses:
             raise NoKnownAddress("No known address for contract")
-        sorted_known_addresses = tuple(sorted(
-            set(known_addresses),
+
+        addresses_with_code = tuple(
+            address
+            for address
+            in found_addresses
+            if self.chain.web3.eth.getCode(address) not in EMPTY_BYTECODE_VALUES
+        )
+        empty_addresses = tuple(
+            address
+            for address
+            in found_addresses
+            if self.chain.web3.eth.getCode(address) in EMPTY_BYTECODE_VALUES
+        )
+        sorted_addresses = tuple(sorted(
+            set(addresses_with_code),
             key=functools.partial(find_deploy_block_number, self.chain.web3),
             reverse=True,
         ))
-        return sorted_known_addresses
+        known_addresses = tuple(itertools.chain(
+            sorted_addresses,
+            empty_addresses,
+        ))
+
+        return known_addresses
 
     @to_tuple
     @chain_return

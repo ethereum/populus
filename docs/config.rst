@@ -62,13 +62,18 @@ Enable or disable compile optimization.
 * value: Boolean
 * default: ``True``
 
-
 Determine compiler output.
 
 * key: ``compilation.settings.output_values``
 * value: List of strings
 * default: ``['bin', 'bin-runtime', 'abi']``
 
+Set `solc import path remappings <https://github.com/pipermerriam/py-solc#import-path-remappings>_`. This is especially useful if you want to use libraries like `OpenZeppelin <https://github.com/OpenZeppelin/zeppelin-solidity/>`_ with your project. Then you can directly import Zeppelin contracts like ``import "zeppelin/contracts/token/TransferableToken.sol";``.
+
+* key: ``compilation.settings.import_remapping``
+* value: String
+* default: ``None``
+* example: ``zeppelin=zeppelin`` (assuming you have done ``git submodule add git@github.com:OpenZeppelin/zeppelin-solidity.git zeppelin``in your project root)
 
 Chains
 ^^^^^^

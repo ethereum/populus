@@ -16,6 +16,13 @@ from .exceptions import (
 )
 
 
+def address_sort_fn(web3, address):
+    try:
+        return find_deploy_block_number(web3, address)
+    except ValueError:
+        return -1
+
+
 class Registrar(object):
     """
     Abstraction for recording known contracts on a given chain.
@@ -43,23 +50,31 @@ class Registrar(object):
         if not found_addresses:
             raise NoKnownAddress("No known address for contract")
 
-        addresses_with_code = tuple(
+        if len(found_addresses) == 1:
+            return found_addresses
+
+        addresses_with_code = tuple(set(
             address
             for address
             in found_addresses
             if self.chain.web3.eth.getCode(address) not in EMPTY_BYTECODE_VALUES
-        )
-        empty_addresses = tuple(
+        ))
+        empty_addresses = tuple(set(
             address
             for address
             in found_addresses
             if self.chain.web3.eth.getCode(address) in EMPTY_BYTECODE_VALUES
-        )
-        sorted_addresses = tuple(sorted(
-            set(addresses_with_code),
-            key=functools.partial(find_deploy_block_number, self.chain.web3),
-            reverse=True,
         ))
+
+        if len(addresses_with_code) > 1:
+            sorted_addresses = tuple(sorted(
+                addresses_with_code,
+                key=functools.partial(address_sort_fn, self.chain.web3),
+                reverse=True,
+            ))
+        else:
+            sorted_addresses = addresses_with_code
+
         known_addresses = tuple(itertools.chain(
             sorted_addresses,
             empty_addresses,

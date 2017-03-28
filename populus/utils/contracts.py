@@ -226,7 +226,15 @@ def find_deploy_block_number(web3, address):
 
     while left + 1 < right:
         middle = (left + right) // 2
-        middle_code = web3.eth.getCode(address, block_identifier=middle)
+        # This only works if the node was not fast synced for the provided
+        # `block_identifier`.
+        try:
+            middle_code = web3.eth.getCode(address, block_identifier=middle)
+        except ValueError as err:
+            if 'Missing trie node' in str(err):
+                left = middle
+                continue
+            raise
 
         if middle_code in EMPTY_BYTECODE_VALUES:
             left = middle
@@ -235,6 +243,11 @@ def find_deploy_block_number(web3, address):
 
     code_at_right = web3.eth.getCode(address, block_identifier=right)
     if code_at_right in EMPTY_BYTECODE_VALUES:
+        raise ValueError(
+            "Something went wrong with the binary search to find the deploy block"
+        )
+    code_at_previous_block = web3.eth.getCode(address, block_identifier=right - 1)
+    if code_at_previous_block not in EMPTY_BYTECODE_VALUES:
         raise ValueError(
             "Something went wrong with the binary search to find the deploy block"
         )

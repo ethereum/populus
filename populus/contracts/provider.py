@@ -145,7 +145,7 @@ class Provider(object):
             if dependency_name in contract_dependencies
         ]
         for dependency_name in dependency_deploy_order:
-            self.get_or_deploy_contract(dependency_name)
+            self.get_or_deploy_contract(dependency_name, deploy_transaction=deploy_transaction)
 
         ContractFactory = self.get_contract_factory(contract_identifier)
         deploy_transaction_hash = ContractFactory.deploy(

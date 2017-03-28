@@ -19,10 +19,8 @@ from .exceptions import (
 def address_sort_fn(web3, address):
     try:
         return find_deploy_block_number(web3, address)
-    except ValueError as err:
-        if 'Missing trie' in str(err):
-            return -1
-        raise
+    except ValueError:
+        return -1
 
 
 class Registrar(object):

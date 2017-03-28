@@ -226,6 +226,8 @@ def find_deploy_block_number(web3, address):
 
     while left + 1 < right:
         middle = (left + right) // 2
+        # This only works if the node was not fast synced for the provided
+        # `block_identifier`.
         middle_code = web3.eth.getCode(address, block_identifier=middle)
 
         if middle_code in EMPTY_BYTECODE_VALUES:

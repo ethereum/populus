@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+.. _v1.6.7-release-notes:
+
+1.6.7
+-----
+
+- Bugfix for registrar address sorting to handle nodes which were fast synced
+  and do not have access to the full chain history.
+
+
 .. _v1.6.6-release-notes:
 
 1.6.6

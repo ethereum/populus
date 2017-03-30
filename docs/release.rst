@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _v1.6.8-release-notes:
+
+1.6.8
+-----
+
+- Allow for empty passwords when unlocking accounts.
+
+
 .. _v1.6.7-release-notes:
 
 1.6.7

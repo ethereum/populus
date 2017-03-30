@@ -248,9 +248,11 @@ def request_account_unlock(chain, account, timeout):
     unlock_account_msg = (
         "Please provide the password to unlock account `{0}`.".format(account)
     )
+
+    # default="" is for allowing empty password
     unlock_successful = chain.web3.personal.unlockAccount(
         account,
-        click.prompt(unlock_account_msg, hide_input=True),
+        click.prompt(unlock_account_msg, hide_input=True, default=""),
         timeout,
     )
     if not unlock_successful:

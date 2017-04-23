@@ -24,10 +24,11 @@ of your project named ``populus.json`` with the following contents
 .. code-block:: javascript
 
     {
+      "version": "3",
       "chains": {
         "horton": {
           "chain": {
-            "class": 'populus.chain.geth.LocalGethChain'
+            "class": "populus.chain.geth.LocalGethChain"
           },
           "web3": {
             "provider": {

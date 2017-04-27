@@ -28,7 +28,7 @@ setup(
         "eth-testrpc>=1.1.0",
         "ethereum-utils>=0.2.0",
         "jsonschema>=2.5.1",
-        "py-geth>=1.7.1",
+        "py-geth>=1.8.0",
         "py-solc>=1.0.0",
         "pylru>=1.0.9",
         "pysha3>=0.3,!=1.0,>1.0.0",
@@ -42,7 +42,7 @@ setup(
             "gevent>=1.1.2,<1.2.0",  # https://github.com/gevent/gevent/issues/916
             "web3[gevent]>=3.7.1",
             "eth-testrpc[gevent]>=1.1.0",
-            "py-geth[gevent]>=1.7.1",
+            "py-geth[gevent]>=1.8.0",
             "py-solc[gevent]>=1.0.0",
         ],
     },

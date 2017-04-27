@@ -110,12 +110,9 @@ exclude_patterns = ['_build']
 pygments_style = 'sphinx'
 
 
-# Custom solidity lexer
-sys.path.append(os.path.dirname(__file__))
+# Solidity lexer from `pygments-lexer-solidity` package
 from sphinx.highlighting import lexers
-from solidity_lexer import SolidityLexer
-
-
+from pygments_lexer_solidity import SolidityLexer
 lexers['solidity'] = SolidityLexer()
 
 # A list of ignored prefixes for module index sorting.

@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _v1.6.9-release-notes:
+
+1.6.9
+-----
+
+- Bump py-geth version to account for removed ``--ipcapi`` CLI flag.
+
+
 .. _v1.6.8-release-notes:
 
 1.6.8

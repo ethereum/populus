@@ -257,6 +257,12 @@ class Project(object):
         return self.compiled_contract_data
 
     #
+    # Compiler Backend
+    #
+    def get_compiler_backend(self):
+        compilation_config =  self.config.get_config('compilation')
+
+    #
     # Local Blockchains
     #
     def get_chain_config(self, chain_name):

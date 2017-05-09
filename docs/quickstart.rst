@@ -177,6 +177,128 @@ populus.
 
 You should see something akin to the output above with three passing tests.
 
+Setup for development and contribution
+--------------------------------------
+
+In order to configure the project locally and get the whole test suite passing, you'll 
+need to make sure you're using the proper version of the ``solc`` compiler. Follow these
+steps to install all the dependencies:
+
+Virtual environment
+~~~~~~~~~~~~~~~~~~~
+If you don't already have it, go ahead and install ``virtualenv`` with ``pip install virtualenv``.
+You can then create and activate your Populus environment with the following commands:
+
+.. code-block:: bash
+
+    $ cd populus
+    $ virtualenv populus
+    $ source populus/bin/activate
+
+This allows you to install the specific versions of the Populus dependencies without conflicting
+with global installations you may already have on your machine.
+
+Install dependencies
+~~~~~~~~~~~~~~~~~~~~
+Now, run the following commands to install all the dependencies specified in the project
+except for ``solc``:
+
+.. code-block:: bash
+
+    $ pip install -r requirements-dev.txt
+    $ pip install -r requirements-docs.txt
+    $ pip install -r requirements-gevent.txt
+    $ pip install -e .
+
+Install Solidity
+~~~~~~~~~~~~~~~~
+Here's where the fun begins: you'll have to build Solidity from source, and it
+specifically needs to be the ``release_0.4.8`` branch. Here's how to do that:
+
+First, clone the repository and switch to the proper branch:
+
+.. code-block:: bash
+
+    $ git clone --recursive https://github.com/ethereum/solidity.git
+    $ cd solidity
+    $ git checkout release_0.4.8
+
+If you're on a Mac, you may need to accept the Xcode license as well. Make sure
+you have the latest version installed, and if you run into errors, try the following:
+
+.. code-block:: bash
+
+    $ sudo xcodebuild -license accept
+
+If you're on Windows, make sure you have Git, CMake, and Visual Studio 2015.
+
+Now, install all the external dependencies.
+For Mac:
+
+.. code-block:: bash
+
+    $ ./scripts/install_deps.sh
+
+Or, for Windows:
+
+.. code-block:: bash
+
+    $ scripts\install_deps.bat
+
+Finally, go ahead and build Solidity.
+For Mac:
+
+.. code-block:: bash
+
+    $ mkdir build
+    $ cd build
+    $ cmake .. && make
+
+Or, for Windows:
+
+.. code-block:: bash
+
+    $ mkdir build
+    $ cd build
+    $ cmake -G "Visual Studio 14 2015 Win64" ..
+
+The following command will also work for Windows:
+
+.. code-block:: bash
+
+    $ cmake --build . --config RelWithDebInfo
+
+Confirm
+~~~~~~~
+This should have installed everything you need, but let's be sure. First, try running:
+
+.. code-block:: bash
+
+    $ which solc
+
+If you didn't see any output, you'll need to move the ``solc`` executable file into
+the directory specified in your ``PATH``, or add an accurate ``PATH`` in your ``bash``
+profile. If you can't find the file, you may need to run:
+
+.. code-block:: bash
+
+    $ npm install -g solc
+
+This should install the executable wherever your Node packages live.
+
+Once you see output from the ``which solc`` command (and you're in the Populus
+directory with the ``virtualenv`` activated), you're ready to run the tests.
+
+.. code-block:: bash
+
+    $ py.test tests/
+
+At this point, all your tests should pass. If they don't, you're probably missing a dependency
+somewhere. Just retrace your steps and you'll figure it out.
+
+
+
+
 
 .. _Go Ethereum: https://github.com/ethereum/go-ethereum/
 .. _Solidity: https://github.com/ethereum/solidity/

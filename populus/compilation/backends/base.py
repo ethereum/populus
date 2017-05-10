@@ -1,13 +1,8 @@
 class BaseCompilerBackend(object):
-    project = None
-    config = None
+    compiler_settings = None
 
-    def __init__(self, project, config):
-        self.project = project
-        self.config = config
+    def __init__(self, settings):
+        self.compiler_settings = settings
 
-    def get_compiler_output(self):
-        raise NotImplementedError("Must be implemented by subclasses")
-
-    def get_normalized_compiler_output(self, compiler_output):
+    def get_compiled_contract_data(self, source_file_paths, import_remappings):
         raise NotImplementedError("Must be implemented by subclasses")

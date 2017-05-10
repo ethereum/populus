@@ -7,6 +7,7 @@ from populus.compilation import (
 )
 from populus.config import (
     ChainConfig,
+    CompilationConfig,
     Config,
     get_default_config_path,
     load_config as _load_config,
@@ -240,10 +241,7 @@ class Project(object):
     def compiled_contract_data(self):
         if self.is_compiled_contract_cache_stale():
             self._cached_compiled_contracts_mtime = self.get_source_modification_time()
-            _, self._cached_compiled_contracts = compile_project_contracts(
-                project=self,
-                compiler_settings=self.config.get('compilation.settings'),
-            )
+            _, self._cached_compiled_contracts = compile_project_contracts(self)
         return self._cached_compiled_contracts
 
     @property
@@ -260,7 +258,11 @@ class Project(object):
     # Compiler Backend
     #
     def get_compiler_backend(self):
-        compilation_config =  self.config.get_config('compilation')
+        compilation_config = self.config.get_config(
+            'compilation',
+            config_class=CompilationConfig,
+        )
+        return compilation_config.backend
 
     #
     # Local Blockchains

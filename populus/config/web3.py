@@ -1,12 +1,13 @@
 from __future__ import absolute_import
 
+from eth_utils import (
+    is_string,
+)
+
 from web3 import Web3
 
 from populus.utils.module_loading import (
     import_string,
-)
-from populus.utils.types import (
-    is_string,
 )
 from populus.utils.config import (
     ClassImportPath,

@@ -24,10 +24,11 @@ of your project named ``populus.json`` with the following contents
 .. code-block:: javascript
 
     {
+      "version": "3",
       "chains": {
         "horton": {
           "chain": {
-            "class": 'populus.chain.geth.LocalGethChain'
+            "class": "populus.chain.geth.LocalGethChain"
           },
           "web3": {
             "provider": {
@@ -110,10 +111,11 @@ address should be.  Change your configuration to match this.
 .. code-block:: javascript
 
     {
+      "version": "3",
       "chains": {
         "horton": {
           "chain": {
-            "class": 'populus.chain.LocalGethChain'
+            "class": "populus.chain.LocalGethChain"
           },
           "web3": {
             "provider": {

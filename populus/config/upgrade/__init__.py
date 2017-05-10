@@ -11,20 +11,24 @@ from populus.config.versions import (
     V1,
     V2,
     V3,
+    V4,
     KNOWN_VERSIONS,
     LATEST_VERSION,
 )
 from .v1 import upgrade_v1_to_v2
 from .v2 import upgrade_v2_to_v3
+from .v3 import upgrade_v3_to_v4
 
 
 UPGRADE_SEQUENCE = {
     V1: V2,
     V2: V3,
+    V3: V4,
 }
 UPGRADE_FUNCTIONS = {
     V1: upgrade_v1_to_v2,
     V2: upgrade_v2_to_v3,
+    V3: upgrade_v3_to_v4,
 }
 
 

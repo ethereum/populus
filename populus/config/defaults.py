@@ -7,6 +7,7 @@ from .versions import (
     V1,
     V2,
     V3,
+    V4,
     LATEST_VERSION
 )
 
@@ -14,12 +15,14 @@ from .versions import (
 DEFAULT_V1_CONFIG_FILENAME = "defaults.v1.config.json"
 DEFAULT_V2_CONFIG_FILENAME = "defaults.v2.config.json"
 DEFAULT_V3_CONFIG_FILENAME = "defaults.v3.config.json"
+DEFAULT_V4_CONFIG_FILENAME = "defaults.v4.config.json"
 
 
 DEFAULT_CONFIG_FILENAMES = {
     V1: DEFAULT_V1_CONFIG_FILENAME,
     V2: DEFAULT_V2_CONFIG_FILENAME,
     V3: DEFAULT_V3_CONFIG_FILENAME,
+    V4: DEFAULT_V4_CONFIG_FILENAME,
 }
 
 

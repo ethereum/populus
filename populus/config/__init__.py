@@ -8,7 +8,7 @@ from .chain import (  # noqa: F401
     ChainConfig,
 )
 from .compilation import (  # noqa: F401
-    CompilationConfig,
+    CompilerConfig,
 )
 from .loading import (  # noqa: F401
     load_config,

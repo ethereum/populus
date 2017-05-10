@@ -27,8 +27,8 @@ UNSUPPORTED_BACKEND_IDENTIFIER_MSG = (
 )
 
 
-class CompilationConfig(Config):
-    backend_class = ClassImportPath('backend.class')
+class CompilerConfig(Config):
+    backend_class = ClassImportPath('class')
 
     def set_backend_class(self, backend_identifier):
         if isinstance(backend_identifier, type):
@@ -55,4 +55,4 @@ class CompilationConfig(Config):
 
     @property
     def backend_settings(self):
-        return self.get('backend.settings', {})
+        return self.get('settings', {})

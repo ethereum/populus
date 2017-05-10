@@ -7,7 +7,7 @@ from populus.compilation import (
 )
 from populus.config import (
     ChainConfig,
-    CompilationConfig,
+    CompilerConfig,
     Config,
     get_default_config_path,
     load_config as _load_config,
@@ -259,8 +259,8 @@ class Project(object):
     #
     def get_compiler_backend(self):
         compilation_config = self.config.get_config(
-            'compilation',
-            config_class=CompilationConfig,
+            'compilation.backend',
+            config_class=CompilerConfig,
         )
         return compilation_config.backend
 

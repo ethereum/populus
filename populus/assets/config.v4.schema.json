@@ -72,6 +72,13 @@
               "$ref": "#/definitions/CompilerBackendConfig"
             }
           }
+        },
+        "import_remappings": {
+          "title": "Import remappings that should be passed into the compiler",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

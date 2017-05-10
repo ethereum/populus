@@ -149,7 +149,8 @@
     "backend": {
       "$ref": "compilation.backends.SolcCombinedJSON"
     },
-    "contracts_source_dir": "./contracts"
+    "contracts_source_dir": "./contracts",
+    "import_remappings": []
   },
   "web3": {
     "GethIPC": {

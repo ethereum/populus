@@ -163,8 +163,9 @@ BASE_V3_CONFIG = {
     "contracts_source_dir": "./contracts",
     "settings": {
       "optimize": True,
-      "optimize_runs": 201  # custom
-    }
+      "optimize_runs": 201,  # custom
+    },
+    "import_remapping": ['zeppelin=zeppelin']
   },
   "web3": {
     "GethIPC": {
@@ -214,6 +215,7 @@ EXPECTED_V4_CONFIG = deep_merge_dicts(
         'optimize': True,
         'optimize_runs': 201,
     }}}}},
+    {'compilation': {'import_remappings': ['zeppelin=zeppelin']}},
 )
 
 

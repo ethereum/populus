@@ -36,9 +36,13 @@ compiles your project contracts.
     {
       "compilation": {
         "contracts_dir": "./path/to/contract-source-files",
-        "settings": {
-          "optimize": true,
-          "optimize_runs": 100
+        "backend": {
+          "class": "populus.compilation.backends.SolcCombinedJSONBackend",
+          "settings": {
+              "optimize": true,
+              "optimize_runs": 100,
+              "output_values": ["abi", "bin", "bin-runtime", "devdoc", "metadata", "userdoc"]
+          }
         }
       }
     }
@@ -53,27 +57,31 @@ The directory that project source files can be found in.
 * default: ``'./contracts'``
 
 
-Compiler Settings
+Compiler Backend
+""""""""""""""""
+
+Set which compiler backend should be used
+
+* key: ``compilation.backend.class``
+* value: Dot separated python path
+* default: ``populus.compilation.backends.SolcStandardJSONBackend``
+
+Settings for the compiler backend
+
+* key: ``compilation.backend.settings``
+* value: Object of configuration parameters for the compiler backend.
+* default: ``{"optimize": true, "output_values": ["abi", "bin", "bin-runtime", "devdoc", "metadata", "userdoc"]}``
+
+
+Import Remappings
 """""""""""""""""
-
-Enable or disable compile optimization.
-
-* key: ``compilation.settings.optimize``
-* value: Boolean
-* default: ``True``
-
-Determine compiler output.
-
-* key: ``compilation.settings.output_values``
-* value: List of strings
-* default: ``['bin', 'bin-runtime', 'abi']``
 
 Set `solc import path remappings <https://github.com/pipermerriam/py-solc#import-path-remappings>`_. This is especially useful if you want to use libraries like `OpenZeppelin <https://github.com/OpenZeppelin/zeppelin-solidity/>`_ with your project. Then you can directly import Zeppelin contracts like ``import "zeppelin/contracts/token/TransferableToken.sol";``.
 
-* key: ``compilation.settings.import_remappings``
-* value: List of strings
-* default: ``None``
-* example: ``["zeppelin=zeppelin"]`` (assuming you have done ``git submodule add git@github.com:OpenZeppelin/zeppelin-solidity.git zeppelin``in your project root)
+* key: ``compilation.import_remappings``
+* value: Array of strings
+* default: ``[]``
+* example: ``["zeppelin=zeppelin"]`` assuming that the root directory for the Zeppelin contracts is ``./zeppelin`` in the root of your project.
 
 Chains
 ^^^^^^

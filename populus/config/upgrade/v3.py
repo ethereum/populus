@@ -1,7 +1,13 @@
 from __future__ import absolute_import
 
 import copy
+import itertools
 import pprint
+
+from eth_utils import (
+    is_dict,
+    is_list_like,
+)
 
 from populus.utils.mappings import (
     set_nested_key,
@@ -27,10 +33,12 @@ from populus.config.versions import (
 NEW_V4_PATHS = {
     'compilation.backends.SolcCombinedJSON',
     'compilation.backend',
+    'compilation.import_remappings',
 }
 
 MOVED_V3_PATHS = {
     'compilation.settings': 'compilation.backends.SolcCombinedJSON.settings',
+    'compilation.import_remapping': 'compilation.import_remappings',
 }
 
 
@@ -69,7 +77,19 @@ def upgrade_v3_to_v4(v3_config):
 
         if has_nested_key(upgraded_v3_config, old_path):
             existing_value = pop_nested_key(upgraded_v3_config, old_path)
-            merged_value = deep_merge_dicts(default_value, existing_value)
+
+            if is_dict(default_value) and is_dict(existing_value):
+                merged_value = deep_merge_dicts(default_value, existing_value)
+            elif is_list_like(default_value) and is_list_like(existing_value):
+                merged_value = list(set(itertools.chain(default_value, existing_value)))
+            else:
+                raise ValueError(
+                    "Unable to merge {0} with {1}".format(
+                        type(default_value),
+                        type(existing_value),
+                    )
+                )
+
             set_nested_key(
                 upgraded_v3_config,
                 new_path,

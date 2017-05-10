@@ -81,7 +81,7 @@ class BaseContractBackend(object):
 
     def get_all_contract_data(self):
         """
-        Returns all contract data available from this store.
+        Returns all contract data available from this backend.
         """
         raise NotImplementedError("Must be implemented by subclasses")
 
@@ -99,6 +99,6 @@ class BaseContractBackend(object):
 
     def get_all_contract_names(self):
         """
-        Returns a set of all of thec ontract names for this backend.
+        Returns a set of all of the contract names for this backend.
         """
         return set(self.get_all_contract_data().keys())

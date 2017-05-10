@@ -7,7 +7,7 @@ from hypothesis import (
 import pytest
 
 from populus.utils.linking import (
-    expand_shortened_reference_name,
+    expand_placeholder,
 )
 
 ALL_FULL_NAMES = (
@@ -25,9 +25,9 @@ ALL_FULL_NAMES = (
     'name',
     ALL_FULL_NAMES,
 )
-def test_expand_shortened_reference_names(name):
-    short_name = name[:36]
-    actual = expand_shortened_reference_name(short_name, ALL_FULL_NAMES)
+def test_expand_placeholder(name):
+    placeholder = name[:36]
+    actual = expand_placeholder(placeholder, ALL_FULL_NAMES)
     assert actual == name
 
 
@@ -46,7 +46,7 @@ def test_expand_shortened_reference_names(name):
 def test_round_trip_always_possible(full_names):
     expected = set(full_names)
     actual = {
-        expand_shortened_reference_name(name[:36], full_names)
+        expand_placeholder(name[:36], full_names)
         for name in full_names
     }
     assert actual == expected

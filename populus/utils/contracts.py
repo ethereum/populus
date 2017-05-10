@@ -2,46 +2,24 @@ import itertools
 import re
 
 from eth_utils import (
-    is_string,
     remove_0x_prefix,
+    to_dict,
 )
 
 from .filesystem import (
     is_under_path,
-)
-from .linking import (
-    find_link_references,
-)
-from .mappings import (
-    get_nested_key,
 )
 from .string import (
     normalize_class_name,
 )
 
 
-def get_contract_source_file_path(contract_data):
-    compilation_target = get_nested_key(contract_data, 'metadata.settings.compilationTarget')
-    assert len(compilation_target) == 1
-    return tuple(compilation_target.keys())[0]
-
-
 def is_project_contract(contracts_source_dir, contract_data):
-    try:
-        contract_source_file_path = get_contract_source_file_path(contract_data)
-    except KeyError:
-        # TODO: abstract contracts don't have a metadata value.  How do we handle this....
-        return False
-    return is_under_path(contracts_source_dir, contract_source_file_path)
+    return is_under_path(contracts_source_dir, contract_data['source_path'])
 
 
 def is_test_contract(tests_dir, contract_data):
-    try:
-        contract_source_file_path = get_contract_source_file_path(contract_data)
-    except KeyError:
-        # TODO: abstract contracts don't have a metadata value.  How do we handle this....
-        return False
-    return is_under_path(tests_dir, contract_source_file_path)
+    return is_under_path(tests_dir, contract_data['source_path'])
 
 
 def package_contracts(contract_factories):
@@ -89,40 +67,41 @@ def create_contract_factory(web3, contract_name, contract_data):
     )
 
 
-def construct_contract_factories(web3, contracts):
+def construct_contract_factories(web3, compiled_contracts):
     contract_classes = {
-        contract_name: create_contract_factory(web3, contract_name, contract_data)
+        contract_name: create_contract_factory(
+            web3,
+            contract_name,
+            contract_data,
+        )
         for contract_name, contract_data
-        in contracts.items()
+        in compiled_contracts.items()
     }
+
     return package_contracts(contract_classes)
 
 
-def get_shallow_dependency_graph(contracts):
+@to_dict
+def compute_direct_dependency_graph(compiled_contracts):
     """
-    Given a dictionary of compiled contract data, this returns a *shallow*
+    Given a dictionary or mapping of compiled contract data, this returns a *shallow*
     dependency graph of each contracts explicit link dependencies.
     """
-    link_dependencies = {
-        contract_name: set(ref.full_name for ref in find_link_references(
-            contract_data['bytecode'],
-            contracts.keys(),
-        ))
-        for contract_name, contract_data
-        in contracts.items()
-        if is_string(contract_data.get('bytecode'))
-    }
-    return link_dependencies
+    for contract_data in compiled_contracts:
+        yield (
+            contract_data['name'],
+            contract_data['direct_dependencies'],
+        )
 
 
-def get_recursive_contract_dependencies(contract_name, dependency_graph):
+def compute_recursive_contract_dependencies(contract_name, dependency_graph):
     """
     Recursive computation of the linker dependencies for a specific contract
     within a contract dependency graph.
     """
     direct_dependencies = dependency_graph.get(contract_name, set())
     sub_dependencies = itertools.chain.from_iterable((
-        get_recursive_contract_dependencies(dep, dependency_graph)
+        compute_recursive_contract_dependencies(dep, dependency_graph)
         for dep in direct_dependencies
     ))
     return set(itertools.chain(direct_dependencies, sub_dependencies))

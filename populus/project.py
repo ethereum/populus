@@ -13,7 +13,6 @@ from populus.config import (
     load_config_schema,
     write_config as _write_config,
 )
-
 from populus.utils.chains import (
     get_base_blockchain_storage_dir,
 )
@@ -26,6 +25,7 @@ from populus.utils.compile import (
 )
 from populus.utils.filesystem import (
     relpath,
+    get_latest_mtime,
 )
 from populus.utils.config import (
     check_if_json_config_file_exists,
@@ -146,22 +146,17 @@ class Project(object):
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None
 
-    def get_source_modification_time(self):
-        all_source_paths = tuple(itertools.chain(
+    def get_all_source_file_paths(self):
+        return tuple(itertools.chain(
             get_project_source_paths(self.contracts_source_dir),
             get_test_source_paths(self.tests_dir),
         ))
-        return max(
-            os.path.getmtime(source_file_path)
-            for source_file_path
-            in all_source_paths
-        ) if len(all_source_paths) > 0 else None
 
     def is_compiled_contract_cache_stale(self):
         if self._cached_compiled_contracts is None:
             return True
 
-        source_mtime = self.get_source_modification_time()
+        source_mtime = get_latest_mtime(self.get_all_source_file_paths())
 
         if source_mtime is None:
             return True
@@ -170,20 +165,24 @@ class Project(object):
         else:
             return self._cached_compiled_contracts_mtime < source_mtime
 
-    def fill_contracts_cache(self, contracts, contracts_mtime):
+    def fill_contracts_cache(self, compiled_contracts, contracts_mtime):
         """
         :param contracts: become the Project's cache for compiled contracts
         :param contracts_mtime: last modification of supplied contracts
         :return:
         """
         self._cached_compiled_contracts_mtime = contracts_mtime
-        self._cached_compiled_contracts = contracts
+        self._cached_compiled_contracts = compiled_contracts
 
     @property
     def compiled_contract_data(self):
         if self.is_compiled_contract_cache_stale():
-            self._cached_compiled_contracts_mtime = self.get_source_modification_time()
-            _, self._cached_compiled_contracts = compile_project_contracts(self)
+            source_file_paths, compiled_contracts = compile_project_contracts(self)
+            contracts_mtime = get_latest_mtime(source_file_paths)
+            self.fill_contracts_cache(
+                compiled_contracts=compiled_contracts,
+                contracts_mtime=contracts_mtime,
+            )
         return self._cached_compiled_contracts
 
     #

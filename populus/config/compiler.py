@@ -47,7 +47,6 @@ class CompilerConfig(Config):
                     self.backend_class = backend_identifier
         else:
             raise ValueError(UNSUPPORTED_BACKEND_IDENTIFIER_MSG.format(backend_identifier))
-        assert False
 
     @property
     def backend(self):

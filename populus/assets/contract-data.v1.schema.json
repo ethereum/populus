@@ -1,0 +1,178 @@
+{
+  "title": "Populus contract data schema",
+  "description": "Defines the format for compiled contract data as it should be returned from compilation backends",
+  "type": "object",
+  "version": "1",
+  "required": [
+    "source_path",
+    "name"
+  ],
+  "properties": {
+    "abi": {
+      "$ref": "#/definitions/ABI"
+    },
+    "bytecode": {
+      "$ref": "#/definitions/HexidecimalString"
+    },
+    "bytecode_runtime": {
+      "$ref": "#/definitions/HexidecimalString"
+    },
+    "linkrefs": {
+      "$ref": "#/definitions/LinkReferences"
+    },
+    "metadata": {
+      "anyOf": [
+        {"$ref": "#/definitions/ContractMetadata"},
+        {"type": "null"}
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "ordered_dependencies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ContractDependency"
+      }
+    },
+    "source_path": {
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "ABI": {
+      "title": "Contract ABI",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {"$ref": "#/definitions/FunctionABI"},
+          {"$ref": "#/definitions/EventABI"},
+          {"$ref": "#/definitions/ConstructorABI"}
+        ]
+      }
+    },
+    "FunctionArgument": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {"type": "string"},
+        "type": {"type": "string"}
+      }
+    },
+    "EventArgument": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {"type": "string"},
+        "type": {"type": "string"},
+        "indexed": {"type": "boolean"}
+      }
+    },
+    "ConstructorABI": {
+      "type": "object",
+      "required": ["inputs", "type"],
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventArgument"
+          }
+        },
+        "payable": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["constructor"]
+        }
+      }
+    },
+    "ContractMetadata": {
+      "type": "object"
+    },
+    "EventABI": {
+      "type": "object",
+      "required": ["inputs", "name", "type"],
+      "properties": {
+        "anonymous": {
+          "type": "boolean"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventArgument"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["event"]
+        }
+      }
+    },
+    "FunctionABI": {
+      "type": "object",
+      "required": ["inputs", "name", "outputs", "type"],
+      "properties": {
+        "constant": {
+          "type": "boolean"
+        },
+        "payable": {
+          "type": "boolean"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FunctionArgument"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FunctionArgument"
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": ["function"]
+        }
+      }
+    },
+    "HexidecimalString": {
+      "type": "string"
+    },
+    "LinkReferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source_path",
+          "name",
+          "start",
+          "length"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "length": {
+            "type": "number",
+            "minimum": 1
+          }
+        }
+      }
+    }
+  }
+}

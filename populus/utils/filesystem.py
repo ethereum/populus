@@ -159,3 +159,14 @@ def is_under_path(base_path, path):
     absolute_base_path = os.path.abspath(base_path)
     absolute_path = os.path.abspath(path)
     return absolute_path.startswith(absolute_base_path)
+
+
+def get_latest_mtime(file_paths):
+    if not file_paths:
+        return None
+    else:
+        return max(
+            os.path.getmtime(path)
+            for path
+            in file_paths
+        )

@@ -78,12 +78,12 @@ def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
     if not chain_name:
         chain_name = select_chain(project)
 
-    contract_data = project.compiled_contract_data
+    compiled_contracts = project.compiled_contract_data
 
     if contracts_to_deploy:
         # validate that we *know* about all of the contracts
         unknown_contracts = set(contracts_to_deploy).difference(
-            contract_data.keys()
+            compiled_contracts.keys()
         )
         if unknown_contracts:
             unknown_contracts_message = (
@@ -91,7 +91,7 @@ def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
                 "compiled project contracts.  These contracts could not be found "
                 "'{0}'.  Searched these known contracts '{1}'".format(
                     ', '.join(sorted(unknown_contracts)),
-                    ', '.join(sorted(contract_data.keys())),
+                    ', '.join(compiled_contracts.keys()),
                 )
             )
             raise click.ClickException(unknown_contracts_message)
@@ -114,7 +114,7 @@ def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
         # Get the deploy order.
         deploy_order = get_deploy_order(
             contracts_to_deploy,
-            contract_data,
+            compiled_contracts,
         )
 
         # Display Start Message Info.
@@ -122,7 +122,7 @@ def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
             "Beginning contract deployment.  Deploying {0} total contracts ({1} "
             "Specified, {2} because of library dependencies)."
             "\n\n" +
-            (" > ".join(deploy_order.keys()))
+            (" > ".join(deploy_order))
         ).format(
             len(deploy_order),
             len(contracts_to_deploy),
@@ -130,7 +130,7 @@ def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
         )
         logger.info(starting_msg)
 
-        for contract_name, _ in deploy_order.items():
+        for contract_name in deploy_order:
             if not provider.are_contract_dependencies_available(contract_name):
                 raise ValueError(
                     "Something is wrong with the deploy order.  Some "

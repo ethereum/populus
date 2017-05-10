@@ -2,8 +2,11 @@ from __future__ import absolute_import
 
 import pprint
 
+from toolz.functoolz import (
+    pipe,
+)
+
 from eth_utils import (
-    compose,
     to_tuple,
 )
 
@@ -12,23 +15,27 @@ from populus.config.versions import (
     V2,
     V3,
     V4,
+    V5,
     KNOWN_VERSIONS,
     LATEST_VERSION,
 )
 from .v1 import upgrade_v1_to_v2
 from .v2 import upgrade_v2_to_v3
 from .v3 import upgrade_v3_to_v4
+from .v4 import upgrade_v4_to_v5
 
 
 UPGRADE_SEQUENCE = {
     V1: V2,
     V2: V3,
     V3: V4,
+    V4: V5,
 }
 UPGRADE_FUNCTIONS = {
     V1: upgrade_v1_to_v2,
     V2: upgrade_v2_to_v3,
     V3: upgrade_v3_to_v4,
+    V4: upgrade_v4_to_v5,
 }
 
 
@@ -68,8 +75,8 @@ def upgrade_config(config, to_version=LATEST_VERSION):
         ))
 
     upgrade_sequence = get_upgrade_sequence(current_version, to_version)
-    upgrade_fn = compose(*(
+    upgrade_functions = tuple(
         UPGRADE_FUNCTIONS[version] for version in upgrade_sequence
-    ))
-    upgraded_config = upgrade_fn(config)
+    )
+    upgraded_config = pipe(config, *upgrade_functions)
     return upgraded_config

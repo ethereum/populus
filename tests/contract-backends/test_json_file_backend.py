@@ -1,11 +1,13 @@
 import pytest
 
-import json
 import os
 
 from populus.config import Config
 from populus.contracts.exceptions import NoKnownAddress
-from populus.contracts.backends.filesystem import JSONFileBackend
+from populus.contracts.backends.filesystem import (
+    JSONFileBackend,
+    load_registrar_data,
+)
 
 from populus.utils.chains import (
     check_if_chain_matches_chain_uri,
@@ -37,7 +39,7 @@ def test_setting_an_address(project_dir, backend, web3):
     backend.set_contract_address('some-key', '0xd3cda913deb6f67967b99d67acdfa1712c293601')
 
     with open(os.path.join(project_dir, FILE_NAME)) as registrar_file:
-        registrar_data = json.load(registrar_file)
+        registrar_data = load_registrar_data(registrar_file)
 
     chain_definitions = registrar_data['deployments']
     assert len(chain_definitions) == 1

@@ -1,3 +1,4 @@
+import collections
 import functools
 import itertools
 
@@ -57,3 +58,13 @@ def apply_to_return_value(callback):
 
 chain_return = apply_to_return_value(itertools.chain.from_iterable)
 to_set = apply_to_return_value(set)
+
+
+def get_duplicates(values):
+    duplicates = {
+        key
+        for key, value
+        in collections.Counter(values).items()
+        if value > 1
+    }
+    return duplicates

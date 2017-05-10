@@ -1,10 +1,10 @@
 Release Notes
 =============
 
+.. _v1.7.0-release-notes:
+
 1.7.0
 -----
-
-.. _v1.6.9-release-notes:
 
 - Remove deprecated ``chain.contract_factories`` API.
 - Remove deprecated ``chain.get_contract_factory`` API.

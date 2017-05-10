@@ -1,5 +1,9 @@
 from __future__ import absolute_import
 
+from eth_utils import (
+    to_dict,
+)
+
 from populus.utils.contracts import (
     is_project_contract,
 )
@@ -23,11 +27,9 @@ class ProjectContractsBackend(BaseContractBackend):
     def get_contract_identifier(self, contract_name):
         return contract_name
 
+    @to_dict
     def get_all_contract_data(self):
-        project_contract_data = {
-            contract_name: contract_data
-            for contract_name, contract_data
-            in self.chain.project.compiled_contract_data.items()
-            if is_project_contract(self.chain.project.contracts_source_dir, contract_data)
-        }
-        return project_contract_data
+        compiled_contracts = self.chain.project.compiled_contract_data
+        for contract_name, contract_data in compiled_contracts.items():
+            if is_project_contract(self.chain.project.contracts_source_dir, contract_data):
+                yield contract_name, contract_data

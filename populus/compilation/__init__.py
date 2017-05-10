@@ -36,7 +36,7 @@ def compile_project_contracts(project):
         import_remappings=None,
     )
 
-    logger.info("> Found %s contract source files:\n%s", len(all_source_paths))
+    logger.info("> Found %s contract source files", len(all_source_paths))
     for path in all_source_paths:
         logger.info("  - %s", os.path.relpath(path))
 

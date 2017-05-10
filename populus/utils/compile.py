@@ -5,9 +5,6 @@ import json
 import logging
 
 from eth_utils import (
-    add_0x_prefix,
-    is_string,
-    to_dict,
     to_tuple,
 )
 

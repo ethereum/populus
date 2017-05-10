@@ -466,10 +466,7 @@ def watch_project_contracts(project, compiler_settings):
             logger.info("> Change detected in: %s", file_path)
             logger.info("> Loading source files from: %s", project.contracts_source_dir)
 
-            contract_source_paths, compiled_sources = compile_project_contracts(
-                project,
-                compiler_settings=compiler_settings,
-            )
+            contract_source_paths, compiled_sources = compile_project_contracts(project)
             write_compiled_sources(
                 project.compiled_contracts_asset_path,
                 compiled_sources,

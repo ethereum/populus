@@ -18,6 +18,7 @@ from populus.config.versions import (
     V1,
     V2,
     V3,
+    V4,
 )
 
 
@@ -27,7 +28,10 @@ from populus.config.versions import (
         (
             (V1, V2),
             (V1, V3),
+            (V1, V4),
             (V2, V3),
+            (V2, V4),
+            (V3, V4),
         ),
         (True, False),
     )),

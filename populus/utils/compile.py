@@ -5,9 +5,6 @@ import json
 import logging
 
 from eth_utils import (
-    add_0x_prefix,
-    is_string,
-    to_dict,
     to_tuple,
 )
 
@@ -61,45 +58,6 @@ def get_project_source_paths(contracts_source_dir):
 def get_test_source_paths(tests_dir):
     test_source_paths = find_solidity_source_files(tests_dir)
     return test_source_paths
-
-
-def process_compiler_output(name_from_compiler, data_from_compiler):
-    # TODO: use the source path.
-    _, _, contract_name = name_from_compiler.rpartition(':')
-    contract_data = normalize_contract_data(data_from_compiler)
-    return contract_name, contract_data
-
-
-def _load_json_if_string(value):
-    if is_string(value):
-        return json.loads(value)
-    else:
-        return value
-
-
-@to_dict
-def normalize_contract_data(contract_data):
-    if 'metadata' in contract_data:
-        yield 'metadata', normalize_contract_metadata(contract_data['metadata'])
-    if 'bin' in contract_data:
-        yield 'bytecode', add_0x_prefix(contract_data['bin'])
-    if 'bin-runtime' in contract_data:
-        yield 'bytecode_runtime', add_0x_prefix(contract_data['bin-runtime'])
-    if 'abi' in contract_data:
-        yield 'abi', _load_json_if_string(contract_data['abi'])
-    if 'userdoc' in contract_data:
-        yield 'userdoc', _load_json_if_string(contract_data['userdoc'])
-    if 'devdoc' in contract_data:
-        yield 'devdoc', _load_json_if_string(contract_data['devdoc'])
-
-
-def normalize_contract_metadata(metadata):
-    if not metadata:
-        return None
-    elif is_string(metadata):
-        return json.loads(metadata)
-    else:
-        raise ValueError("Unknown metadata format '{0}'".format(metadata))
 
 
 def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):

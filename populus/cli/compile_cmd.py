@@ -37,14 +37,12 @@ def compile_cmd(ctx, watch):
     """
     project = ctx.obj['PROJECT']
 
-    compiler_settings = project.config.get('compilation.settings', {})
-    _, compiled_contract_data = compile_project_contracts(project, compiler_settings)
+    _, compiled_contract_data = compile_project_contracts(project)
     write_compiled_sources(project.compiled_contracts_asset_path, compiled_contract_data)
 
     if watch:
         thread = spawn(
             watch_project_contracts,
             project=project,
-            compiler_settings=compiler_settings,
         )
         thread.join()

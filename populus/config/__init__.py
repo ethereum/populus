@@ -7,7 +7,7 @@ from .web3 import (  # noqa: F401
 from .chain import (  # noqa: F401
     ChainConfig,
 )
-from .compilation import (  # noqa: F401
+from .compiler import (  # noqa: F401
     CompilerConfig,
 )
 from .loading import (  # noqa: F401

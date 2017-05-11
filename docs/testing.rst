@@ -65,7 +65,7 @@ The :ref:`Project` object for your project.
         assert project.project_dir == '/path/to/my/project'
 
         # raw compiled contract access
-        assert 'MyContract' in project.compiled_contracts
+        assert 'MyContract' in project.compiled_contract_data
 
 
 Unmigrated Chain

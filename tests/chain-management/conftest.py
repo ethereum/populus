@@ -20,9 +20,9 @@ def inject_contracts(request):
 
 @pytest.yield_fixture()
 def temp_chain(project, wait_for_unlock):
-    assert 'Math' in project.compiled_contracts
-    assert 'Library13' in project.compiled_contracts
-    assert 'Multiply13' in project.compiled_contracts
+    assert 'Math' in project.compiled_contract_data
+    assert 'Library13' in project.compiled_contract_data
+    assert 'Multiply13' in project.compiled_contract_data
 
     with project.get_chain('temp') as chain:
         wait_for_unlock(chain.web3)
@@ -35,7 +35,7 @@ def math(temp_chain):
     web3 = chain.web3
 
     Math = chain.contract_factories.Math
-    MATH = chain.project.compiled_contracts['Math']
+    MATH = chain.project.compiled_contract_data['Math']
 
     math_deploy_txn_hash = Math.deploy()
     math_deploy_txn = web3.eth.getTransaction(math_deploy_txn_hash)
@@ -53,7 +53,7 @@ def library_13(temp_chain):
     web3 = chain.web3
 
     Library13 = chain.contract_factories.Library13
-    LIBRARY_13 = chain.project.compiled_contracts['Library13']
+    LIBRARY_13 = chain.project.compiled_contract_data['Library13']
 
     library_deploy_txn_hash = Library13.deploy()
     library_deploy_txn = web3.eth.getTransaction(library_deploy_txn_hash)

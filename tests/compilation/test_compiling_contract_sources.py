@@ -23,10 +23,10 @@ def test_compiling_project_contracts(project):
 
     assert 'contracts/Math.sol' in source_paths
 
-    assert 'Math' in contract_data
-    assert 'bytecode' in contract_data['Math']
-    assert 'bytecode_runtime' in contract_data['Math']
-    assert 'abi' in contract_data['Math']
+    assert 'Math' in contract_data['contracts']
+    assert 'bytecode' in contract_data['contracts']['Math']
+    assert 'bytecode_runtime' in contract_data['contracts']['Math']
+    assert 'abi' in contract_data['contracts']['Math']
 
 
 @load_contract_fixture('ImportTestA.sol')
@@ -35,23 +35,23 @@ def test_compiling_project_contracts(project):
 def test_compiling_with_local_project_imports(project):
     _, contract_data = compile_project_contracts(project)
 
-    assert 'ImportTestA' in contract_data
-    assert 'ImportTestB' in contract_data
-    assert 'ImportTestC' in contract_data
+    assert 'ImportTestA' in contract_data['contracts']
+    assert 'ImportTestB' in contract_data['contracts']
+    assert 'ImportTestC' in contract_data['contracts']
 
 
 @load_test_contract_fixture('TestMath.sol')
 def test_compiling_with_test_contracts(project):
     source_paths, contract_data = compile_project_contracts(project)
 
-    assert 'TestMath' in contract_data
+    assert 'TestMath' in contract_data['contracts']
 
 
 @load_contract_fixture('Abstract.sol')
 def test_compiling_with_abstract_contract(project):
     _, contract_data = compile_project_contracts(project)
 
-    assert 'Abstract' in contract_data
+    assert 'Abstract' in contract_data['contracts']
 
 
 @load_contract_fixture('Abstract.sol')
@@ -59,12 +59,12 @@ def test_compiling_with_abstract_contract(project):
 def test_compiling_with_abstract_contract_inhereted(project):
     _, contract_data = compile_project_contracts(project)
 
-    assert 'Abstract' in contract_data
-    assert 'UsesAbstract' in contract_data
+    assert 'Abstract' in contract_data['contracts']
+    assert 'UsesAbstract' in contract_data['contracts']
 
 
 @load_contract_fixture(GREETER_SOURCE_PATH)
 def test_compiling_example_greeter_contract(project):
     _, contract_data = compile_project_contracts(project)
 
-    assert 'Greeter' in contract_data
+    assert 'Greeter' in contract_data['contracts']

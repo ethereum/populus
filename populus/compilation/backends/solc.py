@@ -18,6 +18,12 @@ from solc.exceptions import (
     ContractsNotFound,
 )
 
+from populus.utils.deploy import compute_deploy_order
+from populus.utils.contracts import (
+    get_shallow_dependency_graph,
+    get_recursive_contract_dependencies,
+)
+
 from .base import BaseCompilerBackend
 
 
@@ -87,7 +93,24 @@ class SolcCombinedJSONBackend(BaseCompilerBackend):
             in compiled_contracts.items()
         )
 
-        return normalized_compiled_contracts
+        dependency_graph = get_shallow_dependency_graph(
+            normalized_compiled_contracts,
+        )
+
+        deploy_order = compute_deploy_order(dependency_graph)
+
+        for name, contract in normalized_compiled_contracts.items():
+            deps = get_recursive_contract_dependencies(
+                name,
+                dependency_graph,
+            )
+            contract['ordered_dependencies'] = [cid for cid in deploy_order if cid in deps]
+
+        return {
+            'contracts': normalized_compiled_contracts,
+            # 'dependency_graph': dependency_graph,
+            # 'deploy_order': deploy_order,
+        }
 
 
 class SolcStandardJSONBackend(BaseCompilerBackend):

@@ -7,8 +7,6 @@ from eth_utils import (
 )
 
 from populus.utils.contracts import (
-    get_shallow_dependency_graph,
-    get_recursive_contract_dependencies,
     verify_contract_bytecode,
 )
 from populus.utils.deploy import (
@@ -83,26 +81,10 @@ class Provider(object):
         return True
 
     def are_contract_dependencies_available(self, contract_identifier):
-        full_dependency_graph = get_shallow_dependency_graph(
-            self.chain.project.compiled_contract_data,
-        )
-        contract_dependencies = get_recursive_contract_dependencies(
-            contract_identifier,
-            full_dependency_graph,
-        )
+        cdata = self.chain.project.compiled_contract_data
+        contract_dependencies = cdata['contracts'][contract_identifier]['ordered_dependencies']
 
-        dependency_deploy_order = [
-            dependency_name
-            for dependency_name
-            in compute_deploy_order(full_dependency_graph)
-            if dependency_name in contract_dependencies
-        ]
-        for dependency_name in dependency_deploy_order:
-            if self.is_contract_available(dependency_name):
-                continue
-            return False
-        else:
-            return True
+        return all(self.is_contract_available(c) for c in contract_dependencies)
 
     def get_contract(self, contract_identifier):
         ContractFactory = self.get_contract_factory(contract_identifier)
@@ -130,21 +112,10 @@ class Provider(object):
         Same as get_contract but it will also lazily deploy the contract with
         the provided deployment arguments
         """
-        full_dependency_graph = get_shallow_dependency_graph(
-            self.chain.project.compiled_contract_data,
-        )
-        contract_dependencies = get_recursive_contract_dependencies(
-            contract_identifier,
-            full_dependency_graph,
-        )
+        cdata = self.chain.project.compiled_contract_data
+        contract_dependencies = cdata['contracts'][contract_identifier]['ordered_dependencies']
 
-        dependency_deploy_order = [
-            dependency_name
-            for dependency_name
-            in compute_deploy_order(full_dependency_graph)
-            if dependency_name in contract_dependencies
-        ]
-        for dependency_name in dependency_deploy_order:
+        for dependency_name in contract_dependencies:
             self.get_or_deploy_contract(dependency_name, deploy_transaction=deploy_transaction)
 
         ContractFactory = self.get_contract_factory(contract_identifier)

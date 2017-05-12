@@ -40,8 +40,8 @@ def compile_project_contracts(project):
     for path in all_source_paths:
         logger.info("  - %s", os.path.relpath(path))
 
-    logger.info("> Compiled %s contracts", len(compiled_contract_data))
-    for contract_name in sorted(compiled_contract_data.keys()):
+    logger.info("> Compiled %s contracts", len(compiled_contract_data['contracts']))
+    for contract_name in sorted(compiled_contract_data['contracts'].keys()):
         logger.info("  - %s", contract_name)
 
     return all_source_paths, compiled_contract_data

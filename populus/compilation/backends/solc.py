@@ -12,6 +12,7 @@ from eth_utils import (
 
 from solc import (
     compile_files,
+    compile_standard,
 )
 from solc.exceptions import (
     ContractsNotFound,
@@ -62,10 +63,18 @@ class SolcCombinedJSONBackend(BaseCompilerBackend):
     logger = logging.getLogger('populus.compilation.backends.solc.SolcCombinedJSONBackend')
 
     def get_compiled_contract_data(self, source_file_paths, import_remappings):
+        self.logger.debug("Import remappings: %s", import_remappings)
         self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
 
+        if 'import_remappings' in self.compiler_settings and import_remappings is not None:
+            self.logger.warn("Import remappings setting will by overridden by backend settings")
+
         try:
-            compiled_contracts = compile_files(source_file_paths, **self.compiler_settings)
+            compiled_contracts = compile_files(
+                source_file_paths,
+                import_remappings=import_remappings,
+                **self.compiler_settings,
+            )
         except ContractsNotFound:
             return {}
 
@@ -85,4 +94,32 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
     logger = logging.getLogger('populus.compilation.backends.solc.SolcStandardJSONBackend')
 
     def get_compiled_contract_data(self, source_file_paths, import_remappings):
-        raise NotImplementedError("Not yet implemented")
+        self.logger.debug("Import remappings: %s", import_remappings)
+        self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
+
+        if 'remappings' in self.compiler_settings and import_remappings is not None:
+            self.logger.warn("Import remappings setting will by overridden by backend settings")
+
+        sources = {}
+        for sfp in source_file_paths:
+            with open(sfp) as f:
+                sources[sfp] = { 'content': f.read() }
+
+        std_input = {
+            'language': 'Solidity',
+            'sources': sources,
+            'settings': {
+                'remappings': import_remappings
+            }
+        }
+        std_input['settings'].update(self.compiler_settings)
+
+
+        try:
+            compiled_contracts = compile_standard(std_input)
+        except ContractsNotFound:
+            return {}
+
+        # self.logger.debug("Got contracts %s", json.dumps(compiled_contracts, sort_keys=True, indent=2))
+
+        return compiled_contracts

@@ -14,7 +14,7 @@ from populus.utils.testing import (
 
 @load_contract_fixture('Math.sol')
 def test_getting_source_file_for_project_contract(project):
-    source_file_path = get_contract_source_file_path(project.compiled_contract_data['contracts']['Math'])
+    source_file_path = get_contract_source_file_path(project.compiled_contract_data['Math'])
     expected_path = os.path.join(project.contracts_source_dir, 'Math.sol')
     assert is_same_path(source_file_path, expected_path)
 
@@ -22,6 +22,6 @@ def test_getting_source_file_for_project_contract(project):
 @load_contract_fixture('Multiply13.sol')
 @load_contract_fixture('Library13.sol')
 def test_getting_source_file_for_project_contract_with_library_dependency(project):
-    source_file_path = get_contract_source_file_path(project.compiled_contract_data['contracts']['Multiply13'])
+    source_file_path = get_contract_source_file_path(project.compiled_contract_data['Multiply13'])
     expected_path = os.path.join(project.contracts_source_dir, 'Multiply13.sol')
     assert is_same_path(source_file_path, expected_path)

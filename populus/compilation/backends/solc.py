@@ -82,7 +82,7 @@ class SolcCombinedJSONBackend(BaseCompilerBackend):
                 **self.compiler_settings,
             )
         except ContractsNotFound:
-            return {'contracts': {}}
+            return {}
 
         normalized_compiled_contracts = dict(
             (
@@ -106,11 +106,7 @@ class SolcCombinedJSONBackend(BaseCompilerBackend):
             )
             contract['ordered_dependencies'] = [cid for cid in deploy_order if cid in deps]
 
-        return {
-            'contracts': normalized_compiled_contracts,
-            # 'dependency_graph': dependency_graph,
-            # 'deploy_order': deploy_order,
-        }
+        return normalized_compiled_contracts
 
 
 class SolcStandardJSONBackend(BaseCompilerBackend):

@@ -173,7 +173,7 @@ class BaseChain(object):
             "the `chain.provider` and `chain.provider` API to access contract "
             "factory data"
         ))
-        compiled_contracts = self.project.compiled_contracts['contracts']
+        compiled_contracts = self.project.compiled_contracts
 
         return construct_contract_factories(
             self.web3,

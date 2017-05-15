@@ -64,7 +64,7 @@ def deploy_cmd(ctx, chain_name, contracts_to_deploy):
     if not chain_name:
         chain_name = select_chain(project)
 
-    compiled_contracts = project.compiled_contracts['contracts']
+    compiled_contracts = project.compiled_contracts
 
     if contracts_to_deploy:
         # validate that we *know* about all of the contracts

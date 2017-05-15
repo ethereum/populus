@@ -14,7 +14,7 @@ from populus.utils.linking import (
 def test_get_contract_factory_with_no_dependencies(chain):
     provider = chain.provider
 
-    MATH = chain.project.compiled_contract_data['contracts']['Math']
+    MATH = chain.project.compiled_contract_data['Math']
     Math = provider.get_contract_factory('Math')
 
     assert Math.bytecode == MATH['bytecode']
@@ -35,7 +35,7 @@ def test_get_contract_factory_with_dependency(chain,
 
     registrar.set_contract_address('Library13', library_13.address)
 
-    MULTIPLY_13 = chain.project.compiled_contract_data['contracts']['Multiply13']
+    MULTIPLY_13 = chain.project.compiled_contract_data['Multiply13']
     Multiply13 = provider.get_contract_factory('Multiply13')
 
     expected_bytecode = link_bytecode_by_name(

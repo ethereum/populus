@@ -187,7 +187,7 @@ def library_13(chain):
 
 @pytest.fixture()
 def multiply_13(chain, library_13):
-    Multiply13 = chain.project.compiled_contract_data['contracts']['Multiply13']
+    Multiply13 = chain.project.compiled_contract_data['Multiply13']
 
     bytecode = link_bytecode_by_name(
         Multiply13['bytecode'],

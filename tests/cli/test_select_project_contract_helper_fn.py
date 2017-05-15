@@ -29,9 +29,9 @@ def test_select_project_contract_helper(project_dir,
 
     project = Project()
 
-    assert 'A' in project.compiled_contract_data['contracts']
-    assert 'B' in project.compiled_contract_data['contracts']
-    assert 'C' in project.compiled_contract_data['contracts']
+    assert 'A' in project.compiled_contract_data
+    assert 'B' in project.compiled_contract_data
+    assert 'C' in project.compiled_contract_data
 
     @click.command()
     def wrapper():
@@ -59,9 +59,9 @@ def test_select_project_contract_helper(project_dir,
 
     project = Project()
 
-    assert 'A' in project.compiled_contract_data['contracts']
-    assert 'B' in project.compiled_contract_data['contracts']
-    assert 'C' in project.compiled_contract_data['contracts']
+    assert 'A' in project.compiled_contract_data
+    assert 'B' in project.compiled_contract_data
+    assert 'C' in project.compiled_contract_data
 
     @click.command()
     def wrapper():

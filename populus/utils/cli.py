@@ -485,7 +485,7 @@ def watch_project_contracts(project, compiler_settings):
 
 
 def select_project_contract(project):
-    contract_names = sorted(project.compiled_contract_data['contracts'].keys())
+    contract_names = sorted(project.compiled_contract_data.keys())
     contract_choices = [
         " {idx}: {name}".format(
             idx=str(idx).rjust(3),
@@ -500,7 +500,7 @@ def select_project_contract(project):
         )
     )
     contract_name = click.prompt(select_contract_message)
-    if contract_name in project.compiled_contract_data['contracts']:
+    if contract_name in project.compiled_contract_data:
         return contract_name
     elif contract_name.isdigit() and int(contract_name) < len(contract_names):
         return contract_names[int(contract_name)]

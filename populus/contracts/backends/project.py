@@ -27,7 +27,7 @@ class ProjectContractsBackend(BaseContractBackend):
         project_contract_data = {
             contract_name: contract_data
             for contract_name, contract_data
-            in self.chain.project.compiled_contract_data['contracts'].items()
+            in self.chain.project.compiled_contract_data.items()
             if is_project_contract(self.chain.project.contracts_source_dir, contract_data)
         }
         return project_contract_data

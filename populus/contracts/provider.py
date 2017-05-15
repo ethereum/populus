@@ -81,8 +81,8 @@ class Provider(object):
         return True
 
     def are_contract_dependencies_available(self, contract_identifier):
-        cdata = self.chain.project.compiled_contract_data
-        contract_dependencies = cdata['contracts'][contract_identifier]['ordered_dependencies']
+        cdata = self.get_contract_data(contract_identifier)
+        contract_dependencies = cdata['ordered_dependencies']
 
         return all(self.is_contract_available(c) for c in contract_dependencies)
 
@@ -112,8 +112,8 @@ class Provider(object):
         Same as get_contract but it will also lazily deploy the contract with
         the provided deployment arguments
         """
-        cdata = self.chain.project.compiled_contract_data
-        contract_dependencies = cdata['contracts'][contract_identifier]['ordered_dependencies']
+        cdata = self.get_contract_data(contract_identifier)
+        contract_dependencies = cdata['ordered_dependencies']
 
         for dependency_name in contract_dependencies:
             self.get_or_deploy_contract(dependency_name, deploy_transaction=deploy_transaction)
@@ -164,7 +164,7 @@ class Provider(object):
         Returns a dictionary containing the compiler output for the given
         contract identifier.
         """
-        for backend in self.provider_backends.value():
+        for backend in self.provider_backends.values():
             try:
                 return backend.get_contract_data(contract_identifier)
             except UnknownContract:

@@ -82,7 +82,7 @@ class SolcCombinedJSONBackend(BaseCompilerBackend):
                 **self.compiler_settings,
             )
         except ContractsNotFound:
-            return {}
+            return {'contracts': {}}
 
         normalized_compiled_contracts = dict(
             (

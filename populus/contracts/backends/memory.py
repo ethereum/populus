@@ -1,7 +1,8 @@
-import collections
-
 from populus.contracts.exceptions import (
     NoKnownAddress,
+)
+from populus.utils.contract_key_mapping import (
+    DefaultContractKeyMapping,
 )
 
 from .base import BaseContractBackend
@@ -18,7 +19,7 @@ class MemoryBackend(BaseContractBackend):
     contract_addresses = None
 
     def setup_backend(self):
-        self.contract_addresses = collections.defaultdict(set)
+        self.contract_addresses = DefaultContractKeyMapping(set)
 
     #
     # Registrar API

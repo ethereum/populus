@@ -18,6 +18,10 @@ from populus.utils.chains import (
     get_chain_definition,
     check_if_chain_matches_chain_uri,
 )
+from populus.utils.contract_key_mapping import (
+    ContractKeyMapping,
+    ContractKeyMappingEncoder,
+)
 
 from .base import (
     BaseContractBackend,
@@ -29,6 +33,16 @@ def get_matching_chain_definitions(web3, values):
     for chain_definition in values:
         if check_if_chain_matches_chain_uri(web3, chain_definition):
             yield chain_definition
+
+
+def load_registrar_data(registrar_file):
+    registrar_data = json.load(registrar_file)
+    registrar_data.setdefault('deployments', {})
+
+    for chain_definition, raw_map in registrar_data['deployments'].items():
+        registrar_data['deployments'][chain_definition] = ContractKeyMapping.from_dict(raw_map)
+
+    return registrar_data
 
 
 class JSONFileBackend(BaseContractBackend):
@@ -46,6 +60,7 @@ class JSONFileBackend(BaseContractBackend):
             registrar_data,
             'deployments.{0}.{1}'.format(chain_definition, instance_identifier),
             address,
+            mapping_type=ContractKeyMapping,
         )
 
         with open(self.registrar_path, 'w') as registrar_file:
@@ -55,6 +70,7 @@ class JSONFileBackend(BaseContractBackend):
                 sort_keys=True,
                 indent=2,
                 separators=(',', ': '),
+                cls=ContractKeyMappingEncoder
             )
 
     @to_tuple
@@ -85,14 +101,13 @@ class JSONFileBackend(BaseContractBackend):
     def registrar_path(self):
         return self.config.get('file_path', './registrar.json')
 
-    _registrar_data = None
-
     @property
     def registrar_data(self):
         # TODO: this could be cached using mtime of the file.
         if os.path.exists(self.registrar_path):
             with open(self.registrar_path, 'r') as registrar_file:
-                registrar_data = json.load(registrar_file)
+                registrar_data = load_registrar_data(registrar_file)
         else:
-            registrar_data = {}
+            registrar_data = {'deployments':{}}
+
         return registrar_data

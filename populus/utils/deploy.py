@@ -3,6 +3,8 @@ from collections import OrderedDict
 
 import toposort
 
+from populus.utils.contract_key_mapping import ContractKeyMapping
+
 from populus.utils.contracts import (
     get_shallow_dependency_graph,
     get_recursive_contract_dependencies,
@@ -14,6 +16,9 @@ def compute_deploy_order(dependency_graph):
     Given a dictionary that maps contract names to their link dependencies,
     determine the overall dependency ordering for that set of contracts.
     """
+    if isinstance(dependency_graph, ContractKeyMapping):
+        dependency_graph = dependency_graph.contracts
+
     return toposort.toposort_flatten(dependency_graph)
 
 

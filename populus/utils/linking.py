@@ -1,3 +1,4 @@
+import json
 import re
 import functools
 import collections
@@ -16,11 +17,9 @@ from .formatting import (
 
 
 DEPENDENCY_RE = (
-    '__'  # Prefixed by double underscore
-    '[a-zA-Z_]'  # First letter must be alpha or underscore
-    '[a-zA-Z0-9_]{0,59}?'  # Intermediate letters
-    '_{0,59}'
-    '__'  # End with a double underscore
+    r'__'  # Prefixed by double underscore
+    r'.{36}'  # 36 characters of dubious character
+    r'__'  # End with a double underscore
 )
 
 
@@ -36,7 +35,7 @@ def remove_dunderscore_wrapper(value):
 
 @to_tuple
 @coerce_args_to_text
-def find_link_references(bytecode, full_reference_names):
+def find_link_references(bytecode, reference_keys):
     """
     Given bytecode, this will return all of the linked references from within
     the bytecode.
@@ -45,7 +44,7 @@ def find_link_references(bytecode, full_reference_names):
 
     expand_fn = functools.partial(
         expand_shortened_reference_name,
-        full_reference_names=full_reference_names,
+        reference_keys=reference_keys,
     )
 
     link_references = tuple((
@@ -60,38 +59,62 @@ def find_link_references(bytecode, full_reference_names):
     return link_references
 
 
-def expand_shortened_reference_name(short_name, full_reference_names):
+def expand_shortened_reference_name(short_key, reference_keys):
     """
     Link references whos names are longer than their bytecode representations
     will get truncated to 4 characters short of their full name because of the
     double underscore prefix and suffix.
 
-    This expands `short_name` to it's full name or raise a value error if it is
+    This expands `short_key` to it's full name or raise a value error if it is
     unable to find an appropriate expansion.
     """
-    if short_name in full_reference_names:
-        return short_name
+    short_path, sep, short_name = short_key.rpartition(':')
+
+    use_primitive = True
+    processed_reference_keys = []
+    for k in reference_keys:
+        if isinstance(k, tuple):
+            use_primitive = False
+        else:
+            path, _, sym = k.rpartition(':')
+            k = (path, sym)
+        processed_reference_keys.append(k)
+
+    if (short_path, short_name) in processed_reference_keys:
+        if use_primitive:
+            return short_key
+        else:
+            return (short_path, short_name)
 
     candidates = [
-        full_name for full_name in full_reference_names if full_name.startswith(short_name)
+        (full_path, full_name) for full_path, full_name in processed_reference_keys
+        if (full_path+':'+full_name).startswith(short_key) or
+           full_name.startswith(short_key) or
+           not full_path and full_name.startswith(short_name)
     ]
     if len(candidates) == 1:
-        return candidates[0]
+        if use_primitive:
+            path, sym = candidates[0]
+            if path:
+                return path+':'+sym
+            return sym
+        else:
+            return candidates[0]
     elif len(candidates) > 1:
         raise ValueError(
             "Multiple candidates found trying to expand '{0}'.  Found '{1}'. "
             "Searched '{2}'".format(
-                short_name,
-                ','.join(candidates),
-                ','.join(full_reference_names),
+                short_key,
+                candidates,
+                processed_reference_keys,
             )
         )
     else:
         raise ValueError(
             "Unable to expand '{0}'. "
-            "Searched '{1}'".format(
-                short_name,
-                ','.join(full_reference_names),
+            "Searched {1}".format(
+                short_key,
+                json.dumps(list(processed_reference_keys), indent=2),
             )
         )
 
@@ -127,9 +150,14 @@ def link_bytecode_by_name(bytecode, **link_names_and_values):
     Helper function for linking bytecode with a mapping of link reference names
     to their values.
     """
-    unresolved_link_references = find_link_references(bytecode, link_names_and_values.keys())
+    processed_link_names_and_values = {}
+    for rawkey, value in link_names_and_values.items():
+        path, _, sym = rawkey.rpartition(':')
+        processed_link_names_and_values[(path, sym)] = value
+
+    unresolved_link_references = find_link_references(bytecode, processed_link_names_and_values.keys())
     link_reference_values = [
-        (link_reference, link_names_and_values[link_reference.full_name])
+        (link_reference, processed_link_names_and_values[link_reference.full_name])
         for link_reference in unresolved_link_references
     ]
     linked_bytecode = link_bytecode(bytecode, link_reference_values)

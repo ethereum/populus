@@ -6,6 +6,8 @@ from eth_utils import (
     remove_0x_prefix,
 )
 
+from populus.utils.contract_key_mapping import ContractKeyMapping
+
 from .filesystem import (
     is_under_path,
 )
@@ -90,11 +92,12 @@ def create_contract_factory(web3, contract_name, contract_data):
 
 
 def construct_contract_factories(web3, contracts):
-    contract_classes = {
-        contract_name: create_contract_factory(web3, contract_name, contract_data)
-        for contract_name, contract_data
-        in contracts.items()
-    }
+    contract_classes = {}
+    for (_, contract_name), contract_data in contracts.items():
+        if contract_name in contract_classes:
+            raise ValueError('Name `{}` appears multiple times in {}'.format(contract_name, contracts))
+        contract_classes[contract_name] = create_contract_factory(web3, contract_name, contract_data)
+
     return package_contracts(contract_classes)
 
 
@@ -103,16 +106,32 @@ def get_shallow_dependency_graph(contracts):
     Given a dictionary of compiled contract data, this returns a *shallow*
     dependency graph of each contracts explicit link dependencies.
     """
+    use_primitive = isinstance(contracts, dict)
+
+    if use_primitive:
+        contracts = ContractKeyMapping.from_dict(contracts)
+
     link_dependencies = {
-        contract_name: set(ref.full_name for ref in find_link_references(
+        contract_key: set(ref.full_name for ref in find_link_references(
             contract_data['bytecode'],
             contracts.keys(),
         ))
-        for contract_name, contract_data
+        for contract_key, contract_data
         in contracts.items()
         if is_string(contract_data.get('bytecode'))
     }
-    return link_dependencies
+
+    if use_primitive:
+        if all(not path and all(not dpath for (dpath, dsym) in depset)
+               for (path, sym), depset in link_dependencies.items()):
+            return {
+                sym: set(dsym for (_, dsym) in depset)
+                for (_, sym), depset in link_dependencies.items()
+            }
+
+        return link_dependencies
+
+    return ContractKeyMapping(link_dependencies)
 
 
 def get_recursive_contract_dependencies(contract_name, dependency_graph):

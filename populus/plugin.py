@@ -16,7 +16,7 @@ def project(request):
     project = Project()
 
     project.fill_contracts_cache(contracts, mtime)
-    request.config.cache.set(CACHE_KEY_CONTRACTS, project.compiled_contract_data)
+    request.config.cache.set(CACHE_KEY_CONTRACTS, project.compiled_contract_data.to_dict())
     request.config.cache.set(CACHE_KEY_MTIME, project.get_source_modification_time())
 
     return project

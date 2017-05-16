@@ -6,6 +6,8 @@ from eth_utils import (
     to_tuple,
 )
 
+from populus.utils.contract_key_mapping import ContractKeyMapping
+
 from populus.utils.contracts import (
     verify_contract_bytecode,
 )
@@ -57,7 +59,7 @@ class Provider(object):
     def __init__(self, chain, provider_backends):
         self.chain = chain
         self.provider_backends = provider_backends
-        self._factory_cache = lrucache(128)
+        self._factory_cache = ContractKeyMapping(lrucache(128))
 
     def is_contract_available(self, contract_identifier):
         try:

@@ -35,7 +35,9 @@ def build_populus_meta(chain, contract_identifier, contract_data):
         'is_test_contract',
         is_test_contract(chain.project.tests_dir, contract_data),
     )
-    yield 'contract_type_name', normalize_class_name(contract_identifier)
+    if isinstance(contract_identifier, tuple):
+        _, contract_identifier = contract_identifier
+    yield 'contract_type_name', normalize_class_name(contract_identifier).rpartition(':')[2]
 
 
 CONTRACT_FACTORY_FIELDS = {

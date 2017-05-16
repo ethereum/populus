@@ -21,13 +21,8 @@ class ProjectContractsBackend(BaseContractBackend):
     # Provider API
     #
     def get_contract_identifier(self, contract_name):
-        return contract_name
+        ccd = self.chain.project.compiled_contract_data
+        return ccd.normalize_key(contract_name, return_on_no_match=True)
 
     def get_all_contract_data(self):
-        project_contract_data = {
-            contract_name: contract_data
-            for contract_name, contract_data
-            in self.chain.project.compiled_contract_data.items()
-            if is_project_contract(self.chain.project.contracts_source_dir, contract_data)
-        }
-        return project_contract_data
+        return self.chain.project.compiled_contract_data

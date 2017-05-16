@@ -17,7 +17,7 @@ from populus.config import (
 from populus.legacy.config import (
     check_if_ini_config_file_exists,
 )
-
+from populus.utils.contract_key_mapping import ContractKeyMapping
 from populus.utils.chains import (
     get_base_blockchain_storage_dir,
 )
@@ -234,6 +234,9 @@ class Project(object):
         :param contracts_mtime: last modification of supplied contracts
         :return:
         """
+        if isinstance(contracts, dict):
+            contracts = ContractKeyMapping.from_dict(contracts)
+
         self._cached_compiled_contracts_mtime = contracts_mtime
         self._cached_compiled_contracts = contracts
 

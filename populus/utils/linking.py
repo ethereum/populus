@@ -33,6 +33,19 @@ def remove_dunderscore_wrapper(value):
     return remove_dunderscore_prefix(value.rstrip('_'))
 
 
+def convert_linkrefs_from_standard_json(linkrefs):
+    return tuple((
+        LinkReference(
+            reference_name=None,
+            full_name=(path, name),
+            offset=loc['start']*2,
+            length=loc['length']*2,
+        ) for path, names in linkrefs.items()
+            for name, locs in names.items()
+                for loc in locs
+    ))
+
+
 @to_tuple
 @coerce_args_to_text
 def find_link_references(bytecode, reference_keys):

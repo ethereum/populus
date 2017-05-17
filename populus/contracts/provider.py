@@ -10,13 +10,13 @@ from populus.utils.contract_key_mapping import ContractKeyMapping
 
 from populus.utils.contracts import (
     verify_contract_bytecode,
+    get_link_references,
 )
 from populus.utils.deploy import (
     compute_deploy_order,
 )
 from populus.utils.linking import (
     link_bytecode,
-    find_link_references,
 )
 
 from .exceptions import (
@@ -209,8 +209,10 @@ class Provider(object):
 
         BaseContractFactory = self.get_base_contract_factory(contract_identifier)
 
-        bytecode = self._link_bytecode(BaseContractFactory.bytecode)
-        bytecode_runtime = self._link_bytecode(BaseContractFactory.bytecode_runtime)
+        contract_data = self.get_contract_data(contract_identifier)
+
+        bytecode = self._link_bytecode(contract_data)
+        bytecode_runtime = self._link_bytecode(contract_data, is_runtime=True)
 
         ContractFactory = BaseContractFactory.factory(
             web3=BaseContractFactory.web3,
@@ -224,7 +226,7 @@ class Provider(object):
     #
     # Private API
     #
-    def _link_bytecode(self, bytecode):
+    def _link_bytecode(self, contract_data, is_runtime=False):
         """
         Return the fully linked contract bytecode.
 
@@ -233,14 +235,20 @@ class Provider(object):
         `get_contract_address` then the bytecode of sub-dependencies is not
         verified.
         """
+        bytecode_key = 'bytecode'
+        if is_runtime:
+            bytecode_key += '_runtime'
+
         resolved_link_references = tuple((
             (link_reference, self.chain.provider.get_contract(link_reference.full_name).address)
             for link_reference
-            in find_link_references(
-                bytecode,
+            in get_link_references(
+                contract_data,
                 self.get_all_contract_names(),
+                is_runtime=is_runtime
             )
         ))
 
-        linked_bytecode = link_bytecode(bytecode, resolved_link_references)
+        linked_bytecode = link_bytecode(contract_data[bytecode_key], resolved_link_references)
+
         return linked_bytecode

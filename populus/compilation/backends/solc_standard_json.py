@@ -13,10 +13,13 @@ from solc.exceptions import (
     ContractsNotFound,
 )
 
+from populus.utils.contract_key_mapping import ContractKeyMapping
+
 from .base import (
     BaseCompilerBackend,
     _load_json_if_string,
     _normalize_contract_metadata,
+    add_dependency_info,
 )
 
 
@@ -24,10 +27,16 @@ from .base import (
 def _normalize_standard_json_contract_data(contract_data):
     if 'metadata' in contract_data:
         yield 'metadata', _normalize_contract_metadata(contract_data['metadata'])
-    if 'bin' in contract_data:
-        yield 'bytecode', add_0x_prefix(contract_data['bin'])
-    if 'bin-runtime' in contract_data:
-        yield 'bytecode_runtime', add_0x_prefix(contract_data['bin-runtime'])
+    if 'evm' in contract_data:
+        evm_data = contract_data['evm']
+        if 'bytecode' in evm_data:
+            yield 'bytecode', add_0x_prefix(evm_data['bytecode'].get('object', ''))
+            if 'linkReferences' in evm_data['bytecode']:
+                yield 'linkrefs', evm_data['bytecode']['linkReferences']
+        if 'deployedBytecode' in evm_data:
+            yield 'bytecode_runtime', add_0x_prefix(evm_data['deployedBytecode'].get('object', ''))
+            if 'linkReferences' in evm_data['deployedBytecode']:
+                yield 'linkrefs_runtime', evm_data['deployedBytecode']['linkReferences']
     if 'abi' in contract_data:
         yield 'abi', _load_json_if_string(contract_data['abi'])
     if 'userdoc' in contract_data:
@@ -62,10 +71,17 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
 
 
         try:
-            compiled_contracts = compile_standard(std_input)
+            compilation_result = compile_standard(std_input)
         except ContractsNotFound:
             return {}
 
         # self.logger.debug("Got contracts %s", json.dumps(compiled_contracts, sort_keys=True, indent=2))
+        compiled_contracts = {
+            (path, name): _normalize_standard_json_contract_data(contract)
+            for path, file_contracts in compilation_result['contracts'].items()
+                for name, contract in file_contracts.items()
+        }
 
-        return compiled_contracts
+        add_dependency_info(compiled_contracts)
+
+        return ContractKeyMapping(compiled_contracts)

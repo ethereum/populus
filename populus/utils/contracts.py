@@ -13,6 +13,7 @@ from .filesystem import (
 )
 from .linking import (
     find_link_references,
+    convert_linkrefs_from_standard_json,
 )
 from .mappings import (
     get_nested_key,
@@ -101,9 +102,30 @@ def construct_contract_factories(web3, contracts):
     return package_contracts(contract_classes)
 
 
+def get_link_references(contract_data, ref_candidates, is_runtime=False):
+    bytecode_key = 'bytecode'
+    linkrefs_key = 'linkrefs'
+
+    if is_runtime:
+        bytecode_key += '_runtime'
+        linkrefs_key += '_runtime'
+
+    if linkrefs_key in contract_data:
+        return convert_linkrefs_from_standard_json(contract_data[linkrefs_key])
+
+    metadata_sources = (contract_data.get('metadata') or {}).get('sources')
+    if metadata_sources is not None:
+        ref_candidates = tuple(
+            (path, name) for path, name in ref_candidates
+            if not path or path in metadata_sources.keys()
+        )
+
+    return find_link_references(contract_data[bytecode_key], ref_candidates)
+
+
 def get_shallow_dependency_graph(contracts):
     """
-    Given a dictionary of compiled contract data, this returns a *shallow*
+    Given a dictionary or mapping of compiled contract data, this returns a *shallow*
     dependency graph of each contracts explicit link dependencies.
     """
     use_primitive = isinstance(contracts, dict)
@@ -112,8 +134,8 @@ def get_shallow_dependency_graph(contracts):
         contracts = ContractKeyMapping.from_dict(contracts)
 
     link_dependencies = {
-        contract_key: set(ref.full_name for ref in find_link_references(
-            contract_data['bytecode'],
+        contract_key: set(ref.full_name for ref in get_link_references(
+            contract_data,
             contracts.keys(),
         ))
         for contract_key, contract_data
@@ -122,6 +144,7 @@ def get_shallow_dependency_graph(contracts):
     }
 
     if use_primitive:
+        # if all path components are empty, then return with string keys
         if all(not path and all(not dpath for (dpath, dsym) in depset)
                for (path, sym), depset in link_dependencies.items()):
             return {

@@ -25,12 +25,12 @@ FULL_NAMES = (
         ('0x', tuple()),
         ('', tuple()),
         (
-            '0x__NothingButLink__',
+            '0x__NothingButLink________________________',
             (
                 {
                     'name': 'NothingButLink',
                     'offset': 0,
-                    'length': 18,
+                    'length': 40,
                 },
             ),
         ),
@@ -45,27 +45,27 @@ FULL_NAMES = (
             ),
         ),
         (
-            '0xabcdef__Some32ByteValue_______________________________________________12345',
+            '0xabcdef__Some32ByteValue_______________________12345',
             (
                 {
                     'name': 'Some32ByteValue',
                     'offset': 6,
-                    'length': 64,
+                    'length': 40,
                 },
             )
         ),
         (
-            '0xabcdef__Close__12345__Together__abcdef',
+            '0xabcdef__Close___________________________________Together______________________________abcdef',
             (
                 {
                     'name': 'Close',
                     'offset': 6,
-                    'length': 9,
+                    'length': 40,
                 },
                 {
                     'name': 'Together',
-                    'offset': 20,
-                    'length': 12,
+                    'offset': 46,
+                    'length': 40,
                 },
             )
         ),

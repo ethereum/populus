@@ -33,7 +33,7 @@ def compile_project_contracts(project):
     compiler_backend = project.get_compiler_backend()
     compiled_contract_data = compiler_backend.get_compiled_contract_data(
         source_file_paths=all_source_paths,
-        import_remappings=None,
+        import_remappings=project.config.get('compilation.import_remappings'),
     )
 
     logger.info("> Found %s contract source files", len(all_source_paths))
@@ -41,7 +41,7 @@ def compile_project_contracts(project):
         logger.info("  - %s", os.path.relpath(path))
 
     logger.info("> Compiled %s contracts", len(compiled_contract_data))
-    for contract_name in sorted(compiled_contract_data.keys()):
-        logger.info("  - %s", contract_name)
+    for contract_key in sorted(compiled_contract_data.keys()):
+        logger.info("  - %s", contract_key)
 
     return all_source_paths, compiled_contract_data

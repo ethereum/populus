@@ -6,17 +6,17 @@ from eth_utils import (
     to_tuple,
 )
 
+from populus.utils.contract_key_mapping import ContractKeyMapping
+
 from populus.utils.contracts import (
-    get_shallow_dependency_graph,
-    get_recursive_contract_dependencies,
     verify_contract_bytecode,
+    get_link_references,
 )
 from populus.utils.deploy import (
     compute_deploy_order,
 )
 from populus.utils.linking import (
     link_bytecode,
-    find_link_references,
 )
 
 from .exceptions import (
@@ -59,7 +59,7 @@ class Provider(object):
     def __init__(self, chain, provider_backends):
         self.chain = chain
         self.provider_backends = provider_backends
-        self._factory_cache = lrucache(128)
+        self._factory_cache = ContractKeyMapping(lrucache(128))
 
     def is_contract_available(self, contract_identifier):
         try:
@@ -83,26 +83,10 @@ class Provider(object):
         return True
 
     def are_contract_dependencies_available(self, contract_identifier):
-        full_dependency_graph = get_shallow_dependency_graph(
-            self.chain.project.compiled_contract_data,
-        )
-        contract_dependencies = get_recursive_contract_dependencies(
-            contract_identifier,
-            full_dependency_graph,
-        )
+        cdata = self.get_contract_data(contract_identifier)
+        contract_dependencies = cdata['ordered_dependencies']
 
-        dependency_deploy_order = [
-            dependency_name
-            for dependency_name
-            in compute_deploy_order(full_dependency_graph)
-            if dependency_name in contract_dependencies
-        ]
-        for dependency_name in dependency_deploy_order:
-            if self.is_contract_available(dependency_name):
-                continue
-            return False
-        else:
-            return True
+        return all(self.is_contract_available(c) for c in contract_dependencies)
 
     def get_contract(self, contract_identifier):
         ContractFactory = self.get_contract_factory(contract_identifier)
@@ -130,21 +114,10 @@ class Provider(object):
         Same as get_contract but it will also lazily deploy the contract with
         the provided deployment arguments
         """
-        full_dependency_graph = get_shallow_dependency_graph(
-            self.chain.project.compiled_contract_data,
-        )
-        contract_dependencies = get_recursive_contract_dependencies(
-            contract_identifier,
-            full_dependency_graph,
-        )
+        cdata = self.get_contract_data(contract_identifier)
+        contract_dependencies = cdata['ordered_dependencies']
 
-        dependency_deploy_order = [
-            dependency_name
-            for dependency_name
-            in compute_deploy_order(full_dependency_graph)
-            if dependency_name in contract_dependencies
-        ]
-        for dependency_name in dependency_deploy_order:
+        for dependency_name in contract_dependencies:
             self.get_or_deploy_contract(dependency_name, deploy_transaction=deploy_transaction)
 
         ContractFactory = self.get_contract_factory(contract_identifier)
@@ -193,7 +166,7 @@ class Provider(object):
         Returns a dictionary containing the compiler output for the given
         contract identifier.
         """
-        for backend in self.provider_backends.value():
+        for backend in self.provider_backends.values():
             try:
                 return backend.get_contract_data(contract_identifier)
             except UnknownContract:
@@ -236,8 +209,10 @@ class Provider(object):
 
         BaseContractFactory = self.get_base_contract_factory(contract_identifier)
 
-        bytecode = self._link_bytecode(BaseContractFactory.bytecode)
-        bytecode_runtime = self._link_bytecode(BaseContractFactory.bytecode_runtime)
+        contract_data = self.get_contract_data(contract_identifier)
+
+        bytecode = self._link_bytecode(contract_data)
+        bytecode_runtime = self._link_bytecode(contract_data, is_runtime=True)
 
         ContractFactory = BaseContractFactory.factory(
             web3=BaseContractFactory.web3,
@@ -251,7 +226,7 @@ class Provider(object):
     #
     # Private API
     #
-    def _link_bytecode(self, bytecode):
+    def _link_bytecode(self, contract_data, is_runtime=False):
         """
         Return the fully linked contract bytecode.
 
@@ -260,14 +235,20 @@ class Provider(object):
         `get_contract_address` then the bytecode of sub-dependencies is not
         verified.
         """
+        bytecode_key = 'bytecode'
+        if is_runtime:
+            bytecode_key += '_runtime'
+
         resolved_link_references = tuple((
             (link_reference, self.chain.provider.get_contract(link_reference.full_name).address)
             for link_reference
-            in find_link_references(
-                bytecode,
+            in get_link_references(
+                contract_data,
                 self.get_all_contract_names(),
+                is_runtime=is_runtime
             )
         ))
 
-        linked_bytecode = link_bytecode(bytecode, resolved_link_references)
+        linked_bytecode = link_bytecode(contract_data[bytecode_key], resolved_link_references)
+
         return linked_bytecode

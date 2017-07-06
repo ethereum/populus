@@ -66,7 +66,7 @@ def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):
 
     with open(compiled_contracts_asset_path, 'w') as outfile:
         outfile.write(
-            json.dumps(compiled_sources,
+            json.dumps(compiled_sources.to_dict(),
                        sort_keys=True,
                        indent=4,
                        separators=(',', ': '))

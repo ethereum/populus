@@ -62,7 +62,6 @@ def wait_for_unlock(web3, account=None, timeout=120, poll_interval=None):
     )
 
 
-
 def wait_for_peers(web3, peer_count=1, timeout=120, poll_interval=None):
     return poll_until(
         poll_fn=lambda: web3.net.peerCount,

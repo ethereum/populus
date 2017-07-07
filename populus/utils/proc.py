@@ -1,9 +1,5 @@
-import random
 import signal
 
-from .compat import (
-    Timeout,
-)
 from .wait import (
     wait_for_popen,
 )

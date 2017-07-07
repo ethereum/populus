@@ -1,5 +1,3 @@
-import warnings
-
 from populus.utils.empty import empty
 from populus.utils.wait import (
     wait_for_block_number,

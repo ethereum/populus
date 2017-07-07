@@ -147,3 +147,11 @@ def check_if_chain_matches_chain_uri(web3, blockchain_uri):
         return True
     else:
         return False
+
+
+def is_synced(web3, allowed_block_delta=3):
+    sync_info = web3.eth.syncing
+    if not sync_info:
+        return False
+    blocks_to_be_synced = sync_info['highestBlock'] - sync_info['currentBlock']
+    return blocks_to_be_synced <= allowed_block_delta

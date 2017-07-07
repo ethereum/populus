@@ -64,10 +64,6 @@ class Wait(object):
         return wait_for_block_number(self.web3, **kwargs)
 
     def for_unlock(self, account=empty, timeout=empty, poll_interval=empty):
-        warnings.warn(DeprecationWarning(
-            "The `Wait.for_unlock` api has been deprecated and will be removed "
-            "in a subsequent release"
-        ))
         kwargs = {}
 
         if account is not empty:
@@ -83,10 +79,6 @@ class Wait(object):
         return wait_for_unlock(self.web3, **kwargs)
 
     def for_peers(self, peer_count=empty, timeout=empty, poll_interval=empty):
-        warnings.warn(DeprecationWarning(
-            "The `Wait.for_peers` api has been deprecated and will be removed "
-            "in a subsequent release"
-        ))
         kwargs = {}
 
         if peer_count is not empty:
@@ -102,10 +94,6 @@ class Wait(object):
         return wait_for_peers(self.web3, **kwargs)
 
     def for_syncing(self, timeout=empty, poll_interval=empty):
-        warnings.warn(DeprecationWarning(
-            "The `Wait.for_syncing` api has been deprecated and will be removed "
-            "in a subsequent release"
-        ))
         kwargs = {}
 
         if timeout is not empty:

@@ -75,7 +75,7 @@ def wait_for_syncing(web3, timeout=120, poll_interval=None):
     start_block = web3.eth.blockNumber
     return poll_until(
         poll_fn=lambda: web3.eth.syncing,
-        success_fn=lambda v: web3.eth.syncing or web3.eth.blockNumber > start_block,
+        success_fn=lambda v: v,
         timeout=timeout,
         poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
     )
@@ -84,7 +84,7 @@ def wait_for_syncing(web3, timeout=120, poll_interval=None):
 def wait_for_popen(proc, timeout=5):
     return poll_until(
         poll_fn=lambda: proc.poll,
-        success_fn=lambda v: v
+        success_fn=lambda v: v,
         timeout=timeout,
         poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
     )

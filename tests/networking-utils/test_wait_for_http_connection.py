@@ -79,7 +79,7 @@ def test_wait_for_connection_success():
     try:
         with Timeout(5) as _timeout:
             while 'client_success' not in success_tracker and 'server_success' not in success_tracker:
-                _timeout.sleep(random.random())
+                _timeout.sleep(0.01)
     except Timeout:
         pass
 

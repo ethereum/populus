@@ -89,7 +89,6 @@ Example (``deploy_testnet.py``):
     A simple Python script to deploy contracts and then do a smoke test for them.
     """
     from populus import Project
-    from populus.utils.cli import get_unlocked_default_account_address
     from populus.utils.wait import wait_for_transaction_receipt
     from web3 import Web3
 
@@ -133,9 +132,6 @@ Example (``deploy_testnet.py``):
 
             # Random address on Ropsten testnet
             multisig_address = "0x83917f644df1319a6ae792bb244333332e65fff8"
-
-            # Goes through coinbase account unlock process if needed
-            get_unlocked_default_account_address(chain)
 
             # Deploy crowdsale, open since 1970
             txhash = Crowdsale.deploy(transaction={"from": beneficiary}, args=[beneficiary, multisig_address, 1])

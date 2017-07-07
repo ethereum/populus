@@ -4,11 +4,16 @@ import logging
 
 import click
 
+from populus.utils.chains import (
+    is_synced,
+)
 from populus.utils.cli import (
     select_chain,
-    show_chain_sync_progress,
     deploy_contract_and_verify,
     select_project_contract,
+)
+from populus.utils.compat import (
+    sleep,
 )
 from populus.utils.deploy import (
     get_deploy_order,
@@ -51,9 +56,18 @@ def echo_post_deploy_message(web3, deployed_contracts):
         "networks.  Other values should be predefined in your populus.ini"
     ),
 )
+@click.option(
+    'wait_for_sync',
+    '--wait-for-sync/--no-wait-for-sync',
+    default=True,
+    help=(
+        "Determines whether the deploy command should wait until the chain is "
+        "fully synced before deployment"
+    ),
+)
 @click.argument('contracts_to_deploy', nargs=-1)
 @click.pass_context
-def deploy_cmd(ctx, chain_name, contracts_to_deploy):
+def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
     """
     Deploys the specified contracts to a chain.
     """
@@ -90,8 +104,12 @@ def deploy_cmd(ctx, chain_name, contracts_to_deploy):
         provider = chain.provider
         registrar = chain.registrar
 
-        if chain_name in {'mainnet', 'morden'}:
-            show_chain_sync_progress(chain)
+        # wait for the chain to start syncing.
+        if wait_for_sync:
+            logger.info("Waiting for chain to start syncing....")
+            while chain.wait.for_syncing() and is_synced(chain.web3):
+                sleep(1)
+            logger.info("Chain sync complete")
 
         # Get the deploy order.
         deploy_order = get_deploy_order(

@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+.. _v1.6.10-release-notes:
+
+1.6.10 (unreleased)
+-------------------
+
+- ????
+
 .. _v1.6.9-release-notes:
 
 1.6.9

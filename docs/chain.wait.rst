@@ -12,8 +12,11 @@ Wait API
 Each chain object exposes the following API through a property
 :ref:`Chain.wait <chain-api-wait>`.  
 
-* The ``timeout`` parameter sets the default number of seconds that each method will block before raising a :class:`~populus.utils.compat.Timeout` exception.  
-* The ``poll_interval`` determines how long it should wait between polling.  If ``poll_interval == None`` then ``random.random()`` will be used to determine the poling interval.
+* The ``timeout`` parameter sets the default number of seconds that each method
+  will block before raising a :class:`~populus.utils.compat.Timeout` exception.  
+* The ``poll_interval`` determines how long it should wait between polling.  If
+  ``poll_interval == None`` then a random value between 0 and 1 second will be
+  used for the polling interval.
 
 
 .. py:method:: Wait.for_contract_address(txn_hash, timeout=120, poll_interval=None)
@@ -34,6 +37,7 @@ Each chain object exposes the following API through a property
     current chain is at least ``block_number``.
 
 
+.. _wait-api-for-unlock:
 .. py:method:: Wait.for_unlock(account=web3.eth.coinbase, timeout=120, poll_interval=None)
 
     Blocks for up to ``timeout`` seconds waiting until the account specified by
@@ -41,12 +45,14 @@ Each chain object exposes the following API through a property
     ``web3.eth.coinbase`` will be used.
 
 
+.. _wait-api-for-peers:
 .. py:method:: Wait.for_peers(peer_count=1, timeout=120, poll_interval=None)
 
     Blocks for up to ``timeout`` seconds waiting for the client to have at
     least ``peer_count`` peer connections.
 
 
+.. _wait-api-for-syncing:
 .. py:method:: Wait.for_syncing(timeout=120, poll_interval=None)
 
     Blocks for up to ``timeout`` seconds waiting the chain to begin syncing.

@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 import itertools
 import logging
-import random
 
 import click
 
@@ -72,18 +71,13 @@ def select_account(chain):
     all_accounts = chain.web3.eth.accounts
     if not all_accounts:
         raise click.ClickException("No accounts found on chain.")
-    unlocked_accounts = {
-        account for account in all_accounts
-        if not is_account_locked(chain.web3, account)
-    }
 
     pick_account_message = '\n'.join(itertools.chain((
         "Accounts",
         "-----------------",
     ), (
-        "{index} - {account}{extra}".format(
+        "{index} - {account}".format(
             account=account,
-            extra=" (unlocked)" if account in unlocked_accounts else "",
             index=index,
         ) for (index, account) in enumerate(all_accounts)
     ), (
@@ -341,120 +335,6 @@ def deploy_contract_and_verify(chain,
                 "Verified bytecode @ {0} is non-empty".format(contract_address)
             )
     return ContractFactory(address=contract_address)
-
-
-def show_chain_sync_progress(chain):
-    """
-    Display the syncing status of a chain as a progress bar
-    """
-    web3 = chain.web3
-    logger = logging.getLogger('populus.utils.cli.show_chain_sync_progress')
-
-    if not web3.net.peerCount:
-        logger.info("Waiting for peer connections.")
-        try:
-            chain.wait.for_peers(timeout=240)
-        except Timeout:
-            raise click.ClickException("Never connected to any peers.")
-
-    if not web3.eth.syncing:
-        logger.info("Waiting for synchronization to start.")
-        try:
-            chain.wait.for_syncing(timeout=240)
-        except Timeout:
-            raise click.ClickException("Chain synchronization never started.")
-
-    starting_block = web3.eth.syncing['startingBlock']
-
-    while True:
-        sync_data = web3.eth.syncing
-
-        if not sync_data:
-            break
-
-        highest_block = sync_data['highestBlock']
-        blocks_to_sync = highest_block - starting_block
-
-        with click.progressbar(length=blocks_to_sync, label="Syncing") as bar:
-
-            while highest_block == sync_data['highestBlock']:
-                sync_data = web3.eth.syncing
-
-                if not sync_data:
-                    break
-
-                current_block = sync_data['currentBlock']
-                blocks_to_sync = highest_block - starting_block
-
-                position = current_block - starting_block
-
-                if position:
-                    bar.update(position)
-
-                if current_block >= highest_block:
-                    break
-
-                sleep(random.random())
-            else:
-                # start a new progress bar with the new `highestBlock`
-                continue
-
-            # break out of the outer loop
-            break
-
-
-def get_unlocked_default_account_address(chain):
-    """
-    Combination of other utils to get the address deployments should come from.
-
-    Defaults to the one set in the config.
-    If not set, asks for one.
-    If not in config, asks if it should be set as default.
-    If not unlocked, askes for password to unlock.
-    """
-    logger = logging.getLogger('populus.utils.cli.get_unlocked_default_account_address')
-    web3 = chain.web3
-    chain_config = chain.config
-    chain_name = chain.chain_name
-    project = chain.project
-    config = project.config
-
-    # Choose the address we should deploy from.
-    if 'web3.eth.default_account' in chain_config:
-        account = chain_config['web3.eth.default_account']
-        if account not in web3.eth.accounts:
-            raise click.ClickException(
-                "The chain {0!r} is configured to deploy from account {1!r} "
-                "which was not found in the account list for this chain. "
-                "Please ensure that this account exists.".format(
-                    chain_name,
-                    account,
-                )
-            )
-    else:
-        account = select_account(chain)
-        set_as_default_account_msg = (
-            "Would you like set the address '{0}' as the default"
-            "`default_account` address for the '{1}' chain?".format(
-                account,
-                chain_name,
-            )
-        )
-        if click.confirm(set_as_default_account_msg):
-            config['chains.{0}.web3.eth.default_account'.format(chain_name)] = account
-            project.write_config()
-            logger.info("Wrote updated chain configuration")
-
-    # Unlock the account if needed.
-    if is_account_locked(web3, account):
-        try:
-            # in case the chain is still spinning up, give it a moment to
-            # unlock itself.
-            chain.wait.for_unlock(account, timeout=5)
-        except Timeout:
-            request_account_unlock(chain, account, None)
-
-    return account
 
 
 def watch_project_contracts(project, compiler_settings):

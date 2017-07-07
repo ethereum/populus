@@ -1,16 +1,8 @@
-import random
 import signal
 
-from populus.utils.compat import Timeout
-
-
-def wait_for_popen(proc, max_wait=5):
-    with Timeout(max_wait) as timeout:
-        while True:
-            if proc.poll() is None:
-                timeout.sleep(random.random())
-            else:
-                break
+from .wait import (
+    wait_for_popen,
+)
 
 
 def kill_proc(proc):

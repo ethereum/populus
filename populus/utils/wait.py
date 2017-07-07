@@ -1,3 +1,4 @@
+import functools
 import random
 
 from web3.providers.tester import (
@@ -10,36 +11,41 @@ from .compat import (
 )
 
 
+def poll_until(poll_fn, success_fn, timeout, poll_interval_fn):
+    with Timeout(timeout) as _timeout:
+        while True:
+            value = poll_fn()
+
+            if success_fn(value):
+                return value
+
+            _timeout.sleep(poll_interval_fn())
+
+
 def is_tester_web3(web3):
     return isinstance(web3.currentProvider, (TestRPCProvider, EthereumTesterProvider))
 
 
 def wait_for_transaction_receipt(web3, txn_hash, timeout=120, poll_interval=None):
-    with Timeout(timeout) as _timeout:
-        while True:
-            txn_receipt = web3.eth.getTransactionReceipt(txn_hash)
-            if txn_receipt is not None and txn_receipt['blockHash'] is not None:
-                break
-            if poll_interval is None:
-                _timeout.sleep(random.random())
-            else:
-                _timeout.sleep(poll_interval)
-    return txn_receipt
+    return poll_until(
+        poll_fn=functools.partial(web3.eth.getTransactionReceipt, txn_hash),
+        success_fn=lambda r: r is not None and r['blockHash'] is not None,
+        timeout=timeout,
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+    )
 
 
 def wait_for_block_number(web3, block_number=1, timeout=120, poll_interval=None):
-
-    with Timeout(timeout) as _timeout:
+    if is_tester_web3():
         while web3.eth.blockNumber < block_number:
-            if is_tester_web3(web3):
-                web3._requestManager.request_blocking("evm_mine", [])
-                _timeout.sleep(0)
-            else:
-                if poll_interval is None:
-                    _timeout.sleep(random.random())
-                else:
-                    _timeout.sleep(poll_interval)
-    return web3.eth.getBlock(block_number)
+            web3._requestManager.request_blocking("evm_mine", [])
+        return web3.eth.getBlock(block_number)
+    return poll_until(
+        poll_fn=lambda: web3.blockNumber,
+        success_fn=lambda v: v >= block_number,
+        timeout=timeout,
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+    )
 
 
 def wait_for_unlock(web3, account=None, timeout=120, poll_interval=None):
@@ -48,27 +54,36 @@ def wait_for_unlock(web3, account=None, timeout=120, poll_interval=None):
     if account is None:
         account = web3.eth.coinbase
 
-    with Timeout(timeout) as _timeout:
-        while is_account_locked(web3, account):
-            if poll_interval is None:
-                _timeout.sleep(random.random())
-            else:
-                _timeout.sleep(poll_interval)
-    return account
+    return poll_until(
+        poll_fn=functools.partial(is_account_locked, web3, account),
+        success_fn=lambda v: v,
+        timeout=timeout,
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+    )
 
 
 def wait_for_peers(web3, peer_count=1, timeout=120, poll_interval=None):
-    with Timeout(timeout) as _timeout:
-        while web3.net.peerCount < peer_count:
-            _timeout.sleep(random.random())
+    return poll_until(
+        poll_fn=lambda: web3.net.peerCount,
+        success_fn=lambda v: v >= peer_count,
+        timeout=timeout,
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+    )
 
 
 def wait_for_syncing(web3, timeout=120, poll_interval=None):
-    start_block = web3.eth.blockNumber
-    with Timeout(timeout) as _timeout:
-        while not web3.eth.syncing and web3.eth.blockNumber == start_block:
-            if poll_interval is None:
-                _timeout.sleep(random.random())
-            else:
-                _timeout.sleep(poll_interval)
-    return web3.eth.syncing
+    return poll_until(
+        poll_fn=lambda: web3.eth.syncing,
+        success_fn=lambda v: v,
+        timeout=timeout,
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+    )
+
+
+def wait_for_popen(proc, timeout=5, poll_interval=None):
+    return poll_until(
+        poll_fn=lambda: proc.poll,
+        success_fn=lambda v: v,
+        timeout=timeout,
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+    )

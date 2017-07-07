@@ -78,12 +78,12 @@ def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
     if not chain_name:
         chain_name = select_chain(project)
 
-    compiled_contracts = project.compiled_contracts
+    contract_data = project.compiled_contract_data
 
     if contracts_to_deploy:
         # validate that we *know* about all of the contracts
         unknown_contracts = set(contracts_to_deploy).difference(
-            compiled_contracts.keys()
+            contract_data.keys()
         )
         if unknown_contracts:
             unknown_contracts_message = (
@@ -91,7 +91,7 @@ def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
                 "compiled project contracts.  These contracts could not be found "
                 "'{0}'.  Searched these known contracts '{1}'".format(
                     ', '.join(sorted(unknown_contracts)),
-                    ', '.join(sorted(compiled_contracts.keys())),
+                    ', '.join(sorted(contract_data.keys())),
                 )
             )
             raise click.ClickException(unknown_contracts_message)
@@ -114,7 +114,7 @@ def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
         # Get the deploy order.
         deploy_order = get_deploy_order(
             contracts_to_deploy,
-            compiled_contracts,
+            contract_data,
         )
 
         # Display Start Message Info.

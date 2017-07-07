@@ -1,12 +1,25 @@
 Release Notes
 =============
 
-.. _v1.6.10-release-notes:
+Unreleased
+----------
 
-1.6.10 (unreleased)
--------------------
-
-- ????
+- Remove deprecated ``chain.contract_factories`` API.
+- Remove deprecated ``chain.get_contract_factory`` API.
+- Remove deprecated ``chain.is_contract_available`` API.
+- Remove deprecated ``chain.get_contract`` API.
+- Remove deprecated ``chain.deployed_contracts`` API.
+- Remove deprecated ``contracts`` pytest fixture.
+- Remove deprecated ``project.compiled_contracts_file_path`` API
+- Remove deprecated ``project.contracts_dir`` API
+- Remove deprecated ``project.build_dir`` API
+- Remove deprecated ``project.compiled_contracts`` API
+- Remove deprecated ``project.blockchains_dir`` API
+- Remove deprecated ``project.get_blockahin_data_dir`` API
+- Remove deprecated ``project.get_blockchain_chaindata_dir`` API
+- Remove deprecated ``project.get_blockchain_dapp_dir`` API
+- Remove deprecated ``project.get_blockchain_ipc_path`` API
+- Remove deprecated ``project.get_blockchain_nodekey_path`` API
 
 .. _v1.6.9-release-notes:
 

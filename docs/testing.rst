@@ -65,31 +65,7 @@ The :ref:`Project` object for your project.
         assert project.project_dir == '/path/to/my/project'
 
         # raw compiled contract access
-        assert 'MyContract' in project.compiled_contracts
-
-
-Unmigrated Chain
-~~~~~~~~~~~~~~~~
-
-.. warning:: This fixture has been removed as part of the deprecation of the migrations API.  You should instead use the ``chain`` fixture.
-
-
-* ``unmigrated_chain``
-
-The ``'tester'`` test chain.  This chain will not have had migrations run.
-
-
-.. code-block:: python
-
-    def test_greeter(unmigrated_chain):
-        greeter = unmigrated_chain.get_contract('Greeter')
-
-        assert greeter.call().greet() == "Hello"
-
-    def test_deploying_greeter(unmigrated_chain):
-        GreeterFactory = unmigrated_chain.get_contract_factory('Greeter')
-        deploy_txn_hash = GreeterFactory.deploy()
-        ...
+        assert 'MyContract' in project.compiled_contract_data
 
 
 Chain
@@ -106,6 +82,11 @@ A running ``'tester'`` test chain.
         greeter, _ = chain.provider.get_or_deploy_contract('Greeter')
 
         assert greeter.call().greet() == "Hello"
+
+    def test_deploying_greeter(chain):
+        GreeterFactory = chain.provider.get_contract_factory('Greeter')
+        deploy_txn_hash = GreeterFactory.deploy()
+        ...
 
 
 Registrar
@@ -143,14 +124,6 @@ configured to connect to ``chain`` fixture.
         after_balance = web3.eth.getBalance(web3.eth.coinbase)
 
         assert after_balance - initial_balance == 1234
-
-Contracts
-~~~~~~~~~
-
-.. warning:: This fixture has been renamed to ``base_contract_factories``.  In future releases of populus this fixture will be removed or repurposed.
-
-
-* ``contracts``
 
 Base Contract Factories
 ~~~~~~~~~~~~~~~~~~~~~~~

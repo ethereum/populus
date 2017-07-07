@@ -36,13 +36,6 @@ from populus.utils.config import (
     get_default_project_config_file_path,
     get_json_config_file_path,
 )
-from populus.utils.geth import (
-    get_chaindata_dir,
-    get_dapp_dir,
-    get_data_dir,
-    get_geth_ipc_path,
-    get_nodekey_path,
-)
 from populus.utils.testing import (
     get_tests_dir,
 )
@@ -155,16 +148,6 @@ class Project(object):
         return get_compiled_contracts_asset_path(self.build_asset_dir)
 
     @property
-    def compiled_contracts_file_path(self):
-        warnings.warn(DeprecationWarning(
-            "The `compiled_contracts_file_path` property has been renamed to "
-            "`compiled_contracts_asset_path`.  Please update your code to use "
-            "this property.  The `compiled_contracts_file_path` property will "
-            "be removed in subsequent releases"
-        ))
-        return self.compiled_contracts_asset_path
-
-    @property
     @relpath
     def contracts_source_dir(self):
         if 'compilation.contracts_dir' in self.config:
@@ -174,32 +157,11 @@ class Project(object):
 
     @property
     @relpath
-    def contracts_dir(self):
-        warnings.warn(DeprecationWarning(
-            "The `contracts_dir` property has been renamed to "
-            "`contracts_source_dir`.  Please update your code to use "
-            "this property.  The `contracts_dir` property will be removed in "
-            "subsequent releases"
-        ))
-        return self.contracts_source_dir
-
-    @property
-    @relpath
     def build_asset_dir(self):
         if 'compilation.build_dir' in self.config:
             return self.config['compilation.build_dir']
         else:
             return get_build_asset_dir(self.project_dir)
-
-    @property
-    def build_dir(self):
-        warnings.warn(DeprecationWarning(
-            "The `contracts_dir` property has been renamed to "
-            "`contracts_source_dir`.  Please update your code to use "
-            "this property.  The `contracts_dir` property will be removed in "
-            "subsequent releases"
-        ))
-        return self.build_asset_dir
 
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None
@@ -244,16 +206,6 @@ class Project(object):
             _, self._cached_compiled_contracts = compile_project_contracts(self)
         return self._cached_compiled_contracts
 
-    @property
-    def compiled_contracts(self):
-        warnings.warn(DeprecationWarning(
-            "The `compiled_contracts` property has been renamed to "
-            "`compiled_contract_data`.  Please update your code to use "
-            "this property.  The `compiled_contracts` property will be removed in "
-            "subsequent releases"
-        ))
-        return self.compiled_contract_data
-
     #
     # Compiler Backend
     #
@@ -297,52 +249,3 @@ class Project(object):
     @relpath
     def base_blockchain_storage_dir(self):
         return get_base_blockchain_storage_dir(self.project_dir)
-
-    @property
-    def blockchains_dir(self):
-        warnings.warn(DeprecationWarning(
-            "The `blockchains_dir` property has been renamed to "
-            "`base_blockchain_storage_dir`.  Please update your code as the "
-            "`blockchains_dir` property will be removed in subsequent releases"
-        ))
-        return self.base_blockchain_storage_dir
-
-    @relpath
-    def get_blockchain_data_dir(self, chain_name):
-        warnings.warn(DeprecationWarning(
-            "The `get_blockchain_data_dir` function has been deprecated and "
-            "will be removed in subsequent releases"
-        ))
-        return get_data_dir(self.project_dir, chain_name)
-
-    @relpath
-    def get_blockchain_chaindata_dir(self, chain_name):
-        warnings.warn(DeprecationWarning(
-            "The `get_blockchain_chaindata_dir` function has been deprecated and "
-            "will be removed in subsequent releases"
-        ))
-        return get_chaindata_dir(self.get_blockchain_data_dir(chain_name))
-
-    @relpath
-    def get_blockchain_dapp_dir(self, chain_name):
-        warnings.warn(DeprecationWarning(
-            "The `get_blockchain_dapp_dir` function has been deprecated and "
-            "will be removed in subsequent releases"
-        ))
-        return get_dapp_dir(self.get_blockchain_data_dir(chain_name))
-
-    @relpath
-    def get_blockchain_ipc_path(self, chain_name):
-        warnings.warn(DeprecationWarning(
-            "The `get_blockchain_ipc_path` function has been deprecated and "
-            "will be removed in subsequent releases"
-        ))
-        return get_geth_ipc_path(self.get_blockchain_data_dir(chain_name))
-
-    @relpath
-    def get_blockchain_nodekey_path(self, chain_name):
-        warnings.warn(DeprecationWarning(
-            "The `get_blockchain_nodekey_path` function has been deprecated and "
-            "will be removed in subsequent releases"
-        ))
-        return get_nodekey_path(self.get_blockchain_data_dir(chain_name))

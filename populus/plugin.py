@@ -1,7 +1,10 @@
 import pytest
-import warnings
 
 from populus.project import Project
+
+from populus.utils.contracts import (
+    package_contracts,
+)
 
 
 CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
@@ -46,17 +49,10 @@ def web3(chain):
 @pytest.fixture()
 def base_contract_factories(chain):
     # TODO: figure out what to do with thi API
-    return chain.contract_factories
-
-
-@pytest.fixture()
-def contracts(base_contract_factories):
-    warnings.warn(PendingDeprecationWarning(
-        "The `contracts` fixture has been renamed to `base_contract_factories`. "
-        "The `contracts` fixture is pending deprecation and will be removed in "
-        "the near future"
-    ))
-    return base_contract_factories
+    return package_contracts({
+        contract_name: chain.provider.get_base_contract_factory(contract_name)
+        for contract_name in chain.provider.get_all_contract_names()
+    })
 
 
 @pytest.fixture()

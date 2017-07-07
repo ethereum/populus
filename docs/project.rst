@@ -45,7 +45,7 @@ The project object is the entry point for almost everything that populus can do.
     './contracts'
     >>> project.config
     {....}  # Your project configuration.
-    >>> project.compiled_contracts
+    >>> project.compiled_contract_data
     {
       'Greeter': {
         'code': '0x...',

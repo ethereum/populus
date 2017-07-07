@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+.. _v1.6.10-release-notes:
+
+1.6.10 (unreleased)
+-------------------
+
+- Deprecate :ref:`Wait.for_syncing <wait-api-for-syncing>`.
+- Deprecate :ref:`Wait.for_peers <wait-api-for-peers>`.
+- Deprecate :ref:`Wait.for_unlock <wait-api-for-unlock>`.
+
+
 .. _v1.6.9-release-notes:
 
 1.6.9

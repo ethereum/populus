@@ -6,7 +6,6 @@ import click
 
 from populus.utils.cli import (
     select_chain,
-    show_chain_sync_progress,
     deploy_contract_and_verify,
     select_project_contract,
 )
@@ -90,8 +89,8 @@ def deploy_cmd(ctx, chain_name, contracts_to_deploy):
         provider = chain.provider
         registrar = chain.registrar
 
-        if chain_name in {'mainnet', 'morden'}:
-            show_chain_sync_progress(chain)
+        # TODO: check if chain is syncing (behind by more than a few blocks).
+        # If it is, blow up.
 
         # Get the deploy order.
         deploy_order = get_deploy_order(

@@ -343,66 +343,6 @@ def deploy_contract_and_verify(chain,
     return ContractFactory(address=contract_address)
 
 
-def show_chain_sync_progress(chain):
-    """
-    Display the syncing status of a chain as a progress bar
-    """
-    web3 = chain.web3
-    logger = logging.getLogger('populus.utils.cli.show_chain_sync_progress')
-
-    if not web3.net.peerCount:
-        logger.info("Waiting for peer connections.")
-        try:
-            chain.wait.for_peers(timeout=240)
-        except Timeout:
-            raise click.ClickException("Never connected to any peers.")
-
-    if not web3.eth.syncing:
-        logger.info("Waiting for synchronization to start.")
-        try:
-            chain.wait.for_syncing(timeout=240)
-        except Timeout:
-            raise click.ClickException("Chain synchronization never started.")
-
-    starting_block = web3.eth.syncing['startingBlock']
-
-    while True:
-        sync_data = web3.eth.syncing
-
-        if not sync_data:
-            break
-
-        highest_block = sync_data['highestBlock']
-        blocks_to_sync = highest_block - starting_block
-
-        with click.progressbar(length=blocks_to_sync, label="Syncing") as bar:
-
-            while highest_block == sync_data['highestBlock']:
-                sync_data = web3.eth.syncing
-
-                if not sync_data:
-                    break
-
-                current_block = sync_data['currentBlock']
-                blocks_to_sync = highest_block - starting_block
-
-                position = current_block - starting_block
-
-                if position:
-                    bar.update(position)
-
-                if current_block >= highest_block:
-                    break
-
-                sleep(random.random())
-            else:
-                # start a new progress bar with the new `highestBlock`
-                continue
-
-            # break out of the outer loop
-            break
-
-
 def get_unlocked_default_account_address(chain):
     """
     Combination of other utils to get the address deployments should come from.

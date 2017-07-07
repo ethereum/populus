@@ -34,19 +34,28 @@ Each chain object exposes the following API through a property
     current chain is at least ``block_number``.
 
 
+.. _wait-api-for-unlock:
 .. py:method:: Wait.for_unlock(account=web3.eth.coinbase, timeout=120, poll_interval=None)
+
+    .. warning:: This API has been deprecated and is slated for removal.
 
     Blocks for up to ``timeout`` seconds waiting until the account specified by
     ``account`` is unlocked.  If ``account`` is not provided,
     ``web3.eth.coinbase`` will be used.
 
 
+.. _wait-api-for-peers:
 .. py:method:: Wait.for_peers(peer_count=1, timeout=120, poll_interval=None)
+
+    .. warning:: This API has been deprecated and is slated for removal.
 
     Blocks for up to ``timeout`` seconds waiting for the client to have at
     least ``peer_count`` peer connections.
 
 
+.. _wait-api-for-syncing:
 .. py:method:: Wait.for_syncing(timeout=120, poll_interval=None)
+
+    .. warning:: This API has been deprecated and is slated for removal.
 
     Blocks for up to ``timeout`` seconds waiting the chain to begin syncing.

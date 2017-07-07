@@ -79,3 +79,12 @@ def wait_for_syncing(web3, timeout=120, poll_interval=None):
         timeout=timeout,
         poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
     )
+
+
+def wait_for_popen(proc, timeout=5):
+    return poll_until(
+        poll_fn=lambda: proc.poll,
+        success_fn=lambda v: v
+        timeout=timeout,
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+    )

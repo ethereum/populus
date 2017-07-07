@@ -74,6 +74,6 @@ def chain_run(ctx, chain_name, mine, verbosity):
     with chain:
         try:
             while True:
-                sleep(random.random())
+                sleep(0.2)
         except KeyboardInterrupt:
             pass

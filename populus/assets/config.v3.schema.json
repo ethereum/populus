@@ -4,10 +4,6 @@
   "version": "1",
   "required": ["version"],
   "properties": {
-    "version": {
-      "type": "string",
-      "enum": ["3"]
-    },
     "chains": {
       "$ref": "#/definitions/ProjectChainsConfig"
     },
@@ -16,6 +12,10 @@
     },
     "contracts": {
       "$ref": "#/definitions/ContractsConfig"
+    },
+    "version": {
+      "type": "string",
+      "enum": ["3"]
     },
     "web3": {
       "$ref": "#/definitions/ProjectWeb3Config"
@@ -65,20 +65,6 @@
         }
       }
     },
-    "ContractsConfig": {
-      "title": "Configuration for the contract store",
-      "properties": {
-        "backends": {
-          "title": "The contract backends used by this project",
-          "additionalProperties": false,
-          "patternProperties": {
-            "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
-              "$ref": "#/definitions/ContractBackendConfig"
-            }
-          }
-        }
-      }
-    },
     "ContractBackendConfig": {
       "title": "Configuration for a contract backend",
       "type": "object",
@@ -97,15 +83,24 @@
         }
       }
     },
+    "ContractsConfig": {
+      "title": "Configuration for the contract store",
+      "properties": {
+        "backends": {
+          "title": "The contract backends used by this project",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+              "$ref": "#/definitions/ContractBackendConfig"
+            }
+          }
+        }
+      }
+    },
     "EthereumAddress": {
       "title": "An Ethereum address",
       "type": "string",
       "pattern": "^0x[0-9a-fA-F]{40}$"
-    },
-    "PythonImportPath": {
-      "title": "The string representation of an import path for a python module or object",
-      "type": "string",
-      "pattern": "^[a-zA-Z][_a-zA-Z0-9]*(?:\\.[a-zA-Z][_a-zA-Z0-9]*)*$"
     },
     "ProjectChainsConfig": {
       "title": "The configuration for each chain declared by this project",
@@ -140,6 +135,11 @@
           "type": "object"
         }
       }
+    },
+    "PythonImportPath": {
+      "title": "The string representation of an import path for a python module or object",
+      "type": "string",
+      "pattern": "^[a-zA-Z][_a-zA-Z0-9]*(?:\\.[a-zA-Z][_a-zA-Z0-9]*)*$"
     },
     "Reference": {
       "title": "A reference to another section in the configuration file",

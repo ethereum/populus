@@ -1,6 +1,5 @@
 import os
 import itertools
-import warnings
 
 from populus.compilation import (
     compile_project_contracts,
@@ -13,9 +12,6 @@ from populus.config import (
     load_config as _load_config,
     load_config_schema,
     write_config as _write_config,
-)
-from populus.legacy.config import (
-    check_if_ini_config_file_exists,
 )
 
 from populus.utils.chains import (
@@ -72,23 +68,9 @@ class Project(object):
         self._config_cache = None
 
         if self.config_file_path is None:
-            has_ini_config = check_if_ini_config_file_exists()
             has_json_config = check_if_json_config_file_exists()
 
-            if has_ini_config and has_json_config:
-                raise DeprecationWarning(
-                    "Found both `populus.ini` and `populus.json` config files. "
-                    "Please migrate you `populus.ini` file settings into the "
-                    "`populus.json` file and remove the `populus.ini` file"
-                )
-            elif has_ini_config:
-                warnings.warn(DeprecationWarning(
-                    "The `populus.ini` configuration format has been "
-                    "deprecated.  You must upgrade your configuration file to "
-                    "the new `populus.json` format."
-                ))
-                path_to_load = get_default_config_path()
-            elif has_json_config:
+            if has_json_config:
                 path_to_load = get_json_config_file_path()
             else:
                 path_to_load = get_default_config_path()
@@ -131,6 +113,7 @@ class Project(object):
     # Project
     #
     @property
+    @relpath
     def project_dir(self):
         return self.config.get('populus.project_dir', os.getcwd())
 
@@ -150,18 +133,15 @@ class Project(object):
     @property
     @relpath
     def contracts_source_dir(self):
-        if 'compilation.contracts_dir' in self.config:
-            return self.config['compilation.contracts_dir']
-        else:
-            return get_contracts_source_dir(self.project_dir)
+        return self.config.get(
+            'compilation.contracts_source_dir',
+            get_contracts_source_dir(self.project_dir),
+        )
 
     @property
     @relpath
     def build_asset_dir(self):
-        if 'compilation.build_dir' in self.config:
-            return self.config['compilation.build_dir']
-        else:
-            return get_build_asset_dir(self.project_dir)
+        return get_build_asset_dir(self.project_dir)
 
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None

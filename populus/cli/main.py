@@ -1,4 +1,3 @@
-import os
 import sys
 import warnings
 
@@ -9,10 +8,6 @@ from populus.utils.filesystem import (
 )
 from populus.project import (
     Project,
-)
-from populus.legacy.config import (
-    upgrade_legacy_config_file,
-    check_if_ini_config_file_exists,
 )
 from populus.config.versions import (
     LATEST_VERSION,
@@ -46,23 +41,6 @@ def main(ctx, config_file_path):
     Populus
     """
     logger = get_logger_with_click_handler('populus')
-
-    if not config_file_path and check_if_ini_config_file_exists():
-        logger.info("Attempting to upgrade legacy `populus.ini` config file")
-        try:
-            backup_ini_config_file_path = upgrade_legacy_config_file(os.getcwd())
-        except:
-            logger.error(
-                "The following error occured while trying to upgrade the legacy "
-                "`populus.ini` config file:"
-            )
-            raise
-        else:
-            logger.info(
-                "Project configuration upgraded.  New config file "
-                "`populus.json` has been written.  Old config file was renamed "
-                "to `{0}`".format(backup_ini_config_file_path)
-            )
 
     project = Project(config_file_path)
 

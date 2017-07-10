@@ -11,15 +11,14 @@ from populus.cli import main
 from populus.utils.testing import load_contract_fixture
 
 
-@pytest.mark.slow
 @load_contract_fixture('Math.sol')
 @load_contract_fixture('WithNoArgumentConstructor.sol')
 def test_deployment_command_with_one_specified_contract(project):
     runner = CliRunner()
     result = runner.invoke(main, ['deploy', '--no-wait-for-sync', 'Math'], input=(
-        'tester\n' # select the local chain.
-        '0\n'      # select account to deploy from.
-        'Y\n'      # write it to config file
+        'tester\n'  # select the local chain.
+        '0\n'       # select account to deploy from.
+        'Y\n'       # write it to config file
     ))
 
     assert result.exit_code == 0, result.output + str(result.exception)
@@ -29,7 +28,6 @@ def test_deployment_command_with_one_specified_contract(project):
     assert 'Deploying WithNoArgumentConstructor' not in result.output
 
 
-@pytest.mark.slow
 @load_contract_fixture('Math.sol')
 @load_contract_fixture('WithNoArgumentConstructor.sol')
 @load_contract_fixture('Emitter.sol')
@@ -47,7 +45,6 @@ def test_deployment_command_with_specified_contracts(project):
     assert 'Deploying Emitter' in result.output
 
 
-@pytest.mark.slow
 @load_contract_fixture('Math.sol')
 @load_contract_fixture('WithNoArgumentConstructor.sol')
 @load_contract_fixture('Emitter.sol')

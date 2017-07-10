@@ -19,8 +19,3 @@ class TesterChain(BaseChain):
         self.rpc_methods.evm_mine()
 
         return self
-
-    def __exit__(self, *exc_info):
-        if not self._running:
-            raise ValueError("The TesterChain is not running")
-        self._running = False

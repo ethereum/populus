@@ -20,3 +20,15 @@ from .tester import (  # noqa: F401
 from .testrpc import (  # noqa: F401
     TestRPCChain,
 )
+
+
+__all__ = (
+    "TestRPCChain",
+    "TesterChain",
+    "BaseGethChain",
+    "TemporaryGethChain",
+    "LocalGethChain",
+    "MainnetChain",
+    "TestnetChain",
+    "ExternalChain",
+)

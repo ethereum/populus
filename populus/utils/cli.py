@@ -211,7 +211,7 @@ def configure_chain(project, chain_name):
             "Populus needs to connect to the chain.  Press [Enter] when the "
             "chain is ready for populus"
         )
-        click.prompt(is_chain_ready_msg)
+        click.prompt(is_chain_ready_msg, default='')
 
     with project.get_chain(chain_name) as chain:
         web3 = chain.web3
@@ -271,9 +271,6 @@ def deploy_contract_and_verify(chain,
     web3 = chain.web3
     logger = logging.getLogger('populus.utils.cli.deploy_contract_and_verify')
 
-    if ContractFactory is None:
-        ContractFactory = chain.provider.get_contract_factory(contract_name)
-
     if is_account_locked(web3, web3.eth.defaultAccount or web3.eth.coinbase):
         try:
             chain.wait.for_unlock(web3.eth.defaultAccount or web3.eth.coinbase, 5)
@@ -284,6 +281,9 @@ def deploy_contract_and_verify(chain,
             web3.eth.defaultAccount = default_account
 
     logger.info("Deploying {0}".format(contract_name))
+
+    if ContractFactory is None:
+        ContractFactory = chain.provider.get_contract_factory(contract_name)
 
     deploy_txn_hash = ContractFactory.deploy(
         transaction=deploy_transaction,

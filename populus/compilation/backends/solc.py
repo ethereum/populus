@@ -65,7 +65,7 @@ class SolcCombinedJSONBackend(BaseCompilerBackend):
         self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
 
         try:
-            compiled_contracts = compile_files(source_file_paths, **self.compiler_settings)
+            compiled_contracts = compile_files(source_file_paths,import_remappings=import_remappings, **self.compiler_settings)
         except ContractsNotFound:
             return {}
 

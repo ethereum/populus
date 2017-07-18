@@ -7,6 +7,8 @@ env:
   matrix:
     # Solc 0.4.8
     - SOLC_VERSION=v0.4.8 TOX_POSARGS="-e py27-stdlib -e py27-gevent -e py34-stdlib -e py34-gevent -e py35-stdlib -e py35-gevent" GETH_VERSION=v1.6.6
+    # Solc 0.4.11
+    - SOLC_VERSION=v0.4.11 TOX_POSARGS="-e py27-stdlib -e py27-gevent -e py34-stdlib -e py34-gevent -e py35-stdlib -e py35-gevent" GETH_VERSION=v1.6.6
     # Linting
     - TOX_POSARGS="-e flake8"
   global:
@@ -22,7 +24,7 @@ before_install:
   # geth build dependencies
   - if [ -n "$GETH_VERSION" ]; then travis_retry sudo add-apt-repository -y ppa:gophers/archive; fi
   - if [ -n "$GETH_VERSION" ]; then travis_retry sudo apt-get update; fi
-  - if [ -n "$GETH_VERSION" ]; then travis_retry sudo apt-get install -y golang-1.7 build-essential; fi
+  - if [ -n "$GETH_VERSION" ]; then travis_retry sudo apt-get install -y --allow-unauthenticated golang-1.7 build-essential; fi
   - if [ -n "$GETH_VERSION" ]; then mkdir -p $HOME/.ethash; fi
 install:
   # solc

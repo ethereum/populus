@@ -50,3 +50,10 @@ def split_at_longest_importable_path(dotted_path):
             return import_part, remainder
     else:
         return '', dotted_path
+
+
+def get_import_path(obj):
+    return '.'.join((
+        obj.__name__,
+        obj.__module__,
+    ))

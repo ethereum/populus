@@ -6,7 +6,7 @@ from populus.contracts.exceptions import (
     NoKnownAddress,
 )
 
-from populus.utils.linking import (
+from populus.utils.testing import (
     link_bytecode_by_name,
 )
 
@@ -40,10 +40,12 @@ def test_get_contract_factory_with_dependency(chain,
 
     expected_bytecode = link_bytecode_by_name(
         MULTIPLY_13['bytecode'],
+        MULTIPLY_13['linkrefs'],
         Library13=library_13.address,
     )
     expected_runtime = link_bytecode_by_name(
         MULTIPLY_13['bytecode_runtime'],
+        MULTIPLY_13['linkrefs_runtime'],
         Library13=library_13.address,
     )
 

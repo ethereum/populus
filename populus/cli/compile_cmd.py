@@ -37,8 +37,8 @@ def compile_cmd(ctx, watch):
     """
     project = ctx.obj['PROJECT']
 
-    _, compiled_contract_data = compile_project_contracts(project)
-    write_compiled_sources(project.compiled_contracts_asset_path, compiled_contract_data)
+    _, compiled_contracts = compile_project_contracts(project)
+    write_compiled_sources(project.compiled_contracts_asset_path, compiled_contracts)
 
     if watch:
         thread = spawn(

@@ -15,9 +15,6 @@ from populus.utils.contracts import (
 from populus.utils.functional import (
     to_object,
 )
-from populus.utils.string import (
-    normalize_class_name,
-)
 
 
 class PopulusContract(Contract):
@@ -26,7 +23,7 @@ class PopulusContract(Contract):
 
 @to_object('PopulusMeta')
 @to_dict
-def build_populus_meta(chain, contract_identifier, contract_data):
+def build_populus_meta(chain, contract_data):
     yield (
         'is_project_contract',
         is_project_contract(chain.project.contracts_source_dir, contract_data),
@@ -35,7 +32,8 @@ def build_populus_meta(chain, contract_identifier, contract_data):
         'is_test_contract',
         is_test_contract(chain.project.tests_dir, contract_data),
     )
-    yield 'contract_type_name', normalize_class_name(contract_identifier)
+    yield 'contract_type_name', contract_data['name']
+    yield 'source_path', contract_data['source_path']
 
 
 CONTRACT_FACTORY_FIELDS = {
@@ -62,7 +60,7 @@ def construct_contract_factory(chain, contract_identifier, contract_data):
         in CONTRACT_FACTORY_FIELDS
         if key in contract_data
     }
-    populus_meta = build_populus_meta(chain, contract_identifier, contract_data)
+    populus_meta = build_populus_meta(chain, contract_data)
     return chain.web3.eth.contract(
         ContractFactoryClass=PopulusContract,
         populus_meta=populus_meta,

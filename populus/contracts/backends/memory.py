@@ -1,5 +1,3 @@
-import collections
-
 from populus.contracts.exceptions import (
     NoKnownAddress,
 )
@@ -18,7 +16,7 @@ class MemoryBackend(BaseContractBackend):
     contract_addresses = None
 
     def setup_backend(self):
-        self.contract_addresses = collections.defaultdict(set)
+        self.contract_addresses = {}
 
     #
     # Registrar API
@@ -30,4 +28,7 @@ class MemoryBackend(BaseContractBackend):
             raise NoKnownAddress("No known address for '{0}'".format(instance_name))
 
     def set_contract_address(self, instance_name, address):
-        self.contract_addresses[instance_name].add(address)
+        if instance_name in self.contract_addresses:
+            self.contract_addresses[instance_name].add(address)
+        else:
+            self.contract_addresses[instance_name] = {address}

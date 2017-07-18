@@ -2,10 +2,10 @@ import pytest
 
 import json
 
-from populus.utils.linking import (
+from populus import Project
+from populus.utils.testing import (
     link_bytecode_by_name,
 )
-from populus import Project
 
 
 @pytest.fixture(autouse=True)
@@ -15,7 +15,7 @@ def inject_contracts(request):
         test_fn._populus_contract_fixtures = []
     for fixture_path in ('Math.sol', 'Library13.sol', 'Multiply13.sol'):
         if fixture_path not in test_fn._populus_contract_fixtures:
-            test_fn._populus_contract_fixtures.append(fixture_path)
+            test_fn._populus_contract_fixtures.append((fixture_path, None))
 
 
 @pytest.yield_fixture()

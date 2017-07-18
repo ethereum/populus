@@ -19,6 +19,7 @@ from populus.config.versions import (
     V2,
     V3,
     V4,
+    V5,
 )
 
 
@@ -26,12 +27,20 @@ from populus.config.versions import (
     'from_to_version,use_config_object',
     tuple(itertools.product(
         (
+            # v1
             (V1, V2),
             (V1, V3),
             (V1, V4),
+            (V1, V5),
+            # v2
             (V2, V3),
             (V2, V4),
+            (V2, V5),
+            # v3
             (V3, V4),
+            (V3, V5),
+            # v4
+            (V4, V5),
         ),
         (True, False),
     )),

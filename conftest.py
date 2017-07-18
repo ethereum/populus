@@ -11,9 +11,6 @@ import itertools
 
 from populus import Project
 
-from populus.utils.linking import (
-    link_bytecode_by_name,
-)
 from populus.utils.chains import (
     get_base_blockchain_storage_dir,
 )
@@ -26,7 +23,11 @@ from populus.utils.filesystem import (
 )
 from populus.utils.testing import (
     get_tests_dir,
+    link_bytecode_by_name,
 )
+
+
+POPULUS_SOURCE_ROOT = os.path.dirname(__file__)
 
 
 @pytest.fixture()
@@ -85,7 +86,7 @@ def wait_for_unlock():
 
 
 @pytest.fixture()
-def _loaded_contract_fixtures(populus_source_root, project_dir, request):
+def _loaded_contract_fixtures(project_dir, request):
     contracts_to_load_from_fn = getattr(request.function, '_populus_contract_fixtures', [])
     contracts_to_load_from_module = getattr(request.module, '_populus_contract_fixtures', [])
 
@@ -95,11 +96,11 @@ def _loaded_contract_fixtures(populus_source_root, project_dir, request):
     )
     contracts_source_dir = get_contracts_source_dir(project_dir)
 
-    for item in contracts_to_load:
+    for item, dst_path in contracts_to_load:
         ensure_path_exists(contracts_source_dir)
 
         fixture_path = os.path.join(
-            populus_source_root,
+            POPULUS_SOURCE_ROOT,
             'tests',
             'fixtures',
             item,
@@ -111,7 +112,12 @@ def _loaded_contract_fixtures(populus_source_root, project_dir, request):
         else:
             raise ValueError("Unable to load contract '{0}'".format(item))
 
-        dst_path = os.path.join(contracts_source_dir, os.path.basename(item))
+        if dst_path is None:
+            dst_path = os.path.join(contracts_source_dir, os.path.basename(item))
+        elif not os.path.isabs(dst_path):
+            dst_path = os.path.join(project_dir, dst_path)
+
+        ensure_path_exists(os.path.dirname(dst_path))
 
         if os.path.exists(dst_path):
             raise ValueError("File already present at '{0}'".format(dst_path))
@@ -120,7 +126,7 @@ def _loaded_contract_fixtures(populus_source_root, project_dir, request):
 
 
 @pytest.fixture()
-def _loaded_test_contract_fixtures(populus_source_root, project_dir, request):
+def _loaded_test_contract_fixtures(project_dir, request):
     test_contracts_to_load_from_fn = getattr(request.function, '_populus_test_contract_fixtures', [])
     test_contracts_to_load_from_module = getattr(request.module, '_populus_test_contract_fixtures', [])
 
@@ -131,11 +137,11 @@ def _loaded_test_contract_fixtures(populus_source_root, project_dir, request):
 
     tests_dir = get_tests_dir(project_dir)
 
-    for item in test_contracts_to_load:
+    for item, dst_path in test_contracts_to_load:
         ensure_path_exists(tests_dir)
 
         fixture_path = os.path.join(
-            populus_source_root,
+            POPULUS_SOURCE_ROOT,
             'tests',
             'fixtures',
             item,
@@ -147,7 +153,12 @@ def _loaded_test_contract_fixtures(populus_source_root, project_dir, request):
         else:
             raise ValueError("Unable to load test contract '{0}'".format(item))
 
-        dst_path = os.path.join(tests_dir, os.path.basename(item))
+        if dst_path is None:
+            dst_path = os.path.join(tests_dir, os.path.basename(item))
+        elif not os.path.isabs(dst_path):
+            dst_path = os.path.join(project_dir, dst_path)
+
+        ensure_path_exists(os.path.dirname(dst_path))
 
         if os.path.exists(dst_path):
             raise ValueError("File already present at '{0}'".format(dst_path))
@@ -156,15 +167,40 @@ def _loaded_test_contract_fixtures(populus_source_root, project_dir, request):
 
 
 @pytest.fixture()
-def project(project_dir,
-            _loaded_contract_fixtures,
-            _loaded_test_contract_fixtures):
-    return Project()
+def _updated_project_config(project_dir, request):
+    key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])
+    key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
+
+    key_value_pairs = tuple(itertools.chain(
+        key_value_pairs_from_fn,
+        key_value_pairs_from_module,
+    ))
+
+    if key_value_pairs:
+        project = Project()
+
+        for key, value in key_value_pairs:
+            if value is None:
+                del project.config[key]
+            else:
+                project.config[key] = value
+
+        project.write_config()
 
 
-@pytest.fixture()
-def populus_source_root():
-    return os.path.dirname(__file__)
+def pytest_fixture_setup(fixturedef, request):
+    """
+    Injects the following fixtures ahead of the `project` fixture.
+
+    - project_dir
+    - _loaded_contract_fixtures
+    - _loaded_test_contract_fixtures
+    """
+    if fixturedef.argname == 'project':
+        request.getfixturevalue('project_dir')
+        request.getfixturevalue('_loaded_contract_fixtures')
+        request.getfixturevalue('_loaded_test_contract_fixtures')
+        request.getfixturevalue('_updated_project_config')
 
 
 @pytest.fixture()
@@ -191,6 +227,7 @@ def multiply_13(chain, library_13):
 
     bytecode = link_bytecode_by_name(
         Multiply13['bytecode'],
+        Multiply13['linkrefs'],
         Library13=library_13.address,
     )
 

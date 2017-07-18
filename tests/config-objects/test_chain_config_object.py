@@ -5,11 +5,11 @@ from web3.providers.ipc import IPCProvider
 from populus.chain import (
     LocalGethChain,
     ExternalChain,
-    TesterChain,
-    TestRPCChain,
+    TesterChain as _TesterChain,
+    TestRPCChain as _TestRPCChain,
     TemporaryGethChain,
     MainnetChain,
-    TestnetChain,
+    TestnetChain as _TestnetChain,
 )
 
 from populus.config.chain import ChainConfig
@@ -61,11 +61,11 @@ def test_getting_chain_instance(project):
         ('populus.chain.geth.TestnetChain', 'populus.chain.geth.TestnetChain'),
         (LocalGethChain, 'populus.chain.geth.LocalGethChain'),
         (ExternalChain, 'populus.chain.external.ExternalChain'),
-        (TesterChain, 'populus.chain.tester.TesterChain'),
-        (TestRPCChain, 'populus.chain.testrpc.TestRPCChain'),
+        (_TesterChain, 'populus.chain.tester.TesterChain'),
+        (_TestRPCChain, 'populus.chain.testrpc.TestRPCChain'),
         (TemporaryGethChain, 'populus.chain.geth.TemporaryGethChain'),
         (MainnetChain, 'populus.chain.geth.MainnetChain'),
-        (TestnetChain, 'populus.chain.geth.TestnetChain'),
+        (_TestnetChain, 'populus.chain.geth.TestnetChain'),
     )
 )
 def test_set_chain_class_api(value, expected):

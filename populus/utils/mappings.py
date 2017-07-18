@@ -11,11 +11,11 @@ from eth_utils import (
 )
 
 
-def set_nested_key(config, key, value, mapping_type=dict):
+def set_nested_key(config, key, value):
     key_head, _, key_tail = key.rpartition('.')
 
     head_setters = (
-        operator.methodcaller('setdefault', key_part, mapping_type())
+        operator.methodcaller('setdefault', key_part, {})
         for key_part
         in key_head.split('.')
         if key_part

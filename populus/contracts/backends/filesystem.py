@@ -31,6 +31,13 @@ def get_matching_chain_definitions(web3, values):
             yield chain_definition
 
 
+def load_registrar_data(registrar_file):
+    registrar_data = json.load(registrar_file)
+    registrar_data.setdefault('deployments', {})
+
+    return registrar_data
+
+
 class JSONFileBackend(BaseContractBackend):
     is_registrar = True
     is_provider = False
@@ -85,14 +92,13 @@ class JSONFileBackend(BaseContractBackend):
     def registrar_path(self):
         return self.config.get('file_path', './registrar.json')
 
-    _registrar_data = None
-
     @property
     def registrar_data(self):
         # TODO: this could be cached using mtime of the file.
         if os.path.exists(self.registrar_path):
             with open(self.registrar_path, 'r') as registrar_file:
-                registrar_data = json.load(registrar_file)
+                registrar_data = load_registrar_data(registrar_file)
         else:
-            registrar_data = {}
+            registrar_data = {'deployments': {}}
+
         return registrar_data

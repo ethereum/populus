@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+.. _v1.8.0-release-notes:
+
+1.8.0-beta.1
+------------
+
+- Change default compiler backend to
+  ``populus.compilation.backends.SolcAutoBackend`` which will automatically
+  select the appropriate solc compiler backend based on the current installed
+  version olf solc.
+- Add support for standard JSON based solc compilation.
+
+
 .. _v1.7.0-release-notes:
 
 1.7.0

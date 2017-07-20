@@ -11,70 +11,98 @@ from populus.utils.cli import (
 from populus.utils.testing import load_contract_fixture
 
 
-@load_contract_fixture('Math.sol')
-def test_deploying_contract_with_successful_deploy(project):
+
+def deploy_contract(project,name):
+    
     chain = project.get_chain('testrpc')
 
     exports = []
 
     with chain:
-        Math = chain.provider.get_contract_factory('Math')
+        Contract = chain.provider.get_contract_factory(name)
 
         @click.command()
         def wrapper():
-            math_contract = deploy_contract_and_verify(
+            contract = deploy_contract_and_verify(
                 chain,
-                contract_name='Math',
-                ContractFactory=Math,
+                contract_name=name,
+                ContractFactory=Contract,
             )
-            exports.append(math_contract)
-            print("~~{0}~~".format(math_contract.address))
+            exports.append(contract)
+            print("~~{0}~~".format(contract.address))
 
         runner = CliRunner()
         result = runner.invoke(wrapper, [])
 
     assert result.exit_code == 0, str(result.output) + '\n' + str(result.exception)
     assert len(exports) == 1
-    math_contract = exports[0]
-    expected = "~~{0}~~".format(math_contract.address)
+    contract = exports[0]
+    expected = "~~{0}~~".format(contract.address)
     assert expected in result.output
     # ensure that we actually did bytecode verification
     assert "Verified contract bytecode" in result.output
     assert "No runtime available" not in result.output
-
-
-@load_contract_fixture('Math.sol')
-def test_with_successful_deploy_sans_runtime_bytecode(project):
+    
+def deploy_sans_runtime(project,name):
     chain = project.get_chain('testrpc')
 
     exports = []
 
     with chain:
-        Math = chain.provider.get_contract_factory('Math')
+        Contract = chain.provider.get_contract_factory(name)
 
-        Math.bytecode_runtime = None
-        assert Math.bytecode_runtime is None
+        Contract.bytecode_runtime = None
+        assert Contract.bytecode_runtime is None
 
         @click.command()
         def wrapper():
-            math_contract = deploy_contract_and_verify(
+            contract = deploy_contract_and_verify(
                 chain,
-                contract_name='Math',
-                ContractFactory=Math,
+                contract_name=name,
+                ContractFactory=Contract,
             )
-            exports.append(math_contract)
-            print("~~{0}~~".format(math_contract.address))
+            exports.append(contract)
+            print("~~{0}~~".format(contract.address))
 
         runner = CliRunner()
         result = runner.invoke(wrapper, [])
 
     assert result.exit_code == 0, str(result.output) + '\n' + str(result.exception)
     assert len(exports) == 1
-    math_contract = exports[0]
-    expected = "~~{0}~~".format(math_contract.address)
+    contract = exports[0]
+    expected = "~~{0}~~".format(contract.address)
     assert expected in result.output
     assert "Verified contract bytecode" not in result.output
     assert "No runtime available" in result.output
+
+
+
+@load_contract_fixture('Math.sol')
+def test_deploying_contract_with_successful_deploy(project):    
+    deploy_contract(project,"Math")
+
+    
+@load_contract_fixture('ImportTestD.sol')
+def test_deploying_contract_with_successful_deploy_remap(project):    
+    deploy_contract(project,"ImportTestD")
+    
+
+@load_contract_fixture('ImportTestRemapA.sol')
+def test_deploying_contract_with_successful_deploy_remap_lib(project):    
+    deploy_contract(project,"ImportTestRemapA")
+    
+
+@load_contract_fixture('Math.sol')
+def test_with_successful_deploy_sans_runtime_bytecode(project):
+    deploy_sans_runtime(project, "Math")
+    
+@load_contract_fixture('ImportTestD.sol')
+def test_with_successful_deploy_sans_runtime_bytecode_remap(project):
+    deploy_sans_runtime(project, "ImportTestD")
+    
+@load_contract_fixture('ImportTestRemapA.sol')
+def test_with_successful_deploy_sans_runtime_bytecode_remap_lib(project):
+    deploy_sans_runtime(project, "ImportTestRemapA")
 
 
 @load_contract_fixture('ThrowsInConstructor.sol')

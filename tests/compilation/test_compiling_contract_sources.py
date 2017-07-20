@@ -32,12 +32,24 @@ def test_compiling_project_contracts(project):
 @load_contract_fixture('ImportTestA.sol')
 @load_contract_fixture('ImportTestB.sol')
 @load_contract_fixture('ImportTestC.sol')
+@load_contract_fixture('ImportTestD.sol')
+@load_contract_fixture('ImportTestE.sol')
+@load_contract_fixture('ImportTestF.sol')
 def test_compiling_with_local_project_imports(project):
     _, contract_data = compile_project_contracts(project)
 
     assert 'ImportTestA' in contract_data
     assert 'ImportTestB' in contract_data
     assert 'ImportTestC' in contract_data
+    assert 'ImportTestD' in contract_data
+    assert 'ImportTestE' in contract_data
+    assert 'ImportTestF' in contract_data
+    
+    assert 'ImportTestRemapA' in contract_data
+    assert 'ImportTestRemapB' in contract_data
+    assert 'ImportTestRemapC' in contract_data
+    assert 'ImportTestRemapD' in contract_data #side effect
+    assert 'ImportTestRemapE' in contract_data
 
 
 @load_test_contract_fixture('TestMath.sol')

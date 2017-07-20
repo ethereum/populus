@@ -105,20 +105,11 @@ def _loaded_contract_fixtures(project_dir, request):
             'fixtures',
             item,
         )
-        
-        fixture_path_remap = os.path.join(
-            populus_source_root,
-            'tests',
-            'fixtures_remap',
-            item,
-        )
-        
+
         if os.path.exists(item):
             src_path = item
         elif os.path.exists(fixture_path):
             src_path = fixture_path
-        elif os.path.exists(fixture_path_remap):
-            src_path = fixture_path_remap      
         else:
             raise ValueError("Unable to load contract '{0}'".format(item))
 

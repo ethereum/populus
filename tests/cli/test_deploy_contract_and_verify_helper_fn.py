@@ -81,30 +81,10 @@ def deploy_sans_runtime(project,name):
 def test_deploying_contract_with_successful_deploy(project):    
     deploy_contract(project,"Math")
 
-    
-@load_contract_fixture('ImportTestD.sol')
-def test_deploying_contract_with_successful_deploy_remap(project):    
-    deploy_contract(project,"ImportTestD")
-    
-
-@load_contract_fixture('ImportTestRemapA.sol')
-def test_deploying_contract_with_successful_deploy_remap_lib(project):    
-    deploy_contract(project,"ImportTestRemapA")
-    
-
 @load_contract_fixture('Math.sol')
 def test_with_successful_deploy_sans_runtime_bytecode(project):
     deploy_sans_runtime(project, "Math")
     
-@load_contract_fixture('ImportTestD.sol')
-def test_with_successful_deploy_sans_runtime_bytecode_remap(project):
-    deploy_sans_runtime(project, "ImportTestD")
-    
-@load_contract_fixture('ImportTestRemapA.sol')
-def test_with_successful_deploy_sans_runtime_bytecode_remap_lib(project):
-    deploy_sans_runtime(project, "ImportTestRemapA")
-
-
 @load_contract_fixture('ThrowsInConstructor.sol')
 def test_deploying_contract_with_error_during_deploy(project):
     chain = project.get_chain('testrpc')

@@ -150,7 +150,7 @@
       "$ref": "compilation.backends.SolcCombinedJSON"
     },
     "contracts_source_dir": "./contracts",
-    "import_remappings": ["fixtures_remap=/actual/path/to/populus/tests/fixtures_remap"]
+    "import_remappings": []
   },
   "web3": {
     "GethIPC": {

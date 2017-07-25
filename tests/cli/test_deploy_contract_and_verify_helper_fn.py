@@ -11,80 +11,72 @@ from populus.utils.cli import (
 from populus.utils.testing import load_contract_fixture
 
 
-
-def deploy_contract(project,name):
-    
+@load_contract_fixture('Math.sol')
+def test_deploying_contract_with_successful_deploy(project):
     chain = project.get_chain('testrpc')
 
     exports = []
 
     with chain:
-        Contract = chain.provider.get_contract_factory(name)
+        Math = chain.provider.get_contract_factory('Math')
 
         @click.command()
         def wrapper():
-            contract = deploy_contract_and_verify(
+            math_contract = deploy_contract_and_verify(
                 chain,
-                contract_name=name,
-                ContractFactory=Contract,
+                contract_name='Math',
+                ContractFactory=Math,
             )
-            exports.append(contract)
-            print("~~{0}~~".format(contract.address))
+            exports.append(math_contract)
+            print("~~{0}~~".format(math_contract.address))
 
         runner = CliRunner()
         result = runner.invoke(wrapper, [])
 
     assert result.exit_code == 0, str(result.output) + '\n' + str(result.exception)
     assert len(exports) == 1
-    contract = exports[0]
-    expected = "~~{0}~~".format(contract.address)
+    math_contract = exports[0]
+    expected = "~~{0}~~".format(math_contract.address)
     assert expected in result.output
     # ensure that we actually did bytecode verification
     assert "Verified contract bytecode" in result.output
     assert "No runtime available" not in result.output
-    
-def deploy_sans_runtime(project,name):
+
+
+@load_contract_fixture('Math.sol')
+def test_with_successful_deploy_sans_runtime_bytecode(project):
     chain = project.get_chain('testrpc')
 
     exports = []
 
     with chain:
-        Contract = chain.provider.get_contract_factory(name)
+        Math = chain.provider.get_contract_factory('Math')
 
-        Contract.bytecode_runtime = None
-        assert Contract.bytecode_runtime is None
+        Math.bytecode_runtime = None
+        assert Math.bytecode_runtime is None
 
         @click.command()
         def wrapper():
-            contract = deploy_contract_and_verify(
+            math_contract = deploy_contract_and_verify(
                 chain,
-                contract_name=name,
-                ContractFactory=Contract,
+                contract_name='Math',
+                ContractFactory=Math,
             )
-            exports.append(contract)
-            print("~~{0}~~".format(contract.address))
+            exports.append(math_contract)
+            print("~~{0}~~".format(math_contract.address))
 
         runner = CliRunner()
         result = runner.invoke(wrapper, [])
 
     assert result.exit_code == 0, str(result.output) + '\n' + str(result.exception)
     assert len(exports) == 1
-    contract = exports[0]
-    expected = "~~{0}~~".format(contract.address)
+    math_contract = exports[0]
+    expected = "~~{0}~~".format(math_contract.address)
     assert expected in result.output
     assert "Verified contract bytecode" not in result.output
     assert "No runtime available" in result.output
 
 
-
-@load_contract_fixture('Math.sol')
-def test_deploying_contract_with_successful_deploy(project):    
-    deploy_contract(project,"Math")
-
-@load_contract_fixture('Math.sol')
-def test_with_successful_deploy_sans_runtime_bytecode(project):
-    deploy_sans_runtime(project, "Math")
-    
 @load_contract_fixture('ThrowsInConstructor.sol')
 def test_deploying_contract_with_error_during_deploy(project):
     chain = project.get_chain('testrpc')

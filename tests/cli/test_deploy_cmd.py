@@ -27,41 +27,7 @@ def test_deployment_command_with_one_specified_contract(project):
     assert 'Deploying Math' in result.output
     assert 'Deploying WithNoArgumentConstructor' not in result.output
     
-@load_contract_fixture('ImportTestD.sol')
-@load_contract_fixture('WithNoArgumentConstructor.sol')
-def test_deployment_command_with_one_specified_contract_remap(project):
-    runner = CliRunner()
-    result = runner.invoke(main, ['deploy', '--no-wait-for-sync', 'ImportTestD'], input=(
-        'tester\n'  # select the local chain.
-        '0\n'       # select account to deploy from.
-        'Y\n'       # write it to config file
-    ))
-
-    assert result.exit_code == 0, result.output + str(result.exception)
-
-    # weak assertion but not sure what to do here.
-    assert 'Deploying ImportTestD' in result.output
-    assert 'Deploying WithNoArgumentConstructor' not in result.output
     
-@load_contract_fixture('ImportTestRemapA.sol')
-@load_contract_fixture('WithNoArgumentConstructor.sol')
-def test_deployment_command_with_one_specified_contract_remap_lib(project):
-    runner = CliRunner()
-    result = runner.invoke(main, ['deploy', '--no-wait-for-sync', 'ImportTestRemapA'], input=(
-        'tester\n'  # select the local chain.
-        '0\n'       # select account to deploy from.
-        'Y\n'       # write it to config file
-    ))
-
-    assert result.exit_code == 0, result.output + str(result.exception)
-
-    # weak assertion but not sure what to do here.
-    assert 'Deploying ImportTestRemapA' in result.output
-    assert 'Deploying WithNoArgumentConstructor' not in result.output
-    
-    
-
-
 @load_contract_fixture('Math.sol')
 @load_contract_fixture('WithNoArgumentConstructor.sol')
 @load_contract_fixture('Emitter.sol')

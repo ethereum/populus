@@ -1,9 +1,9 @@
 pragma solidity ^0.4.0;
 
-import {ImportTestA} from "import-path-for-A/ImportTestA.sol";
+import {RemapImported} from "import-path-for-A/RemapImported.sol";
 
 
-contract ImportRemappingTestA is ImportTestA {
+contract ImportRemappingTestA is RemapImported {
   function ImportRemappingTestA() {
   }
 }

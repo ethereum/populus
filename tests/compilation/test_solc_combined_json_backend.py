@@ -70,6 +70,27 @@ def test_compiling_with_local_project_imports(project):
     not get_solc_version() in Spec('<=0.4.8'),
     reason="Solc compiler not supported for combined json compilation",
 )
+
+
+@load_contract_fixture('RemapImported.sol')
+@load_contract_fixture('ImportRemappingTestA.sol')
+@update_project_config(
+    ('compilation.import_remappings', [
+        'import-path-for-A=contracts'
+        ]),
+)
+def test_compiling_with_import_remappings(project):
+    _, compiled_contracts = compile_project_contracts(project)
+
+    assert 'ImportRemappingTestA' in compiled_contracts
+    assert 'RemapImported' in compiled_contracts
+    assert 'RemapImportedNotUsed' in compiled_contracts
+
+
+@pytest.mark.skipif(
+    not get_solc_version() in Spec('<=0.4.8'),
+    reason="Solc compiler not supported for combined json compilation",
+)
 @load_test_contract_fixture('TestMath.sol')
 def test_compiling_with_test_contracts(project):
     source_paths, compiled_contracts = compile_project_contracts(project)

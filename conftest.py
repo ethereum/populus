@@ -105,6 +105,7 @@ def _loaded_contract_fixtures(project_dir, request):
             'fixtures',
             item,
         )
+
         if os.path.exists(item):
             src_path = item
         elif os.path.exists(fixture_path):

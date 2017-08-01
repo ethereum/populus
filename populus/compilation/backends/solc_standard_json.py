@@ -89,16 +89,14 @@ def normalize_compilation_result(compilation_result):
 
 
 class SolcStandardJSONBackend(BaseCompilerBackend):
+    solc_version = '>=0.4.11'
+
     def __init__(self, *args, **kwargs):
-        if get_solc_version() not in Spec('>=0.4.11'):
-            raise OSError(
-                "The 'SolcStandardJSONBackend can only be used with solc "
-                "versions >=0.4.11.  The SolcCombinedJSONBackend should be used "
-                "for all versions <=0.4.8"
-            )
+
         super(SolcStandardJSONBackend, self).__init__(*args, **kwargs)
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
+
         self.logger.debug("Import remappings: %s", import_remappings)
         self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
 

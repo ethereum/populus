@@ -22,29 +22,24 @@ from .solc_standard_json import (
 )
 
 
-def get_solc_backend_class_for_version(solc_version):
-    if is_string(solc_version):
+def get_solc_backend_class_for_version(solc_version=None,settings=None):
+
+    if solc_version == None:
+        solc_version = get_solc_version()
+
+    elif is_string(solc_version):
         solc_version = Version(solc_version)
 
-    if solc_version in Spec('<=0.4.8'):
-        return SolcCombinedJSONBackend
-    elif solc_version in Spec('>=0.4.11'):
-        return SolcStandardJSONBackend
+    if solc_version in Spec('>=0.4.11'):
+        backend_class = SolcStandardJSONBackend
     else:
         raise OSError(
-            "The installed solc compiler is not supported.  Supported versions "
-            "of the solc compiler are <=0.4.8 and >=0.4.11"
+            "The installed solc compiler is not supported. Supported versions "
+            "solc >=0.4.11"
         )
 
+    if settings == None:
+        return backend_class()
+    else:
+        return backend_class(settings)
 
-class SolcAutoBackend(BaseCompilerBackend):
-    def __init__(self, settings):
-        proxy_backend_class = get_solc_backend_class_for_version(get_solc_version())
-        self.proxy_backend = proxy_backend_class(settings)
-
-    @property
-    def settings(self):
-        return self.proxy_backend.settings
-
-    def get_compiled_contracts(self, *args, **kwargs):
-        return self.proxy_backend.get_compiled_contracts(*args, **kwargs)

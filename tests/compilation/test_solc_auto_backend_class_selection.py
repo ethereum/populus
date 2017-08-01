@@ -1,7 +1,6 @@
 import pytest
 
 from populus.compilation.backends import (
-    SolcCombinedJSONBackend,
     SolcStandardJSONBackend,
 )
 from populus.compilation.backends.solc_auto import (
@@ -12,15 +11,6 @@ from populus.compilation.backends.solc_auto import (
 @pytest.mark.parametrize(
     'solc_version,backend_class',
     (
-        # combined
-        ('0.4.0', SolcCombinedJSONBackend),
-        ('0.4.1', SolcCombinedJSONBackend),
-        ('0.4.2', SolcCombinedJSONBackend),
-        ('0.4.3', SolcCombinedJSONBackend),
-        ('0.4.4', SolcCombinedJSONBackend),
-        ('0.4.6', SolcCombinedJSONBackend),
-        ('0.4.7', SolcCombinedJSONBackend),
-        ('0.4.8', SolcCombinedJSONBackend),
         # standard
         ('0.4.11', SolcStandardJSONBackend),
         ('0.4.12', SolcStandardJSONBackend),
@@ -35,8 +25,7 @@ def test_get_solc_backend_class_for_version(solc_version, backend_class):
 @pytest.mark.parametrize(
     'solc_version',
     (
-        '0.4.9',
-        '0.4.10',
+        '<0.4.11',
     )
 )
 def test_fails_for_unsupported_solc_versions(solc_version):

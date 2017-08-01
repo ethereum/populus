@@ -16,9 +16,7 @@ from eth_utils import (
 from .base import (
     BaseCompilerBackend,
 )
-from .solc_combined_json import (
-    SolcCombinedJSONBackend,
-)
+
 from .solc_standard_json import (
     SolcStandardJSONBackend,
 )

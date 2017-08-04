@@ -114,10 +114,15 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
                 'remappings': import_remappings
             }
         }
-        std_input['settings'].update(self.compiler_settings)
 
+        std_input['settings'].update(self.compiler_settings.get("solidity_input_description", {}))
+        command_line_settings = self.compiler_settings.get("command_line_options", {})
+
+        print("Using keys", std_input.keys())
+        print("Settings are", std_input["settings"])
+        print("Command line settings are", command_line_settings)
         try:
-            compilation_result = compile_standard(std_input)
+            compilation_result = compile_standard(std_input, **command_line_settings)
         except ContractsNotFound:
             return {}
 

@@ -15,7 +15,7 @@ from solc import (
 
 
 
-#TODO-PRIORITY-01:
+# TODO-PRIORITY-01:
 # move to new global compilation settings
 # by solc version
 
@@ -31,18 +31,17 @@ class BaseCompilerBackend(object):
 
     def __init__(self, settings=None):
 
-        try:
-            assert get_solc_version() in Spec(self.solc_version)
-        except AssertionError:
+        if get_solc_version() not in Spec(self.solc_version):
             raise OSError(
                 "The 'SolcStandardJSONBackend can only be used with solc versions {version}.".format(
                     version=self.solc_version
                 )
             )
-        except:
-            raise
 
-        self.compiler_settings = DEFAULT_SOLC_SETTINGS if settings == None else settings
+        if settings is None:
+            self.compiler_settings = DEFAULT_SOLC_SETTINGS
+        else:
+            self.compiler_settings = settings
         self.logger = logging.getLogger(get_import_path(type(self)))
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):

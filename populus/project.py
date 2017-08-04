@@ -1,5 +1,6 @@
-import os
 import itertools
+import os
+import sys
 
 from populus.compilation import (
     compile_project_contracts,
@@ -23,9 +24,11 @@ from populus.utils.compile import (
     get_project_source_paths,
     get_test_source_paths,
 )
+
 from populus.utils.filesystem import (
     relpath,
     get_latest_mtime,
+    is_same_path,
 )
 from populus.utils.config import (
     check_if_json_config_file_exists,
@@ -46,20 +49,25 @@ class Project(object):
     #
     # Config
     #
-    project_root_path = None
+    project_root_dir = None
     _project_config = None
     _project_config_schema = None
 
-    def __init__(self, project_root_path, create=False):
-        self.project_root_path = project_root_path
+    def __init__(self, project_root_dir, create=False):
+        self.project_root_dir = project_root_dir
 
         if not self.has_json_config():
             raise FileNotFoundError(
                 "Did not find config file {file_name} in {dir_name}".format(
-                    file_name=JSON_PROJECT_CONFIG_FILENAME,dir_name=self.project_root_path)
+                    file_name=JSON_PROJECT_CONFIG_FILENAME,dir_name=self.project_root_dir)
             )
-        self.json_config_file_path = os.path.join(self.project_root_path, JSON_PROJECT_CONFIG_FILENAME)
+        self.json_config_file_path = os.path.join(self.project_root_dir, JSON_PROJECT_CONFIG_FILENAME)
         self.load_config()
+
+        if not any(is_same_path(p, project_root_dir) for p in sys.path):
+            # ensure that the project directory is in the sys.path
+            sys.path.insert(0, project_root_dir)
+
 
     def create(self):
 
@@ -68,7 +76,7 @@ class Project(object):
     def has_json_config(self):
 
         return check_if_json_config_file_exists(
-            path=self.project_root_path, file_name=JSON_PROJECT_CONFIG_FILENAME
+            path=self.project_root_dir, file_name=JSON_PROJECT_CONFIG_FILENAME
         )
 
     def write_config(self):

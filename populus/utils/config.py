@@ -30,11 +30,11 @@ def get_json_config_file_path(project_dir=None):
     return json_config_file_path
 
 
-def check_if_json_config_file_exists(project_dir=None):
-    if project_dir is None:
-        project_dir = os.getcwd()
+def check_if_json_config_file_exists(path, file_name):
+    if path is None:
+        path = os.getcwd()
 
-    json_config_file_path = get_json_config_file_path(project_dir)
+    json_config_file_path = os.path.join(path, file_name)
     return os.path.exists(json_config_file_path)
 
 

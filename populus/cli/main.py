@@ -1,3 +1,4 @@
+import logging
 import sys
 import warnings
 
@@ -24,6 +25,19 @@ CONTEXT_SETTINGS = dict(
 )
 
 
+def validate_logging_level(ctx, param, value):
+    normalized_value = value.lower()
+    if normalized_value.lower() in {'info', '20'}:
+        return logging.INFO
+    elif normalized_value.lower() in {'debug', '10'}:
+        return logging.DEBUG
+    else:
+        raise click.BadParameter(
+            "Logging level must be one of DEBUG/INFO or the numeric equivalents "
+            "10/20"
+        )
+
+
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option(
     '--config',
@@ -35,12 +49,23 @@ CONTEXT_SETTINGS = dict(
     ),
     type=click.Path(exists=True, dir_okay=False),
 )
+@click.option(
+    '--logging',
+    '-l',
+    'logging_level',
+    help=(
+        "Specify the logging level.  Allowed values are DEBUG/INFO or their "
+        "numeric equivalents 10/20"
+    ),
+    default=str(logging.INFO),
+    callback=validate_logging_level,
+)
 @click.pass_context
-def main(ctx, config_file_path):
+def main(ctx, config_file_path, logging_level):
     """
     Populus
     """
-    logger = get_logger_with_click_handler('populus')
+    logger = get_logger_with_click_handler('populus', level=logging_level)
 
     project = Project(config_file_path)
 

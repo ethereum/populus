@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _v1.8.1-release-notes:
+
+1.8.1
+-----
+
+- Add ``--logging`` option to main cli command to set logging level.
+
+
 .. _v1.8.0-release-notes:
 
 1.8.0

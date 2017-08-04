@@ -14,6 +14,9 @@ from populus.utils.functional import (
     get_duplicates,
 )
 
+from populus.compilation.backends.solc_auto import (
+    get_solc_backend_class_for_version,
+    )
 
 def _get_contract_key(contract_data):
     return (
@@ -44,7 +47,9 @@ def compile_project_contracts(project):
         test_contract_source_paths,
     ))
 
-    compiler_backend = project.get_compiler_backend()
+    #TODO-PRIORITY1
+    #move to the api and provide backend as an arg
+    compiler_backend = get_solc_backend_class_for_version()
     base_compiled_contracts = compiler_backend.get_compiled_contracts(
         source_file_paths=all_source_paths,
         import_remappings=project.config.get('compilation.import_remappings'),

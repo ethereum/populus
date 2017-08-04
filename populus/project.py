@@ -1,5 +1,6 @@
-import os
 import itertools
+import os
+import sys
 
 from populus.compilation import (
     compile_project_contracts,
@@ -23,9 +24,11 @@ from populus.utils.compile import (
     get_project_source_paths,
     get_test_source_paths,
 )
+
 from populus.utils.filesystem import (
     relpath,
     get_latest_mtime,
+    is_same_path,
 )
 from populus.utils.config import (
     check_if_json_config_file_exists,
@@ -36,19 +39,45 @@ from populus.utils.testing import (
     get_tests_dir,
 )
 
+from populus.defaults import (
+    JSON_PROJECT_CONFIG_FILENAME,
+)
+
 
 class Project(object):
-    def __init__(self, config_file_path=None):
-        self.config_file_path = config_file_path
-        self.load_config()
 
     #
     # Config
     #
-    config_file_path = None
-
+    project_root_dir = None
     _project_config = None
     _project_config_schema = None
+
+    def __init__(self, project_root_dir, create=False):
+        self.project_root_dir = project_root_dir
+
+        if not self.has_json_config():
+            raise FileNotFoundError(
+                "Did not find config file {file_name} in {dir_name}".format(
+                    file_name=JSON_PROJECT_CONFIG_FILENAME,dir_name=self.project_root_dir)
+            )
+        self.json_config_file_path = os.path.join(self.project_root_dir, JSON_PROJECT_CONFIG_FILENAME)
+        self.load_config()
+
+        if not any(is_same_path(p, project_root_dir) for p in sys.path):
+            # ensure that the project directory is in the sys.path
+            sys.path.insert(0, project_root_dir)
+
+
+    def create(self):
+
+        pass
+
+    def has_json_config(self):
+
+        return check_if_json_config_file_exists(
+            path=self.project_root_dir, file_name=JSON_PROJECT_CONFIG_FILENAME
+        )
 
     def write_config(self):
         if self.config_file_path is None:
@@ -67,18 +96,7 @@ class Project(object):
     def load_config(self):
         self._config_cache = None
 
-        if self.config_file_path is None:
-            has_json_config = check_if_json_config_file_exists()
-
-            if has_json_config:
-                path_to_load = get_json_config_file_path()
-            else:
-                path_to_load = get_default_config_path()
-        else:
-            path_to_load = self.config_file_path
-
-        self._project_config = _load_config(path_to_load)
-
+        self._project_config = _load_config(self.json_config_file_path)
         config_version = self._project_config['version']
         self._project_config_schema = load_config_schema(config_version)
 
@@ -184,16 +202,6 @@ class Project(object):
                 contracts_mtime=contracts_mtime,
             )
         return self._cached_compiled_contracts
-
-    #
-    # Compiler Backend
-    #
-    def get_compiler_backend(self):
-        compilation_config = self.config.get_config(
-            'compilation.backend',
-            config_class=CompilerConfig,
-        )
-        return compilation_config.backend
 
     #
     # Local Blockchains

@@ -13,7 +13,10 @@ class ClickLogHandler(logging.Handler):
         click.echo(self.format(record), err=True)
 
 
-def get_logger_with_click_handler(name, level=logging.INFO):
+def get_logger_with_click_handler(name, level=None):
+    if level is None:
+        level = logging.INFO
+
     logger = logging.getLogger(name)
     logger.setLevel(level)
 

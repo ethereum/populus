@@ -29,6 +29,64 @@ LinkReference = collections.namedtuple(
     ['reference_name', 'full_name', 'offset', 'length'],
 )
 
+#
+# Standard JSON utils
+#
+@to_tuple
+def normalize_standard_json_link_references(link_references):
+    for source_path, names in link_references.items():
+        for contract_name, reference_locations in names.items():
+            for location in reference_locations:
+                yield LinkReference(
+                    source_path=source_path,
+                    name=contract_name,
+                    start=location['start'] * 2,  # convert binary offsets to hex
+                    length=location['length'] * 2,  # convert binary offsets to hex
+                )
+
+
+
+def expand_placeholder(placeholder, full_names):
+    """
+    Link references whos names are longer than their bytecode representations
+    will get truncated to 4 characters short of their full name because of the
+    double underscore prefix and suffix.  This embedded string is referred to
+    as the `placeholder`
+
+    This expands `placeholder` to it's full reference name or raise a value
+    error if it is unable to find an appropriate expansion.
+    """
+    if placeholder in full_names:
+        return placeholder
+
+    candidates = [
+        full_name
+        for full_name
+        in full_names
+        if full_name.startswith(placeholder)
+    ]
+    if len(candidates) == 1:
+        return candidates[0]
+    elif len(candidates) > 1:
+        raise ValueError(
+            "Multiple candidates found trying to expand '{0}'.  Found '{1}'. "
+            "Searched '{2}'".format(
+                placeholder,
+                ", ".join(candidates),
+                ", ".join(full_names),
+            )
+        )
+    else:
+        raise ValueError(
+            "Unable to expand '{0}'. "
+            "Searched {1}".format(
+                placeholder,
+                ", ".join(full_names),
+            )
+        )
+
+
+
 
 def remove_dunderscore_wrapper(value):
     return remove_dunderscore_prefix(value.rstrip('_'))

@@ -49,7 +49,7 @@ def compile_project_contracts(project):
 
     #TODO-PRIORITY1
     #move to the api and provide backend as an arg
-    compiler_backend = get_solc_backend_class_for_version()
+    compiler_backend = get_solc_backend_class_for_version(solc_version="latest")
     base_compiled_contracts = compiler_backend.get_compiled_contracts(
         source_file_paths=all_source_paths,
         import_remappings=project.config.get('compilation.import_remappings'),

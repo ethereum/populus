@@ -22,9 +22,9 @@ from .solc_standard_json import (
 )
 
 
-def get_solc_backend_class_for_version(solc_version=None,settings=None):
+def get_solc_backend_class_for_version(solc_version,settings=None):
 
-    if solc_version == None:
+    if solc_version == "latest":
         solc_version = get_solc_version()
 
     elif is_string(solc_version):

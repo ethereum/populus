@@ -1,15 +1,13 @@
 import re
 import functools
-
-from toolz.functoolz import (
-    compose,
-)
+import collections
 
 from eth_utils import (
     coerce_args_to_text,
     remove_0x_prefix,
     add_0x_prefix,
     to_tuple,
+    compose,
 )
 
 from .formatting import (
@@ -18,81 +16,64 @@ from .formatting import (
 
 
 DEPENDENCY_RE = (
-    r'__'  # Prefixed by double underscore
-    r'.{36}'  # 36 characters of dubious character
-    r'__'  # End with a double underscore
+    '__'  # Prefixed by double underscore
+    '[a-zA-Z_]'  # First letter must be alpha or underscore
+    '[a-zA-Z0-9_]{0,59}?'  # Intermediate letters
+    '_{0,59}'
+    '__'  # End with a double underscore
 )
 
 
-# start and length should be `byte` offsets meaning they represent the
-# start/length in the bytecode in its bytes representation.  To transate to hex
-# representation, these two numbers should be multiplied by two.
-def LinkReference(source_path, name, start, length):
-    return {
-        'source_path': source_path,
-        'name': name,
-        'start': start,
-        'length': length,
-    }
+LinkReference = collections.namedtuple(
+    'LinkReference',
+    ['reference_name', 'full_name', 'offset', 'length'],
+)
 
 
-#
-# Standard JSON utils
-#
-@to_tuple
-def normalize_standard_json_link_references(link_references):
-    for source_path, names in link_references.items():
-        for contract_name, reference_locations in names.items():
-            for location in reference_locations:
-                yield LinkReference(
-                    source_path=source_path,
-                    name=contract_name,
-                    start=location['start'] * 2,  # convert binary offsets to hex
-                    length=location['length'] * 2,  # convert binary offsets to hex
-                )
-
-
-#
-# Combined JSON utils
-#
 def remove_dunderscore_wrapper(value):
     return remove_dunderscore_prefix(value.rstrip('_'))
 
 
 @to_tuple
 @coerce_args_to_text
-def find_placeholder_locations(bytecode):
+def find_link_references(bytecode, full_reference_names):
     """
     Given bytecode, this will return all of the linked references from within
     the bytecode.
     """
     unprefixed_bytecode = remove_0x_prefix(bytecode)
 
-    for match in re.finditer(DEPENDENCY_RE, unprefixed_bytecode):
-        start = match.start()
-        length = match.end() - start
-        placeholder = unprefixed_bytecode[start:start + length]
-        yield (remove_dunderscore_wrapper(placeholder), start, length)
+    expand_fn = functools.partial(
+        expand_shortened_reference_name,
+        full_reference_names=full_reference_names,
+    )
+
+    link_references = tuple((
+        LinkReference(
+            reference_name=remove_dunderscore_wrapper(match.group()),
+            full_name=expand_fn(remove_dunderscore_wrapper(match.group())),
+            offset=match.start(),
+            length=match.end() - match.start(),
+        ) for match in re.finditer(DEPENDENCY_RE, unprefixed_bytecode)
+    ))
+
+    return link_references
 
 
-def expand_placeholder(placeholder, full_names):
+def expand_shortened_reference_name(short_name, full_reference_names):
     """
     Link references whos names are longer than their bytecode representations
     will get truncated to 4 characters short of their full name because of the
-    double underscore prefix and suffix.  This embedded string is referred to
-    as the `placeholder`
+    double underscore prefix and suffix.
 
-    This expands `placeholder` to it's full reference name or raise a value
-    error if it is unable to find an appropriate expansion.
+    This expands `short_name` to it's full name or raise a value error if it is
+    unable to find an appropriate expansion.
     """
-    if placeholder in full_names:
-        return placeholder
+    if short_name in full_reference_names:
+        return short_name
 
     candidates = [
-        full_name
-        for full_name
-        in full_names
-        if full_name.startswith(placeholder)
+        full_name for full_name in full_reference_names if full_name.startswith(short_name)
     ]
     if len(candidates) == 1:
         return candidates[0]
@@ -100,48 +81,21 @@ def expand_placeholder(placeholder, full_names):
         raise ValueError(
             "Multiple candidates found trying to expand '{0}'.  Found '{1}'. "
             "Searched '{2}'".format(
-                placeholder,
-                ", ".join(candidates),
-                ", ".join(full_names),
+                short_name,
+                ','.join(candidates),
+                ','.join(full_reference_names),
             )
         )
     else:
         raise ValueError(
             "Unable to expand '{0}'. "
-            "Searched {1}".format(
-                placeholder,
-                ", ".join(full_names),
+            "Searched '{1}'".format(
+                short_name,
+                ','.join(full_reference_names),
             )
         )
 
 
-@to_tuple
-def normalize_placeholder_link_references(placeholder_locations, compiled_contracts):
-    all_contract_names = set(
-        contract_data['name']
-        for contract_data
-        in compiled_contracts
-    )
-    contract_source_paths = {
-        contract_data['name']: contract_data['source_path']
-        for contract_data
-        in compiled_contracts
-    }
-
-    for placeholder, start, length in placeholder_locations:
-        contract_name = expand_placeholder(placeholder, all_contract_names)
-        source_path = contract_source_paths[contract_name]
-        yield LinkReference(
-            source_path=source_path,
-            name=contract_name,
-            start=start,
-            length=length,
-        )
-
-
-#
-# Bytecode Linking utils
-#
 def insert_link_value(bytecode, value, offset):
     return add_0x_prefix(''.join((
         remove_0x_prefix(bytecode)[:offset],
@@ -155,16 +109,28 @@ def link_bytecode(bytecode, link_reference_values):
     Given the bytecode for a contract, and it's dependencies in the form of
     {contract_name: address} this functino returns the bytecode with all of the
     link references replaced with the dependency addresses.
-
-    TODO: validate that the provided values are of the appropriate length
     """
     linker_fn = compose(*(
         functools.partial(
             insert_link_value,
             value=value,
-            offset=link_reference['start'],
+            offset=link_reference.offset,
         )
         for link_reference, value in link_reference_values
     ))
     linked_bytecode = linker_fn(bytecode)
+    return linked_bytecode
+
+
+def link_bytecode_by_name(bytecode, **link_names_and_values):
+    """
+    Helper function for linking bytecode with a mapping of link reference names
+    to their values.
+    """
+    unresolved_link_references = find_link_references(bytecode, link_names_and_values.keys())
+    link_reference_values = [
+        (link_reference, link_names_and_values[link_reference.full_name])
+        for link_reference in unresolved_link_references
+    ]
+    linked_bytecode = link_bytecode(bytecode, link_reference_values)
     return linked_bytecode

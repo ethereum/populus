@@ -27,7 +27,7 @@ from solc.exceptions import (
 )
 
 from populus.utils.compile import (
-    load_json_if_string,
+    #load_json_if_string,
     normalize_contract_metadata,
 )
 from populus.utils.linking import (

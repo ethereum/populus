@@ -7,6 +7,10 @@ from eth_utils import (
     to_dict,
 )
 
+from populus.utils.functional import (
+    cached_property,
+)
+
 from populus.compilation import (
     compile_project_contracts,
 )
@@ -30,14 +34,22 @@ from populus.utils.compile import (
     get_project_source_paths,
     get_test_source_paths,
 )
+from populus.utils.dependencies import (
+    recursive_find_installed_dependency_base_dirs,
+    get_installed_dependency_locations,
+    get_installed_packages_dir,
+)
 
 from populus.utils.filesystem import (
+    is_same_path,
     relpath,
 )
 from populus.utils.config import (
     check_if_json_config_file_exists,
     get_default_project_config_file_path,
     get_json_config_file_path,
+    sort_prioritized_configs,
+
 )
 from populus.utils.testing import (
     get_tests_dir,

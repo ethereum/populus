@@ -7,8 +7,8 @@ import os
 from populus.utils.compile import (
     get_project_source_paths,
     get_test_source_paths,
-    validate_compiled_contracts,
-    post_process_compiled_contracts,
+    #validate_compiled_contracts,
+    #post_process_compiled_contracts,
 )
 from populus.utils.functional import (
     get_duplicates,

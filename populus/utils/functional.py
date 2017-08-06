@@ -6,6 +6,18 @@ from .string import (
     normalize_class_name,
 )
 
+from eth_utils import (
+    to_tuple,
+    compose,
+)
+
+def star_apply(fn):
+    @functools.wraps(fn)
+    def inner(args):
+        return fn(*args)
+    return inner
+
+
 
 class cached_property(object):
     """
@@ -57,9 +69,11 @@ def apply_to_return_value(callback):
 
 
 chain_return = apply_to_return_value(itertools.chain.from_iterable)
+star_zip_return = compose(apply_to_return_value(star_apply(zip)), to_tuple)
 to_set = apply_to_return_value(set)
 
 
+# delted in feat/v2
 def get_duplicates(values):
     duplicates = {
         key

@@ -126,11 +126,12 @@ def configure_chain(project, chain_name):
     logger.info('-' * len(start_msg))
 
     if is_existing_chain:
+        # TODO: this should probably show flattened out config keys
         current_configuration_msg = "\n".join(itertools.chain((
             "Current Configuration",
         ), (
             "  {key} = {value}".format(key=key, value=value)
-            for key, value in chain_config.items()
+            for key, value in chain_config.items()  # TODO: Config.items() doesn't exist.
         )))
         logger.info(current_configuration_msg)
 
@@ -267,9 +268,17 @@ def deploy_contract_and_verify(chain,
     Deploy a contract, displaying information about the deploy process as it
     happens.  This also verifies that the deployed contract's bytecode matches
     the expected value.
+
+    TODO: the `ContractFactory` keyword here is special in that it is only
+    present so that this can be used to deploy the `Registrar`.  It seems like
+    the `Registrar` should just be merged into the available contract
+    factories, or even be a *special* contract in which case it should be given
+    a different name.
     """
-    web3 = chain.web3
     logger = logging.getLogger('populus.utils.cli.deploy_contract_and_verify')
+
+    web3 = chain.web3
+    provider = chain.provider
 
     if is_account_locked(web3, web3.eth.defaultAccount or web3.eth.coinbase):
         try:
@@ -283,7 +292,7 @@ def deploy_contract_and_verify(chain,
     logger.info("Deploying {0}".format(contract_name))
 
     if ContractFactory is None:
-        ContractFactory = chain.provider.get_contract_factory(contract_name)
+        ContractFactory = provider.get_contract_factory(contract_name)
 
     deploy_txn_hash = ContractFactory.deploy(
         transaction=deploy_transaction,

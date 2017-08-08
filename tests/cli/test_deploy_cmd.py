@@ -1,10 +1,7 @@
-import pytest
-
 import os
 import re
 
 import click
-
 from click.testing import CliRunner
 
 from populus.cli import main

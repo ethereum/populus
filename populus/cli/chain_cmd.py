@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from populus.chain import (
+from populus.chain.geth import (
     BaseGethChain,
 )
 

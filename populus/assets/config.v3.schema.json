@@ -19,6 +19,13 @@
     },
     "web3": {
       "$ref": "#/definitions/ProjectWeb3Config"
+    },
+    "version": {
+      "type": "string",
+      "enum": ["3"]
+    },
+    "web3": {
+      "$ref": "#/definitions/ProjectWeb3Config"
     }
   },
   "definitions": {
@@ -39,7 +46,7 @@
     "ChainConfig": {
       "title": "Configuration for a single project chain",
       "type": "object",
-      "required": ["chain", "web3"],
+      "required": ["chain", "web3", "contracts"],
       "properties": {
         "chain": {"$ref": "#/definitions/ChainClassConfig"},
         "web3": {
@@ -47,6 +54,23 @@
             {"$ref": "#/definitions/Reference"},
             {"$ref": "#/definitions/Web3Config"}
           ]
+        },
+        "contracts": {
+          "title": "Configuration for the contract backends this chain will use",
+          "type": "object",
+          "required": ["backends"],
+          "properties": {
+            "backends": {
+              "patternProperties": {
+                "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+                  "anyOf": [
+                    {"$ref": "#/definitions/Reference"},
+                    {"$ref": "#/definitions/ContractBackendConfig"}
+                  ]
+                }
+              }
+            }
+          }
         }
       }
     },

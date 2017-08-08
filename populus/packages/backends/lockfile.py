@@ -17,6 +17,9 @@ class LocalFilesystemLockfileBackend(BasePackageBackend):
         return is_aliased_filesystem_release_lockfile_path(package_identifier)
 
     def translate_package_identifier(self, package_identifier):
+        """
+        TODO: this needs to translate this all-the-way to a lockfile URI
+        """
         if is_aliased_filesystem_release_lockfile_path(package_identifier):
             _, _, release_lockfile_path = package_identifier.partition('@')
             return (

@@ -116,13 +116,13 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
         }
 
         std_input['settings'].update(self.compiler_settings.get("solidity_input_description", {}))
-        command_line_settings = self.compiler_settings.get("command_line_options", {})
+        command_line_options = self.compiler_settings.get("command_line_options", {})
 
-        print("Using keys", std_input.keys())
-        print("Settings are", std_input["settings"])
-        print("Command line settings are", command_line_settings)
+        self.logger.debug("std_input has: %s", std_input.keys())
+        self.logger.debug("JSON settings are: %s", std_input["settings"])
+        self.logger.debug("Command line options are", command_line_options)
         try:
-            compilation_result = compile_standard(std_input, **command_line_settings)
+            compilation_result = compile_standard(std_input, **command_line_options)
         except ContractsNotFound:
             return {}
 

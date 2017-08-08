@@ -16,9 +16,6 @@ from populus.compilation import (
     compile_project_contracts,
 )
 
-from populus.utils.compile import (
-    get_contracts_source_dir,
-)
 from populus.utils.testing import (
     load_contract_fixture,
     load_test_contract_fixture,

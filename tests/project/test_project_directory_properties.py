@@ -1,5 +1,4 @@
 import pytest
-import sys
 
 from populus.project import Project
 
@@ -9,7 +8,7 @@ from populus.utils.chains import (
 from populus.utils.compile import (
     get_compiled_contracts_asset_path,
     get_build_asset_dir,
-    get_contracts_source_dir,
+    get_contracts_source_dirs,
 )
 from populus.utils.filesystem import (
     is_same_path,
@@ -20,8 +19,8 @@ def test_project_directory_properties(project_dir):
     project = Project()
 
     with pytest.warns(DeprecationWarning):
-        contracts_source_dir = get_contracts_source_dir(project_dir)
-        assert is_same_path(project.contracts_source_dir, contracts_source_dir)
+        contracts_source_dir = get_contracts_source_dirs(project_dir)
+        assert is_same_path(project.contracts_source_dirs, contracts_source_dir)
 
     contracts_source_dirs = get_contracts_source_dirs(project_dir)
     assert is_same_path(project.contracts_source_dirs, contracts_source_dirs)

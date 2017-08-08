@@ -121,7 +121,7 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
 
         # Get Solidity Input Description settings section
         # http://solidity.readthedocs.io/en/develop/using-the-compiler.html#input-description
-        std_input_settings = self.compiler_settings.get("solidity_input_description", {})
+        std_input_settings = self.compiler_settings.get("stdin", {})
         std_input['settings'].update(std_input_settings)
 
         self.logger.debug("std_input sections: %s", std_input.keys())

@@ -1,9 +1,9 @@
 import pprint
 
-from toolz.dicttoolz import (
+from cytoolz.dicttoolz import (
     assoc,
 )
-from toolz.functoolz import (
+from cytoolz.functoolz import (
     pipe,
     partial,
 )

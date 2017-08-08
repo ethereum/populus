@@ -126,7 +126,7 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
 
         self.logger.debug("std_input sections: %s", std_input.keys())
         self.logger.debug("Input Description JSON settings are: %s", std_input["settings"])
-        self.logger.debug("Command line options are", command_line_options)
+        self.logger.debug("Command line options are: %s", command_line_options)
         try:
             compilation_result = compile_standard(std_input, **command_line_options)
         except ContractsNotFound:

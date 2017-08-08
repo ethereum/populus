@@ -45,6 +45,7 @@
       "type": "array",
       "items": {
         "anyOf": [
+          {"$ref": "#/definitions/FallbackABI"},
           {"$ref": "#/definitions/FunctionABI"},
           {"$ref": "#/definitions/EventABI"},
           {"$ref": "#/definitions/ConstructorABI"}
@@ -140,6 +141,15 @@
         "type": {
           "type": "string",
           "enum": ["function"]
+        }
+      }
+    },
+    "FallbackABI": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["fallback"]
         }
       }
     },

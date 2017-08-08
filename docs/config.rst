@@ -28,8 +28,11 @@ Currently the config file controls the following things.
 Compiler Configuration
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The following configuration options are available to control how populus
-compiles your project contracts.
+Each complication backend takes settings that are passed down to Solidity compiler
+Input Description (JSON) and command line.
+
+Here is an example for the compilation backend settings when using
+multiple contracts folders besides Populus default ``contracts`` folder.
 
 .. code-block:: javascript
 
@@ -39,13 +42,37 @@ compiles your project contracts.
         "backend": {
           "class": "populus.compilation.backends.SolcCombinedJSONBackend",
           "settings": {
-              "optimize": true,
-              "optimize_runs": 100,
-              "output_values": ["abi", "bin", "bin-runtime", "devdoc", "metadata", "userdoc"]
+              "stdin": {
+                "optimizer": {
+                  "enabled": true,
+                  "runs": 500
+                },
+                "outputSelection": {
+                  "*": {
+                    "*": [
+                      "abi",
+                      "metadata",
+                      "evm.bytecode",
+                      "evm.deployedBytecode"
+                    ]
+                  }
+                }
+              },
+              "command_line_options": {
+                "allow_paths": "/path-to-your-external-solidity-files"
+              }
+            }
           }
         }
       }
     }
+
+
+``backend.settings`` has two keys
+
+* ``stdin`` is `Solidity Input Description as JSON <http://solidity.readthedocs.io/en/develop/using-the-compiler.html?highlight=input%20description#input-description>`_
+
+* ``command_line_options`` are passed to Solidity compiler command line, as given keyword arguments to `py-solc` package's `solc.wrapper.solc_wrapper <https://github.com/pipermerriam/py-solc/blob/3a6de359dc31375df46418e6ffd7f45ab9567287/solc/wrapper.py#L20>_`
 
 Contract Source Directory
 """""""""""""""""""""""""
@@ -73,8 +100,8 @@ Settings for the compiler backend
 * default: ``{"optimize": true, "output_values": ["abi", "bin", "bin-runtime", "devdoc", "metadata", "userdoc"]}``
 
 
-Import Remappings
-"""""""""""""""""
+Configuring compiler for extra
+""""""""""""""""""""""""""""""
 
 Set `solc import path remappings <https://github.com/pipermerriam/py-solc#import-path-remappings>`_. This is especially useful if you want to use libraries like `OpenZeppelin <https://github.com/OpenZeppelin/zeppelin-solidity/>`_ with your project. Then you can directly import Zeppelin contracts like ``import "zeppelin/contracts/token/TransferableToken.sol";``.
 

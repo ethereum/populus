@@ -31,5 +31,5 @@ class ProjectContractsBackend(BaseContractBackend):
     def get_all_contract_data(self):
         compiled_contracts = self.chain.project.compiled_contract_data
         for contract_name, contract_data in compiled_contracts.items():
-            if is_project_contract(self.chain.project.contracts_source_dir, contract_data):
+            if is_project_contract(self.chain.project.contracts_source_dirs, contract_data):
                 yield contract_name, contract_data

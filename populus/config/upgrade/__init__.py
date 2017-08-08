@@ -16,6 +16,7 @@ from populus.config.versions import (
     V3,
     V4,
     V5,
+    V6,
     KNOWN_VERSIONS,
     LATEST_VERSION,
 )
@@ -23,6 +24,7 @@ from .v1 import upgrade_v1_to_v2
 from .v2 import upgrade_v2_to_v3
 from .v3 import upgrade_v3_to_v4
 from .v4 import upgrade_v4_to_v5
+from .v5 import upgrade_v5_to_v6
 
 
 UPGRADE_SEQUENCE = {
@@ -30,12 +32,14 @@ UPGRADE_SEQUENCE = {
     V2: V3,
     V3: V4,
     V4: V5,
+    V5: V6,
 }
 UPGRADE_FUNCTIONS = {
     V1: upgrade_v1_to_v2,
     V2: upgrade_v2_to_v3,
     V3: upgrade_v3_to_v4,
     V4: upgrade_v4_to_v5,
+    V5: upgrade_v5_to_v6,
 }
 
 

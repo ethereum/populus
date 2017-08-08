@@ -16,6 +16,7 @@ from .versions import (
     V3,
     V4,
     V5,
+    V6,
     LATEST_VERSION,
 )
 
@@ -26,6 +27,7 @@ CONFIG_SCHEMA_FILENAMES = {
     V3: "config.v3.schema.json",
     V4: "config.v4.schema.json",
     V5: "config.v5.schema.json",
+    V6: "config.v6.schema.json",
 }
 
 

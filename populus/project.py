@@ -1,5 +1,6 @@
 import os
 import itertools
+import warnings
 
 from populus.compilation import (
     compile_project_contracts,
@@ -19,7 +20,7 @@ from populus.utils.chains import (
 from populus.utils.compile import (
     get_build_asset_dir,
     get_compiled_contracts_asset_path,
-    get_contracts_source_dir,
+    get_contracts_source_dirs,
     get_project_source_paths,
     get_test_source_paths,
 )
@@ -133,9 +134,23 @@ class Project(object):
     @property
     @relpath
     def contracts_source_dir(self):
+        warnings.warn(DeprecationWarning(
+            "project.contracts_source_dir has been replaced by the plural, "
+            "project.contracts_source_dirs which is an iterable of all source "
+            "directories populus will search for contracts.  Please update your "
+            "code accordingly as this API will be removed in a future release"
+        ))
         return self.config.get(
             'compilation.contracts_source_dir',
-            get_contracts_source_dir(self.project_dir),
+            get_contracts_source_dirs(self.project_dir),
+        )[0]
+
+    @property
+    @relpath
+    def contracts_source_dirs(self):
+        return self.config.get(
+            'compilation.contracts_source_dirs',
+            get_contracts_source_dirs(self.project_dir),
         )
 
     @property

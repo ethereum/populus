@@ -9,6 +9,8 @@ import tempfile as _tempfile
 
 from eth_utils import (
     to_tuple,
+    is_string,
+    is_list_like,
 )
 
 
@@ -140,8 +142,15 @@ def is_same_path(p1, p2):
 def relpath(fn):
     @functools.wraps(fn)
     def wrapper(*args, **kwargs):
-        path = fn(*args, **kwargs)
-        return os.path.relpath(path)
+        value = fn(*args, **kwargs)
+        if is_string(value):
+            return os.path.relpath(value)
+        elif is_list_like(value):
+            return type(value)([
+                os.path.relpath(path) for path in value
+            ])
+        else:
+            raise TypeError("Unsupported type: {0}".format(type(value)))
     return wrapper
 
 

@@ -26,7 +26,7 @@ class PopulusContract(Contract):
 def build_populus_meta(chain, contract_data):
     yield (
         'is_project_contract',
-        is_project_contract(chain.project.contracts_source_dir, contract_data),
+        is_project_contract(chain.project.contracts_source_dirs, contract_data),
     )
     yield (
         'is_test_contract',

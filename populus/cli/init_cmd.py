@@ -57,14 +57,15 @@ def init_cmd(ctx):
 
     project.load_config()
 
-    if ensure_path_exists(project.contracts_source_dir):
-        logger.info(
-            "Created Directory: ./{0}".format(
-                os.path.relpath(project.contracts_source_dir)
+    for source_dir in project.contracts_source_dirs:
+        if ensure_path_exists(source_dir):
+            logger.info(
+                "Created Directory: ./{0}".format(
+                    os.path.relpath(source_dir)
+                )
             )
-        )
 
-    example_contract_path = os.path.join(project.contracts_source_dir, 'Greeter.sol')
+    example_contract_path = os.path.join(project.contracts_source_dirs[0], 'Greeter.sol')
     if not os.path.exists(example_contract_path):
         shutil.copy(GREETER_SOURCE_PATH, example_contract_path)
         logger.info("Created Example Contract: ./{0}".format(

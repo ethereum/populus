@@ -12,9 +12,6 @@ from populus.compilation import (
     compile_project_contracts,
 )
 
-from populus.utils.compile import (
-    get_contracts_source_dir,
-)
 from populus.utils.testing import (
     load_contract_fixture,
     load_test_contract_fixture,
@@ -132,19 +129,23 @@ def test_compiling_with_local_import_remappings(project):
         'compilation.backend',
         {
             'class': "populus.compilation.backends.SolcStandardJSONBackend",
-            "settings": {
-                "stdin": {
-                    "optimizer": {"enabled": True, "runs": 500},
-                    "outputSelection": {
-                        "*": {"*": ["abi", "metadata", "evm"]},
+            'settings': {
+                'stdin': {
+                    'optimizer': {'enabled': True, 'runs': 500},
+                    'outputSelection': {
+                        '*': {'*': ['abi', 'metadata', 'evm']},
                     },
                 },
-                "command_line_options": {
-                    "allow_paths": "./another-directory/contracts",
+                'command_line_options': {
+                    'allow_paths': './another-directory/contracts',
                 },
             },
         }
-    )
+    ),
+    (
+        'compilation.contracts_source_dirs',
+        ['./contracts', './another-directory/contracts'],
+    ),
 )
 def test_compiling_with_import_remapping_outside_contracts_directory(project):
     _, compiled_contracts = compile_project_contracts(project)

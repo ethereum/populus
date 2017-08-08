@@ -18,6 +18,7 @@ from populus.utils.compile import (
 from populus.utils.testing import (
     load_contract_fixture,
     load_test_contract_fixture,
+    update_project_config,
 )
 
 
@@ -29,10 +30,15 @@ _populus_config_key_value_pairs = (
 GREETER_SOURCE_PATH = os.path.join(ASSETS_DIR, 'Greeter.sol')
 
 
-@pytest.mark.skipif(
+pytestmark = pytest.mark.skipif(
     not solc_supports_standard_json_interface(),
     reason="Solc compiler does not support standard json compilation",
 )
+
+
+#
+# Normal project contracts
+#
 @load_contract_fixture('Math.sol')
 def test_compiling_project_contracts(project):
     source_paths, compiled_contracts = compile_project_contracts(project)
@@ -46,10 +52,6 @@ def test_compiling_project_contracts(project):
     assert 'abi' in contract_data
 
 
-@pytest.mark.skipif(
-    not solc_supports_standard_json_interface(),
-    reason="Solc compiler does not support standard json compilation",
-)
 @load_contract_fixture('ImportTestA.sol')
 @load_contract_fixture('ImportTestB.sol')
 @load_contract_fixture('ImportTestC.sol')
@@ -61,10 +63,9 @@ def test_compiling_with_local_project_imports(project):
     assert 'ImportTestC' in compiled_contracts
 
 
-@pytest.mark.skipif(
-    not solc_supports_standard_json_interface(),
-    reason="Solc compiler does not support standard json compilation",
-)
+#
+# Contracts in the `./tests` directory
+#
 @load_test_contract_fixture('TestMath.sol')
 def test_compiling_with_test_contracts(project):
     source_paths, compiled_contracts = compile_project_contracts(project)
@@ -72,10 +73,9 @@ def test_compiling_with_test_contracts(project):
     assert 'TestMath' in compiled_contracts
 
 
-@pytest.mark.skipif(
-    not solc_supports_standard_json_interface(),
-    reason="Solc compiler does not support standard json compilation",
-)
+#
+# Abstract contracts
+#
 @load_contract_fixture('Abstract.sol')
 def test_compiling_with_abstract_contract(project):
     _, compiled_contracts = compile_project_contracts(project)
@@ -83,10 +83,6 @@ def test_compiling_with_abstract_contract(project):
     assert 'Abstract' in compiled_contracts
 
 
-@pytest.mark.skipif(
-    not solc_supports_standard_json_interface(),
-    reason="Solc compiler does not support standard json compilation",
-)
 @load_contract_fixture('Abstract.sol')
 @load_contract_fixture('UsesAbstract.sol')
 def test_compiling_with_abstract_contract_inhereted(project):
@@ -96,12 +92,64 @@ def test_compiling_with_abstract_contract_inhereted(project):
     assert 'UsesAbstract' in compiled_contracts
 
 
-@pytest.mark.skipif(
-    not solc_supports_standard_json_interface(),
-    reason="Solc compiler does not support standard json compilation",
-)
+#
+# Provided "Greeter" contract
+#
 @load_contract_fixture(GREETER_SOURCE_PATH)
 def test_compiling_example_greeter_contract(project):
     _, compiled_contracts = compile_project_contracts(project)
 
     assert 'Greeter' in compiled_contracts
+
+
+#
+# Import remappings
+#
+@load_contract_fixture('RemapImported.sol')
+@load_contract_fixture('ImportRemappingTestA.sol')
+@update_project_config(
+    (
+        'compilation.import_remappings',
+        ['import-path-for-A=contracts'],
+    ),
+)
+def test_compiling_with_local_import_remappings(project):
+    _, compiled_contracts = compile_project_contracts(project)
+
+    assert 'ImportRemappingTestA' in compiled_contracts
+    assert 'RemapImported' in compiled_contracts
+    assert 'RemapImportedNotUsed' in compiled_contracts
+
+
+@load_contract_fixture('RemapImported.sol', 'another-directory/contracts')
+@load_contract_fixture('ImportRemappingTestA.sol')
+@update_project_config(
+    (
+        'compilation.import_remappings',
+        ['import-path-for-A=another-directory/contracts'],
+    ),
+    (
+        'compilation.backend',
+        {
+            'class': "populus.compilation.backends.SolcCombinedJSONBackend",
+            "settings": {
+                "stdin": {
+                    "optimizer": {"enabled": True},
+                    "runs": 500,
+                },
+            },
+            "outputSelection": {
+                "*": {"*": ["abi", "metadata", "evm"]},
+            },
+            "command_line_options": {
+                "allow_paths": "another-directory/contracts",
+            },
+        }
+    )
+)
+def test_compiling_with_import_remapping_outside_contracts_directory(project):
+    _, compiled_contracts = compile_project_contracts(project)
+
+    assert 'ImportRemappingTestA' in compiled_contracts
+    assert 'RemapImported' in compiled_contracts
+    assert 'RemapImportedNotUsed' in compiled_contracts

@@ -1,10 +1,6 @@
-import pytest
 import click
 from click.testing import CliRunner
 
-from geth.accounts import create_new_account
-
-from populus.project import Project
 from populus.utils.cli import (
     deploy_contract_and_verify,
 )

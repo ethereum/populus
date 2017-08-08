@@ -33,9 +33,9 @@ def test_backend_class_property():
         ('project', 'populus.contracts.backends.project.ProjectContractsBackend'),
         ('memory', 'populus.contracts.backends.memory.MemoryBackend'),
         ('jsonfile', 'populus.contracts.backends.filesystem.JSONFileBackend'),
-        ('populus.contracts.backends.project.ProjectContractsBackend', 'populus.contracts.backends.project.ProjectContractsBackend'),
-        ('populus.contracts.backends.memory.MemoryBackend', 'populus.contracts.backends.memory.MemoryBackend'),
-        ('populus.contracts.backends.filesystem.JSONFileBackend', 'populus.contracts.backends.filesystem.JSONFileBackend'),
+        ('populus.contracts.backends.project.ProjectContractsBackend', 'populus.contracts.backends.project.ProjectContractsBackend'),  # noqa: E501
+        ('populus.contracts.backends.memory.MemoryBackend', 'populus.contracts.backends.memory.MemoryBackend'),  # noqa: E501
+        ('populus.contracts.backends.filesystem.JSONFileBackend', 'populus.contracts.backends.filesystem.JSONFileBackend'),  # noqa: E501
         (ProjectContractsBackend, 'populus.contracts.backends.project.ProjectContractsBackend'),
         (MemoryBackend, 'populus.contracts.backends.memory.MemoryBackend'),
         (JSONFileBackend, 'populus.contracts.backends.filesystem.JSONFileBackend'),

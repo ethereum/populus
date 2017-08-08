@@ -2,7 +2,6 @@ import pytest
 
 import os
 import random
-import contextlib
 
 try:
     from http.server import (
@@ -36,7 +35,10 @@ def can_test_connect_with_gevent():
     return monkey.is_module_patched('socket')
 
 
-@pytest.mark.skipif(can_test_connect_with_gevent(), reason="Bad configuration for gevent based testing")
+@pytest.mark.skipif(
+    can_test_connect_with_gevent(),
+    reason="Bad configuration for gevent based testing",
+)
 def test_wait_for_connection_success():
     success_tracker = {}
     port = get_open_port()
@@ -51,7 +53,6 @@ def test_wait_for_connection_success():
             success_tracker['client_success'] = True
         finally:
             success_tracker['client_exited'] = True
-
 
     class TestHTTPServer(HTTPServer):
         timeout = 30
@@ -73,12 +74,12 @@ def test_wait_for_connection_success():
         success_tracker.setdefault('server_success', True)
         success_tracker['server_exited'] = True
 
-    client_thread = spawn(_do_client)
-    server_thread = spawn(_do_server)
+    spawn(_do_client)
+    spawn(_do_server)
 
     try:
         with Timeout(5) as _timeout:
-            while 'client_success' not in success_tracker and 'server_success' not in success_tracker:
+            while 'client_success' not in success_tracker and 'server_success' not in success_tracker:  # noqa: E501
                 _timeout.sleep(0.01)
     except Timeout:
         pass
@@ -103,7 +104,7 @@ def test_wait_for_connection_failure():
         else:
             success_tracker['client_success'] = True
 
-    client_thread = spawn(_do_client)
+    spawn(_do_client)
 
     try:
         with Timeout(5) as _timeout:

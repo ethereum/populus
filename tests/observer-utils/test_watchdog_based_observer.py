@@ -1,6 +1,5 @@
 import pytest
 
-import time
 import os
 
 from populus.utils.filesystem import (

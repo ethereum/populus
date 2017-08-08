@@ -64,9 +64,10 @@ def test_compiling_with_local_project_imports(project):
 @load_contract_fixture('RemapImported.sol')
 @load_contract_fixture('ImportRemappingTestA.sol')
 @update_project_config(
-    ('compilation.import_remappings', [
-        'import-path-for-A=contracts'
-        ]),
+    (
+        'compilation.import_remappings',
+        ['import-path-for-A=contracts'],
+    ),
 )
 def test_compiling_with_import_remappings(project):
     _, compiled_contracts = compile_project_contracts(project)
@@ -117,8 +118,14 @@ def test_link_reference_extraction_from_bytecode(project):
     assert 'Library13' in compiled_contracts['Multiply13']['direct_dependencies']
 
 
-@load_contract_fixture('Library13.sol', 'contracts/long-path-to-truncate-linkref-placeholders/Library13.sol')
-@load_contract_fixture('Multiply13.sol', 'contracts/long-path-to-truncate-linkref-placeholders/Multiply13.sol')
+@load_contract_fixture(
+    'Library13.sol',
+    'contracts/long-path-to-truncate-linkref-placeholders/Library13.sol',
+)
+@load_contract_fixture(
+    'Multiply13.sol',
+    'contracts/long-path-to-truncate-linkref-placeholders/Multiply13.sol',
+)
 def test_detects_contract_name_truncation_from_long_file_paths(project):
     _, compiled_contracts = compile_project_contracts(project)
 

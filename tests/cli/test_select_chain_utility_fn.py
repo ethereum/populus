@@ -53,7 +53,6 @@ def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expecte
     )
     project.write_config()
 
-
     @click.command()
     def wrapper():
         chain_name = select_chain(project)

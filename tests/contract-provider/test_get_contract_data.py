@@ -1,6 +1,3 @@
-import pytest
-
-
 def test_getting_contract_data(chain, math):
     provider = chain.provider
 

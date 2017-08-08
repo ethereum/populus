@@ -3,7 +3,6 @@ import os
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
-from populus.project import Project
 from populus.utils.geth import (
     reset_chain,
     get_data_dir,

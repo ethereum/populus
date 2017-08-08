@@ -1,4 +1,3 @@
-import os
 import pytest
 
 from populus.contracts.exceptions import (
@@ -25,7 +24,7 @@ def test_get_contract_factory_with_missing_dependency(chain):
     provider = chain.provider
 
     with pytest.raises(NoKnownAddress):
-        Multiply13 = provider.get_contract_factory('Multiply13')
+        provider.get_contract_factory('Multiply13')
 
 
 def test_get_contract_factory_with_dependency(chain,

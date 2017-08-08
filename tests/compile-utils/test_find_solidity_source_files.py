@@ -6,7 +6,6 @@ from populus.utils.compile import (
     find_solidity_source_files,
 )
 from populus.utils.filesystem import (
-    mkdir,
     is_same_path,
 )
 

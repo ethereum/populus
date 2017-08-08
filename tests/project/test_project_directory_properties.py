@@ -1,4 +1,5 @@
 import pytest
+import sys
 
 from populus.project import Project
 
@@ -18,8 +19,9 @@ from populus.utils.filesystem import (
 def test_project_directory_properties(project_dir):
     project = Project()
 
-    with pytest.warns(DeprecationWarning):
-        project.contracts_source_dir
+    if sys.version_info.major != 2:
+        with pytest.warns(DeprecationWarning):
+            project.contracts_source_dir
 
     contracts_source_dirs = get_contracts_source_dirs(project_dir)
     for left, right in zip(project.contracts_source_dirs, contracts_source_dirs):

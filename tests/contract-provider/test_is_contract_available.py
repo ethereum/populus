@@ -1,8 +1,3 @@
-import pytest
-
-from populus import Project
-
-
 def test_contract_availability_with_no_dependencies(chain, math):
     provider = chain.provider
 

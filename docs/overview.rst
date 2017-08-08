@@ -35,7 +35,7 @@ Command Line Options
 Project Layout
 --------------
 
-By default Populus expects a project to be layed out as follows.
+By default Populus expects a project to be laid out as follows:
 
 .. code-block:: shell
 

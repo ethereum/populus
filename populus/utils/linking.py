@@ -1,7 +1,7 @@
 import re
 import functools
 
-from toolz.functoolz import (
+from cytoolz.functoolz import (
     compose,
 )
 

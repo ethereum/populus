@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import pprint
 
-from toolz.functoolz import (
+from cytoolz.functoolz import (
     pipe,
 )
 

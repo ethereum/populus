@@ -10,11 +10,11 @@ import os
 import json
 import logging
 
-from toolz.functoolz import (
+from cytoolz.functoolz import (
     partial,
     pipe,
 )
-from toolz.dicttoolz import (
+from cytoolz.dicttoolz import (
     assoc,
 )
 

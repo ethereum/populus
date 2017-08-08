@@ -34,7 +34,7 @@ setup(
         "pysha3>=0.3,!=1.0,>1.0.0",
         "pytest>=2.7.2",
         "semantic_version>=2.6.0",
-        "toolz>=0.8.2",
+        "cytoolz>=0.8.2",
         "toposort>=1.4",
         "watchdog>=0.8.3",
         "web3>=3.7.1",

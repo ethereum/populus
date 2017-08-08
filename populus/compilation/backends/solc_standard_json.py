@@ -115,11 +115,17 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
             }
         }
 
-        std_input['settings'].update(self.compiler_settings.get("solidity_input_description", {}))
+        # solc command line options as passed to solc_wrapper()
+        # https://github.com/pipermerriam/py-solc/blob/3a6de359dc31375df46418e6ffd7f45ab9567287/solc/wrapper.py#L20
         command_line_options = self.compiler_settings.get("command_line_options", {})
 
-        self.logger.debug("std_input has: %s", std_input.keys())
-        self.logger.debug("JSON settings are: %s", std_input["settings"])
+        # Get Solidity Input Description settings section
+        # http://solidity.readthedocs.io/en/develop/using-the-compiler.html#input-description
+        std_input_settings = self.compiler_settings.get("solidity_input_description", {})
+        std_input['settings'].update(std_input_settings)
+
+        self.logger.debug("std_input sections: %s", std_input.keys())
+        self.logger.debug("Input Description JSON settings are: %s", std_input["settings"])
         self.logger.debug("Command line options are", command_line_options)
         try:
             compilation_result = compile_standard(std_input, **command_line_options)

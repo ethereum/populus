@@ -31,6 +31,9 @@ Compiler Configuration
 Each complication backend takes settings that are passed down to Solidity compiler
 Input Description (JSON) and command line.
 
+Here is an example for the compilation backend settings when using
+multiple contracts folders besides Populus default ``contracts`` folder.
+
 .. code-block:: javascript
 
     {
@@ -56,10 +59,10 @@ Input Description (JSON) and command line.
                 }
               },
               "command_line_options": {
-                "allow_paths": "/"
+                "allow_paths": "/path-to-your-external-solidity-files"
               }
             }
-          },
+          }
         }
       }
     }

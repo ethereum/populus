@@ -1,7 +1,3 @@
-import pytest
-
-from populus import Project
-
 from populus.utils.filesystem import get_latest_mtime
 from populus.utils.testing import load_contract_fixture
 

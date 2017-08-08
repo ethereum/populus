@@ -12,7 +12,9 @@ def test_deep_merge_with_single_arg():
 
 
 def test_deep_merge_with_multiple_args():
-    assert deep_merge_dicts({'a': 1, 'b': 2}, {'c': 3, 'd': 4}) == {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    expected = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    actual = deep_merge_dicts({'a': 1, 'b': 2}, {'c': 3, 'd': 4})
+    assert expected == actual
 
 
 def test_deep_merge_orger_precidence():
@@ -33,7 +35,9 @@ def test_deep_merge_with_deep_dicts():
     dict_a = {'a': 1, 'b': {'x': 5, 'y': 6}}
     dict_b = {'c': 3, 'b': {'y': 7, 'z': 8}}
     dict_c = {'d': 5, 'b': {'z': 9}}
-    assert deep_merge_dicts(dict_a, dict_b, dict_c) == {'a': 1, 'b': {'x': 5, 'y': 7, 'z': 9}, 'c': 3, 'd': 5}
+    expected = {'a': 1, 'b': {'x': 5, 'y': 7, 'z': 9}, 'c': 3, 'd': 5}
+    actual = deep_merge_dicts(dict_a, dict_b, dict_c)
+    assert expected == actual
 
 
 def test_deep_merge_with_non_mapping_as_primary_value():
@@ -47,4 +51,6 @@ def test_deep_merge_with_non_mappings_in_secondary_value_positions():
     dict_a = {'a': 1, 'b': {'x': 5, 'y': 6}}
     dict_b = {'c': 3, 'b': 72}
     dict_c = {'d': 5, 'b': {'z': 9}}
-    assert deep_merge_dicts(dict_a, dict_b, dict_c) == {'a': 1, 'b': {'x': 5, 'y': 6, 'z': 9}, 'c': 3, 'd': 5}
+    expected = {'a': 1, 'b': {'x': 5, 'y': 6, 'z': 9}, 'c': 3, 'd': 5}
+    actual = deep_merge_dicts(dict_a, dict_b, dict_c)
+    assert expected == actual

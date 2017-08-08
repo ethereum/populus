@@ -10,6 +10,7 @@ from populus.utils.linking import (
     expand_placeholder,
 )
 
+
 ALL_FULL_NAMES = (
     'ShortName',
     '__ShortName',
@@ -20,6 +21,7 @@ ALL_FULL_NAMES = (
     'EndsWithUnderscores__________________________________________________',
     '____StartsAndEndsWithUnderscores_____________________________________',
 )
+
 
 @pytest.mark.parametrize(
     'name',

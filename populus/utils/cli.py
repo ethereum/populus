@@ -344,7 +344,8 @@ def watch_project_contracts(project, compiler_settings):
         if event_name in {'modified', 'created'}:
             logger.info("============ Compiling ==============")
             logger.info("> Change detected in: %s", file_path)
-            logger.info("> Loading source files from: %s", project.contracts_source_dir)
+            for source_dir in project.contracts_source_dirs:
+                logger.info("> Loading source files from: %s", source_dir)
 
             contract_source_paths, compiled_sources = compile_project_contracts(project)
             write_compiled_sources(

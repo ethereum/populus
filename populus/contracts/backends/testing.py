@@ -29,6 +29,6 @@ class TestContractsBackend(BaseContractBackend):
             contract_name: contract_data
             for contract_name, contract_data
             in self.chain.project.compiled_contract_data.items()
-            if is_test_contract(self.chain.project.contracts_source_dir, contract_data)
+            if is_test_contract(self.chain.project.tests_dir, contract_data)
         }
         return testing_contract_data

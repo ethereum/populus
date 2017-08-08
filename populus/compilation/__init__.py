@@ -25,7 +25,11 @@ def _get_contract_key(contract_data):
 def compile_project_contracts(project):
     logger = logging.getLogger('populus.compilation.compile_project_contracts')
 
-    project_contract_source_paths = get_project_source_paths(project.contracts_source_dir)
+    project_contract_source_paths = tuple(itertools.chain.from_iterable(
+        get_project_source_paths(source_dir)
+        for source_dir
+        in project.contracts_source_dirs
+    ))
     logger.debug(
         "Found %s project source files: %s",
         len(project_contract_source_paths),

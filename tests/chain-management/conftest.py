@@ -1,8 +1,5 @@
 import pytest
 
-import json
-
-from populus import Project
 from populus.utils.testing import (
     link_bytecode_by_name,
 )
@@ -73,7 +70,10 @@ def multiply_13(temp_chain, library_13):
     Multiply13 = chain.contract_factories['Multiply13']
 
     bytecode = link_bytecode_by_name(Multiply13.bytecode, Library13=library_13.address)
-    bytecode_runtime = link_bytecode_by_name(Multiply13.bytecode_runtime, Library13=library_13.address)
+    bytecode_runtime = link_bytecode_by_name(
+        Multiply13.bytecode_runtime,
+        Library13=library_13.address,
+    )
 
     LinkedMultiply13 = chain.web3.eth.contract(
         abi=Multiply13.abi,

@@ -15,7 +15,7 @@ from populus.utils.chains import (
     get_base_blockchain_storage_dir,
 )
 from populus.utils.compile import (
-    get_contracts_source_dir,
+    get_contracts_source_dirs,
     get_build_asset_dir,
 )
 from populus.utils.filesystem import (
@@ -41,7 +41,8 @@ def project_dir(tmpdir, monkeypatch):
     _project_dir = str(tmpdir.mkdir("project-dir"))
 
     # setup project directories
-    ensure_path_exists(get_contracts_source_dir(_project_dir))
+    for source_dir in get_contracts_source_dirs(_project_dir):
+        ensure_path_exists(source_dir)
     ensure_path_exists(get_build_asset_dir(_project_dir))
     ensure_path_exists(get_base_blockchain_storage_dir(_project_dir))
 
@@ -91,10 +92,10 @@ def _loaded_contract_fixtures(project_dir, request):
     contracts_to_load_from_module = getattr(request.module, '_populus_contract_fixtures', [])
 
     contracts_to_load = itertools.chain(
-        contracts_to_load_from_fn,
         contracts_to_load_from_module,
+        contracts_to_load_from_fn,
     )
-    contracts_source_dir = get_contracts_source_dir(project_dir)
+    contracts_source_dir = get_contracts_source_dirs(project_dir)[0]
 
     for item, dst_path in contracts_to_load:
         ensure_path_exists(contracts_source_dir)
@@ -132,8 +133,8 @@ def _loaded_test_contract_fixtures(project_dir, request):
     test_contracts_to_load_from_module = getattr(request.module, '_populus_test_contract_fixtures', [])
 
     test_contracts_to_load = itertools.chain(
-        test_contracts_to_load_from_fn,
         test_contracts_to_load_from_module,
+        test_contracts_to_load_from_fn,
     )
 
     tests_dir = get_tests_dir(project_dir)
@@ -173,8 +174,8 @@ def _updated_project_config(project_dir, request):
     key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
 
     key_value_pairs = tuple(itertools.chain(
-        key_value_pairs_from_fn,
         key_value_pairs_from_module,
+        key_value_pairs_from_fn,
     ))
 
     if key_value_pairs:

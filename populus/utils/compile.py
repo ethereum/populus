@@ -47,9 +47,11 @@ from .json import (
 DEFAULT_CONTRACTS_DIR = "./contracts/"
 
 
-def get_contracts_source_dir(project_dir):
-    contracts_source_dir = os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)
-    return os.path.abspath(contracts_source_dir)
+def get_contracts_source_dirs(project_dir):
+    contracts_source_dirs = [
+        os.path.abspath(os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)),
+    ]
+    return contracts_source_dirs
 
 
 BUILD_ASSET_DIR = "./build"

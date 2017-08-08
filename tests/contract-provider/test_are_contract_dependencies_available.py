@@ -1,6 +1,3 @@
-import pytest
-
-
 def test_contract_factory_availability_with_no_dependencies(chain):
     provider = chain.provider
 
@@ -29,7 +26,6 @@ def test_contract_factory_availability_with_bytecode_mismatch_on_dependency(chai
 
 def test_contract_factory_availability_with_dependency(chain):
     provider = chain.provider
-    registrar = chain.registrar
 
     assert not provider.are_contract_dependencies_available('Multiply13')
 

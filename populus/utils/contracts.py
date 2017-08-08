@@ -14,8 +14,12 @@ from .string import (
 )
 
 
-def is_project_contract(contracts_source_dir, contract_data):
-    return is_under_path(contracts_source_dir, contract_data['source_path'])
+def is_project_contract(contracts_source_dirs, contract_data):
+    return any(
+        is_under_path(source_dir, contract_data['source_path'])
+        for source_dir
+        in contracts_source_dirs
+    )
 
 
 def is_test_contract(tests_dir, contract_data):

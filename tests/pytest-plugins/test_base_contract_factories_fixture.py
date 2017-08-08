@@ -1,5 +1,3 @@
-import pytest
-
 from populus.utils.testing import load_contract_fixture
 
 

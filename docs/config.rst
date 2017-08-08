@@ -32,13 +32,17 @@ Each complication backend takes settings that are passed down to Solidity compil
 Input Description (JSON) and command line.
 
 Here is an example for the compilation backend settings when using
-multiple contracts folders besides Populus default ``contracts`` folder.
+contract source files in folders outside of the Populus default ``./contracts``
+folder.
 
 .. code-block:: javascript
 
     {
       "compilation": {
-        "contracts_dir": "./path/to/contract-source-files",
+        "contracts_source_dirs": [
+          "./contracts",
+          "/path-to-your-external-solidity-files",
+        ],
         "backend": {
           "class": "populus.compilation.backends.SolcCombinedJSONBackend",
           "settings": {
@@ -79,9 +83,9 @@ Contract Source Directory
 
 The directory that project source files can be found in.
 
-* key: ``compilation.contracts_dir``
-* value: Filesystem path
-* default: ``'./contracts'``
+* key: ``compilation.contracts_source_dirs``
+* value: List of filesystem paths
+* default: ``['./contracts']``
 
 
 Compiler Backend

@@ -121,7 +121,7 @@ def test_compiling_with_local_import_remappings(project):
     assert 'RemapImportedNotUsed' in compiled_contracts
 
 
-@load_contract_fixture('RemapImported.sol', 'another-directory/contracts')
+@load_contract_fixture('RemapImported.sol', 'another-directory/contracts/RemapImported.sol')
 @load_contract_fixture('ImportRemappingTestA.sol')
 @update_project_config(
     (
@@ -131,18 +131,17 @@ def test_compiling_with_local_import_remappings(project):
     (
         'compilation.backend',
         {
-            'class': "populus.compilation.backends.SolcCombinedJSONBackend",
+            'class': "populus.compilation.backends.SolcStandardJSONBackend",
             "settings": {
                 "stdin": {
-                    "optimizer": {"enabled": True},
-                    "runs": 500,
+                    "optimizer": {"enabled": True, "runs": 500},
+                    "outputSelection": {
+                        "*": {"*": ["abi", "metadata", "evm"]},
+                    },
                 },
-            },
-            "outputSelection": {
-                "*": {"*": ["abi", "metadata", "evm"]},
-            },
-            "command_line_options": {
-                "allow_paths": "another-directory/contracts",
+                "command_line_options": {
+                    "allow_paths": "./another-directory/contracts",
+                },
             },
         }
     )

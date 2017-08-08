@@ -91,8 +91,8 @@ def _loaded_contract_fixtures(project_dir, request):
     contracts_to_load_from_module = getattr(request.module, '_populus_contract_fixtures', [])
 
     contracts_to_load = itertools.chain(
-        contracts_to_load_from_fn,
         contracts_to_load_from_module,
+        contracts_to_load_from_fn,
     )
     contracts_source_dir = get_contracts_source_dir(project_dir)
 
@@ -132,8 +132,8 @@ def _loaded_test_contract_fixtures(project_dir, request):
     test_contracts_to_load_from_module = getattr(request.module, '_populus_test_contract_fixtures', [])
 
     test_contracts_to_load = itertools.chain(
-        test_contracts_to_load_from_fn,
         test_contracts_to_load_from_module,
+        test_contracts_to_load_from_fn,
     )
 
     tests_dir = get_tests_dir(project_dir)
@@ -173,8 +173,8 @@ def _updated_project_config(project_dir, request):
     key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
 
     key_value_pairs = tuple(itertools.chain(
-        key_value_pairs_from_fn,
         key_value_pairs_from_module,
+        key_value_pairs_from_fn,
     ))
 
     if key_value_pairs:

@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+.. _v1.9.0-release-notes:
+
+1.9.0
+-----
+
+- Bugfix for ``SolcStandardJSONBacken`` compilation.  Settings for this
+  compiler now appropriately split between standard JSON input and compiler
+  command line arguments.
+- Deprecate: ``project.contracts_source_dir`` and releated setting
+  ``compilation.contracts_source_dir``.
+- New API: ``project.contracts_source_dirs`` replaces deprecated singular
+  ``project.contracts_source_dir``.  
+- New setting ``compilation.contracts_source_dirs``.
+
+
 .. _v1.8.1-release-notes:
 
 1.8.1

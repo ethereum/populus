@@ -43,16 +43,9 @@ from .json import (
     normalize_object_for_json,
 )
 
-
-DEFAULT_CONTRACTS_DIR = "./contracts/"
-
-
-def get_contracts_source_dir(project_dir):
-    contracts_source_dir = os.path.join(project_dir, DEFAULT_CONTRACTS_DIR)
-    return os.path.abspath(contracts_source_dir)
-
-
-BUILD_ASSET_DIR = "./build"
+from populus.defaults import (
+    BUILD_ASSET_DIR,
+)
 
 
 def get_build_asset_dir(project_dir):

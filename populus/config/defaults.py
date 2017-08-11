@@ -2,6 +2,10 @@ import os
 import json
 
 from populus import ASSETS_DIR
+from populus.defaults import (
+    PROJECT_JSON_CONFIG_DEFAULTS,
+    PROJECT_JSON_CONFIG_SCHEMA,
+)
 
 from .versions import (
     V1,
@@ -29,6 +33,11 @@ DEFAULT_CONFIG_FILENAMES = {
 }
 
 
+def get_default_project_config_path():
+
+    return os.path.join(ASSETS_DIR, PROJECT_JSON_CONFIG_DEFAULTS)
+
+
 def get_default_config_path(version=LATEST_VERSION):
     try:
         return os.path.join(ASSETS_DIR, DEFAULT_CONFIG_FILENAMES[version])
@@ -38,6 +47,13 @@ def get_default_config_path(version=LATEST_VERSION):
                 sorted(tuple(DEFAULT_CONFIG_FILENAMES.keys()))
             )
         )
+
+
+def load_default_project_config():
+    default_config_path = get_default_project_config_path()
+    with open(default_config_path) as default_config_file:
+        default_config = json.load(default_config_file)
+    return default_config
 
 
 def load_default_config(version=LATEST_VERSION):

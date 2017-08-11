@@ -7,7 +7,7 @@ from eth_utils import (
 from populus.utils.module_loading import (
     import_string,
 )
-from populus.utils.config import (
+from .helpers import (
     ClassImportPath,
 )
 

@@ -16,7 +16,7 @@ from populus.utils.mappings import (
     pop_nested_key,
     flatten_mapping,
 )
-from populus.utils.config import (
+from .helpers import (
     get_empty_config,
     resolve_config,
 )

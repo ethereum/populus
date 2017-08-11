@@ -20,7 +20,7 @@ from populus.wait import (
     Wait,
 )
 
-from populus.utils.config import (
+from populus.config.helpers import (
     sort_prioritized_configs,
 )
 from populus.utils.functional import (

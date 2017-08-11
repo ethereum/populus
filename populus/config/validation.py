@@ -9,7 +9,9 @@ from eth_utils import (
 )
 
 from populus import ASSETS_DIR
-
+from populus.defaults import (
+    PROJECT_JSON_CONFIG_SCHEMA,
+)
 from .versions import (
     V1,
     V2,
@@ -32,6 +34,11 @@ CONFIG_SCHEMA_FILENAMES = {
 assert LATEST_VERSION in CONFIG_SCHEMA_FILENAMES
 
 
+def get_project_config_schema_path():
+
+    return os.path.join(ASSETS_DIR, PROJECT_JSON_CONFIG_SCHEMA)
+
+
 def get_config_schema_path(version=LATEST_VERSION):
     try:
         return os.path.join(ASSETS_DIR, CONFIG_SCHEMA_FILENAMES[version])
@@ -41,6 +48,12 @@ def get_config_schema_path(version=LATEST_VERSION):
                 sorted(tuple(CONFIG_SCHEMA_FILENAMES.keys()))
             )
         )
+
+
+def load_project_config_schema():
+    config_schema_path = get_project_config_schema_path()
+    config_schema = anyconfig.load(config_schema_path)
+    return config_schema
 
 
 def load_config_schema(version=LATEST_VERSION):

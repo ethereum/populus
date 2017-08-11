@@ -20,5 +20,7 @@ from .defaults import (  # noqa: F401
 )
 from .validation import (  # noqa: F401
     load_config_schema,
+    load_project_config_schema,
     validate_config,
+
 )

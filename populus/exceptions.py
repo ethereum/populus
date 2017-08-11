@@ -4,3 +4,7 @@ class PopulusException(Exception):
 
 class ValidationError(PopulusException):
     pass
+
+
+class ConfigError(PopulusException):
+    pass

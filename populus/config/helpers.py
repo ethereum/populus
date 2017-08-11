@@ -10,16 +10,32 @@ from eth_utils import (
     to_ordered_dict,
 )
 
-from .mappings import (
+from populus.utils.mappings import (
     get_nested_key,
     has_nested_key,
 )
-from .module_loading import (
+from populus.utils.module_loading import (
     import_string,
 )
 
 
-JSON_CONFIG_FILENAME = './populus.json'
+from populus.defaults import (
+    PROJECT_JSON_CONFIG_FILENAME,
+)
+
+
+def write_project_config(project_root_dir, config):
+    write_path = os.path.join(project_root_dir, PROJECT_JSON_CONFIG_FILENAME)
+    with open(write_path, 'w') as config_file:
+        anyconfig.dump(
+            dict(config),
+            config_file,
+            sort_keys=True,
+            indent=2,
+            separators=(',', ': '),
+        )
+
+    return write_path
 
 
 def get_json_config_file_path(project_dir=None):
@@ -28,6 +44,18 @@ def get_json_config_file_path(project_dir=None):
 
     json_config_file_path = os.path.join(project_dir, JSON_CONFIG_FILENAME)
     return json_config_file_path
+
+
+def get_project_json_config_file_path(project_root_dir):
+
+    json_config_file_path = os.path.join(project_root_dir, PROJECT_JSON_CONFIG_FILENAME)
+    return json_config_file_path
+
+
+def check_if_project_json_file_exists(dir_path):
+
+    json_config_file_path = os.path.join(dir_path, PROJECT_JSON_CONFIG_FILENAME)
+    return os.path.exists(json_config_file_path)
 
 
 def check_if_json_config_file_exists(project_dir=None):

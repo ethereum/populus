@@ -4,7 +4,7 @@ from populus.utils.module_loading import (
 from populus.utils.types import (
     is_string,
 )
-from populus.utils.config import (
+from .helpers import (
     ClassImportPath,
 )
 

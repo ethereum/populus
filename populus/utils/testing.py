@@ -42,14 +42,6 @@ def update_project_config(*key_value_pairs):
     return outer
 
 
-DEFAULT_TESTS_DIR = "./tests/"
-
-
-def get_tests_dir(project_dir):
-    tests_dir = os.path.join(project_dir, DEFAULT_TESTS_DIR)
-    return os.path.abspath(tests_dir)
-
-
 def link_bytecode_by_name(bytecode, link_references, **link_names_and_values):
     """
     Helper function for linking bytecode with a mapping of link reference names

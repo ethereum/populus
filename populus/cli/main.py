@@ -4,7 +4,6 @@ import warnings
 
 import click
 
-
 from populus.project import (
     Project,
 )
@@ -34,8 +33,17 @@ CONTEXT_SETTINGS = dict(
     ),
     type=click.Path(exists=True),
 )
+@click.option(
+    '--warnings',
+    'show_warnings',
+    help=(
+        "Show all warnings"
+    ),
+    default=False,
+    is_flag=True
+)
 @click.pass_context
-def main(ctx, project_root_dir):
+def main(ctx, project_root_dir,show_warnings):
     """
     Populus
     """
@@ -44,3 +52,5 @@ def main(ctx, project_root_dir):
         project_root_dir = os.getcwd()
     ctx.obj = {}
     ctx.obj['project_root_dir'] = project_root_dir
+    if show_warnings:
+        warnings.filterwarnings("always")

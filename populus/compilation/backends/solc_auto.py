@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import warnings
 
 from semantic_version import (
     Spec,
@@ -13,40 +14,33 @@ from eth_utils import (
     is_string,
 )
 
-from .base import (
-    BaseCompilerBackend,
-)
 from .solc_combined_json import (
     SolcCombinedJSONBackend,
 )
+
 from .solc_standard_json import (
     SolcStandardJSONBackend,
 )
 
 
-def get_solc_backend_class_for_version(solc_version):
-    if is_string(solc_version):
-        solc_version = Version(solc_version)
+def get_compiler_backend_class_for_version(compiler_version, settings=None):
 
-    if solc_version in Spec('<=0.4.8'):
-        return SolcCombinedJSONBackend
-    elif solc_version in Spec('>=0.4.11'):
-        return SolcStandardJSONBackend
+    if compiler_version == "auto":
+        compiler_version = get_solc_version()
+
+    elif is_string(compiler_version):
+        compiler_version = Version(compiler_version)
+
+    if compiler_version in Spec('>=0.4.11'):
+        backend_class = SolcStandardJSONBackend
     else:
-        raise OSError(
-            "The installed solc compiler is not supported.  Supported versions "
-            "of the solc compiler are <=0.4.8 and >=0.4.11"
+        warnings.warn(
+            "Support for solc <0.4.11 will be dropped in the next populus release",
+            DeprecationWarning
         )
+        backend_class = SolcCombinedJSONBackend
 
-
-class SolcAutoBackend(BaseCompilerBackend):
-    def __init__(self, settings):
-        proxy_backend_class = get_solc_backend_class_for_version(get_solc_version())
-        self.proxy_backend = proxy_backend_class(settings)
-
-    @property
-    def settings(self):
-        return self.proxy_backend.settings
-
-    def get_compiled_contracts(self, *args, **kwargs):
-        return self.proxy_backend.get_compiled_contracts(*args, **kwargs)
+    if settings is None:
+        return backend_class({})
+    else:
+        return backend_class(**settings)

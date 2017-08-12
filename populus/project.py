@@ -5,9 +5,16 @@ import sys
 from populus.utils.filesystem import (
     is_same_path,
 )
-from populus.compilation import (
-    compile_project_contracts,
+
+
+from populus.compilation.helpers import (
+    get_dir_source_paths,
 )
+
+from populus.compilation.compile import (
+    compile_dirs,
+)
+
 from populus.config import (
     ChainConfig,
     CompilerConfig,
@@ -21,12 +28,7 @@ from populus.config import (
 from populus.utils.chains import (
     get_base_blockchain_storage_dir,
 )
-from populus.utils.compile import (
-    get_build_asset_dir,
-    get_compiled_contracts_asset_path,
-    get_project_source_paths,
-    get_test_source_paths,
-)
+
 from populus.utils.filesystem import (
     relpath,
     get_latest_mtime,
@@ -36,13 +38,15 @@ from populus.config.helpers import (
     get_default_project_config_file_path,
     get_json_config_file_path,
 )
-from populus.utils.testing import (
-    get_tests_dir,
-)
+
 
 from populus.defaults import (
+    BUILD_ASSET_DIR,
+    COMPILED_CONTRACTS_ASSET_FILENAME,
     DEFAULT_CONTRACTS_DIR,
+    DEFAULT_TESTS_DIR,
     PROJECT_JSON_CONFIG_FILENAME,
+
 )
 
 
@@ -57,7 +61,7 @@ class Project(object):
     _project_config_schema = None
 
     def __init__(self, project_root_dir):
-        self.project_root_dir = project_root_dir
+        self.project_root_dir = os.path.abspath(project_root_dir)
 
         if not self.has_json_config():
             raise FileNotFoundError(
@@ -133,38 +137,43 @@ class Project(object):
         return self.config.get('populus.project_dir', os.getcwd())
 
     @property
-    @relpath
     def tests_dir(self):
-        return get_tests_dir(self.project_dir)
+        dir_path = self.config.get(
+            'locations.tests_dir',
+            DEFAULT_TESTS_DIR
+        )
+
+        return os.path.join(self.project_root_dir, dir_path)
 
     #
     # Contracts
     #
     @property
-    @relpath
     def compiled_contracts_asset_path(self):
-        return get_compiled_contracts_asset_path(self.build_asset_dir)
+        return os.path.join(
+            self.build_asset_dir,
+            COMPILED_CONTRACTS_ASSET_FILENAME,
+        )
 
     @property
     def contracts_source_dir(self):
-        contracts_dir = self.config.get(
-            'compilation.contracts_source_dir',
+        dir_path = self.config.get(
+            'locations.contracts_source_dir',
             DEFAULT_CONTRACTS_DIR)
 
-        return os.path.join(self.project_root_dir, DEFAULT_CONTRACTS_DIR)
+        return os.path.join(self.project_root_dir, dir_path)
 
     @property
-    @relpath
     def build_asset_dir(self):
-        return get_build_asset_dir(self.project_dir)
+        return os.path.join(self.project_root_dir, BUILD_ASSET_DIR)
 
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None
 
     def get_all_source_file_paths(self):
         return tuple(itertools.chain(
-            get_project_source_paths(self.contracts_source_dir),
-            get_test_source_paths(self.tests_dir),
+            get_dir_source_paths(self.contracts_source_dir),
+            get_dir_source_paths(self.tests_dir),
         ))
 
     def is_compiled_contract_cache_stale(self):
@@ -192,7 +201,10 @@ class Project(object):
     @property
     def compiled_contract_data(self):
         if self.is_compiled_contract_cache_stale():
-            source_file_paths, compiled_contracts = compile_project_contracts(self)
+            source_file_paths, compiled_contracts = compile_dirs(
+                (self.contracts_source_dir, self.tests_dir),
+                import_remappings=self.config.get('compilation.import_remappings')
+            )
             contracts_mtime = get_latest_mtime(source_file_paths)
             self.fill_contracts_cache(
                 compiled_contracts=compiled_contracts,

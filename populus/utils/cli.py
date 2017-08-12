@@ -5,9 +5,6 @@ import logging
 
 import click
 
-from populus.compilation import (
-    compile_project_contracts,
-)
 from populus.config import (
     Config,
 )
@@ -19,7 +16,7 @@ from .compat import (
     Timeout,
     sleep,
 )
-from .compile import (
+from populus.compilation.helpers import (
     write_compiled_sources,
 )
 from .contracts import (
@@ -337,8 +334,11 @@ def deploy_contract_and_verify(chain,
     return ContractFactory(address=contract_address)
 
 
-def watch_project_contracts(project, compiler_settings):
+def watch_project_contracts(project, compiler_settings=None):
+
     logger = logging.getLogger('populus.utils.cli.watch_project_contracts')
+    if compiler_settings is None:
+        compiler_settings = {}
 
     def callback(file_path, event_name):
         if event_name in {'modified', 'created'}:
@@ -346,7 +346,10 @@ def watch_project_contracts(project, compiler_settings):
             logger.info("> Change detected in: %s", file_path)
             logger.info("> Loading source files from: %s", project.contracts_source_dir)
 
-            contract_source_paths, compiled_sources = compile_project_contracts(project)
+            contract_source_paths, compiled_sources = compile_dirs(
+                (project.contracts_source_dir, project.tests_dir,),
+                import_remappings=project.config.get('compilation.import_remappings')
+            )
             write_compiled_sources(
                 project.compiled_contracts_asset_path,
                 compiled_sources,
@@ -354,7 +357,7 @@ def watch_project_contracts(project, compiler_settings):
 
             logger.info("> Watching ...")
 
-    watcher = DirWatcher(project.contracts_dir, callback)
+    watcher = DirWatcher(project.contracts_source_dir, callback)
     watcher.start()
 
     try:

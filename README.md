@@ -24,4 +24,5 @@ Ethereum Development Framework
 
 
 ### Project
-- compilation.contracts_source_dir: optional, if provided use absolute path
+- location.contracts_source_dir: optional, if provided use relative path
+- location.tests_dir: optional, if provided use relative path

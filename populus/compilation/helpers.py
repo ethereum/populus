@@ -1,11 +1,8 @@
 from __future__ import absolute_import
 
-import itertools
-
 import anyconfig
-
+import itertools
 import jsonschema
-
 import os
 import json
 import logging
@@ -28,59 +25,26 @@ from populus.exceptions import (
     ValidationError,
 )
 
-from .contracts import (
+from populus.utils.contracts import (
     compute_direct_dependency_graph,
     compute_recursive_contract_dependencies,
 )
-from .deploy import (
+from populus.utils.deploy import (
     compute_deploy_order,
 )
-from .filesystem import (
+from populus.utils.filesystem import (
     recursive_find_files,
     ensure_file_exists,
+    find_solidity_source_files,
 )
-from .json import (
+from populus.utils.json import (
     normalize_object_for_json,
 )
 
-from populus.defaults import (
-    BUILD_ASSET_DIR,
-)
-
-
-def get_build_asset_dir(project_dir):
-    build_asset_dir = os.path.join(project_dir, BUILD_ASSET_DIR)
-    return build_asset_dir
-
-
-COMPILED_CONTRACTS_ASSET_FILENAME = './contracts.json'
-
-
-def get_compiled_contracts_asset_path(build_asset_dir):
-    compiled_contracts_asset_path = os.path.join(
-        build_asset_dir,
-        COMPILED_CONTRACTS_ASSET_FILENAME,
-    )
-    return compiled_contracts_asset_path
-
 
 @to_tuple
-def find_solidity_source_files(base_dir):
-    return (
-        os.path.relpath(source_file_path)
-        for source_file_path
-        in recursive_find_files(base_dir, "*.sol")
-    )
-
-
-def get_project_source_paths(contracts_source_dir):
-    project_source_paths = find_solidity_source_files(contracts_source_dir)
-    return project_source_paths
-
-
-def get_test_source_paths(tests_dir):
-    test_source_paths = find_solidity_source_files(tests_dir)
-    return test_source_paths
+def get_dir_source_paths(contracts_source_dir):
+    return find_solidity_source_files(contracts_source_dir)
 
 
 def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):

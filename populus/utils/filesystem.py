@@ -92,7 +92,7 @@ def recursive_find_files(base_dir, pattern):
 @to_tuple
 def find_solidity_source_files(base_dir):
     return (
-        os.path.relpath(source_file_path)
+        os.path.abspath(source_file_path)
         for source_file_path
         in recursive_find_files(base_dir, "*.sol")
     )

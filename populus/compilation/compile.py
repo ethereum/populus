@@ -23,7 +23,11 @@ def _get_contract_key(contract_data):
     )
 
 
-def compile_dirs(dir_paths, import_remappings=None, compiler_version="auto"):
+def compile_dirs(dir_paths,
+                 global_config,
+                 import_remappings=None,
+                 compiler_version="auto"
+                 ):
 
     logger = logging.getLogger('populus.compilation.helpers.compile_dir')
     if import_remappings is None:
@@ -39,7 +43,7 @@ def compile_dirs(dir_paths, import_remappings=None, compiler_version="auto"):
         )
         all_source_paths.extend(contract_source_paths)
 
-    compiler_backend = get_compiler_backend_class_for_version(compiler_version)
+    compiler_backend = get_compiler_backend_class_for_version(compiler_version,global_config)
 
     base_compiled_contracts = compiler_backend.get_compiled_contracts(
         source_file_paths=all_source_paths,

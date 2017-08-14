@@ -1,7 +1,7 @@
 #
 # Config
 #
-JSON_CONFIG_FILENAME = './populus.json'
+GLOBAL_JSON_CONFIG_FILENAME = '.populus/populus.config.json'
 PROJECT_JSON_CONFIG_FILENAME = './project.json'
 PROJECT_JSON_CONFIG_DEFAULTS = 'project.config.defaults.json'
 PROJECT_JSON_CONFIG_SCHEMA = 'project.config.schema.json'

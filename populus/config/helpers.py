@@ -20,6 +20,7 @@ from populus.utils.module_loading import (
 
 
 from populus.defaults import (
+    GLOBAL_JSON_CONFIG_FILENAME,
     PROJECT_JSON_CONFIG_FILENAME,
 )
 
@@ -38,11 +39,9 @@ def write_project_config(project_root_dir, config):
     return write_path
 
 
-def get_json_config_file_path(project_dir=None):
-    if project_dir is None:
-        project_dir = os.getcwd()
+def get_global_default_json_config_file_path():
 
-    json_config_file_path = os.path.join(project_dir, JSON_CONFIG_FILENAME)
+    json_config_file_path = os.path.join(os.path.expanduser("~"), GLOBAL_JSON_CONFIG_FILENAME)
     return json_config_file_path
 
 
@@ -56,17 +55,6 @@ def check_if_project_json_file_exists(dir_path):
 
     json_config_file_path = os.path.join(dir_path, PROJECT_JSON_CONFIG_FILENAME)
     return os.path.exists(json_config_file_path)
-
-
-def check_if_json_config_file_exists(project_dir=None):
-    if project_dir is None:
-        project_dir = os.getcwd()
-
-    json_config_file_path = get_json_config_file_path(project_dir)
-    return os.path.exists(json_config_file_path)
-
-
-get_default_project_config_file_path = get_json_config_file_path
 
 
 def get_empty_config():

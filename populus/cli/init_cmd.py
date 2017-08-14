@@ -10,7 +10,6 @@ from populus.config import (
 )
 
 from populus.config.helpers import (
-    get_json_config_file_path,
     check_if_project_json_file_exists,
 )
 from populus.utils.filesystem import (

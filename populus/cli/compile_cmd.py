@@ -34,7 +34,9 @@ def compile_cmd(ctx, watch):
     specify only named contracts in the specified file.
     """
     project_root_dir = ctx.obj['project_root_dir']
-    project = compile(project_root_dir)
+    global_config = ctx.obj['global_config_path']
+
+    project = compile(project_root_dir,global_config)
 
     if watch:
         warnings.warn("Watch will be deprecated in the next version of Populus", DeprecationWarning)

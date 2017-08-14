@@ -35,8 +35,7 @@ from populus.utils.filesystem import (
 )
 from populus.config.helpers import (
     check_if_project_json_file_exists,
-    get_default_project_config_file_path,
-    get_json_config_file_path,
+    get_project_json_config_file_path,
 )
 
 
@@ -83,7 +82,7 @@ class Project(object):
 
     def write_config(self):
         if self.config_file_path is None:
-            config_file_path = get_default_project_config_file_path(self.project_dir)
+            config_file_path = get_project_json_config_file_path(self.project_dir)
         else:
             config_file_path = self.config_file_path
 

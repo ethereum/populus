@@ -36,7 +36,7 @@ def wait_for_transaction_receipt(web3, txn_hash, timeout=120, poll_interval=None
 
 
 def wait_for_block_number(web3, block_number=1, timeout=120, poll_interval=None):
-    if is_tester_web3():
+    if is_tester_web3(web3):
         while web3.eth.blockNumber < block_number:
             web3._requestManager.request_blocking("evm_mine", [])
         return web3.eth.getBlock(block_number)

@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+
+.. _v1.9.1-release-notes:
+
+1.9.1
+-----
+
+- Bugfix for ``Wait.wait_for_block`` API when interacting with a tester chain.
+
+
 .. _v1.9.0-release-notes:
 
 1.9.0

@@ -59,8 +59,9 @@ class Project(object):
     _project_config = None
     _project_config_schema = None
 
-    def __init__(self, project_root_dir):
+    def __init__(self, project_root_dir,global_config_path=None):
         self.project_root_dir = os.path.abspath(project_root_dir)
+        self.global_config_path = global_config_path
 
         if not self.has_json_config():
             raise FileNotFoundError(
@@ -202,7 +203,8 @@ class Project(object):
         if self.is_compiled_contract_cache_stale():
             source_file_paths, compiled_contracts = compile_dirs(
                 (self.contracts_source_dir, self.tests_dir),
-                import_remappings=self.config.get('compilation.import_remappings')
+                self.global_config_path,
+                self.config.get('compilation.import_remappings')
             )
             contracts_mtime = get_latest_mtime(source_file_paths)
             self.fill_contracts_cache(

@@ -16,6 +16,11 @@ from populus.utils.functional import (
 )
 
 
+from populus.config.loading import (
+    load_global_config,
+)
+
+
 def _get_contract_key(contract_data):
     return (
         contract_data['source_path'],
@@ -24,7 +29,7 @@ def _get_contract_key(contract_data):
 
 
 def compile_dirs(dir_paths,
-                 global_config,
+                 global_config_path=None,
                  import_remappings=None,
                  compiler_version="auto"
                  ):
@@ -43,7 +48,8 @@ def compile_dirs(dir_paths,
         )
         all_source_paths.extend(contract_source_paths)
 
-    compiler_backend = get_compiler_backend_class_for_version(compiler_version,global_config)
+    global_config = load_global_config(global_config_path)
+    compiler_backend = get_compiler_backend_class_for_version(compiler_version, global_config)
 
     base_compiled_contracts = compiler_backend.get_compiled_contracts(
         source_file_paths=all_source_paths,

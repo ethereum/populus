@@ -25,9 +25,7 @@ from populus.config import (
     load_project_config_schema,
     write_config as _write_config,
 )
-from populus.utils.chains import (
-    get_base_blockchain_storage_dir,
-)
+
 
 from populus.utils.filesystem import (
     relpath,
@@ -227,8 +225,3 @@ class Project(object):
             config_class=CompilerConfig,
         )
         return compilation_config.backend
-
-    @property
-    @relpath
-    def base_blockchain_storage_dir(self):
-        return get_base_blockchain_storage_dir(self.project_dir)

@@ -33,7 +33,7 @@ def deploy(project_root_dir, user_config_path, chain_name):
     else:
         contracts_to_deploy = contract_data.keys()
 
-    with get_chain(chain_name, user_config) as chain:
+    with get_chain(chain_name, user_config, chain_dir=project.project_root_dir) as chain:
         provider = chain.provider
         registrar = chain.registrar
 

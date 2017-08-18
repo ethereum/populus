@@ -7,14 +7,22 @@ from .filesystem import (
     remove_file_if_exists,
     normpath,
 )
-from .chains import (
-    get_base_blockchain_storage_dir,
+
+
+from populus.defaults import (
+    BASE_BLOCKCHAIN_STORAGE_DIR,
 )
 
 
 @normpath
-def get_data_dir(project_dir, chain_name):
-    base_blockchain_storage_dir = get_base_blockchain_storage_dir(project_dir)
+def get_base_blockchain_storage_dir(base_dir):
+    base_blochcain_storage_dir = os.path.join(base_dir, BASE_BLOCKCHAIN_STORAGE_DIR)
+    return base_blochcain_storage_dir
+
+
+@normpath
+def get_data_dir(base_dir, chain_name):
+    base_blockchain_storage_dir = get_base_blockchain_storage_dir(base_dir)
     return os.path.join(base_blockchain_storage_dir, chain_name)
 
 
@@ -105,8 +113,8 @@ def get_geth_default_ipc_path(testnet=False):
 
 
 @normpath
-def get_geth_logfile_path(project_dir, prefix, suffix):
-    logs_dir = os.path.join(project_dir, 'logs')
+def get_geth_logfile_path(chain_dir, prefix, suffix):
+    logs_dir = os.path.join(chain_dir, 'logs')
     logfile_name = datetime.datetime.now().strftime(
         'geth-%Y%m%d-%H%M%S-{prefix}-{suffix}.log'.format(
             prefix=prefix, suffix=suffix,

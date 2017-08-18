@@ -21,6 +21,7 @@ Ethereum Development Framework
 - management of test chains
 
 ## Config Changes
+- "dir" key to chain, used as rel path to user's home, if none is provided by the caller
 
 
 ### Project

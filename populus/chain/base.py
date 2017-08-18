@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import os
 from pylru import lrucache
 
 from eth_utils import (
@@ -38,13 +39,20 @@ class BaseChain(object):
     """
 
     chain_name = None
+    chain_dir = None
     config = None
     _factory_cache = None
 
-    def __init__(self, chain_name, chain_config, user_config):
+    def __init__(self, chain_name, chain_config, user_config, chain_dir=None):
         self.chain_name = chain_name
         self.config = chain_config
         self.user_config = user_config
+        if chain_dir is None:
+            self.chain_dir = os.path.join(
+                os.path.expanduser("~"),chain_config.get("dir")
+                )
+        else:
+            self.chain_dir = chain_dir
         self._factory_cache = lrucache(128)
         self.initialize_chain()
 

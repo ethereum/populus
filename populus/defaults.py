@@ -18,3 +18,9 @@ COMPILED_CONTRACTS_ASSET_FILENAME = './contracts.json'
 # Deploy
 #
 DEPLOY_JSON_CONFIG_FILENAME = "./deployment.json"
+
+
+#
+# Chain
+#
+BASE_BLOCKCHAIN_STORAGE_DIR = "./chains"

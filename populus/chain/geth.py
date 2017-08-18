@@ -19,14 +19,15 @@ from web3 import (
     HTTPProvider,
 )
 
-from populus.utils.chains import (
-    get_base_blockchain_storage_dir,
-)
+
 from populus.utils.filesystem import (
     tempdir,
 )
+
+
 from populus.utils.geth import (
     get_geth_logfile_path,
+    get_base_blockchain_storage_dir,
 )
 
 from .base import (
@@ -35,14 +36,14 @@ from .base import (
 
 
 class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
-    def __init__(self, project_dir, blockchains_dir, chain_name, overrides):
+    def __init__(self, chain_dir, blockchains_dir, chain_name, overrides):
         stdout_logfile_path = get_geth_logfile_path(
-            project_dir,
+            chain_dir,
             chain_name,
             'stdout'
         )
         stderr_logfile_path = get_geth_logfile_path(
-            project_dir,
+            chain_dir,
             chain_name,
             'stderr',
         )
@@ -56,23 +57,23 @@ class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
 
 
 class LoggedTestnetGethProccess(LoggingMixin, TestnetGethProcess):
-    def __init__(self, project_dir, geth_kwargs):
+    def __init__(self, chain_dir, geth_kwargs):
         super(LoggedTestnetGethProccess, self).__init__(
             geth_kwargs=geth_kwargs,
         )
 
 
 class LoggedMainnetGethProcess(LoggingMixin, LiveGethProcess):
-    def __init__(self, project_dir, geth_kwargs):
+    def __init__(self, chain_dir, geth_kwargs):
         super(LoggedMainnetGethProcess, self).__init__(
             geth_kwargs=geth_kwargs,
             stdout_logfile_path=get_geth_logfile_path(
-                project_dir,
+                chain_dir,
                 'mainnet',
                 'stdout'
             ),
             stderr_logfile_path=get_geth_logfile_path(
-                project_dir,
+                chain_dir,
                 'mainnet',
                 'stderr',
             ),
@@ -131,8 +132,8 @@ class BaseGethChain(BaseChain):
 class LocalGethChain(BaseGethChain):
     def get_geth_process_instance(self):
         return LoggedDevGethProcess(
-            project_dir=self.project.project_dir,
-            blockchains_dir=self.project.base_blockchain_storage_dir,
+            chain_dir=self.chain_dir,
+            blockchains_dir=get_base_blockchain_storage_dir(self.chain_dir),
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
         )
@@ -140,11 +141,11 @@ class LocalGethChain(BaseGethChain):
 
 class TemporaryGethChain(BaseGethChain):
     def get_geth_process_instance(self):
-        tmp_project_dir = self.stack.enter_context(tempdir())
-        base_blockchain_storage_dir = get_base_blockchain_storage_dir(tmp_project_dir)
+        tmp_chain_dir = self.stack.enter_context(tempdir())
+        base_blockchain_storage_dir = get_base_blockchain_storage_dir(tmp_chain_dir)
 
         return LoggedDevGethProcess(
-            project_dir=self.project.project_dir,
+            chain_dir=self.chain_dir,
             blockchains_dir=base_blockchain_storage_dir,
             chain_name=self.chain_name,
             overrides=self.geth_kwargs,
@@ -154,7 +155,7 @@ class TemporaryGethChain(BaseGethChain):
 class TestnetChain(BaseGethChain):
     def get_geth_process_instance(self):
         return LoggedTestnetGethProccess(
-            project_dir=self.project.project_dir,
+            chain_dir=self.chain_dir,
             geth_kwargs=self.geth_kwargs,
         )
 
@@ -162,6 +163,6 @@ class TestnetChain(BaseGethChain):
 class MainnetChain(BaseGethChain):
     def get_geth_process_instance(self):
         return LoggedMainnetGethProcess(
-            project_dir=self.project.project_dir,
+            chain_dir=self.chain_dir,
             geth_kwargs=self.geth_kwargs,
         )

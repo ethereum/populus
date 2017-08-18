@@ -35,17 +35,16 @@ class BaseChain(object):
     """
     Base class for how populus interacts with the blockchain.
 
-    :param project: Instance of :class:`populus.project.Project`
     """
-    project = None
+
     chain_name = None
     config = None
     _factory_cache = None
 
-    def __init__(self, project, chain_name, chain_config):
-        self.project = project
+    def __init__(self, chain_name, chain_config, user_config):
         self.chain_name = chain_name
         self.config = chain_config
+        self.user_config = user_config
         self._factory_cache = lrucache(128)
         self.initialize_chain()
 
@@ -104,7 +103,8 @@ class BaseChain(object):
         backend_configs = self.config.get_config('contracts.backends')
         sorted_backend_configs = sort_prioritized_configs(
             backend_configs,
-            self.project.config
+            self.user_config
+            #self.project.config
         )
         for backend_name, base_backend_config in sorted_backend_configs.items():
             yield backend_name, ContractBackendConfig(base_backend_config)

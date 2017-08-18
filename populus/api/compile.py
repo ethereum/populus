@@ -1,7 +1,12 @@
+from populus.config.loading import (
+    load_user_config
+)
+
 
 from populus.project import (
     Project,
 )
+
 
 from populus.compilation.compile import (
      compile_dirs,
@@ -12,14 +17,15 @@ from populus.compilation.helpers import (
 )
 
 
-def compile(project_root_dir,global_config_path):
+def compile(project_root_dir, user_config_path):
 
-    project = Project(project_root_dir,global_config_path)
+    user_config = load_user_config(user_config_path)
+    project = Project(project_root_dir, user_config)
 
     #TODO don't compile with a project property so global path is provided once
     _, compiled_contracts = compile_dirs(
-        (project.contracts_source_dir,project.tests_dir,),
-        global_config_path,
+        (project.contracts_source_dir, project.tests_dir,),
+        user_config,
         project.config.get('compilation.import_remappings')
     )
 

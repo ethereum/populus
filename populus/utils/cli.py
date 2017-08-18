@@ -98,7 +98,7 @@ def select_account(chain):
         )
 
 
-def configure_chain(project, chain_name):
+def configure_chain(project, chain_name): #BUG delete project
     """
     Interactive configuration of an existing or new chain.
 

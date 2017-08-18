@@ -1,10 +1,10 @@
 
 from populus.config.loading import (
-    load_global_config,
+    load_user_config,
 )
 
 
-def load_global_config(global_config_path=None):
+def load_user_config(user_config_path=None):
 
-    return load_global_config(global_config_path)
+    return load_user_config(user_config_path)
 

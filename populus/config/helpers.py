@@ -39,7 +39,7 @@ def write_project_config(project_root_dir, config):
     return write_path
 
 
-def get_global_default_json_config_file_path():
+def get_user_default_json_config_file_path():
 
     json_config_file_path = os.path.join(os.path.expanduser("~"), GLOBAL_JSON_CONFIG_FILENAME)
     return json_config_file_path

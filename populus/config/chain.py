@@ -34,9 +34,6 @@ UNSUPPORTED_CHAIN_IDENTIFIER_MSG = (
 class ChainConfig(Config):
     chain_class = ClassImportPath('chain.class')
 
-    def get_chain(self, project, chain_name):
-        return self.chain_class(project, chain_name, self)
-
     def set_chain_class(self, chain_identifier):
         if isinstance(chain_identifier, type):
             self.chain_class = chain_identifier

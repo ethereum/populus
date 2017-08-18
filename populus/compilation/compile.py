@@ -2,7 +2,7 @@ import logging
 import os
 
 from .helpers import (
-    get_dir_source_paths,
+    get_all_dirs_source_pathes,
     post_process_compiled_contracts,
     validate_compiled_contracts,
 )
@@ -17,7 +17,7 @@ from populus.utils.functional import (
 
 
 from populus.config.loading import (
-    load_global_config,
+    load_user_config,
 )
 
 
@@ -29,7 +29,7 @@ def _get_contract_key(contract_data):
 
 
 def compile_dirs(dir_paths,
-                 global_config_path=None,
+                 user_config,
                  import_remappings=None,
                  compiler_version="auto"
                  ):
@@ -38,18 +38,8 @@ def compile_dirs(dir_paths,
     if import_remappings is None:
         import_remappings = []
 
-    all_source_paths = []
-    for dir_path in set(dir_paths): # sliently ignore duplicates
-        contract_source_paths = get_dir_source_paths(dir_path)
-        logger.debug(
-            "Found %s source files: %s",
-            len(contract_source_paths),
-            ", ".join(contract_source_paths),
-        )
-        all_source_paths.extend(contract_source_paths)
-
-    global_config = load_global_config(global_config_path)
-    compiler_backend = get_compiler_backend_class_for_version(compiler_version, global_config)
+    all_source_paths = get_all_dirs_source_pathes(dir_paths, logger)
+    compiler_backend = get_compiler_backend_class_for_version(compiler_version, user_config)
 
     base_compiled_contracts = compiler_backend.get_compiled_contracts(
         source_file_paths=all_source_paths,

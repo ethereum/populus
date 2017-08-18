@@ -38,6 +38,7 @@ def init_cmd(ctx):
     Generate project layout with an example contract.
     """
     project_root_dir = ctx.obj['project_root_dir']
+    user_config_path = ctx.obj['user_config_path']
 
     if check_if_project_json_file_exists(project_root_dir):
         raise ConfigError(
@@ -46,7 +47,7 @@ def init_cmd(ctx):
             )
         )
 
-    init_project(project_root_dir)
+    init_project(project_root_dir, user_config_path)
 
 
 

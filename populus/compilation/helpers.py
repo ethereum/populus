@@ -47,6 +47,22 @@ def get_dir_source_paths(contracts_source_dir):
     return find_solidity_source_files(contracts_source_dir)
 
 
+@to_tuple
+def get_all_dirs_source_pathes(dir_paths, logger=None):
+
+    all_source_paths = []
+    for dir_path in set(dir_paths): # sliently ignore duplicates
+        contract_source_paths = get_dir_source_paths(dir_path)
+        if logger:
+            logger.debug(
+                "Found %s source files: %s",
+                len(contract_source_paths),
+                ", ".join(contract_source_paths),
+            )
+        all_source_paths.extend(contract_source_paths)
+    return all_source_paths
+
+
 def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):
     logger = logging.getLogger('populus.compilation.write_compiled_sources')
     ensure_file_exists(compiled_contracts_asset_path)

@@ -23,7 +23,7 @@ from .solc_standard_json import (
 )
 
 
-def get_compiler_backend_class_for_version(compiler_version, global_config=None):
+def get_compiler_backend_class_for_version(compiler_version, user_config):
 
     if compiler_version == "auto":
         compiler_version = get_solc_version()
@@ -33,13 +33,13 @@ def get_compiler_backend_class_for_version(compiler_version, global_config=None)
 
     if compiler_version in Spec('>=0.4.11'):
         backend_class = SolcStandardJSONBackend
-        settings = global_config.get('compilation.backends.SolcStandardJSON.settings')
+        settings = user_config.get('compilation.backends.SolcStandardJSON.settings')
     else:
         warnings.warn(
             "Support for solc <0.4.11 will be dropped in the next populus release",
             DeprecationWarning
         )
         backend_class = SolcCombinedJSONBackend
-        settings = global_config.get('compilation.backends.SolcCombinedJSON.settings')
+        settings = user_config.get('compilation.backends.SolcCombinedJSON.settings')
 
     return backend_class(settings)

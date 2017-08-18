@@ -45,6 +45,7 @@ from populus.defaults import (
     DEFAULT_CONTRACTS_DIR,
     DEFAULT_TESTS_DIR,
     PROJECT_JSON_CONFIG_FILENAME,
+    DEPLOY_JSON_CONFIG_FILENAME,
 
 )
 
@@ -59,9 +60,9 @@ class Project(object):
     _project_config = None
     _project_config_schema = None
 
-    def __init__(self, project_root_dir,global_config_path=None):
+    def __init__(self, project_root_dir, user_config):
         self.project_root_dir = os.path.abspath(project_root_dir)
-        self.global_config_path = global_config_path
+        self.user_config = user_config
 
         if not self.has_json_config():
             raise FileNotFoundError(
@@ -80,6 +81,10 @@ class Project(object):
 
     def has_json_config(self):
         return check_if_project_json_file_exists(self.project_root_dir)
+
+    @property
+    def deploy_config_path(self):
+        return os.path.join(self.project_root_dir, DEPLOY_JSON_CONFIG_FILENAME)
 
     def write_config(self):
         if self.config_file_path is None:
@@ -203,7 +208,7 @@ class Project(object):
         if self.is_compiled_contract_cache_stale():
             source_file_paths, compiled_contracts = compile_dirs(
                 (self.contracts_source_dir, self.tests_dir),
-                self.global_config_path,
+                self.user_config,
                 self.config.get('compilation.import_remappings')
             )
             contracts_mtime = get_latest_mtime(source_file_paths)
@@ -222,35 +227,6 @@ class Project(object):
             config_class=CompilerConfig,
         )
         return compilation_config.backend
-
-    #
-    # Local Blockchains
-    #
-    def get_chain_config(self, chain_name):
-        chain_config_key = 'chains.{chain_name}'.format(chain_name=chain_name)
-
-        if chain_config_key in self.config:
-            return self.config.get_config(chain_config_key, config_class=ChainConfig)
-        else:
-            raise KeyError(
-                "Unknown chain: {0!r} - Must be one of {1!r}".format(
-                    chain_name,
-                    sorted(self.config.get('chains', {}).keys()),
-                )
-            )
-
-    def get_chain(self, chain_name, chain_config=None):
-        """
-        Returns a context manager that runs a chain within the context of the
-        current populus project.
-
-        Alternatively you can specify any chain name that is present in the
-        `chains` configuration key.
-        """
-        if chain_config is None:
-            chain_config = self.get_chain_config(chain_name)
-        chain = chain_config.get_chain(self, chain_name)
-        return chain
 
     @property
     @relpath

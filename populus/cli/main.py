@@ -29,7 +29,7 @@ CONTEXT_SETTINGS = dict(
 @click.option(
     '--global-config',
     '-g',
-    'global_config_path',
+    'user_config_path',
     help=(
         "Specify a global populus configuration file, instead of the default"
     ),
@@ -45,7 +45,7 @@ CONTEXT_SETTINGS = dict(
     is_flag=True
 )
 @click.pass_context
-def main(ctx, project_root_dir, show_warnings, global_config_path):
+def main(ctx, project_root_dir, show_warnings, user_config_path):
     """
     Populus
     """
@@ -58,11 +58,11 @@ def main(ctx, project_root_dir, show_warnings, global_config_path):
     if show_warnings:
         warnings.filterwarnings("always")
 
-    if global_config_path is not None and not os.path.exists(global_config_path):
+    if user_config_path is not None and not os.path.exists(user_config_path):
         raise ConfigError(
             "Global json config file does not exists at {config_path}".format(
-                config_path=global_config_path
+                config_path=user_config_path
             )
         )
 
-    ctx.obj['global_config_path'] = global_config_path
+    ctx.obj['user_config_path'] = user_config_path

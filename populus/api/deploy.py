@@ -4,6 +4,19 @@ from populus.project import (
     Project,
 )
 
+from populus.contracts.provider import (
+    Provider,
+)
+
+from populus.contracts.registrar import (
+    Registrar,
+)
+
+from populus.contracts.helpers import (
+    get_provider_backends,
+    get_registrar_backends,
+)
+
 from populus.utils.cli import (
     select_chain,
     deploy_contract_and_verify,
@@ -33,9 +46,28 @@ def deploy(project_root_dir, user_config_path, chain_name):
     else:
         contracts_to_deploy = contract_data.keys()
 
-    with get_chain(chain_name, user_config, chain_dir=project.project_root_dir) as chain:
-        provider = chain.provider
-        registrar = chain.registrar
+    chain = get_chain(chain_name, user_config, chain_dir=project.project_root_dir)
+    web3 = chain.web3
+    contract_backends = chain.contract_backends
+
+    registrar_backends = get_registrar_backends(contract_backends)
+    if not registrar_backends:
+        raise ValueError(
+            "Must have at least one registrar backend for chain {chain_name}".format(
+                chain_name=chain_name
+            )
+        )
+
+    provider_backends = get_provider_backends(contract_backends)
+    if not provider_backends:
+        raise ValueError(
+            "Must have at least one provider backend for chain {chain_name}".format(
+                chain_name=chain_name
+            )
+        )
+
+    registrar = Registrar(web3, registrar_backends)
+    provider = Provider(web3, registrar, provider_backends)
 
 
 

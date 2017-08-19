@@ -11,12 +11,7 @@ from populus.config.backend import (
     ContractBackendConfig,
 )
 
-from populus.contracts.provider import (
-    Provider,
-)
-from populus.contracts.registrar import (
-    Registrar,
-)
+
 from populus.wait import (
     Wait,
 )
@@ -49,7 +44,7 @@ class BaseChain(object):
         self.user_config = user_config
         if chain_dir is None:
             self.chain_dir = os.path.join(
-                os.path.expanduser("~"),chain_config.get("dir")
+                os.path.expanduser("~"), chain_config.get("dir")
                 )
         else:
             self.chain_dir = chain_dir
@@ -92,8 +87,6 @@ class BaseChain(object):
 
     @cached_property
     def web3(self):
-        if not self._running:
-            raise ValueError("Chain must be running prior to accessing web3")
         return self.web3_config.get_web3()
 
     @property
@@ -121,46 +114,8 @@ class BaseChain(object):
     @to_ordered_dict
     def contract_backends(self):
         for backend_name, backend_config in self.contract_backend_configs.items():
-            ProviderBackendClass = import_string(backend_config['class'])
+            ChainBackendClass = import_string(backend_config['class'])
             yield (
                 backend_name,
-                ProviderBackendClass(self, backend_config.get_config('settings')),
+                ChainBackendClass(self, backend_config.get_config('settings')),
             )
-
-    #
-    # Provider
-    #
-    @property
-    @to_ordered_dict
-    def provider_backends(self):
-        for backend_name, backend in self.contract_backends.items():
-            if backend.is_provider:
-                yield backend_name, backend
-
-    @property
-    def provider(self):
-        if not self.provider_backends:
-            raise ValueError(
-                "Must have at least one provider backend "
-                "configured\n{0}".format(self.contract_backend_configs)
-            )
-        return Provider(self, self.provider_backends)
-
-    #
-    # Registrar
-    #
-    @cached_property
-    @to_ordered_dict
-    def registrar_backends(self):
-        for backend_name, backend in self.contract_backends.items():
-            if backend.is_registrar:
-                yield backend_name, backend
-
-    @property
-    def registrar(self):
-        if not self.registrar_backends:
-            raise ValueError(
-                "Must have at least one registrar backend "
-                "configured\n{0}".format(self.contract_backend_configs)
-            )
-        return Registrar(self, self.registrar_backends)

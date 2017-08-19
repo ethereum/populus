@@ -54,14 +54,6 @@ class ChainConfig(Config):
         return self.get_config('web3', config_class=Web3Config)
 
     @property
-    def registrar(self):
-        return self['registrar']
-
-    @registrar.setter
-    def registrar(self, value):
-        self['registrar'] = value
-
-    @property
     def is_external(self):
         from populus.chain import ExternalChain
         return self.chain_class is ExternalChain

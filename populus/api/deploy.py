@@ -66,8 +66,8 @@ def deploy(project_root_dir, user_config_path, chain_name):
             )
         )
 
-    registrar = Registrar(web3, registrar_backends)
-    provider = Provider(web3, registrar, provider_backends)
+    registrar = Registrar(web3, registrar_backends, base_dir=project_root_dir)
+    provider = Provider(web3, registrar, provider_backends, project)
 
 
 

@@ -54,10 +54,13 @@ class Provider(object):
     """
     provider_backends = None
 
-    def __init__(self, web3, registrar, provider_backends):
+    def __init__(self, web3, registrar, provider_backends, project=None):
         self.web3 = web3
         self.registrar = registrar
         self.provider_backends = provider_backends
+        for backend in self.provider_backends.values():
+            backend.provider = self
+        self.project = project
         self._factory_cache = lrucache(128)
 
     def is_contract_available(self, contract_identifier):

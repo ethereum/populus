@@ -117,5 +117,5 @@ class BaseChain(object):
             ChainBackendClass = import_string(backend_config['class'])
             yield (
                 backend_name,
-                ChainBackendClass(self, backend_config.get_config('settings')),
+                ChainBackendClass(backend_config.get_config('settings')),
             )

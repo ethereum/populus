@@ -29,9 +29,12 @@ class Registrar(object):
     """
     registrar_backends = None
 
-    def __init__(self, web3, registrar_backends):
+    def __init__(self, web3, registrar_backends, base_dir):
         self.web3 = web3
+        self.base_dir = base_dir
         self.registrar_backends = registrar_backends
+        for backend in self.registrar_backends.values():
+            backend.registrar = self
 
     def set_contract_address(self, contract_name, contract_address):
         """

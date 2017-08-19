@@ -14,7 +14,7 @@ from populus.contracts.exceptions import (
 from populus.utils.mappings import (
     set_nested_key,
 )
-from populus.utils.chains import (
+from populus.chain.helpers import (
     get_chain_definition,
     check_if_chain_matches_chain_uri,
 )

@@ -8,7 +8,7 @@ from populus.api.deploy import (
     deploy,
 )
 
-from populus.utils.chains import (
+from populus.chain.helpers import (
     is_synced,
 )
 

@@ -65,19 +65,18 @@ def echo_post_deploy_message(web3, deployed_contracts):
 @click.option(
     'wait_for_sync',
     '--wait-for-sync/--no-wait-for-sync',
-    default=True,
+    default=False,
     help=(
         "Determines whether the deploy command should wait until the chain is "
         "fully synced before deployment"
     ),
 )
-
 @click.pass_context
 def deploy_cmd(ctx, chain_name, wait_for_sync):
     """
     Deploys the specified contracts to a chain.
     """
-
+    logger = logging.getLogger('populus.cli.deploy')
     project_root_dir = ctx.obj['project_root_dir']
     user_config_path = ctx.obj['user_config_path']
-    deploy(project_root_dir, user_config_path, chain_name)
+    deploy(project_root_dir, user_config_path, chain_name, wait_for_sync, logger)

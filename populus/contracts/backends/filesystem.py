@@ -46,7 +46,7 @@ class JSONFileBackend(BaseRegistrarContractBackend):
     def set_contract_address(self, instance_identifier, address):
         registrar_data = self.registrar_data
 
-        chain_definition = get_chain_definition(self.registrar.web3)
+        chain_definition = get_chain_definition(self.registrar().web3)
         set_nested_key(
             registrar_data,
             'deployments.{0}.{1}'.format(chain_definition, instance_identifier),
@@ -66,7 +66,7 @@ class JSONFileBackend(BaseRegistrarContractBackend):
     def get_contract_addresses(self, instance_identifier):
         registrar_data = self.registrar_data
         matching_chain_definitions = get_matching_chain_definitions(
-            self.registrar.web3,
+            self.registrar().web3,
             registrar_data.get('deployments', {}),
         )
 
@@ -89,7 +89,7 @@ class JSONFileBackend(BaseRegistrarContractBackend):
     @property
     def registrar_path(self):
         registrar_path = self.config.get('file_path', './registrar.json')
-        return os.path.join(self.registrar.base_dir, registrar_path)
+        return os.path.join(self.registrar().base_dir, registrar_path)
 
     @property
     def registrar_data(self):

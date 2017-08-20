@@ -251,6 +251,7 @@ def request_account_unlock(chain, account, timeout):
 
 
 def deploy_contract_and_verify(chain,
+                               provider,
                                contract_name,
                                ContractFactory=None,
                                deploy_transaction=None,
@@ -280,7 +281,7 @@ def deploy_contract_and_verify(chain,
     logger.info("Deploying {0}".format(contract_name))
 
     if ContractFactory is None:
-        ContractFactory = chain.provider.get_contract_factory(contract_name)
+        ContractFactory = provider.get_contract_factory(contract_name)
 
     deploy_txn_hash = ContractFactory.deploy(
         transaction=deploy_transaction,

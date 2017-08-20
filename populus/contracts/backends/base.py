@@ -128,8 +128,8 @@ class BaseProjectContractBackend(BaseContractBackend):
         contract_data = self.get_contract_data(contract_identifier)
 
         base_contract_factory = construct_project_contract_factory(
-            project=self.provider.project,
-            web3=self.provider.web3,
+            project=self.provider().project,
+            web3=self.provider().web3,
             contract_identifier=contract_identifier,
             contract_data=contract_data,
         )

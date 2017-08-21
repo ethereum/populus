@@ -20,7 +20,7 @@ from populus.utils.module_loading import (
 
 
 from populus.defaults import (
-    GLOBAL_JSON_CONFIG_FILENAME,
+    USER_JSON_CONFIG_FILENAME,
     PROJECT_JSON_CONFIG_FILENAME,
 )
 
@@ -41,7 +41,7 @@ def write_project_config(project_root_dir, config):
 
 def get_user_default_json_config_file_path():
 
-    json_config_file_path = os.path.join(os.path.expanduser("~"), GLOBAL_JSON_CONFIG_FILENAME)
+    json_config_file_path = os.path.join(os.path.expanduser("~"), USER_JSON_CONFIG_FILENAME)
     return json_config_file_path
 
 

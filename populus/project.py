@@ -21,7 +21,6 @@ from populus.config import (
     Config,
     get_default_config_path,
     load_config as _load_config,
-    load_config_schema,
     load_project_config_schema,
     write_config as _write_config,
 )
@@ -124,8 +123,7 @@ class Project(object):
             self._config_cache = value
         else:
             self._project_config = value
-            config_version = self._project_config['version']
-            self._project_config_schema = load_config_schema(config_version)
+            self._project_config_schema = load_project_config_schema()
             self._config_cache = Config(
                 config=self._project_config,
                 schema=self._project_config_schema,

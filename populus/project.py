@@ -201,10 +201,11 @@ class Project(object):
     @property
     def compiled_contract_data(self):
         if self.is_compiled_contract_cache_stale():
+            import_remmapings = self.user_config.import_remmapings(self)
             source_file_paths, compiled_contracts = compile_dirs(
                 (self.contracts_source_dir, self.tests_dir),
                 self.user_config,
-                self.config.get('compilation.import_remappings')
+                import_remmapings
             )
             contracts_mtime = get_latest_mtime(source_file_paths)
             self.fill_contracts_cache(

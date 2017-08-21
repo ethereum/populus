@@ -24,19 +24,6 @@ from .exceptions import (
 )
 
 
-def get_base_contract_factory(contract_identifier, store_backends):
-    for backend in store_backends.values():
-        try:
-            return backend.get_base_contract_factory(contract_identifier)
-        except UnknownContract:
-            pass
-    else:
-        raise UnknownContract(
-            "No contract data was available for the contract identifier '{0}' "
-            "from any of the configured backends".format(contract_identifier)
-        )
-
-
 @to_tuple
 def filter_addresses_by_bytecode_match(web3, expected_bytecode, addresses):
     for address in addresses:
@@ -161,7 +148,17 @@ class Provider(object):
         Returns the base contract factory for the given `contract_identifier`.
         The `bytecode` and `bytecode_runtime` will be unlinked in this class.
         """
-        return get_base_contract_factory(contract_identifier, self.provider_backends)
+
+        for backend in self.provider_backends.values():
+            try:
+                return backend.get_base_contract_factory(contract_identifier)
+            except UnknownContract:
+                pass
+        else:
+            raise UnknownContract(
+                "No contract data was available for the contract identifier '{0}' "
+                "from any of the configured backends".format(contract_identifier)
+            )
 
     def get_contract_data(self, contract_identifier):
         """

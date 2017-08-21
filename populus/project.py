@@ -19,7 +19,6 @@ from populus.config import (
     ChainConfig,
     CompilerConfig,
     Config,
-    get_default_config_path,
     load_config as _load_config,
     load_project_config_schema,
     write_config as _write_config,

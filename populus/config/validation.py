@@ -13,26 +13,6 @@ from populus.defaults import (
     PROJECT_JSON_CONFIG_SCHEMA,
     USER_JSON_CONFIG_SCHEMA,
 )
-from .versions import (
-    V1,
-    V2,
-    V3,
-    V4,
-    V5,
-    LATEST_VERSION,
-)
-
-
-CONFIG_SCHEMA_FILENAMES = {
-    V1: "config.v1.schema.json",
-    V2: "config.v2.schema.json",
-    V3: "config.v3.schema.json",
-    V4: "config.v4.schema.json",
-    V5: "config.v5.schema.json",
-}
-
-
-assert LATEST_VERSION in CONFIG_SCHEMA_FILENAMES
 
 
 def get_user_config_schema_path():

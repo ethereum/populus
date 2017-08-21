@@ -5,7 +5,6 @@ import shutil
 import click
 
 from populus.config import (
-    load_default_config,
     write_config,
 )
 

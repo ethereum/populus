@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 
-from populus.config.loading import (
+from .config import (
     load_user_config,
 )
 
@@ -25,7 +25,7 @@ GREETER_SOURCE_PATH = os.path.join(ASSETS_DIR, 'Greeter.sol')
 GREETER_TEST_PATH = os.path.join(ASSETS_DIR, 'test_greeter.py')
 
 
-def init_project(project_root_dir, user_config_path):
+def init_project(project_root_dir, user_config_path=None):
 
     logger = logging.getLogger('populus.cli.init_cmd')
     default_config = load_default_project_config()

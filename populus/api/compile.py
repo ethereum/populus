@@ -1,4 +1,4 @@
-from populus.config.loading import (
+from .config import (
     load_user_config
 )
 
@@ -17,7 +17,7 @@ from populus.compilation.helpers import (
 )
 
 
-def compile(project_root_dir, user_config_path):
+def compile(project_root_dir, user_config_path=None):
 
     user_config = load_user_config(user_config_path)
     project = Project(project_root_dir, user_config)

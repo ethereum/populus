@@ -35,6 +35,9 @@ from populus.utils.deploy import (
 
 from populus.config.loading import (
     load_deploy_config,
+)
+
+from .config import (
     load_user_config,
 )
 
@@ -44,7 +47,7 @@ from populus.chain.helpers import (
 )
 
 
-def deploy(project_root_dir, user_config_path, chain_name, wait_for_sync=True, logger=None):
+def deploy(project_root_dir, chain_name, user_config_path=None, wait_for_sync=True, logger=None):
 
     if logger is None:
         logger = logging.getLogger('populus.deploy')

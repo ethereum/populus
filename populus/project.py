@@ -21,9 +21,11 @@ from populus.config import (
     Config,
     load_config as _load_config,
     load_project_config_schema,
-    write_config as _write_config,
 )
 
+from populus.config.helpers import (
+    write_project_config as _write_project_config
+)
 
 from populus.utils.filesystem import (
     relpath,
@@ -83,18 +85,13 @@ class Project(object):
         return os.path.join(self.project_root_dir, DEPLOY_JSON_CONFIG_FILENAME)
 
     def write_config(self):
-        if self.config_file_path is None:
-            config_file_path = get_project_json_config_file_path(self.project_dir)
-        else:
-            config_file_path = self.config_file_path
 
-        self.config_file_path = _write_config(
-            self.project_dir,
+        config_file_path = _write_project_config(
+            self.project_root_dir,
             self.config,
-            write_path=config_file_path,
         )
 
-        return self.config_file_path
+        return config_file_path
 
     def load_config(self):
         self._config_cache = None

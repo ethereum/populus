@@ -129,11 +129,6 @@ class Project(object):
     # Project
     #
     @property
-    @relpath
-    def project_dir(self):
-        return self.config.get('populus.project_dir', os.getcwd())
-
-    @property
     def tests_dir(self):
         dir_path = self.config.get(
             'locations.tests_dir',

@@ -172,7 +172,7 @@ def configure_chain(project, chain_name): #BUG delete project
             chain_config['web3.providers.settings.ipc_path'] = ipc_path
         elif chain_name not in {"mainnet", "ropsten"}:
             chain_config['web3.providers.settings.ipc_path'] = get_geth_ipc_path(
-                get_local_chain_datadir(project.project_dir, chain_name),
+                get_local_chain_datadir(project.project_root_dir, chain_name),
             )
     elif chain_config['web3.provider.class'] == 'web3.providers.rpc.HTTPProvider':
         custom_rpc_host = (

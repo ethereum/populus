@@ -62,6 +62,11 @@ def init_project(project_root_dir, user_config_path=None):
     if ensure_path_exists(tests_dir):
         logger.info("Created Directory: ./{0}".format(os.path.relpath(tests_dir)))
 
+    build_dir = project.build_asset_dir
+    if ensure_path_exists(build_dir):
+        logger.info("Created Directory: ./{0}".format(os.path.relpath(build_dir)))
+
+
     example_tests_path = os.path.join(tests_dir, 'test_greeter.py')
     if not os.path.exists(example_tests_path):
         shutil.copy(GREETER_TEST_PATH, example_tests_path)

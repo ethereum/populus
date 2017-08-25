@@ -36,6 +36,9 @@ from populus.api.config import (
     load_user_config,
 )
 
+from populus.chain.helpers import (
+    get_chain,
+)
 
 POPULUS_SOURCE_ROOT = os.path.dirname(__file__)
 
@@ -88,6 +91,17 @@ def project(tmpdir, user_config_path, monkeypatch):
 def _project_loaded(project):
 
     pass
+
+
+@pytest.fixture()
+def chain(project, user_config):
+    with get_chain('tester', user_config, chain_dir=project.project_root_dir) as chain:
+        yield chain
+
+
+@pytest.fixture()
+def web3(chain):
+    return chain.web3
 
 
 @pytest.fixture()

@@ -43,7 +43,6 @@ from .config import (
 
 from populus.chain.helpers import (
     get_chain,
-    get_chain_config,
 )
 
 

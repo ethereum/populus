@@ -1,6 +1,6 @@
 import pytest
 
-from populus.utils.chains import (
+from populus.chain.helpers import (
     is_block_or_transaction_hash,
     create_block_uri,
     create_transaction_uri,

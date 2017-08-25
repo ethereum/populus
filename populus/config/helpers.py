@@ -25,8 +25,7 @@ from populus.defaults import (
 )
 
 
-def write_project_config(project_root_dir, config):
-    write_path = os.path.join(project_root_dir, PROJECT_JSON_CONFIG_FILENAME)
+def write_config(config, write_path):
     with open(write_path, 'w') as config_file:
         anyconfig.dump(
             dict(config),
@@ -37,6 +36,17 @@ def write_project_config(project_root_dir, config):
         )
 
     return write_path
+
+
+def write_project_config(config, project_root_dir):
+    write_path = os.path.join(project_root_dir, PROJECT_JSON_CONFIG_FILENAME)
+    return write_config(config, write_path)
+
+
+def write_user_config(user_config, user_config_path):
+    if user_config_path is None:
+        user_config_path = get_user_default_json_config_file_path()
+    return write_config(user_config, user_config_path)
 
 
 def get_user_default_json_config_file_path():

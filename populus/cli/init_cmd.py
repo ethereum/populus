@@ -4,9 +4,6 @@ import shutil
 
 import click
 
-from populus.config import (
-    write_config,
-)
 
 from populus.config.helpers import (
     check_if_project_json_file_exists,

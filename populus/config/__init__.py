@@ -12,7 +12,6 @@ from .compiler import (  # noqa: F401
 )
 from .loading import (  # noqa: F401
     load_config,
-    write_config,
 )
 from .validation import (  # noqa: F401
     load_project_config_schema,

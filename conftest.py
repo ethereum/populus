@@ -9,21 +9,31 @@ import pytest
 import shutil
 import itertools
 
+from populus import api
 from populus import Project
 
-from populus.utils.chains import (
+from populus.utils.geth import (
     get_base_blockchain_storage_dir,
-)
-from populus.utils.compile import (
-    get_contracts_source_dir,
-    get_build_asset_dir,
 )
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
 from populus.utils.testing import (
-    get_tests_dir,
     link_bytecode_by_name,
+)
+
+from populus import ASSETS_DIR
+
+from populus.defaults import (
+    DEFAULT_CONTRACTS_DIR,
+    DEFAULT_TESTS_DIR,
+    BUILD_ASSET_DIR,
+    USER_JSON_CONFIG_DEFAULTS,
+
+)
+
+from populus.api.config import (
+    load_user_config,
 )
 
 
@@ -37,18 +47,47 @@ def temporary_dir(tmpdir):
 
 
 @pytest.fixture()
-def project_dir(tmpdir, monkeypatch):
-    _project_dir = str(tmpdir.mkdir("project-dir"))
+def user_config_path(temporary_dir):
+    _user_config_path = os.path.join(temporary_dir, USER_JSON_CONFIG_DEFAULTS)
+    if not os.path.exists(_user_config_path):
+        shutil.copyfile(
+            os.path.join(ASSETS_DIR, USER_JSON_CONFIG_DEFAULTS),
+            _user_config_path
+        )
+    return _user_config_path
 
-    # setup project directories
-    ensure_path_exists(get_contracts_source_dir(_project_dir))
-    ensure_path_exists(get_build_asset_dir(_project_dir))
-    ensure_path_exists(get_base_blockchain_storage_dir(_project_dir))
 
-    monkeypatch.chdir(_project_dir)
-    monkeypatch.syspath_prepend(_project_dir)
+@pytest.fixture()
+def user_config(user_config_path):
+    return load_user_config(user_config_path)
 
-    return _project_dir
+
+@pytest.fixture()
+def project(tmpdir, user_config_path, monkeypatch):
+    project_dir = str(tmpdir.mkdir("project-dir"))
+    project = api.project.init_project(
+        project_dir,
+        user_config_path,
+    )
+
+    dirs = (DEFAULT_CONTRACTS_DIR, DEFAULT_TESTS_DIR, BUILD_ASSET_DIR,)
+    for dir_name in dirs:
+        assert (
+            os.path.exists(
+                os.path.join(project.project_root_dir, dir_name)
+                )
+        )
+
+    monkeypatch.chdir(project_dir)
+    monkeypatch.syspath_prepend(project_dir)
+
+    return project
+
+
+@pytest.fixture()
+def _project_loaded(project):
+
+    pass
 
 
 @pytest.fixture()
@@ -86,7 +125,7 @@ def wait_for_unlock():
 
 
 @pytest.fixture()
-def _loaded_contract_fixtures(project_dir, request):
+def _loaded_contract_fixtures(project, request):
     contracts_to_load_from_fn = getattr(request.function, '_populus_contract_fixtures', [])
     contracts_to_load_from_module = getattr(request.module, '_populus_contract_fixtures', [])
 
@@ -94,7 +133,7 @@ def _loaded_contract_fixtures(project_dir, request):
         contracts_to_load_from_fn,
         contracts_to_load_from_module,
     )
-    contracts_source_dir = get_contracts_source_dir(project_dir)
+    contracts_source_dir = project.contracts_source_dir
 
     for item, dst_path in contracts_to_load:
         ensure_path_exists(contracts_source_dir)
@@ -127,7 +166,7 @@ def _loaded_contract_fixtures(project_dir, request):
 
 
 @pytest.fixture()
-def _loaded_test_contract_fixtures(project_dir, request):
+def _loaded_test_contract_fixtures(project, request):
     test_contracts_to_load_from_fn = getattr(request.function, '_populus_test_contract_fixtures', [])
     test_contracts_to_load_from_module = getattr(request.module, '_populus_test_contract_fixtures', [])
 
@@ -136,7 +175,7 @@ def _loaded_test_contract_fixtures(project_dir, request):
         test_contracts_to_load_from_module,
     )
 
-    tests_dir = get_tests_dir(project_dir)
+    tests_dir = project.tests_dir
 
     for item, dst_path in test_contracts_to_load:
         ensure_path_exists(tests_dir)
@@ -168,7 +207,7 @@ def _loaded_test_contract_fixtures(project_dir, request):
 
 
 @pytest.fixture()
-def _updated_project_config(project_dir, request):
+def _updated_project_config(project, request):
     key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])
     key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
 
@@ -193,12 +232,13 @@ def pytest_fixture_setup(fixturedef, request):
     """
     Injects the following fixtures ahead of the `project` fixture.
 
-    - project_dir
+    - project
     - _loaded_contract_fixtures
     - _loaded_test_contract_fixtures
     """
-    if fixturedef.argname == 'project':
-        request.getfixturevalue('project_dir')
+
+    if fixturedef.argname == "_project_loaded":
+        request.getfixturevalue('user_config')
         request.getfixturevalue('_loaded_contract_fixtures')
         request.getfixturevalue('_loaded_test_contract_fixtures')
         request.getfixturevalue('_updated_project_config')

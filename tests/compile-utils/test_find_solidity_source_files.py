@@ -1,7 +1,7 @@
 import os
 
 from populus import Project
-from populus.utils.compile import (
+from populus.compilation.helpers import (
     find_solidity_source_files,
 )
 from populus.utils.filesystem import (

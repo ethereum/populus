@@ -30,8 +30,8 @@ def init_project(project_root_dir, user_config_path=None):
     logger = logging.getLogger('populus.cli.init_cmd')
     default_config = load_default_project_config()
     write_project_config(
-            project_root_dir,
-            default_config
+        default_config,
+        project_root_dir,
         )
 
     logger.info(
@@ -66,11 +66,12 @@ def init_project(project_root_dir, user_config_path=None):
     if ensure_path_exists(build_dir):
         logger.info("Created Directory: ./{0}".format(os.path.relpath(build_dir)))
 
-
     example_tests_path = os.path.join(tests_dir, 'test_greeter.py')
     if not os.path.exists(example_tests_path):
         shutil.copy(GREETER_TEST_PATH, example_tests_path)
         logger.info("Created Example Tests: ./{0}".format(
             os.path.relpath(example_tests_path)
         ))
+
+    return project
 

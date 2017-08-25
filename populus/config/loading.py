@@ -36,16 +36,3 @@ def load_deploy_config(config_path):
 
     config = load_config(config_path)
     return DeployConfig(config)
-
-
-def write_config(config, write_path):
-    with open(write_path, 'w') as config_file:
-        anyconfig.dump(
-            dict(config),
-            config_file,
-            sort_keys=True,
-            indent=2,
-            separators=(',', ': '),
-        )
-
-    return write_path

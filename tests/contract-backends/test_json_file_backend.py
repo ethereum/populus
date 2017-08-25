@@ -9,7 +9,7 @@ from populus.contracts.backends.filesystem import (
     load_registrar_data,
 )
 
-from populus.utils.chains import (
+from populus.chain.helpers import (
     check_if_chain_matches_chain_uri,
 )
 

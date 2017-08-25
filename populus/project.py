@@ -87,8 +87,8 @@ class Project(object):
     def write_config(self):
 
         config_file_path = _write_project_config(
-            self.project_root_dir,
             self.config,
+            self.project_root_dir,
         )
 
         return config_file_path
@@ -190,15 +190,20 @@ class Project(object):
         self._cached_compiled_contracts_mtime = contracts_mtime
         self._cached_compiled_contracts = compiled_contracts
 
+    def compile(self):
+
+        import_remmapings = self.user_config.import_remmapings(self)
+        source_file_paths, compiled_contracts = compile_dirs(
+            (self.contracts_source_dir, self.tests_dir),
+            self.user_config,
+            import_remmapings
+        )
+        return source_file_paths, compiled_contracts
+
     @property
     def compiled_contract_data(self):
         if self.is_compiled_contract_cache_stale():
-            import_remmapings = self.user_config.import_remmapings(self)
-            source_file_paths, compiled_contracts = compile_dirs(
-                (self.contracts_source_dir, self.tests_dir),
-                self.user_config,
-                import_remmapings
-            )
+            source_file_paths, compiled_contracts = self.compile()
             contracts_mtime = get_latest_mtime(source_file_paths)
             self.fill_contracts_cache(
                 compiled_contracts=compiled_contracts,

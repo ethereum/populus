@@ -3,14 +3,10 @@ import sys
 
 from populus.project import Project
 
-from populus.utils.chains import (
+from populus.utils.geth import (
     get_base_blockchain_storage_dir,
 )
-from populus.utils.compile import (
-    get_compiled_contracts_asset_path,
-    get_build_asset_dir,
-    get_contracts_source_dir,
-)
+
 from populus.utils.filesystem import (
     is_same_path,
 )

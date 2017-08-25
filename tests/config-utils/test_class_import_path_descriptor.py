@@ -2,7 +2,7 @@ import pytest
 
 import numbers
 
-from populus.utils.config import (
+from populus.config.helpers import (
     ClassImportPath,
 )
 

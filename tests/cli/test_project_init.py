@@ -2,10 +2,6 @@ import os
 import pytest
 from click.testing import CliRunner
 
-from populus.utils.compile import (
-    get_contracts_source_dir,
-)
-
 from populus.cli import main
 
 

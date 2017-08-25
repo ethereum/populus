@@ -27,7 +27,7 @@ CONTEXT_SETTINGS = dict(
     type=click.Path(exists=True),
 )
 @click.option(
-    '--global-config',
+    '--user-config',
     '-g',
     'user_config_path',
     help=(

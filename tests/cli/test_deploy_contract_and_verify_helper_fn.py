@@ -157,7 +157,6 @@ def test_deploying_contract_with_error_during_deploy_sanity_check(project, user_
         registrar = Registrar(web3, registrar_backends, base_dir=project.project_root_dir)
         provider = Provider(web3, registrar, provider_backends, project)
 
-    with chain:
         ThrowsInConstructor = provider.get_contract_factory('ThrowsInConstructor')
 
         @click.command()

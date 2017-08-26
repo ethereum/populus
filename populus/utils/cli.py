@@ -30,13 +30,19 @@ from .observers import (
     DirWatcher,
 )
 
+from populus.config.loading import (
+    load_user_config,
+)
 
-def select_chain(project):
+def select_chain(user_config=None):
     """
     Present the user with a prompt to select which of the project chains they
     want to use.
     """
-    chain_options = set(project.config['chains'].keys())
+    if user_config is None:
+        user_config = load_user_config()
+
+    chain_options = set(user_config['chains'].keys())
 
     choose_chain_msg = "\n".join(itertools.chain((
         "Available Chains",

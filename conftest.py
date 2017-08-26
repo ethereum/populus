@@ -139,9 +139,9 @@ def web3(chain):
 
 
 @pytest.fixture()
-def write_project_file(project_dir):
+def write_project_file(project):
     def _write_project_file(filename, content=''):
-        full_path = os.path.join(project_dir, filename)
+        full_path = os.path.join(project.project_root_dir, filename)
         file_dir = os.path.dirname(full_path)
         ensure_path_exists(file_dir)
 

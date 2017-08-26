@@ -66,7 +66,7 @@ def user_config(user_config_path):
 
 
 @pytest.fixture()
-def project(tmpdir, user_config_path, monkeypatch):
+def project(tmpdir, user_config_path, monkeypatch, request):
     project_dir = str(tmpdir.mkdir("project-dir"))
     project = api.project.init_project(
         project_dir,
@@ -83,6 +83,38 @@ def project(tmpdir, user_config_path, monkeypatch):
 
     monkeypatch.chdir(project_dir)
     monkeypatch.syspath_prepend(project_dir)
+
+    #
+    # load fixtures
+    #
+
+    contracts_to_load_from_fn = getattr(request.function, '_populus_contract_fixtures', [])
+    contracts_to_load_from_module = getattr(request.module, '_populus_contract_fixtures', [])
+
+    contracts_to_load = itertools.chain(
+        contracts_to_load_from_fn,
+        contracts_to_load_from_module,
+    )
+
+    test_contracts_to_load_from_fn = getattr(request.function, '_populus_test_contract_fixtures', [])
+    test_contracts_to_load_from_module = getattr(request.module, '_populus_test_contract_fixtures', [])
+
+    test_contracts_to_load = itertools.chain(
+        test_contracts_to_load_from_fn,
+        test_contracts_to_load_from_module,
+    )
+
+    _loaded_contract_fixtures(
+        project.project_root_dir,
+        project.contracts_source_dir,
+        contracts_to_load
+    )
+
+    _loaded_contract_fixtures(
+        project.project_root_dir,
+        project.tests_dir,
+        test_contracts_to_load
+    )
 
     return project
 
@@ -138,19 +170,11 @@ def wait_for_unlock():
     return _wait_for_unlock
 
 
-@pytest.fixture()
-def _loaded_contract_fixtures(project, request):
-    contracts_to_load_from_fn = getattr(request.function, '_populus_contract_fixtures', [])
-    contracts_to_load_from_module = getattr(request.module, '_populus_contract_fixtures', [])
 
-    contracts_to_load = itertools.chain(
-        contracts_to_load_from_fn,
-        contracts_to_load_from_module,
-    )
-    contracts_source_dir = project.contracts_source_dir
+
+def _loaded_contract_fixtures(project_root_dir, project_contracts_dir, contracts_to_load):
 
     for item, dst_path in contracts_to_load:
-        ensure_path_exists(contracts_source_dir)
 
         fixture_path = os.path.join(
             POPULUS_SOURCE_ROOT,
@@ -167,52 +191,9 @@ def _loaded_contract_fixtures(project, request):
             raise ValueError("Unable to load contract '{0}'".format(item))
 
         if dst_path is None:
-            dst_path = os.path.join(contracts_source_dir, os.path.basename(item))
+            dst_path = os.path.join(project_contracts_dir, os.path.basename(item))
         elif not os.path.isabs(dst_path):
-            dst_path = os.path.join(project_dir, dst_path)
-
-        ensure_path_exists(os.path.dirname(dst_path))
-
-        if os.path.exists(dst_path):
-            raise ValueError("File already present at '{0}'".format(dst_path))
-
-        shutil.copy(src_path, dst_path)
-
-
-@pytest.fixture()
-def _loaded_test_contract_fixtures(project, request):
-    test_contracts_to_load_from_fn = getattr(request.function, '_populus_test_contract_fixtures', [])
-    test_contracts_to_load_from_module = getattr(request.module, '_populus_test_contract_fixtures', [])
-
-    test_contracts_to_load = itertools.chain(
-        test_contracts_to_load_from_fn,
-        test_contracts_to_load_from_module,
-    )
-
-    tests_dir = project.tests_dir
-
-    for item, dst_path in test_contracts_to_load:
-        ensure_path_exists(tests_dir)
-
-        fixture_path = os.path.join(
-            POPULUS_SOURCE_ROOT,
-            'tests',
-            'fixtures',
-            item,
-        )
-        if os.path.exists(item):
-            src_path = item
-        elif os.path.exists(fixture_path):
-            src_path = fixture_path
-        else:
-            raise ValueError("Unable to load test contract '{0}'".format(item))
-
-        if dst_path is None:
-            dst_path = os.path.join(tests_dir, os.path.basename(item))
-        elif not os.path.isabs(dst_path):
-            dst_path = os.path.join(project_dir, dst_path)
-
-        ensure_path_exists(os.path.dirname(dst_path))
+            dst_path = os.path.join(project_root_dir, dst_path)
 
         if os.path.exists(dst_path):
             raise ValueError("File already present at '{0}'".format(dst_path))
@@ -245,16 +226,10 @@ def _updated_project_config(project, request):
 def pytest_fixture_setup(fixturedef, request):
     """
     Injects the following fixtures ahead of the `project` fixture.
-
-    - project
-    - _loaded_contract_fixtures
-    - _loaded_test_contract_fixtures
     """
 
     if fixturedef.argname == "_project_loaded":
         request.getfixturevalue('user_config')
-        request.getfixturevalue('_loaded_contract_fixtures')
-        request.getfixturevalue('_loaded_test_contract_fixtures')
         request.getfixturevalue('_updated_project_config')
 
 

@@ -33,8 +33,12 @@ class Registrar(object):
         self.web3 = web3
         self.base_dir = base_dir
         self.registrar_backends = registrar_backends
-        for backend in self.registrar_backends.values():
-            backend.registrar = self
+        for backend_name, backend in self.registrar_backends.items():
+            self.add_backend(backend_name, backend)
+
+    def add_backend(self, backend_name, backend):
+        backend.registrar = self
+        self.registrar_backends[backend_name] = backend
 
     def set_contract_address(self, contract_name, contract_address):
         """

@@ -16,7 +16,6 @@ from populus.compilation.compile import (
 )
 
 from populus.config import (
-    ChainConfig,
     CompilerConfig,
     Config,
     load_config as _load_config,

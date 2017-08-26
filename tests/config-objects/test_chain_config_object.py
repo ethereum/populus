@@ -32,12 +32,12 @@ def test_chain_class_property():
     assert chain_config.chain_class is ExternalChain
 
 
-def test_getting_chain_instance(project):
+def test_getting_chain_instance(user_config, project):
     chain_config = ChainConfig({
         'chain': {'class': 'populus.chain.external.ExternalChain'},
         'web3': {'provider': {'class': 'web3.providers.ipc.IPCProvider'}},
     })
-    chain = chain_config.get_chain(project, 'test-chain')
+    chain = chain_config.chain_class('test-chain', chain_config, user_config, chain_dir=project.project_root_dir)
     assert isinstance(chain, ExternalChain)
 
 

@@ -1,5 +1,9 @@
 import pytest
 
+from semantic_version import (
+    Spec,
+)
+
 from populus.compilation.backends import (
     SolcCombinedJSONBackend,
     SolcStandardJSONBackend,
@@ -8,6 +12,9 @@ from populus.compilation.backends.solc_auto import (
     get_compiler_backend_class_for_version,
 )
 
+from solc import (
+    get_solc_version,
+)
 
 @pytest.mark.parametrize(
     'solc_version,backend_class',
@@ -25,11 +32,16 @@ from populus.compilation.backends.solc_auto import (
         ('0.4.11', SolcStandardJSONBackend),
         ('0.4.12', SolcStandardJSONBackend),
         ('0.4.13', SolcStandardJSONBackend),
+
     )
 )
-def test_get_compiler_backend_class_for_version(solc_version, backend_class):
-    actual_backend_class = get_compiler_backend_class_for_version(solc_version)
-    assert actual_backend_class == backend_class
+def test_get_compiler_backend_class_for_version(solc_version, backend_class, user_config):
+    if backend_class is SolcCombinedJSONBackend and get_solc_version() not in Spec('<=0.4.8'):
+        with pytest.raises(OSError):
+            actual_backend = get_compiler_backend_class_for_version(solc_version, user_config)
+    else:
+        actual_backend = get_compiler_backend_class_for_version(solc_version, user_config)
+        assert actual_backend.__class__ == backend_class
 
 
 @pytest.mark.parametrize(
@@ -39,6 +51,6 @@ def test_get_compiler_backend_class_for_version(solc_version, backend_class):
         '0.4.10',
     )
 )
-def test_fails_for_unsupported_solc_versions(solc_version):
+def test_fails_for_unsupported_solc_versions(solc_version, user_config):
     with pytest.raises(OSError):
-        get_compiler_backend_class_for_version(solc_version)
+        get_compiler_backend_class_for_version(solc_version, user_config)

@@ -31,7 +31,7 @@ GREETER_SOURCE_PATH = os.path.join(ASSETS_DIR, 'Greeter.sol')
 def test_compiling_project_contracts(project):
     source_paths, compiled_contracts = project.compile()
 
-    assert 'contracts/Math.sol' in source_paths
+    os.path.join(project.project_root_dir, 'contracts/Math.sol') in source_paths
 
     assert 'Math' in compiled_contracts
     contract_data = compiled_contracts['Math']
@@ -94,7 +94,6 @@ def test_compiling_with_abstract_contract_inhereted(project):
     not solc_supports_standard_json_interface(),
     reason="Solc compiler does not support standard json compilation",
 )
-@load_contract_fixture(GREETER_SOURCE_PATH)
 def test_compiling_example_greeter_contract(project):
     _, compiled_contracts = project.compile()
 

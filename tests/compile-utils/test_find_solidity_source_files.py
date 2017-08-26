@@ -1,3 +1,4 @@
+import itertools
 import os
 
 from populus import Project
@@ -10,9 +11,7 @@ from populus.utils.filesystem import (
 )
 
 
-def test_gets_correct_files_default_dir(project_dir, write_project_file):
-    project = Project()
-    file_names = find_solidity_source_files(project.contracts_source_dir)
+def test_gets_correct_files_default_dir(project, write_project_file):
 
     should_match = {
         'contracts/SolidityContract.sol',
@@ -31,7 +30,16 @@ def test_gets_correct_files_default_dir(project_dir, write_project_file):
     for filename in should_not_match:
         write_project_file(filename)
 
+    file_names = find_solidity_source_files(project.contracts_source_dir)
+
+
     for file_name in file_names:
-        assert os.path.exists(file_name)
-        assert any(is_same_path(file_name, path) for path in should_match)
-        assert not any(is_same_path(file_name, path) for path in should_not_match)
+        file_path = os.path.join(project.project_root_dir,file_name)
+        should_path = (os.path.join(project.project_root_dir,path)
+                       for path in
+                       itertools.chain(should_match,['contracts/Greeter.sol'])
+                       )
+        should_not_path = (os.path.join(project.project_root_dir,path) for path in should_not_match)
+        assert os.path.exists(file_path)
+        assert any(is_same_path(file_path, path) for path in should_path)
+        assert not any(is_same_path(file_path, path) for path in should_not_path)

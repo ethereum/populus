@@ -9,7 +9,9 @@ import pytest
 import shutil
 import itertools
 
-from populus import api
+from populus.api.project import (
+    init_project,
+)
 from populus import Project
 
 from populus.utils.geth import (
@@ -68,7 +70,7 @@ def user_config(user_config_path):
 @pytest.fixture()
 def project(tmpdir, user_config_path, monkeypatch, request):
     project_dir = str(tmpdir.mkdir("project-dir"))
-    project = api.project.init_project(
+    project = init_project(
         project_dir,
         user_config_path,
     )

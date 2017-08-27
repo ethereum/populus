@@ -22,11 +22,33 @@ from populus.api.config import (
     load_user_config,
 )
 
+from populus.contracts.registrar import (
+    Registrar,
+)
+
+from populus.contracts.provider import (
+    Provider,
+)
+
+from populus.contracts.helpers import (
+    get_provider_backends,
+    get_registrar_backends,
+)
+
+from populus.chain.helpers import (
+    get_chain,
+)
+
 CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
 CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
 
 project_root_dir = None
 user_config_path = None
+chain_name = None
+
+#
+# Hooks
+#
 
 
 def get_populus_option(cmdline_option, ini_option, environ_var, early_config, args):
@@ -44,11 +66,14 @@ def get_populus_option(cmdline_option, ini_option, environ_var, early_config, ar
 
 def pytest_addoption(parser):
 
-    parser.addini("populus_project", "populus project root directory")
     parser.addoption("--populus-project", help="populus project root directory")
+    parser.addini("populus_project", "populus project root directory")
 
-    parser.addini("populus_user_config", "populus user config file path")
     parser.addoption("--populus-user-config", help="populus user config file path")
+    parser.addini("populus_user_config", "populus user config file path")
+
+    parser.addoption("--populus-chain-name", help="the chain to run the tests with")
+    parser.addini("populus_chain_name", "the chain to run the tests with")
 
 
 def pytest_load_initial_conftests(early_config, parser, args):
@@ -73,7 +98,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
     global user_config_path
     user_config_path = get_populus_option(
-        cmdline_option="--populus-user-config",
+        cmdline_option="--populus-chain-name",
         ini_option="populus_user_config",
         environ_var="POPULUS_PYTEST_USER_CONFIG",
         early_config=early_config,
@@ -82,6 +107,21 @@ def pytest_load_initial_conftests(early_config, parser, args):
     if not user_config_path:
         user_config_path = get_user_default_json_config_file_path()
 
+    global chain_name
+    chain_name = get_populus_option(
+        cmdline_option="--populus-chain-name",
+        ini_option="populus_chain_name",
+        environ_var="POPULUS_PYTEST_CHAIN_NAME",
+        early_config=early_config,
+        args=args)
+
+    if not chain_name:
+        chain_name = 'tester'
+
+
+#
+# Fixtures
+#
 
 @pytest.fixture(scope="session")
 def user_config(request):
@@ -109,20 +149,11 @@ def project(request, user_config):
     return project
 
 
-@pytest.yield_fixture()
-def chain(project):
-    with project.get_chain('tester') as chain:
+@pytest.fixture()
+def chain(project, user_config):
+    global chain_name
+    with get_chain(chain_name, user_config, chain_dir=project.project_root_dir) as chain:
         yield chain
-
-
-@pytest.fixture()
-def registrar(chain):
-    return chain.registrar
-
-
-@pytest.fixture()
-def provider(chain):
-    return chain.provider
 
 
 @pytest.fixture()
@@ -130,11 +161,25 @@ def web3(chain):
     return chain.web3
 
 
+@pytest.fixture
+def registrar(chain, project, web3):
+    registrar_backends = get_registrar_backends(chain.contract_backends)
+    registrar = Registrar(web3, registrar_backends, base_dir=project.project_root_dir)
+    return registrar
+
+
+@pytest.fixture
+def provider(chain, project, registrar):
+    provider_backends = get_provider_backends(chain.contract_backends)
+    provider = Provider(chain.web3, registrar, provider_backends, project)
+    return provider
+
+
 @pytest.fixture()
-def base_contract_factories(chain):
+def base_contract_factories(provider):
     return package_contracts({
-        contract_name: chain.provider.get_base_contract_factory(contract_name)
-        for contract_name in chain.provider.get_all_contract_names()
+        contract_name: provider.get_base_contract_factory(contract_name)
+        for contract_name in provider.get_all_contract_names()
     })
 
 

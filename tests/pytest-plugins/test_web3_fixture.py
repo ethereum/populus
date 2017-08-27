@@ -1,4 +1,4 @@
-def test_web3_fixture(request, project_dir):
+def test_web3_fixture(request):
     chain = request.getfuncargvalue('chain')
     web3 = request.getfuncargvalue('web3')
 

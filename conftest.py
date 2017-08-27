@@ -13,7 +13,23 @@ from populus.api.project import (
     init_project,
 )
 from populus import Project
+from populus.config import Config
 
+from populus.contracts.registrar import (
+    Registrar,
+)
+
+from populus.contracts.provider import (
+    Provider,
+)
+
+from populus.contracts.helpers import (
+    get_provider_backends,
+)
+
+from populus.contracts.backends.filesystem import (
+    JSONFileBackend,
+)
 from populus.utils.geth import (
     get_base_blockchain_storage_dir,
 )
@@ -138,6 +154,24 @@ def web3(chain):
     return chain.web3
 
 
+@pytest.fixture
+def registrar(project, web3):
+    FILE_NAME = './registrar.json'
+    registrar = Registrar(web3, {}, base_dir=project.project_root_dir)
+    backend = JSONFileBackend(
+        Config({'file_path': FILE_NAME})
+    )
+    registrar.add_backend('JSONFile', backend)
+    return registrar
+
+
+@pytest.fixture
+def provider(chain, project, registrar):
+    provider_backends = get_provider_backends(chain.contract_backends)
+    provider = Provider(chain.web3, registrar, provider_backends, project)
+    return provider
+
+
 @pytest.fixture()
 def write_project_file(project):
     def _write_project_file(filename, content=''):
@@ -236,8 +270,8 @@ def pytest_fixture_setup(fixturedef, request):
 
 
 @pytest.fixture()
-def math(chain):
-    Math = chain.provider.get_contract_factory('Math')
+def math(chain, provider):
+    Math = provider.get_contract_factory('Math')
 
     math_address = chain.wait.for_contract_address(Math.deploy())
 
@@ -245,8 +279,8 @@ def math(chain):
 
 
 @pytest.fixture()
-def library_13(chain):
-    Library13 = chain.provider.get_contract_factory('Library13')
+def library_13(chain, provider):
+    Library13 = provider.get_contract_factory('Library13')
 
     library_13_address = chain.wait.for_contract_address(Library13.deploy())
 
@@ -254,8 +288,8 @@ def library_13(chain):
 
 
 @pytest.fixture()
-def multiply_13(chain, library_13):
-    Multiply13 = chain.project.compiled_contract_data['Multiply13']
+def multiply_13(chain, project, library_13):
+    Multiply13 = project.compiled_contract_data['Multiply13']
 
     bytecode = link_bytecode_by_name(
         Multiply13['bytecode'],

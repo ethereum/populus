@@ -25,7 +25,7 @@ class TestContractsBackend(BaseProjectContractBackend):
         testing_contract_data = {
             contract_name: contract_data
             for contract_name, contract_data
-            in self.provider.project.compiled_contract_data.items()
-            if is_test_contract(self.provider.project.tests_dir, contract_data)
+            in self.provider().project.compiled_contract_data.items()
+            if is_test_contract(self.provider().project.tests_dir, contract_data)
         }
         return testing_contract_data

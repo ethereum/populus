@@ -1,23 +1,19 @@
 import pytest
 
 
-def test_contract_factory_availability_with_no_dependencies(chain):
-    provider = chain.provider
+def test_contract_factory_availability_with_no_dependencies(chain, project, provider):
 
     is_available = provider.are_contract_dependencies_available('Math')
     assert is_available is True
 
 
-def test_contract_factory_availability_with_missing_dependency(chain):
-    provider = chain.provider
+def test_contract_factory_availability_with_missing_dependency(chain, project, provider):
 
     is_available = provider.are_contract_dependencies_available('Multiply13')
     assert is_available is False
 
 
-def test_contract_factory_availability_with_bytecode_mismatch_on_dependency(chain):
-    provider = chain.provider
-    registrar = chain.registrar
+def test_contract_factory_availability_with_bytecode_mismatch_on_dependency(chain, project, registrar, provider):
 
     math, _ = provider.get_or_deploy_contract('Math')
 
@@ -27,9 +23,7 @@ def test_contract_factory_availability_with_bytecode_mismatch_on_dependency(chai
     assert is_available is False
 
 
-def test_contract_factory_availability_with_dependency(chain):
-    provider = chain.provider
-    registrar = chain.registrar
+def test_contract_factory_availability_with_dependency(chain, project, registrar, provider):
 
     assert not provider.are_contract_dependencies_available('Multiply13')
 

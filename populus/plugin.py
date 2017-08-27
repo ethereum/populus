@@ -98,7 +98,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
     global user_config_path
     user_config_path = get_populus_option(
-        cmdline_option="--populus-chain-name",
+        cmdline_option="--populus-user-config",
         ini_option="populus_user_config",
         environ_var="POPULUS_PYTEST_USER_CONFIG",
         early_config=early_config,

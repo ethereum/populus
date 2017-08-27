@@ -15,7 +15,7 @@ from populus.utils.geth import (
 
 
 def test_reset_chain_on_empty_project_dir(project):
-    data_dir = get_data_dir(project.project_dir, 'test-chain')
+    data_dir = get_data_dir(project.project_root_dir, 'test-chain')
     ensure_path_exists(data_dir)
 
     chaindata_dir = get_chaindata_dir(data_dir)
@@ -40,7 +40,7 @@ def test_reset_chain_on_empty_project_dir(project):
 
 
 def test_reset_chain(project, write_project_file):
-    data_dir = get_data_dir(project.project_dir, 'test-chain')
+    data_dir = get_data_dir(project.project_root_dir, 'test-chain')
     ensure_path_exists(data_dir)
 
     chaindata_dir = get_chaindata_dir(data_dir)

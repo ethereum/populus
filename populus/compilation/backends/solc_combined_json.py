@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-
 import pprint
 
 from toolz.dicttoolz import (
@@ -29,7 +28,7 @@ from solc.exceptions import (
     ContractsNotFound,
 )
 
-from populus.utils.compile import (
+from populus.compilation.helpers import (
     load_json_if_string,
     normalize_contract_metadata,
 )

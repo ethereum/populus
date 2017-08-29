@@ -26,7 +26,7 @@ from solc.exceptions import (
     ContractsNotFound,
 )
 
-from populus.utils.compile import (
+from populus.compilation.helpers import (
     load_json_if_string,
     normalize_contract_metadata,
 )

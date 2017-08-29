@@ -8,12 +8,6 @@ from eth_utils import (
     to_tuple,
 )
 
-from populus.config.defaults import (
-    LATEST_VERSION,
-)
-from populus.config.upgrade import (
-    upgrade_config,
-)
 
 from .main import main
 
@@ -113,34 +107,3 @@ def config_delete(ctx, keys):
         except KeyError:
             logger.error("KeyError: {0}".format(key), err=True)
     project.write_config()
-
-
-@config_cmd.command('upgrade')
-@click.pass_context
-@click.option(
-    '-t',
-    '--to-version',
-    'to_version',
-    default=LATEST_VERSION,
-)
-def config_upgrade(ctx, to_version):
-    """
-    Upgrades the current populus config file to the specifed version.
-    """
-    logger = logging.getLogger('populus.cli.config.upgrade')
-    project = ctx.obj['PROJECT']
-
-    from_version = project.config['version']
-    if from_version == LATEST_VERSION:
-        logger.info("Already at latest version: v{0}".format(from_version))
-        return
-
-    upgraded_config = upgrade_config(project.config, to_version=to_version)
-    logger.info(
-        "Upgraded config from v{0} -> v{1}".format(from_version, to_version)
-    )
-    project.config = upgraded_config
-    config_file_path = project.write_config()
-    logger.info(
-        "Wrote updated config to: `{0}`".format(config_file_path)
-    )

@@ -29,9 +29,16 @@ class Registrar(object):
     """
     registrar_backends = None
 
-    def __init__(self, chain, registrar_backends):
-        self.chain = chain
+    def __init__(self, web3, registrar_backends, base_dir):
+        self.web3 = web3
+        self.base_dir = base_dir
         self.registrar_backends = registrar_backends
+        for backend_name, backend in self.registrar_backends.items():
+            self.add_backend(backend_name, backend)
+
+    def add_backend(self, backend_name, backend):
+        backend.registrar = self
+        self.registrar_backends[backend_name] = backend
 
     def set_contract_address(self, contract_name, contract_address):
         """
@@ -57,19 +64,19 @@ class Registrar(object):
             address
             for address
             in found_addresses
-            if self.chain.web3.eth.getCode(address) not in EMPTY_BYTECODE_VALUES
+            if self.web3.eth.getCode(address) not in EMPTY_BYTECODE_VALUES
         ))
         empty_addresses = tuple(set(
             address
             for address
             in found_addresses
-            if self.chain.web3.eth.getCode(address) in EMPTY_BYTECODE_VALUES
+            if self.web3.eth.getCode(address) in EMPTY_BYTECODE_VALUES
         ))
 
         if len(addresses_with_code) > 1:
             sorted_addresses = tuple(sorted(
                 addresses_with_code,
-                key=functools.partial(address_sort_fn, self.chain.web3),
+                key=functools.partial(address_sort_fn, self.web3),
                 reverse=True,
             ))
         else:

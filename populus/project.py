@@ -1,86 +1,102 @@
 import os
 import itertools
+import sys
 
-from populus.compilation import (
-    compile_project_contracts,
+from populus.utils.filesystem import (
+    is_same_path,
 )
+
+
+from populus.compilation.helpers import (
+    get_dir_source_paths,
+)
+
+from populus.compilation.compile import (
+    compile_dirs,
+)
+
 from populus.config import (
-    ChainConfig,
     CompilerConfig,
     Config,
-    get_default_config_path,
     load_config as _load_config,
-    load_config_schema,
-    write_config as _write_config,
+    load_project_config_schema,
 )
-from populus.utils.chains import (
-    get_base_blockchain_storage_dir,
+
+from populus.config.helpers import (
+    write_project_config as _write_project_config
 )
-from populus.utils.compile import (
-    get_build_asset_dir,
-    get_compiled_contracts_asset_path,
-    get_contracts_source_dir,
-    get_project_source_paths,
-    get_test_source_paths,
-)
+
 from populus.utils.filesystem import (
     relpath,
     get_latest_mtime,
 )
-from populus.utils.config import (
-    check_if_json_config_file_exists,
-    get_default_project_config_file_path,
-    get_json_config_file_path,
+from populus.config.helpers import (
+    check_if_project_json_file_exists,
+    get_project_json_config_file_path,
 )
-from populus.utils.testing import (
-    get_tests_dir,
+
+
+from populus.defaults import (
+    BUILD_ASSET_DIR,
+    COMPILED_CONTRACTS_ASSET_FILENAME,
+    DEFAULT_CONTRACTS_DIR,
+    DEFAULT_TESTS_DIR,
+    PROJECT_JSON_CONFIG_FILENAME,
+    DEPLOY_JSON_CONFIG_FILENAME,
+
 )
 
 
 class Project(object):
-    def __init__(self, config_file_path=None):
-        self.config_file_path = config_file_path
-        self.load_config()
 
     #
     # Config
     #
-    config_file_path = None
+    project_root_dir = None
 
     _project_config = None
     _project_config_schema = None
 
-    def write_config(self):
-        if self.config_file_path is None:
-            config_file_path = get_default_project_config_file_path(self.project_dir)
-        else:
-            config_file_path = self.config_file_path
+    def __init__(self, project_root_dir, user_config):
+        self.project_root_dir = os.path.abspath(project_root_dir)
+        self.user_config = user_config
 
-        self.config_file_path = _write_config(
-            self.project_dir,
+        if not self.has_json_config():
+            raise FileNotFoundError(
+                "Did not find config file {file_name} in {dir_name}".format(
+                    file_name=PROJECT_JSON_CONFIG_FILENAME, dir_name=self.project_root_dir)
+            )
+        self.json_config_file_path = os.path.join(
+            self.project_root_dir,
+            PROJECT_JSON_CONFIG_FILENAME
+        )
+        self.load_config()
+
+        if not any(is_same_path(p, project_root_dir) for p in sys.path):
+            # ensure that the project directory is in the sys.path
+            sys.path.insert(0, project_root_dir)
+
+    def has_json_config(self):
+        return check_if_project_json_file_exists(self.project_root_dir)
+
+    @property
+    def deploy_config_path(self):
+        return os.path.join(self.project_root_dir, DEPLOY_JSON_CONFIG_FILENAME)
+
+    def write_config(self):
+
+        config_file_path = _write_project_config(
             self.config,
-            write_path=config_file_path,
+            self.project_root_dir,
         )
 
-        return self.config_file_path
+        return config_file_path
 
     def load_config(self):
         self._config_cache = None
 
-        if self.config_file_path is None:
-            has_json_config = check_if_json_config_file_exists()
-
-            if has_json_config:
-                path_to_load = get_json_config_file_path()
-            else:
-                path_to_load = get_default_config_path()
-        else:
-            path_to_load = self.config_file_path
-
-        self._project_config = _load_config(path_to_load)
-
-        config_version = self._project_config['version']
-        self._project_config_schema = load_config_schema(config_version)
+        self._project_config = _load_config(self.json_config_file_path)
+        self._project_config_schema = load_project_config_schema()
 
     def reload_config(self):
         self.load_config()
@@ -102,8 +118,7 @@ class Project(object):
             self._config_cache = value
         else:
             self._project_config = value
-            config_version = self._project_config['version']
-            self._project_config_schema = load_config_schema(config_version)
+            self._project_config_schema = load_project_config_schema()
             self._config_cache = Config(
                 config=self._project_config,
                 schema=self._project_config_schema,
@@ -113,43 +128,43 @@ class Project(object):
     # Project
     #
     @property
-    @relpath
-    def project_dir(self):
-        return self.config.get('populus.project_dir', os.getcwd())
-
-    @property
-    @relpath
     def tests_dir(self):
-        return get_tests_dir(self.project_dir)
+        dir_path = self.config.get(
+            'locations.tests_dir',
+            DEFAULT_TESTS_DIR
+        )
+
+        return os.path.join(self.project_root_dir, dir_path)
 
     #
     # Contracts
     #
     @property
-    @relpath
     def compiled_contracts_asset_path(self):
-        return get_compiled_contracts_asset_path(self.build_asset_dir)
-
-    @property
-    @relpath
-    def contracts_source_dir(self):
-        return self.config.get(
-            'compilation.contracts_source_dir',
-            get_contracts_source_dir(self.project_dir),
+        return os.path.join(
+            self.build_asset_dir,
+            COMPILED_CONTRACTS_ASSET_FILENAME,
         )
 
     @property
-    @relpath
+    def contracts_source_dir(self):
+        dir_path = self.config.get(
+            'locations.contracts_source_dir',
+            DEFAULT_CONTRACTS_DIR)
+
+        return os.path.join(self.project_root_dir, dir_path)
+
+    @property
     def build_asset_dir(self):
-        return get_build_asset_dir(self.project_dir)
+        return os.path.join(self.project_root_dir, BUILD_ASSET_DIR)
 
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None
 
     def get_all_source_file_paths(self):
         return tuple(itertools.chain(
-            get_project_source_paths(self.contracts_source_dir),
-            get_test_source_paths(self.tests_dir),
+            get_dir_source_paths(self.contracts_source_dir),
+            get_dir_source_paths(self.tests_dir),
         ))
 
     def is_compiled_contract_cache_stale(self):
@@ -174,10 +189,20 @@ class Project(object):
         self._cached_compiled_contracts_mtime = contracts_mtime
         self._cached_compiled_contracts = compiled_contracts
 
+    def compile(self):
+
+        import_remmapings = self.user_config.import_remmapings(self)
+        source_file_paths, compiled_contracts = compile_dirs(
+            (self.contracts_source_dir, self.tests_dir),
+            self.user_config,
+            import_remmapings
+        )
+        return source_file_paths, compiled_contracts
+
     @property
     def compiled_contract_data(self):
         if self.is_compiled_contract_cache_stale():
-            source_file_paths, compiled_contracts = compile_project_contracts(self)
+            source_file_paths, compiled_contracts = self.compile()
             contracts_mtime = get_latest_mtime(source_file_paths)
             self.fill_contracts_cache(
                 compiled_contracts=compiled_contracts,
@@ -194,37 +219,3 @@ class Project(object):
             config_class=CompilerConfig,
         )
         return compilation_config.backend
-
-    #
-    # Local Blockchains
-    #
-    def get_chain_config(self, chain_name):
-        chain_config_key = 'chains.{chain_name}'.format(chain_name=chain_name)
-
-        if chain_config_key in self.config:
-            return self.config.get_config(chain_config_key, config_class=ChainConfig)
-        else:
-            raise KeyError(
-                "Unknown chain: {0!r} - Must be one of {1!r}".format(
-                    chain_name,
-                    sorted(self.config.get('chains', {}).keys()),
-                )
-            )
-
-    def get_chain(self, chain_name, chain_config=None):
-        """
-        Returns a context manager that runs a chain within the context of the
-        current populus project.
-
-        Alternatively you can specify any chain name that is present in the
-        `chains` configuration key.
-        """
-        if chain_config is None:
-            chain_config = self.get_chain_config(chain_name)
-        chain = chain_config.get_chain(self, chain_name)
-        return chain
-
-    @property
-    @relpath
-    def base_blockchain_storage_dir(self):
-        return get_base_blockchain_storage_dir(self.project_dir)

@@ -10,35 +10,61 @@ from eth_utils import (
     to_ordered_dict,
 )
 
-from .mappings import (
+from populus.utils.mappings import (
     get_nested_key,
     has_nested_key,
 )
-from .module_loading import (
+from populus.utils.module_loading import (
     import_string,
 )
 
 
-JSON_CONFIG_FILENAME = './populus.json'
+from populus.defaults import (
+    USER_JSON_CONFIG_FILENAME,
+    PROJECT_JSON_CONFIG_FILENAME,
+)
 
 
-def get_json_config_file_path(project_dir=None):
-    if project_dir is None:
-        project_dir = os.getcwd()
+def write_config(config, write_path):
+    with open(write_path, 'w') as config_file:
+        anyconfig.dump(
+            dict(config),
+            config_file,
+            sort_keys=True,
+            indent=2,
+            separators=(',', ': '),
+        )
 
-    json_config_file_path = os.path.join(project_dir, JSON_CONFIG_FILENAME)
+    return write_path
+
+
+def write_project_config(config, project_root_dir):
+    write_path = os.path.join(project_root_dir, PROJECT_JSON_CONFIG_FILENAME)
+    return write_config(config, write_path)
+
+
+def write_user_config(user_config, user_config_path):
+    if user_config_path is None:
+        user_config_path = get_user_default_json_config_file_path()
+    return write_config(user_config, user_config_path)
+
+
+def get_user_default_json_config_file_path():
+
+    json_config_file_path = os.path.join(os.path.expanduser("~"), USER_JSON_CONFIG_FILENAME)
     return json_config_file_path
 
 
-def check_if_json_config_file_exists(project_dir=None):
-    if project_dir is None:
-        project_dir = os.getcwd()
+def get_project_json_config_file_path(project_root_dir):
 
-    json_config_file_path = get_json_config_file_path(project_dir)
+    json_config_file_path = os.path.join(project_root_dir, PROJECT_JSON_CONFIG_FILENAME)
+    return json_config_file_path
+
+
+def check_if_project_json_file_exists(dir_path):
+
+    json_config_file_path = os.path.join(dir_path, PROJECT_JSON_CONFIG_FILENAME)
     return os.path.exists(json_config_file_path)
-
-
-get_default_project_config_file_path = get_json_config_file_path
 
 
 def get_empty_config():

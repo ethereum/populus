@@ -5,9 +5,6 @@ import logging
 
 import click
 
-from populus.compilation import (
-    compile_project_contracts,
-)
 from populus.config import (
     Config,
 )
@@ -19,7 +16,7 @@ from .compat import (
     Timeout,
     sleep,
 )
-from .compile import (
+from populus.compilation.helpers import (
     write_compiled_sources,
 )
 from .contracts import (
@@ -33,13 +30,19 @@ from .observers import (
     DirWatcher,
 )
 
+from populus.config.loading import (
+    load_user_config,
+)
 
-def select_chain(project):
+def select_chain(user_config=None):
     """
     Present the user with a prompt to select which of the project chains they
     want to use.
     """
-    chain_options = set(project.config['chains'].keys())
+    if user_config is None:
+        user_config = load_user_config()
+
+    chain_options = set(user_config['chains'].keys())
 
     choose_chain_msg = "\n".join(itertools.chain((
         "Available Chains",
@@ -101,7 +104,7 @@ def select_account(chain):
         )
 
 
-def configure_chain(project, chain_name):
+def configure_chain(project, chain_name): #BUG delete project
     """
     Interactive configuration of an existing or new chain.
 
@@ -175,7 +178,7 @@ def configure_chain(project, chain_name):
             chain_config['web3.providers.settings.ipc_path'] = ipc_path
         elif chain_name not in {"mainnet", "ropsten"}:
             chain_config['web3.providers.settings.ipc_path'] = get_geth_ipc_path(
-                get_local_chain_datadir(project.project_dir, chain_name),
+                get_local_chain_datadir(project.project_root_dir, chain_name),
             )
     elif chain_config['web3.provider.class'] == 'web3.providers.rpc.HTTPProvider':
         custom_rpc_host = (
@@ -254,6 +257,7 @@ def request_account_unlock(chain, account, timeout):
 
 
 def deploy_contract_and_verify(chain,
+                               provider,
                                contract_name,
                                ContractFactory=None,
                                deploy_transaction=None,
@@ -283,7 +287,7 @@ def deploy_contract_and_verify(chain,
     logger.info("Deploying {0}".format(contract_name))
 
     if ContractFactory is None:
-        ContractFactory = chain.provider.get_contract_factory(contract_name)
+        ContractFactory = provider.get_contract_factory(contract_name)
 
     deploy_txn_hash = ContractFactory.deploy(
         transaction=deploy_transaction,
@@ -337,8 +341,11 @@ def deploy_contract_and_verify(chain,
     return ContractFactory(address=contract_address)
 
 
-def watch_project_contracts(project, compiler_settings):
+def watch_project_contracts(project, compiler_settings=None):
+
     logger = logging.getLogger('populus.utils.cli.watch_project_contracts')
+    if compiler_settings is None:
+        compiler_settings = {}
 
     def callback(file_path, event_name):
         if event_name in {'modified', 'created'}:
@@ -346,7 +353,10 @@ def watch_project_contracts(project, compiler_settings):
             logger.info("> Change detected in: %s", file_path)
             logger.info("> Loading source files from: %s", project.contracts_source_dir)
 
-            contract_source_paths, compiled_sources = compile_project_contracts(project)
+            contract_source_paths, compiled_sources = compile_dirs(
+                (project.contracts_source_dir, project.tests_dir,),
+                import_remappings=project.config.get('compilation.import_remappings')
+            )
             write_compiled_sources(
                 project.compiled_contracts_asset_path,
                 compiled_sources,
@@ -354,7 +364,7 @@ def watch_project_contracts(project, compiler_settings):
 
             logger.info("> Watching ...")
 
-    watcher = DirWatcher(project.contracts_dir, callback)
+    watcher = DirWatcher(project.contracts_source_dir, callback)
     watcher.start()
 
     try:

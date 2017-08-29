@@ -4,9 +4,14 @@ import logging
 
 import click
 
-from populus.utils.chains import (
+from populus.api.deploy import (
+    deploy,
+)
+
+from populus.chain.helpers import (
     is_synced,
 )
+
 from populus.utils.cli import (
     select_chain,
     deploy_contract_and_verify,
@@ -55,119 +60,23 @@ def echo_post_deploy_message(web3, deployed_contracts):
         "mainnet' and 'morden' are pre-configured to connect to the public "
         "networks.  Other values should be predefined in your populus.ini"
     ),
+    default="tester",
 )
 @click.option(
     'wait_for_sync',
     '--wait-for-sync/--no-wait-for-sync',
-    default=True,
+    default=False,
     help=(
         "Determines whether the deploy command should wait until the chain is "
         "fully synced before deployment"
     ),
 )
-@click.argument('contracts_to_deploy', nargs=-1)
 @click.pass_context
-def deploy_cmd(ctx, chain_name, wait_for_sync, contracts_to_deploy):
+def deploy_cmd(ctx, chain_name, wait_for_sync):
     """
     Deploys the specified contracts to a chain.
     """
-    project = ctx.obj['PROJECT']
     logger = logging.getLogger('populus.cli.deploy')
-
-    # Determine which chain should be used.
-    if not chain_name:
-        chain_name = select_chain(project)
-
-    compiled_contracts = project.compiled_contract_data
-
-    if contracts_to_deploy:
-        # validate that we *know* about all of the contracts
-        unknown_contracts = set(contracts_to_deploy).difference(
-            compiled_contracts.keys()
-        )
-        if unknown_contracts:
-            unknown_contracts_message = (
-                "Some contracts specified for deploy were not found in the "
-                "compiled project contracts.  These contracts could not be found "
-                "'{0}'.  Searched these known contracts '{1}'".format(
-                    ', '.join(sorted(unknown_contracts)),
-                    ', '.join(compiled_contracts.keys()),
-                )
-            )
-            raise click.ClickException(unknown_contracts_message)
-    else:
-        # prompt the user to select the desired contracts they want to deploy.
-        # Potentially display the currently deployed status.
-        contracts_to_deploy = [select_project_contract(project)]
-
-    with project.get_chain(chain_name) as chain:
-        provider = chain.provider
-        registrar = chain.registrar
-
-        # wait for the chain to start syncing.
-        if wait_for_sync:
-            logger.info("Waiting for chain to start syncing....")
-            while chain.wait.for_syncing() and is_synced(chain.web3):
-                sleep(1)
-            logger.info("Chain sync complete")
-
-        # Get the deploy order.
-        deploy_order = get_deploy_order(
-            contracts_to_deploy,
-            compiled_contracts,
-        )
-
-        # Display Start Message Info.
-        starting_msg = (
-            "Beginning contract deployment.  Deploying {0} total contracts ({1} "
-            "Specified, {2} because of library dependencies)."
-            "\n\n" +
-            (" > ".join(deploy_order))
-        ).format(
-            len(deploy_order),
-            len(contracts_to_deploy),
-            len(deploy_order) - len(contracts_to_deploy),
-        )
-        logger.info(starting_msg)
-
-        for contract_name in deploy_order:
-            if not provider.are_contract_dependencies_available(contract_name):
-                raise ValueError(
-                    "Something is wrong with the deploy order.  Some "
-                    "dependencies for {0} are not "
-                    "available.".format(contract_name)
-                )
-
-            # Check if we already have an existing deployed version of that
-            # contract (via the registry).  For each of these, prompt the user
-            # if they would like to use the existing version.
-            if provider.is_contract_available(contract_name):
-                # TODO: this block should be a standalone cli util.
-                # TODO: this block needs to use the `Provider` API
-                existing_contract_instance = provider.get_contract(contract_name)
-                found_existing_contract_prompt = (
-                    "Found existing version of {name} in registrar. "
-                    "Would you like to use the previously deployed "
-                    "contract @ {address}?".format(
-                        name=contract_name,
-                        address=existing_contract_instance.address,
-                    )
-                )
-                if click.prompt(found_existing_contract_prompt, default=True):
-                    continue
-
-            # We don't have an existing version of this contract available so
-            # deploy it.
-            contract_instance = deploy_contract_and_verify(
-                chain,
-                contract_name=contract_name,
-            )
-
-            # Store the contract address for linking of subsequent deployed contracts.
-            registrar.set_contract_address(contract_name, contract_instance.address)
-
-        # TODO: fix this message.
-        success_msg = (
-            "Deployment Successful."
-        )
-        logger.info(success_msg)
+    project_root_dir = ctx.obj['project_root_dir']
+    user_config_path = ctx.obj['user_config_path']
+    deploy(project_root_dir, chain_name, user_config_path, wait_for_sync, logger)

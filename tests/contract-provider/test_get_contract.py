@@ -6,10 +6,9 @@ from populus.contracts.exceptions import (
 )
 
 
-def test_getting_contract_with_no_dependencies(chain,
+def test_getting_contract_with_no_dependencies(provider,
+                                               registrar,
                                                math):
-    provider = chain.provider
-    registrar = chain.registrar
 
     registrar.set_contract_address('Math', math.address)
 
@@ -17,8 +16,7 @@ def test_getting_contract_with_no_dependencies(chain,
     assert math.call().multiply7(3) == 21
 
 
-def test_latest_deployed_version_is_used(chain):
-    provider = chain.provider
+def test_latest_deployed_version_is_used(provider):
 
     math_1, deploy_txn_1 = provider.deploy_contract('Math')
     math_2, deploy_txn_2 = provider.deploy_contract('Math')
@@ -31,17 +29,16 @@ def test_latest_deployed_version_is_used(chain):
     assert math.address == math_2.address
 
 
-def test_getting_contract_when_not_registered(chain):
-    provider = chain.provider
+def test_getting_contract_when_not_registered(provider):
 
     with pytest.raises(NoKnownAddress):
         provider.get_contract('Math')
 
 
 def test_getting_contract_with_missing_dependency(chain,
+                                                  registrar,
+                                                  provider,
                                                   multiply_13):
-    provider = chain.provider
-    registrar = chain.registrar
 
     registrar.set_contract_address('Multiply13', multiply_13.address)
 
@@ -50,10 +47,10 @@ def test_getting_contract_with_missing_dependency(chain,
 
 
 def test_getting_contract_with_bytecode_mismatch(chain,
+                                                 registrar,
+                                                 provider,
                                                  library_13,
                                                  math):
-    provider = chain.provider
-    registrar = chain.registrar
 
     registrar.set_contract_address('Math', library_13.address)
 
@@ -62,10 +59,10 @@ def test_getting_contract_with_bytecode_mismatch(chain,
 
 
 def test_get_contract_with_bytecode_mismatch_on_dependency(chain,
+                                                           registrar,
+                                                           provider,
                                                            multiply_13,
                                                            math):
-    provider = chain.provider
-    registrar = chain.registrar
 
     registrar.set_contract_address('Multiply13', multiply_13.address)
     registrar.set_contract_address('Library13', math.address)
@@ -75,10 +72,10 @@ def test_get_contract_with_bytecode_mismatch_on_dependency(chain,
 
 
 def test_get_contract_with_dependency(chain,
+                                      registrar,
+                                      provider,
                                       multiply_13,
                                       library_13):
-    provider = chain.provider
-    registrar = chain.registrar
 
     registrar.set_contract_address('Multiply13', multiply_13.address)
     registrar.set_contract_address('Library13', library_13.address)

@@ -11,31 +11,30 @@ from populus.utils.testing import (
 )
 
 
-def test_get_contract_factory_with_no_dependencies(chain):
-    provider = chain.provider
+def test_get_contract_factory_with_no_dependencies(chain, project, provider):
 
-    MATH = chain.project.compiled_contract_data['Math']
+    MATH = project.compiled_contract_data['Math']
     Math = provider.get_contract_factory('Math')
 
     assert Math.bytecode == MATH['bytecode']
     assert Math.bytecode_runtime == MATH['bytecode_runtime']
 
 
-def test_get_contract_factory_with_missing_dependency(chain):
-    provider = chain.provider
+def test_get_contract_factory_with_missing_dependency(chain, provider):
 
     with pytest.raises(NoKnownAddress):
         Multiply13 = provider.get_contract_factory('Multiply13')
 
 
 def test_get_contract_factory_with_dependency(chain,
+                                              project,
+                                              registrar,
+                                              provider,
                                               library_13):
-    provider = chain.provider
-    registrar = chain.registrar
 
     registrar.set_contract_address('Library13', library_13.address)
 
-    MULTIPLY_13 = chain.project.compiled_contract_data['Multiply13']
+    MULTIPLY_13 = project.compiled_contract_data['Multiply13']
     Multiply13 = provider.get_contract_factory('Multiply13')
 
     expected_bytecode = link_bytecode_by_name(
@@ -54,9 +53,9 @@ def test_get_contract_factory_with_dependency(chain,
 
 
 def test_get_contract_factory_with_dependency_bytecode_mismatch(chain,
+                                                                registrar,
+                                                                provider,
                                                                 library_13):
-    provider = chain.provider
-    registrar = chain.registrar
 
     # this will not match the expected underlying bytecode for the Library13
     # contract so it will cause a failure.

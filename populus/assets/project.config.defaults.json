@@ -1,0 +1,9 @@
+{
+  "locations":{
+    "contracts_source_dir":"./contracts/",
+    "tests_dir":"./tests/"
+  },
+  "compilation":{
+    "import_remappings":[]
+  }
+}

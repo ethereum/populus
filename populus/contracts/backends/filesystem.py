@@ -14,13 +14,13 @@ from populus.contracts.exceptions import (
 from populus.utils.mappings import (
     set_nested_key,
 )
-from populus.utils.chains import (
+from populus.chain.helpers import (
     get_chain_definition,
     check_if_chain_matches_chain_uri,
 )
 
 from .base import (
-    BaseContractBackend,
+    BaseRegistrarContractBackend,
 )
 
 
@@ -38,9 +38,7 @@ def load_registrar_data(registrar_file):
     return registrar_data
 
 
-class JSONFileBackend(BaseContractBackend):
-    is_registrar = True
-    is_provider = False
+class JSONFileBackend(BaseRegistrarContractBackend):
 
     #
     # Registrar API
@@ -48,7 +46,7 @@ class JSONFileBackend(BaseContractBackend):
     def set_contract_address(self, instance_identifier, address):
         registrar_data = self.registrar_data
 
-        chain_definition = get_chain_definition(self.chain.web3)
+        chain_definition = get_chain_definition(self.registrar().web3)
         set_nested_key(
             registrar_data,
             'deployments.{0}.{1}'.format(chain_definition, instance_identifier),
@@ -68,7 +66,7 @@ class JSONFileBackend(BaseContractBackend):
     def get_contract_addresses(self, instance_identifier):
         registrar_data = self.registrar_data
         matching_chain_definitions = get_matching_chain_definitions(
-            self.chain.web3,
+            self.registrar().web3,
             registrar_data.get('deployments', {}),
         )
 
@@ -90,7 +88,8 @@ class JSONFileBackend(BaseContractBackend):
     #
     @property
     def registrar_path(self):
-        return self.config.get('file_path', './registrar.json')
+        registrar_path = self.config.get('file_path', './registrar.json')
+        return os.path.join(self.registrar().base_dir, registrar_path)
 
     @property
     def registrar_data(self):

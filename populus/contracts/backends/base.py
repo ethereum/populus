@@ -1,16 +1,16 @@
+import weakref
+
 from populus.contracts.exceptions import (
     UnknownContract,
 )
 from populus.contracts.contract import (
-    construct_contract_factory,
+    construct_project_contract_factory,
 )
 
 
 class BaseContractBackend(object):
-    chain = None
 
-    def __init__(self, chain, config):
-        self.chain = chain
+    def __init__(self, config):
         self.config = config
         self.setup_backend()
 
@@ -57,28 +57,6 @@ class BaseContractBackend(object):
         """
         raise NotImplementedError("Must be implemented by subclasses")
 
-    def get_base_contract_factory(self, contract_name):
-        """
-        Returns the base contract factory for the given contract identifier.
-        """
-        try:
-            contract_identifier = self.get_contract_identifier(contract_name)
-        except KeyError:
-            raise UnknownContract(
-                "No contract available for the name '{0}'".format(
-                    contract_name,
-                )
-            )
-
-        contract_data = self.get_contract_data(contract_identifier)
-
-        base_contract_factory = construct_contract_factory(
-            chain=self.chain,
-            contract_identifier=contract_identifier,
-            contract_data=contract_data,
-        )
-        return base_contract_factory
-
     def get_all_contract_data(self):
         """
         Returns all contract data available from this backend.
@@ -102,3 +80,57 @@ class BaseContractBackend(object):
         Returns a set of all of the contract names for this backend.
         """
         return set(self.get_all_contract_data().keys())
+
+
+class BaseRegistrarContractBackend(BaseContractBackend):
+
+    is_registrar = True
+    is_provider = False
+    _registrar = None
+
+    @property
+    def registrar(self):
+        return self._registrar
+
+    @registrar.setter
+    def registrar(self, registrar):
+        self._registrar = weakref.ref(registrar)
+
+
+class BaseProjectContractBackend(BaseContractBackend):
+
+    is_registrar = False
+    is_provider = True
+    _provider = None
+    project = None
+
+    @property
+    def provider(self):
+        return self._provider
+
+    @provider.setter
+    def provider(self, provider):
+        self._provider = weakref.ref(provider)
+
+    def get_base_contract_factory(self, contract_name):
+        """
+        Returns the base contract factory for the given contract identifier.
+        """
+        try:
+            contract_identifier = self.get_contract_identifier(contract_name)
+        except KeyError:
+            raise UnknownContract(
+                "No contract available for the name '{0}'".format(
+                    contract_name,
+                )
+            )
+
+        contract_data = self.get_contract_data(contract_identifier)
+
+        base_contract_factory = construct_project_contract_factory(
+            project=self.provider().project,
+            web3=self.provider().web3,
+            contract_identifier=contract_identifier,
+            contract_data=contract_data,
+        )
+        return base_contract_factory

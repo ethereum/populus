@@ -1,17 +1,9 @@
+import os
 import sys
 import warnings
 
 import click
 
-from populus.utils.filesystem import (
-    is_same_path,
-)
-from populus.project import (
-    Project,
-)
-from populus.config.versions import (
-    LATEST_VERSION,
-)
 
 from populus.utils.logging import (
     get_logger_with_click_handler,
@@ -26,50 +18,51 @@ CONTEXT_SETTINGS = dict(
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option(
-    '--config',
-    '-c',
-    'config_file_path',
+    '--project-root-dir',
+    '-p',
+    'project_root_dir',
     help=(
-        "Specify a populus configuration file to be used.  No other "
-        "configuration files will be loaded"
+        "Specify a populus project root directory"
     ),
-    type=click.Path(exists=True, dir_okay=False),
+    type=click.Path(exists=True),
+)
+@click.option(
+    '--user-config',
+    '-g',
+    'user_config_path',
+    help=(
+        "Specify a global populus configuration file, instead of the default"
+    ),
+    type=click.Path(exists=True),
+)
+@click.option(
+    '--warnings',
+    'show_warnings',
+    help=(
+        "Show all warnings"
+    ),
+    default=False,
+    is_flag=True
 )
 @click.pass_context
-def main(ctx, config_file_path):
+def main(ctx, project_root_dir, show_warnings, user_config_path):
     """
     Populus
     """
     logger = get_logger_with_click_handler('populus')
+    if project_root_dir is None:
+        project_root_dir = os.getcwd()
+    ctx.obj = {}
+    ctx.obj['project_root_dir'] = project_root_dir
 
-    project = Project(config_file_path)
+    if show_warnings:
+        warnings.filterwarnings("always")
 
-    config_version = project.config['version']
-    subcommand_bypasses_config_version = ctx.invoked_subcommand in {'config', 'init'}
-
-    if not subcommand_bypasses_config_version and config_version != LATEST_VERSION:
-        old_config_version_msg = (
-            "================ warning =================\n"
-            "Your populus config file is current at version {0}. "
-            "The latest version is {1}.  You can use the `populus config "
-            "upgrade` command to upgrade your config file to the latest version\n"
-            "================ warning =================\n\n".format(
-                config_version,
-                LATEST_VERSION,
+    if user_config_path is not None and not os.path.exists(user_config_path):
+        raise ConfigError(
+            "Global json config file does not exists at {config_path}".format(
+                config_path=user_config_path
             )
         )
-        warnings.warn(DeprecationWarning(old_config_version_msg))
-        logger.warning(old_config_version_msg)
-        proceed_msg = (
-            "Without and up-to-date configuration file Populus may not function "
-            "correctly.  Would you still like to proceed?"
-        )
-        if not click.confirm(proceed_msg):
-            ctx.exit(1)
 
-    if not any(is_same_path(p, project.project_dir) for p in sys.path):
-        # ensure that the project directory is in the sys.path
-        sys.path.insert(0, project.project_dir)
-
-    ctx.obj = {}
-    ctx.obj['PROJECT'] = project
+    ctx.obj['user_config_path'] = user_config_path

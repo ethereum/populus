@@ -19,15 +19,13 @@ from populus.utils.cli import (
         ('C', 'C'),
     )
 )
-def test_select_project_contract_helper(project_dir,
+def test_select_project_contract_helper(project,
                                         write_project_file,
                                         input,
                                         expected_name):
     write_project_file('contracts/ContractA.sol', 'contract A { function A() {}}')
     write_project_file('contracts/ContractB.sol', 'contract B { function B() {}}')
     write_project_file('contracts/ContractC.sol', 'contract C { function C() {}}')
-
-    project = Project()
 
     assert 'A' in project.compiled_contract_data
     assert 'B' in project.compiled_contract_data
@@ -50,18 +48,16 @@ def test_select_project_contract_helper(project_dir,
     ('input'),
     (3, 'D'),
 )
-def test_select_project_contract_helper(project_dir,
+def test_select_project_contract_helper(project,
                                         write_project_file,
                                         input):
     write_project_file('contracts/ContractA.sol', 'contract A { function A() {}}')
     write_project_file('contracts/ContractB.sol', 'contract B { function B() {}}')
-    write_project_file('contracts/ContractC.sol', 'contract C { function C() {}}')
 
-    project = Project()
-
+    assert 'Greeter' in project.compiled_contract_data
     assert 'A' in project.compiled_contract_data
     assert 'B' in project.compiled_contract_data
-    assert 'C' in project.compiled_contract_data
+
 
     @click.command()
     def wrapper():

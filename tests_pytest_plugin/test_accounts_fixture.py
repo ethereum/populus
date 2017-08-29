@@ -1,4 +1,4 @@
-def test_web3_fixture(request, project_dir):
+def test_web3_fixture(request):
     web3 = request.getfuncargvalue('web3')
     accounts = request.getfuncargvalue('accounts')
 

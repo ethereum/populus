@@ -5,7 +5,6 @@ import anyconfig
 from eth_utils import (
     to_tuple,
 )
-
 from populus.utils.empty import (
     empty,
 )
@@ -16,11 +15,10 @@ from populus.utils.mappings import (
     pop_nested_key,
     flatten_mapping,
 )
-from populus.utils.config import (
+from .helpers import (
     get_empty_config,
     resolve_config,
 )
-
 from .validation import (
     validate_config,
 )
@@ -45,7 +43,7 @@ class Config(object):
             self.validate()
 
     def validate(self):
-        validate_config(self._wrapped)
+        validate_config(self._wrapped, self.schema)
 
     def get_master_config(self):
         if self.parent is None:

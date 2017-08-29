@@ -4,7 +4,7 @@ from populus.utils.module_loading import (
 from populus.utils.types import (
     is_string,
 )
-from populus.utils.config import (
+from .helpers import (
     ClassImportPath,
 )
 
@@ -34,9 +34,6 @@ UNSUPPORTED_CHAIN_IDENTIFIER_MSG = (
 class ChainConfig(Config):
     chain_class = ClassImportPath('chain.class')
 
-    def get_chain(self, project, chain_name):
-        return self.chain_class(project, chain_name, self)
-
     def set_chain_class(self, chain_identifier):
         if isinstance(chain_identifier, type):
             self.chain_class = chain_identifier
@@ -55,14 +52,6 @@ class ChainConfig(Config):
 
     def get_web3_config(self):
         return self.get_config('web3', config_class=Web3Config)
-
-    @property
-    def registrar(self):
-        return self['registrar']
-
-    @registrar.setter
-    def registrar(self, value):
-        self['registrar'] = value
 
     @property
     def is_external(self):

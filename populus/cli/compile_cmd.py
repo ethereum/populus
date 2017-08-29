@@ -1,8 +1,5 @@
 import click
-
-from populus.compilation import (
-    compile_project_contracts,
-)
+import warnings
 
 from populus.utils.cli import (
     watch_project_contracts,
@@ -10,8 +7,9 @@ from populus.utils.cli import (
 from populus.utils.compat import (
     spawn,
 )
-from populus.utils.compile import (
-    write_compiled_sources,
+
+from populus.api.compile import (
+    compile,
 )
 
 from .main import main
@@ -35,12 +33,13 @@ def compile_cmd(ctx, watch):
     Pass in a file path and a contract name separated by a colon(":") to
     specify only named contracts in the specified file.
     """
-    project = ctx.obj['PROJECT']
+    project_root_dir = ctx.obj['project_root_dir']
+    user_config_path = ctx.obj['user_config_path']
 
-    _, compiled_contracts = compile_project_contracts(project)
-    write_compiled_sources(project.compiled_contracts_asset_path, compiled_contracts)
+    project = compile(project_root_dir, user_config_path)
 
     if watch:
+        warnings.warn("Watch will be deprecated in the next version of Populus", DeprecationWarning)
         thread = spawn(
             watch_project_contracts,
             project=project,

@@ -8,8 +8,8 @@ from populus.utils.compat import (
     spawn,
 )
 
-from populus.api.compile import (
-    compile,
+from populus.api.compile_contracts import (
+    compile_project_dir,
 )
 
 from .main import main
@@ -36,7 +36,7 @@ def compile_cmd(ctx, watch):
     project_root_dir = ctx.obj['project_root_dir']
     user_config_path = ctx.obj['user_config_path']
 
-    project = compile(project_root_dir, user_config_path)
+    project = compile_project_dir(project_root_dir, user_config_path)
 
     if watch:
         warnings.warn("Watch will be deprecated in the next version of Populus", DeprecationWarning)

@@ -9,7 +9,7 @@ from populus.config import (
     Config,
 )
 
-from populus.compilation.compile import (
+from populus.compilation.compile_contracts import (
     compile_dirs,
 )
 

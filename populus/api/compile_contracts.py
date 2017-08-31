@@ -8,7 +8,7 @@ from populus.project import (
 )
 
 
-from populus.compilation.compile import (
+from populus.compilation.compile_contracts import (
      compile_dirs,
 )
 
@@ -17,7 +17,7 @@ from populus.compilation.helpers import (
 )
 
 
-def compile(project_root_dir, user_config_path=None):
+def compile_project_dir(project_root_dir, user_config_path=None):
 
     user_config = load_user_config(user_config_path)
     project = Project(project_root_dir, user_config)

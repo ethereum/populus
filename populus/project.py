@@ -11,7 +11,7 @@ from populus.compilation.helpers import (
     get_dir_source_paths,
 )
 
-from populus.compilation.compile import (
+from populus.compilation.compile_contracts import (
     compile_dirs,
 )
 
@@ -188,7 +188,7 @@ class Project(object):
         self._cached_compiled_contracts_mtime = contracts_mtime
         self._cached_compiled_contracts = compiled_contracts
 
-    def compile(self):
+    def compile_project(self):
 
         import_remmapings = self.user_config.import_remmapings(self)
         source_file_paths, compiled_contracts = compile_dirs(
@@ -201,7 +201,7 @@ class Project(object):
     @property
     def compiled_contract_data(self):
         if self.is_compiled_contract_cache_stale():
-            source_file_paths, compiled_contracts = self.compile()
+            source_file_paths, compiled_contracts = self.compile_project()
             contracts_mtime = get_latest_mtime(source_file_paths)
             self.fill_contracts_cache(
                 compiled_contracts=compiled_contracts,

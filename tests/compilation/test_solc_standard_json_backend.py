@@ -29,7 +29,7 @@ GREETER_SOURCE_PATH = os.path.join(ASSETS_DIR, 'Greeter.sol')
 )
 @load_contract_fixture('Math.sol')
 def test_compiling_project_contracts(project):
-    source_paths, compiled_contracts = project.compile()
+    source_paths, compiled_contracts = project.compile_project()
 
     os.path.join(project.project_root_dir, 'contracts/Math.sol') in source_paths
 
@@ -48,7 +48,7 @@ def test_compiling_project_contracts(project):
 @load_contract_fixture('ImportTestB.sol')
 @load_contract_fixture('ImportTestC.sol')
 def test_compiling_with_local_project_imports(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'ImportTestA' in compiled_contracts
     assert 'ImportTestB' in compiled_contracts
@@ -61,7 +61,7 @@ def test_compiling_with_local_project_imports(project):
 )
 @load_test_contract_fixture('TestMath.sol')
 def test_compiling_with_test_contracts(project):
-    source_paths, compiled_contracts = project.compile()
+    source_paths, compiled_contracts = project.compile_project()
 
     assert 'TestMath' in compiled_contracts
 
@@ -72,7 +72,7 @@ def test_compiling_with_test_contracts(project):
 )
 @load_contract_fixture('Abstract.sol')
 def test_compiling_with_abstract_contract(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'Abstract' in compiled_contracts
 
@@ -84,7 +84,7 @@ def test_compiling_with_abstract_contract(project):
 @load_contract_fixture('Abstract.sol')
 @load_contract_fixture('UsesAbstract.sol')
 def test_compiling_with_abstract_contract_inhereted(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'Abstract' in compiled_contracts
     assert 'UsesAbstract' in compiled_contracts
@@ -95,6 +95,6 @@ def test_compiling_with_abstract_contract_inhereted(project):
     reason="Solc compiler does not support standard json compilation",
 )
 def test_compiling_example_greeter_contract(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'Greeter' in compiled_contracts

@@ -33,7 +33,7 @@ GREETER_SOURCE_PATH = os.path.join(ASSETS_DIR, 'Greeter.sol')
 )
 @load_contract_fixture('Math.sol')
 def test_compiling_project_contracts(project):
-    source_paths, compiled_contracts = project.compile()
+    source_paths, compiled_contracts = project.compile_project()
 
     assert 'contracts/Math.sol' in source_paths
 
@@ -52,7 +52,7 @@ def test_compiling_project_contracts(project):
 @load_contract_fixture('ImportTestB.sol')
 @load_contract_fixture('ImportTestC.sol')
 def test_compiling_with_local_project_imports(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'ImportTestA' in compiled_contracts
     assert 'ImportTestB' in compiled_contracts
@@ -73,7 +73,7 @@ def test_compiling_with_local_project_imports(project):
         ]),
 )
 def test_compiling_with_import_remappings(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'ImportRemappingTestA' in compiled_contracts
     assert 'RemapImported' in compiled_contracts
@@ -86,7 +86,7 @@ def test_compiling_with_import_remappings(project):
 )
 @load_test_contract_fixture('TestMath.sol')
 def test_compiling_with_test_contracts(project):
-    source_paths, compiled_contracts = project.compile()
+    source_paths, compiled_contracts = project.compile_project()
 
     assert 'TestMath' in compiled_contracts
 
@@ -97,7 +97,7 @@ def test_compiling_with_test_contracts(project):
 )
 @load_contract_fixture('Abstract.sol')
 def test_compiling_with_abstract_contract(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'Abstract' in compiled_contracts
 
@@ -109,7 +109,7 @@ def test_compiling_with_abstract_contract(project):
 @load_contract_fixture('Abstract.sol')
 @load_contract_fixture('UsesAbstract.sol')
 def test_compiling_with_abstract_contract_inhereted(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'Abstract' in compiled_contracts
     assert 'UsesAbstract' in compiled_contracts
@@ -121,7 +121,7 @@ def test_compiling_with_abstract_contract_inhereted(project):
 )
 @load_contract_fixture(GREETER_SOURCE_PATH)
 def test_compiling_example_greeter_contract(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'Greeter' in compiled_contracts
 
@@ -133,7 +133,7 @@ def test_compiling_example_greeter_contract(project):
 @load_contract_fixture('Library13.sol')
 @load_contract_fixture('Multiply13.sol')
 def test_link_reference_extraction_from_bytecode(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'Library13' in compiled_contracts
     assert 'Multiply13' in compiled_contracts
@@ -148,7 +148,7 @@ def test_link_reference_extraction_from_bytecode(project):
 @load_contract_fixture('Library13.sol', 'contracts/long-path-to-truncate-linkref-placeholders/Library13.sol')
 @load_contract_fixture('Multiply13.sol', 'contracts/long-path-to-truncate-linkref-placeholders/Multiply13.sol')
 def test_detects_contract_name_truncation_from_long_file_paths(project):
-    _, compiled_contracts = project.compile()
+    _, compiled_contracts = project.compile_project()
 
     assert 'Library13' in compiled_contracts
     assert 'Multiply13' in compiled_contracts

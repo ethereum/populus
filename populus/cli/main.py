@@ -33,7 +33,7 @@ CONTEXT_SETTINGS = dict(
     '-g',
     'user_config_path',
     help=(
-        "Specify a global populus configuration file, instead of the default"
+        "Specify a global populus configuration file, instead of the default at ~/.populus/populus.config.json"
     ),
     type=click.Path(exists=True),
 )

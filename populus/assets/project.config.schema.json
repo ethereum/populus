@@ -8,33 +8,33 @@
       "$ref": "#/definitions/ProjectCompilationConfig"
     },
   "definitions": {
-  "ProjectLocationsConfig": {
-      "title": "Directorires of project files",
-      "type": "object",
-      "properties": {
-        "contracts_source_dir": {
-          "title": "The root filesystem path under which the projects source files can be found",
-          "type": "string"
-        },
-        "tests_dir": {
-          "title": "The root filesystem path under which the projects test files can be found",
-          "type": "string"
-        }
-      }
-    },
-
-    "ProjectCompilationConfig": {
-      "title": "Configuration for how populus compiles the project source files",
-      "type": "object",
-      "properties": {
-        "import_remappings": {
-          "title": "Import remappings that should be passed into the compiler, in addtion to the global user import remmapings",
-          "type": "array",
-          "items": {
+    "ProjectLocationsConfig": {
+        "title": "Directorires of project files",
+        "type": "object",
+        "properties": {
+          "contracts_source_dir": {
+            "title": "The root filesystem path under which the projects source files can be found",
+            "type": "string"
+          },
+          "tests_dir": {
+            "title": "The root filesystem path under which the projects test files can be found",
             "type": "string"
           }
         }
+      },
+
+      "ProjectCompilationConfig": {
+        "title": "Configuration for how populus compiles the project source files",
+        "type": "object",
+        "properties": {
+          "import_remappings": {
+            "title": "Import remappings that should be passed into the compiler, in addtion to the global user import remmapings",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
-    }
   }
 }

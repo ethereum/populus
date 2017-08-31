@@ -120,8 +120,6 @@ def deploy(project_root_dir, chain_name, user_config_path=None, wait_for_sync=Tr
         # contract (via the registry).  For each of these, prompt the user
         # if they would like to use the existing version.
         if provider.is_contract_available(contract_name):
-            # TODO: this block should be a standalone cli util.
-            # TODO: this block needs to use the `Provider` API
             existing_contract_instance = provider.get_contract(contract_name)
             found_existing_contract_msg = (
                     "Found existing version of {name} in registrar. "
@@ -144,7 +142,6 @@ def deploy(project_root_dir, chain_name, user_config_path=None, wait_for_sync=Tr
         # Store the contract address for linking of subsequent deployed contracts.
         registrar.set_contract_address(contract_name, contract_instance.address)
 
-    # TODO: fix this message.
     success_msg = (
             "Deployment Successful."
         )

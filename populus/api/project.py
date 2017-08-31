@@ -19,7 +19,11 @@ from populus.utils.filesystem import (
     ensure_path_exists,
 )
 
-from populus import ASSETS_DIR, Project
+from populus import (
+    ASSETS_DIR,
+    Project
+)
+
 GREETER_SOURCE_PATH = os.path.join(ASSETS_DIR, 'Greeter.sol')
 GREETER_TEST_PATH = os.path.join(ASSETS_DIR, 'test_greeter.py')
 

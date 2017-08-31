@@ -26,7 +26,7 @@ def init_cmd(ctx):
 
     if check_if_project_json_file_exists(project_root_dir):
         raise ConfigError(
-            "Project json config file already exists at {root_dir}, can not init new project".format(
+            "Project json config file already exists at {root_dir}, cannot init new project".format(
                 root_dir=project_root_dir
             )
         )

@@ -1,19 +1,7 @@
-import logging
-import os
-import shutil
-
 import click
-
 
 from populus.config.helpers import (
     check_if_project_json_file_exists,
-)
-from populus.utils.filesystem import (
-    ensure_path_exists,
-)
-
-from populus.project import (
-    Project,
 )
 
 from populus.exceptions import (
@@ -44,7 +32,3 @@ def init_cmd(ctx):
         )
 
     init_project(project_root_dir, user_config_path)
-
-
-
-

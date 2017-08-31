@@ -1,9 +1,11 @@
 import os
-import sys
 import warnings
 
 import click
 
+from populus.exceptions import (
+    ConfigError,
+)
 
 from populus.utils.logging import (
     get_logger_with_click_handler,

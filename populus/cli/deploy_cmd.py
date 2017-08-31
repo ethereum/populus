@@ -8,22 +8,6 @@ from populus.api.deploy import (
     deploy,
 )
 
-from populus.chain.helpers import (
-    is_synced,
-)
-
-from populus.utils.cli import (
-    select_chain,
-    deploy_contract_and_verify,
-    select_project_contract,
-)
-from populus.utils.compat import (
-    sleep,
-)
-from populus.utils.deploy import (
-    get_deploy_order,
-)
-
 from .main import main
 
 

@@ -17,4 +17,3 @@ class UserConfig(Config):
                 project.config.get('compilation.import_remappings', [])
             )
         )
-

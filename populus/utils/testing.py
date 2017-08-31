@@ -1,5 +1,3 @@
-import os
-
 from toolz.functoolz import (
     compose,
     partial,

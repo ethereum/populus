@@ -9,6 +9,10 @@ from populus.config import (
     Config,
 )
 
+from populus.compilation.compile import (
+    compile_dirs,
+)
+
 from .accounts import (
     is_account_locked,
 )
@@ -33,6 +37,7 @@ from .observers import (
 from populus.config.loading import (
     load_user_config,
 )
+
 
 def select_chain(user_config=None):
     """
@@ -104,8 +109,9 @@ def select_account(chain):
         )
 
 
-def configure_chain(project, chain_name): #BUG delete project
+def configure_chain(project, chain_name):
     """
+    BUG:  delete project
     Interactive configuration of an existing or new chain.
 
     - is it external?

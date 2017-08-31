@@ -27,12 +27,11 @@ from populus.config.helpers import (
 )
 
 from populus.utils.filesystem import (
-    relpath,
     get_latest_mtime,
 )
+
 from populus.config.helpers import (
     check_if_project_json_file_exists,
-    get_project_json_config_file_path,
 )
 
 

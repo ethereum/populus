@@ -30,12 +30,11 @@ from populus.contracts.helpers import (
 from populus.contracts.backends.filesystem import (
     JSONFileBackend,
 )
-from populus.utils.geth import (
-    get_base_blockchain_storage_dir,
-)
+
 from populus.utils.filesystem import (
     ensure_path_exists,
 )
+
 from populus.utils.testing import (
     link_bytecode_by_name,
 )
@@ -204,8 +203,6 @@ def wait_for_unlock():
                 else:
                     break
     return _wait_for_unlock
-
-
 
 
 def _loaded_contract_fixtures(project_root_dir, project_contracts_dir, contracts_to_load):

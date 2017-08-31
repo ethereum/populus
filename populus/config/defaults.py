@@ -4,7 +4,6 @@ import json
 from populus import ASSETS_DIR
 from populus.defaults import (
     PROJECT_JSON_CONFIG_DEFAULTS,
-    PROJECT_JSON_CONFIG_SCHEMA,
 )
 
 

@@ -29,14 +29,16 @@ from populus.utils.contracts import (
     compute_direct_dependency_graph,
     compute_recursive_contract_dependencies,
 )
+
 from populus.utils.deploy import (
     compute_deploy_order,
 )
+
 from populus.utils.filesystem import (
-    recursive_find_files,
     ensure_file_exists,
     find_solidity_source_files,
 )
+
 from populus.utils.json import (
     normalize_object_for_json,
 )
@@ -51,7 +53,7 @@ def get_dir_source_paths(contracts_source_dir):
 def get_all_dirs_source_pathes(dir_paths, logger=None):
 
     all_source_paths = []
-    for dir_path in set(dir_paths): # sliently ignore duplicates
+    for dir_path in set(dir_paths):  # sliently ignore duplicates
         contract_source_paths = get_dir_source_paths(dir_path)
         if logger:
             logger.debug(

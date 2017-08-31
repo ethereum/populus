@@ -16,11 +16,6 @@ from populus.utils.functional import (
 )
 
 
-from populus.config.loading import (
-    load_user_config,
-)
-
-
 def _get_contract_key(contract_data):
     return (
         contract_data['source_path'],

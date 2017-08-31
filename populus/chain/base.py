@@ -105,7 +105,6 @@ class BaseChain(object):
         sorted_backend_configs = sort_prioritized_configs(
             backend_configs,
             self.user_config
-            #self.project.config
         )
         for backend_name, base_backend_config in sorted_backend_configs.items():
             yield backend_name, ContractBackendConfig(base_backend_config)

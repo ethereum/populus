@@ -23,7 +23,7 @@ def compile(project_root_dir, user_config_path=None):
     project = Project(project_root_dir, user_config)
     import_remmapings = user_config.import_remmapings(project)
 
-    #TODO don't compile with a project property so global path is provided once
+    # TODO don't compile with a project property so global path is provided once
     _, compiled_contracts = compile_dirs(
         (project.contracts_source_dir, project.tests_dir,),
         user_config,
@@ -33,6 +33,3 @@ def compile(project_root_dir, user_config_path=None):
     write_compiled_sources(project.compiled_contracts_asset_path, compiled_contracts)
 
     return project
-
-
-

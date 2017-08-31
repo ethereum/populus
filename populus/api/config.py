@@ -16,6 +16,3 @@ def load_user_config(user_config_path=None):
 def write_user_config(user_config, user_config_path=None):
 
     _write_user_config(user_config, user_config_path)
-
-
-

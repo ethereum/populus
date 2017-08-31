@@ -19,11 +19,8 @@ from populus.contracts.helpers import (
 )
 
 from populus.utils.cli import (
-    select_chain,
     deploy_contract_and_verify,
-    select_project_contract,
 )
-
 
 from populus.utils.compat import (
     sleep,
@@ -43,6 +40,7 @@ from .config import (
 
 from populus.chain.helpers import (
     get_chain,
+    is_synced,
 )
 
 

@@ -11,7 +11,6 @@ from populus.config.defaults import (
 )
 
 from populus.config.helpers import (
-    check_if_project_json_file_exists,
     write_project_config,
     get_project_json_config_file_path,
 )
@@ -74,4 +73,3 @@ def init_project(project_root_dir, user_config_path=None):
         ))
 
     return project
-

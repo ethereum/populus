@@ -12,37 +12,39 @@ from populus.config.helpers import (
     get_json_config_file_path,
     check_if_json_config_file_exists,
 )
+
 from populus.utils.filesystem import (
     ensure_path_exists,
+)
+
+from populus.project import (
+    Project,
 )
 
 GREETER_SOURCE_PATH = os.path.join(ASSETS_DIR, 'Greeter.sol')
 GREETER_TEST_PATH = os.path.join(ASSETS_DIR, 'test_greeter.py')
 
 
-def init_project(project, logger):
+def init_project(project_dir, logger):
 
-    has_json_config = check_if_json_config_file_exists(project.project_dir)
+    if project_dir is None:
+        project_dir = os.getcwd()
+    else:
+        project_dir = os.path.abspath(project_dir)
+
+    has_json_config = check_if_json_config_file_exists(project_dir)
 
     if has_json_config:
         logger.info(
             "Found existing `populus.json` file.  Not writing default config."
         )
-    else:
-        json_config_file_path = get_json_config_file_path(project.project_dir)
-        default_config = load_default_config()
-        write_config(
-            project.project_dir,
-            default_config,
-            json_config_file_path,
-        )
-        logger.info(
-            "Wrote default populus configuration to `./{0}`.".format(
-                os.path.relpath(json_config_file_path, project.project_dir),
-            )
-        )
 
-    project.load_config()
+    project = Project(project_dir)
+    logger.info(
+        "Wrote default populus configuration to `./{0}`.".format(
+            os.path.relpath(project.config_file_path),
+        )
+    )
 
     for source_dir in project.contracts_source_dirs:
         if ensure_path_exists(source_dir):
@@ -69,3 +71,5 @@ def init_project(project, logger):
         logger.info("Created Example Tests: ./{0}".format(
             os.path.relpath(example_tests_path)
         ))
+
+    return project

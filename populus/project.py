@@ -37,7 +37,6 @@ from populus.utils.compile import (
 )
 
 from populus.utils.filesystem import (
-    relpath,
     get_latest_mtime,
 )
 
@@ -65,7 +64,7 @@ class Project(object):
         self.config_file_path = get_json_config_file_path(self.project_dir)
         if not os.path.exists(self.config_file_path):
             defaults_path = get_default_config_path()
-            shutil.copyfile(defaults_path,self.config_file_path)
+            shutil.copyfile(defaults_path, self.config_file_path)
 
         self.load_config()
 

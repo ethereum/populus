@@ -3,13 +3,7 @@ import shutil
 
 from populus import ASSETS_DIR
 
-from populus.config import (
-    load_default_config,
-    write_config,
-)
-
 from populus.config.helpers import (
-    get_json_config_file_path,
     check_if_json_config_file_exists,
 )
 

@@ -68,7 +68,9 @@ class Project(object):
                 shutil.copyfile(defaults_path, self.config_file_path)
             else:
                 raise FileNotFoundError(
-                    "No project config file found at {project_dir}".format(project_dir=self.project_dir)
+                    "No project config file found at {project_dir}".format(
+                        project_dir=self.project_dir
+                    )
                 )
 
         self.load_config()

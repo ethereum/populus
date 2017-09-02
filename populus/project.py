@@ -54,7 +54,7 @@ class Project(object):
     project_dir = None
     config_file_path = None
 
-    def __init__(self, project_dir=None):
+    def __init__(self, project_dir=None, create_config_file=False):
 
         if project_dir is None:
             self.project_dir = os.getcwd()
@@ -63,8 +63,13 @@ class Project(object):
 
         self.config_file_path = get_json_config_file_path(self.project_dir)
         if not os.path.exists(self.config_file_path):
-            defaults_path = get_default_config_path()
-            shutil.copyfile(defaults_path, self.config_file_path)
+            if create_config_file:
+                defaults_path = get_default_config_path()
+                shutil.copyfile(defaults_path, self.config_file_path)
+            else:
+                raise FileNotFoundError(
+                    "No project config file found at {project_dir}".format(project_dir=self.project_dir)
+                )
 
         self.load_config()
 

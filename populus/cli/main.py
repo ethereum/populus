@@ -10,9 +10,15 @@ from populus.utils.filesystem import (
 from populus.project import (
     Project,
 )
+
+from populus.config import (
+    load_user_config,
+)
+
 from populus.config.versions import (
     LATEST_VERSION,
 )
+
 
 from populus.utils.logging import (
     get_logger_with_click_handler,
@@ -49,6 +55,15 @@ def validate_logging_level(ctx, param, value):
     type=click.Path(exists=True, dir_okay=True),
 )
 @click.option(
+    '--user-config',
+    '-u',
+    'user_config_path',
+    help=(
+        "Specify a path to the global user config, default is ~/.populus/config.json"
+    ),
+    type=click.Path(exists=True, dir_okay=True),
+)
+@click.option(
     '--logging',
     '-l',
     'logging_level',
@@ -60,17 +75,19 @@ def validate_logging_level(ctx, param, value):
     callback=validate_logging_level,
 )
 @click.pass_context
-def main(ctx, project_dir, logging_level):
+def main(ctx, project_dir, user_config_path, logging_level):
     """
     Populus
     """
     logger = get_logger_with_click_handler('populus', level=logging_level)
     ctx.obj = {}
     ctx.obj['PROJECT_DIR'] = project_dir
+    ctx.obj['USER_CONFIG_PATH'] = user_config_path
 
     if ctx.invoked_subcommand != 'init':
 
-        project = Project(project_dir)
+        user_config = load_user_config(user_config_path)
+        project = Project(project_dir, user_config)
 
         config_version = project.config['version']
         subcommand_bypasses_config_version = ctx.invoked_subcommand in {'config'}

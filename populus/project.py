@@ -16,6 +16,7 @@ from populus.config import (
     CompilerConfig,
     Config,
     load_config as _load_config,
+    load_user_config,
     load_config_schema,
     write_config as _write_config,
 )
@@ -54,12 +55,15 @@ class Project(object):
     project_dir = None
     config_file_path = None
 
-    def __init__(self, project_dir=None, create_config_file=False):
+    def __init__(self, project_dir=None, user_config=None, create_config_file=False):
 
         if project_dir is None:
             self.project_dir = os.getcwd()
         else:
             self.project_dir = os.path.abspath(project_dir)
+
+        if user_config is None:
+            user_config = load_user_config()
 
         self.config_file_path = get_json_config_file_path(self.project_dir)
         if not os.path.exists(self.config_file_path):
@@ -85,7 +89,6 @@ class Project(object):
     def write_config(self):
 
         _write_config(
-            self.project_dir,
             self.config,
             write_path=self.config_file_path,
         )

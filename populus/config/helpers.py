@@ -18,14 +18,35 @@ from populus.utils.module_loading import (
     import_string,
 )
 
+from populus.defaults import (
+    JSON_CONFIG_FILENAME,
+    USER_JSON_CONFIG_FILENAME,
+)
 
-JSON_CONFIG_FILENAME = './populus.json'
+
+def get_user_default_json_config_file_path():
+
+    json_config_file_path = os.path.join(os.path.expanduser("~"), USER_JSON_CONFIG_FILENAME)
+    return json_config_file_path
 
 
 def get_json_config_file_path(project_dir):
 
     json_config_file_path = os.path.join(project_dir, JSON_CONFIG_FILENAME)
     return json_config_file_path
+
+
+def write_config(config, write_path):
+    with open(write_path, 'w') as config_file:
+        anyconfig.dump(
+            dict(config),
+            config_file,
+            sort_keys=True,
+            indent=2,
+            separators=(',', ': '),
+        )
+
+    return write_path
 
 
 def check_if_json_config_file_exists(project_dir):

@@ -15,5 +15,6 @@ def init_cmd(ctx):
     """
     logger = logging.getLogger('populus.cli.init_cmd')
     project_dir = ctx.obj['PROJECT_DIR']
+    user_config_path = ctx.obj['USER_CONFIG_PATH']
 
-    init_project(project_dir, logger)
+    init_project(project_dir, user_config_path, logger)

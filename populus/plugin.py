@@ -1,10 +1,17 @@
 import os
+import shutil
 import pytest
 
-from populus.project import Project
+from populus.project import (
+    Project,
+)
 
 from populus.config.helpers import (
     get_json_config_file_path,
+)
+
+from populus.config import (
+    load_user_config,
 )
 
 from populus.utils.contracts import (
@@ -17,14 +24,30 @@ from populus.utils.json import (
     normalize_object_for_json,
 )
 
+from populus.defaults import (
+    USER_JSON_CONFIG_DEFAULTS,
+    USER_JSON_CONFIG_FILENAME,
+)
+
+from populus.config.helpers import (
+    get_user_default_json_config_file_path,
+)
+
+
+from populus.utils.filesystem import (
+    ensure_path_exists,
+)
 
 CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
 CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
 
+BASE_DIR = os.path.dirname(__file__)
+ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+
 
 testing_project_dir = None
 testing_context = None
-
+testing_user_config_path = None
 #
 # Hooks
 #
@@ -45,6 +68,8 @@ def get_populus_option(cmdline_option, ini_option, environ_var, early_config, ar
 
 def pytest_addoption(parser):
 
+    parser.addoption("--populus-user-config", help="populus global user config json file")
+    parser.addini("populus_user_config", "populus global user config json file")
     parser.addoption("--populus-project", help="populus project root directory")
     parser.addini("populus_project", "populus project root directory")
     parser.addoption("--populus-context", help="populus testing context")
@@ -52,6 +77,17 @@ def pytest_addoption(parser):
 
 
 def pytest_load_initial_conftests(early_config, parser, args):
+
+    global testing_user_config_path
+    testing_user_config_path = get_populus_option(
+        cmdline_option="--populus-user-config",
+        ini_option="populus_user_config",
+        environ_var="POPULUS_USER_CONFIG",
+        early_config=early_config,
+        args=args
+    )
+    if not testing_user_config_path:
+        testing_user_config_path = get_user_default_json_config_file_path()
 
     global testing_context
     testing_context = get_populus_option(
@@ -96,13 +132,27 @@ def project(request):
 
     global testing_project_dir
     global testing_context
+    global testing_user_config_path
+
     contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
     mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
 
     if testing_context == "user":
-        project = Project(testing_project_dir, create_config_file=True)
+        user_config = load_user_config(testing_user_config_path)
+        project = Project(testing_project_dir, user_config, create_config_file=True)
+
     elif testing_context == "populus":
-        project = Project(create_config_file=True)
+        tmp_user_global_dir = os.path.join(os.getcwd(), '.populus')
+        ensure_path_exists(tmp_user_global_dir)
+        tmp_user_config_file_path = os.path.join(os.getcwd(), USER_JSON_CONFIG_FILENAME)
+
+        shutil.copyfile(
+            os.path.join(ASSETS_DIR, USER_JSON_CONFIG_DEFAULTS),
+            tmp_user_config_file_path
+        )
+
+        user_config = load_user_config(tmp_user_config_file_path)
+        project = Project(user_config=user_config, create_config_file=True)
 
     project.fill_contracts_cache(contracts, mtime)
     request.config.cache.set(

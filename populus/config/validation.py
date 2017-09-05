@@ -21,6 +21,10 @@ from .versions import (
 )
 
 
+from populus.defaults import (
+    USER_JSON_CONFIG_SCHEMA,
+)
+
 CONFIG_SCHEMA_FILENAMES = {
     V1: "config.v1.schema.json",
     V2: "config.v2.schema.json",
@@ -47,6 +51,17 @@ def get_config_schema_path(version=LATEST_VERSION):
 
 def load_config_schema(version=LATEST_VERSION):
     config_schema_path = get_config_schema_path(version)
+    config_schema = anyconfig.load(config_schema_path)
+    return config_schema
+
+
+def get_user_config_schema_path():
+
+    return os.path.join(ASSETS_DIR, USER_JSON_CONFIG_SCHEMA)
+
+
+def load_user_config_schema():
+    config_schema_path = get_user_config_schema_path()
     config_schema = anyconfig.load(config_schema_path)
     return config_schema
 

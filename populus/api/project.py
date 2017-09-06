@@ -10,6 +10,13 @@ from populus.config.helpers import (
 from populus.config import (
     load_user_config,
 )
+from populus.config.helpers import (
+    get_user_default_json_config_file_path,
+)
+
+from populus.defaults import (
+    USER_JSON_CONFIG_DEFAULTS,
+)
 
 from populus.utils.filesystem import (
     ensure_path_exists,
@@ -33,8 +40,18 @@ def init_project(project_dir, user_config_path, logger):
     has_json_config = check_if_json_config_file_exists(project_dir)
 
     if has_json_config:
-        logger.info(
+        logger.error(
             "Found existing `populus.json` file.  Not writing default config."
+        )
+        assert False
+
+    if not user_config_path or not os.path.exists(user_config_path):
+        default_user_config_asset_path = os.path.join(ASSETS_DIR, USER_JSON_CONFIG_DEFAULTS)
+        copy_to = get_user_default_json_config_file_path()
+        ensure_path_exists(os.path.dirname(copy_to))
+        shutil.copy(
+            default_user_config_asset_path,
+            copy_to,
         )
 
     user_config = load_user_config(user_config_path)

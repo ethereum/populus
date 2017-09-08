@@ -97,7 +97,7 @@ def pop_nested_key(config, key):
 
 @to_tuple
 @sort_return
-def flatten_mapping(config, base_prefix=None):
+def flatten_mapping(config, base_prefix=None, exclude_refs=False):
     """
     An `.items()` implementation for nested configuration dictionaries.  It
     flattens out the entire keyspace returning an interable of 2-tuples.
@@ -113,12 +113,15 @@ def flatten_mapping(config, base_prefix=None):
         base_prefix = tuple()
 
     for key, value in config.items():
-        prefix = base_prefix + (key,)
-        if is_dict(value):
-            for sub_key, sub_value in flatten_mapping(value, prefix):
-                yield sub_key, sub_value
+        if exclude_refs and key == '$ref':
+            yield '.'.join(base_prefix), value
         else:
-            yield '.'.join(prefix), value
+            prefix = base_prefix + (key,)
+            if is_dict(value):
+                for sub_key, sub_value in flatten_mapping(value, prefix, exclude_refs):
+                    yield sub_key, sub_value
+            else:
+                yield '.'.join(prefix), value
 
 
 @to_dict

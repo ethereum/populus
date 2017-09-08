@@ -179,7 +179,7 @@ def _updated_project_config(project_dir, request):
     ))
 
     if key_value_pairs:
-        project = Project()
+        project = Project(create_config_file=True)
 
         for key, value in key_value_pairs:
             if value is None:

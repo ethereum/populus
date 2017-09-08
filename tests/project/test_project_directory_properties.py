@@ -17,7 +17,7 @@ from populus.utils.filesystem import (
 
 
 def test_project_directory_properties(project_dir):
-    project = Project()
+    project = Project(create_config_file=True)
 
     if sys.version_info.major != 2:
         with pytest.warns(DeprecationWarning):

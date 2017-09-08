@@ -11,7 +11,7 @@ from populus.utils.filesystem import (
 
 
 def test_gets_correct_files_default_dir(project_dir, write_project_file):
-    project = Project()
+    project = Project(create_config_file=True)
     file_names = tuple(itertools.chain.from_iterable(
         find_solidity_source_files(source_dir)
         for source_dir

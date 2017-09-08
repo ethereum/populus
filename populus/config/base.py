@@ -15,8 +15,9 @@ from populus.utils.mappings import (
     set_nested_key,
     pop_nested_key,
     flatten_mapping,
+
 )
-from populus.utils.config import (
+from populus.config.helpers import (
     get_empty_config,
     resolve_config,
 )
@@ -45,7 +46,7 @@ class Config(object):
             self.validate()
 
     def validate(self):
-        validate_config(self._wrapped)
+        validate_config(self._wrapped, schema=self.schema)
 
     def get_master_config(self):
         if self.parent is None:
@@ -97,10 +98,18 @@ class Config(object):
         for key, _ in self.items(flatten=flatten):
             yield key
 
+    def keys_full_pathes(self):
+        # flatten w/o $ref
+        for key, _ in self.items(flatten=True, exclude_refs=True):
+            yield key
+
     @to_tuple
-    def items(self, flatten=False):
+    def items(self, flatten=False, exclude_refs=False):
         if flatten:
-            _items = flatten_mapping(self._wrapped)
+            _items = flatten_mapping(
+                config=self._wrapped,
+                exclude_refs=exclude_refs
+            )
         else:
             _items = self._wrapped.items()
         for key, value in _items:

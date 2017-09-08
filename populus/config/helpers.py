@@ -1,6 +1,7 @@
 import collections
 import operator
 import os
+import shutil
 
 import anyconfig
 
@@ -19,9 +20,22 @@ from populus.utils.module_loading import (
 )
 
 from populus.defaults import (
-    JSON_CONFIG_FILENAME,
+    PROJECT_JSON_CONFIG_FILENAME,
     USER_JSON_CONFIG_FILENAME,
 )
+
+from .defaults import (
+    get_default_config_path,
+)
+
+
+def ensure_user_config_exists(user_config_path):
+
+    if not os.path.exists(user_config_path):
+        shutil.copyfile(
+            get_default_config_path(),
+            user_config_path,
+        )
 
 
 def get_user_default_json_config_file_path():
@@ -30,9 +44,9 @@ def get_user_default_json_config_file_path():
     return json_config_file_path
 
 
-def get_json_config_file_path(project_dir):
+def get_project_json_config_file_path(project_dir):
 
-    json_config_file_path = os.path.join(project_dir, JSON_CONFIG_FILENAME)
+    json_config_file_path = os.path.join(project_dir, PROJECT_JSON_CONFIG_FILENAME)
     return json_config_file_path
 
 
@@ -49,9 +63,9 @@ def write_config(config, write_path):
     return write_path
 
 
-def check_if_json_config_file_exists(project_dir):
+def check_if_project_json_config_file_exists(project_dir):
 
-    json_config_file_path = get_json_config_file_path(project_dir)
+    json_config_file_path = get_project_json_config_file_path(project_dir)
     return os.path.exists(json_config_file_path)
 
 

@@ -6,7 +6,7 @@
   "properties": {
     "version": {
       "type": "string",
-      "enum": ["6"]
+      "enum": ["7"]
     },
     "chains": {
       "$ref": "#/definitions/ProjectChainsConfig"

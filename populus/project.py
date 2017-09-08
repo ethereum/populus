@@ -1,7 +1,9 @@
+import copy
 import os
 import shutil
 import itertools
 import warnings
+
 
 from eth_utils import (
     to_tuple,
@@ -18,11 +20,12 @@ from populus.config import (
     load_config as _load_config,
     load_user_config,
     load_config_schema,
+    load_project_config_schema,
     write_config as _write_config,
 )
 
 from populus.config.defaults import (
-    get_default_config_path,
+    get_default_project_config_path,
 )
 
 from populus.utils.chains import (
@@ -42,7 +45,7 @@ from populus.utils.filesystem import (
 )
 
 from populus.config.helpers import (
-    get_json_config_file_path,
+    get_project_json_config_file_path,
 )
 
 from populus.utils.testing import (
@@ -63,12 +66,14 @@ class Project(object):
             self.project_dir = os.path.abspath(project_dir)
 
         if user_config is None:
-            user_config = load_user_config()
+            self._user_config = load_user_config()
+        else:
+            self._user_config = user_config
 
-        self.config_file_path = get_json_config_file_path(self.project_dir)
+        self.config_file_path = get_project_json_config_file_path(self.project_dir)
         if not os.path.exists(self.config_file_path):
             if create_config_file:
-                defaults_path = get_default_config_path()
+                defaults_path = get_default_project_config_path()
                 shutil.copyfile(defaults_path, self.config_file_path)
             else:
                 raise FileNotFoundError(
@@ -84,7 +89,10 @@ class Project(object):
     #
 
     _project_config = None
+    _user_config = None
+    _user_config_schema = None
     _project_config_schema = None
+    _merged_config = None
 
     def write_config(self):
 
@@ -100,7 +108,8 @@ class Project(object):
         self._project_config = _load_config(self.config_file_path)
 
         config_version = self._project_config['version']
-        self._project_config_schema = load_config_schema(config_version)
+        self._project_config_schema = load_project_config_schema(config_version)
+        self._user_config_schema = load_config_schema(config_version)
 
     def reload_config(self):
         self.load_config()
@@ -110,9 +119,20 @@ class Project(object):
     @property
     def config(self):
         if self._config_cache is None:
-            self._config_cache = Config(
+
+            project_config = Config(
                 config=self._project_config,
-                schema=self._project_config_schema,
+                schema=self._project_config_schema
+            )
+            self._config_cache = project_config
+
+            self._merged_config = Config(copy.deepcopy(self._user_config))
+            for k in project_config.keys(flatten=True):
+                self._merged_config[k] = project_config.get_config(k)
+
+            self._config_cache = Config(
+                config=self._merged_config,
+                schema=self._user_config_schema,
             )
         return self._config_cache
 
@@ -123,7 +143,7 @@ class Project(object):
         else:
             self._project_config = value
             config_version = self._project_config['version']
-            self._project_config_schema = load_config_schema(config_version)
+            self._project_config_schema = load_project_config_schema(config_version)
             self._config_cache = Config(
                 config=self._project_config,
                 schema=self._project_config_schema,

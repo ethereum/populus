@@ -2,8 +2,6 @@
 # Config
 #
 USER_JSON_CONFIG_FILENAME = '.populus/config.json'
-USER_JSON_CONFIG_DEFAULTS = 'user.config.defaults.json'
-USER_JSON_CONFIG_SCHEMA = 'user.config.schema.json'
 
 # project v1-v6
 JSON_CONFIG_FILENAME = './populus.json'

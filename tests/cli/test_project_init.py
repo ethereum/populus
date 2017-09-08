@@ -15,7 +15,7 @@ def test_initializing_empty_project(project_dir):
         os.rmdir(source_dir)
 
     expected_paths = (
-        os.path.join(project_dir, 'populus.json'),
+        os.path.join(project_dir, 'project.json'),
         os.path.join(project_dir, 'tests'),
         os.path.join(contracts_source_dirs[0], 'Greeter.sol'),
         os.path.join(project_dir, 'tests', 'test_greeter.py'),

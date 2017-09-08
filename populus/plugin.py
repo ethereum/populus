@@ -7,11 +7,15 @@ from populus.project import (
 )
 
 from populus.config.helpers import (
-    get_json_config_file_path,
+    get_project_json_config_file_path,
 )
 
 from populus.config import (
     load_user_config,
+)
+
+from populus.config.defaults import (
+    get_default_config_path,
 )
 
 from populus.utils.contracts import (
@@ -24,15 +28,14 @@ from populus.utils.json import (
     normalize_object_for_json,
 )
 
-from populus.defaults import (
-    USER_JSON_CONFIG_DEFAULTS,
-    USER_JSON_CONFIG_FILENAME,
-)
 
 from populus.config.helpers import (
     get_user_default_json_config_file_path,
 )
 
+from populus.defaults import (
+    USER_JSON_CONFIG_FILENAME,
+)
 
 from populus.utils.filesystem import (
     ensure_path_exists,
@@ -112,7 +115,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
     if testing_project_dir:
         testing_project_dir = os.path.abspath(testing_project_dir)
-        if not os.path.exists(get_json_config_file_path(testing_project_dir)):
+        if not os.path.exists(get_project_json_config_file_path(testing_project_dir)):
             raise FileNotFoundError(
                 "No populus project found for testing in {testing_project_dir}".format(
                     testing_project_dir=testing_project_dir
@@ -147,7 +150,7 @@ def project(request):
         tmp_user_config_file_path = os.path.join(os.getcwd(), USER_JSON_CONFIG_FILENAME)
 
         shutil.copyfile(
-            os.path.join(ASSETS_DIR, USER_JSON_CONFIG_DEFAULTS),
+            os.path.join(ASSETS_DIR, get_default_config_path()),
             tmp_user_config_file_path
         )
 

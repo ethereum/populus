@@ -4,7 +4,7 @@ import shutil
 from populus import ASSETS_DIR
 
 from populus.config.helpers import (
-    check_if_json_config_file_exists,
+    check_if_project_json_config_file_exists,
 )
 
 from populus.config import (
@@ -30,11 +30,11 @@ def init_project(project_dir, user_config_path, logger):
     else:
         project_dir = os.path.abspath(project_dir)
 
-    has_json_config = check_if_json_config_file_exists(project_dir)
+    has_json_config = check_if_project_json_config_file_exists(project_dir)
 
     if has_json_config:
         logger.info(
-            "Found existing `populus.json` file.  Not writing default config."
+            "Found existing `project.json` file.  Not writing default config."
         )
 
     user_config = load_user_config(user_config_path)

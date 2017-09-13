@@ -10,11 +10,11 @@ from eth_utils import (
     to_ordered_dict,
 )
 
-from .mappings import (
+from populus.utils.mappings import (
     get_nested_key,
     has_nested_key,
 )
-from .module_loading import (
+from populus.utils.module_loading import (
     import_string,
 )
 

@@ -8,7 +8,7 @@ from populus.config import (
     write_config,
 )
 
-from populus.utils.config import (
+from populus.config.helpers import (
     get_json_config_file_path,
     check_if_json_config_file_exists,
 )

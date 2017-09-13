@@ -28,7 +28,7 @@ from populus.utils.filesystem import (
     relpath,
     get_latest_mtime,
 )
-from populus.utils.config import (
+from populus.config.helpers import (
     check_if_json_config_file_exists,
     get_default_project_config_file_path,
     get_json_config_file_path,

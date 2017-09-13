@@ -3,7 +3,7 @@ import pytest
 from populus.config import (
     Config,
 )
-from populus.utils.config import (
+from populus.config.helpers import (
     resolve_config,
 )
 

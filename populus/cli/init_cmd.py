@@ -14,6 +14,6 @@ def init_cmd(ctx):
     Generate project layout with an example contract.
     """
     logger = logging.getLogger('populus.cli.init_cmd')
-    project = ctx.obj['PROJECT']
+    project_dir = ctx.obj['PROJECT_DIR']
 
-    init_project(project, logger)
+    init_project(project_dir, logger)

@@ -19,7 +19,7 @@ from populus.project import Project
 
 @pytest.mark.skip(reason="Unlocked account checker is broken")
 def test_request_account_unlock_with_correct_password(project_dir):
-    project = Project()
+    project = Project(project_dir, create_config_file=True)
     chain = project.get_chain('temp')
 
     # create 3 new accounts
@@ -43,7 +43,7 @@ def test_request_account_unlock_with_correct_password(project_dir):
 
 @pytest.mark.skip(reason="Unlocked account checker is broken")
 def test_request_account_unlock_with_bad_password(project_dir):
-    project = Project()
+    project = Project(project_dir, create_config_file=True)
     chain = project.get_chain('temp')
 
     # create 3 new accounts

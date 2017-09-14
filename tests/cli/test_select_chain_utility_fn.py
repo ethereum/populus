@@ -35,7 +35,7 @@ from populus.utils.cli import (
     ),
 )
 def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expected):
-    project = Project()
+    project = Project(project_dir, create_config_file=True)
     project.config['chains.local_a.chain.class'] = 'populus.chain.TesterChain'
     project.config['chains.local_a.web3.provider.class'] = 'web3.providers.ipc.IPCProvider'
     project.config['chains.local_a.web3.provider.settings.ipc_path'] = (
@@ -69,7 +69,7 @@ def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expecte
     'stdin', ('local_a\n', '20\n'),
 )
 def test_cli_select_chain_helper_select_invalid_options(project_dir, stdin):
-    project = Project()
+    project = Project(project_dir, create_config_file=True)
 
     assert 'local_a' not in project.config['chains']
     assert len(project.config['chains']) < 20

@@ -7,7 +7,7 @@ from populus.project import (
 
 @pytest.mark.slow
 def test_project_tester_chain(project_dir):
-    project = Project()
+    project = Project(project_dir, create_config_file=True)
 
     chain = project.get_chain('tester')
 
@@ -18,7 +18,7 @@ def test_project_tester_chain(project_dir):
 
 @pytest.mark.slow
 def test_project_testrpc_chain(project_dir):
-    project = Project()
+    project = Project(project_dir, create_config_file=True)
 
     chain = project.get_chain('testrpc')
 

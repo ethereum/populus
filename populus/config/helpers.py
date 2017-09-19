@@ -19,7 +19,7 @@ from populus.utils.module_loading import (
 )
 
 
-JSON_CONFIG_FILENAME = './populus.json'
+JSON_CONFIG_FILENAME = './project.json'
 
 
 def get_json_config_file_path(project_dir):

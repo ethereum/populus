@@ -53,6 +53,13 @@ class Config(object):
         else:
             return self.parent.get_master_config()
 
+    def unref(self):
+        while [item for item in self.items(flatten=True) if item[0].rpartition(".")[2]=="$ref"]: # NOQA
+            for key, value in self.items(flatten=True):
+                prefix, _, leaf_key = key.rpartition('.')
+                if leaf_key == "$ref":
+                    self[prefix] = self.get(prefix)
+
     def resolve(self, value):
         if isinstance(value, dict):
             return resolve_config(value, self.get_master_config())
@@ -70,7 +77,9 @@ class Config(object):
         if config_class is None:
             config_class = Config
         try:
-            return config_class(copy.deepcopy(self.resolve(self[key])), parent=self)
+            return config_class(
+                copy.deepcopy(self.resolve(self[key])), parent=self
+            )
         except KeyError:
             return config_class(get_empty_config(), parent=self)
 
@@ -79,7 +88,9 @@ class Config(object):
             value = pop_nested_key(self._wrapped, key)
         except KeyError:
             if default is empty:
-                raise KeyError("Key '{0}' not found in {1}".format(key, self.wrapped))
+                raise KeyError(
+                    "Key '{0}' not found in {1}".format(key, self.wrapped)
+                )
             else:
                 value = default
 
@@ -134,7 +145,11 @@ class Config(object):
         try:
             return self.resolve(get_nested_key(self._wrapped, key))
         except KeyError:
-            raise KeyError("Key '{0}' not found in {1}".format(key, self._wrapped))
+            raise KeyError(
+                "Key '{0}' not found in {1}".format(
+                    key, self._wrapped
+                )
+            )
 
     def __setitem__(self, key, value):
         if isinstance(value, Config):

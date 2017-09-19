@@ -1,3 +1,4 @@
+import copy
 import os
 import shutil
 import itertools
@@ -100,6 +101,7 @@ class Project(object):
     #
 
     _project_config = None
+    _user_config = None
     _project_config_schema = None
 
     def write_config(self):
@@ -117,6 +119,7 @@ class Project(object):
     def load_config(self):
         self._config_cache = None
         self._project_config = _load_config(self.config_file_path)
+        self._user_config = _load_config(self.user_config_file_path)
 
         config_version = self._project_config['version']
         self._project_config_schema = load_config_schema(config_version)
@@ -125,14 +128,50 @@ class Project(object):
         self.load_config()
 
     _config_cache = None
+    _user_config_cache = None
+    _project_config_cache = None
 
     @property
-    def config(self):
-        if self._config_cache is None:
-            self._config_cache = Config(
+    def user_config(self):
+
+        if self._user_config_cache is None:
+            user_config = Config(
+                config=self._user_config,
+                schema=self._project_config_schema,
+            )
+            user_config.unref()
+            self._user_config_cache = user_config
+
+        return self._user_config_cache
+
+    @property
+    def project_config(self):
+
+        if self._project_config_cache is None:
+            project_config = Config(
                 config=self._project_config,
                 schema=self._project_config_schema,
             )
+            project_config.unref()
+            self._project_config_cache = project_config
+
+        return self._project_config_cache
+
+    @property
+    def config(self):
+
+        warn_msg = '''Support for project.config will be dropped in the next populus release,
+        use project_config or user_config or both'''
+        warnings.warn(warn_msg, DeprecationWarning)
+
+        if self._config_cache is None:
+
+            merged_config = copy.deepcopy(self.user_config)
+            for key, value in self.project_config.items(flatten=True):
+                if key != 'version':
+                    merged_config[key] = value
+            self._config_cache = merged_config
+
         return self._config_cache
 
     @config.setter

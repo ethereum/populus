@@ -22,6 +22,12 @@ from populus.config import (
 
 from populus.config.defaults import (
     get_default_config_path,
+    get_user_default_config_path,
+)
+
+from populus.config.helpers import (
+    check_if_user_json_config_file_exists,
+    get_user_json_config_file_path,
 )
 
 from populus.utils.chains import (
@@ -37,6 +43,7 @@ from populus.utils.compile import (
 )
 
 from populus.utils.filesystem import (
+    ensure_path_exists,
     get_latest_mtime,
 )
 
@@ -53,13 +60,26 @@ class Project(object):
 
     project_dir = None
     config_file_path = None
+    user_config_file_path = None
 
-    def __init__(self, project_dir=None, create_config_file=False):
+    def __init__(self, project_dir=None, user_config_file_path=None, create_config_file=False):
 
         if project_dir is None:
             self.project_dir = os.getcwd()
         else:
             self.project_dir = os.path.abspath(project_dir)
+
+        self.user_config_file_path = user_config_file_path
+        if self.user_config_file_path is None:
+            self.user_config_file_path = get_user_json_config_file_path()
+            if not check_if_user_json_config_file_exists():
+                user_config_path = get_user_json_config_file_path()
+                user_defaults_path = get_user_default_config_path()
+                ensure_path_exists(os.path.dirname(user_config_path))
+                shutil.copyfile(
+                    user_defaults_path,
+                    user_config_path
+                )
 
         self.config_file_path = get_json_config_file_path(self.project_dir)
         if not os.path.exists(self.config_file_path):

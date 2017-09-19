@@ -20,6 +20,18 @@ from populus.utils.module_loading import (
 
 
 JSON_CONFIG_FILENAME = './project.json'
+USER_JSON_CONFIG_FILENAME = '~/.populus/config.json'
+
+
+def get_user_json_config_file_path():
+
+    return os.path.expanduser(USER_JSON_CONFIG_FILENAME)
+
+
+def check_if_user_json_config_file_exists():
+
+    json_config_file_path = get_user_json_config_file_path()
+    return os.path.exists(json_config_file_path)
 
 
 def get_json_config_file_path(project_dir):

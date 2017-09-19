@@ -23,6 +23,8 @@ DEFAULT_V5_CONFIG_FILENAME = "defaults.v5.config.json"
 DEFAULT_V6_CONFIG_FILENAME = "defaults.v6.config.json"
 DEFAULT_V7_CONFIG_FILENAME = "defaults.v7.config.json"
 
+DEFAULT_USER_V7_CONFIG_FILENAME = "defaults.user.v7.config.json"
+
 
 DEFAULT_CONFIG_FILENAMES = {
     V1: DEFAULT_V1_CONFIG_FILENAME,
@@ -33,6 +35,22 @@ DEFAULT_CONFIG_FILENAMES = {
     V6: DEFAULT_V6_CONFIG_FILENAME,
     V7: DEFAULT_V7_CONFIG_FILENAME,
 }
+
+DEFAULT_USER_CONFIG_FILENAMES = {
+    V7: DEFAULT_USER_V7_CONFIG_FILENAME,
+}
+
+
+def get_user_default_config_path(version=LATEST_VERSION):
+
+    try:
+        return os.path.join(ASSETS_DIR, DEFAULT_USER_CONFIG_FILENAMES[version])
+    except KeyError:
+        raise KeyError(
+            "`version` must be one of {0}".format(
+                sorted(tuple(DEFAULT_USER_CONFIG_FILENAMES.keys()))
+            )
+        )
 
 
 def get_default_config_path(version=LATEST_VERSION):

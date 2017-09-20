@@ -20,7 +20,7 @@ Command Line Options
       Populus
 
     Options:
-      -c, --config FILENAME  Specify a populus configuration file to be used.
+      -p, --project DIRECTORY  Specify a populus project directory to be used.
       -h, --help             Show this message and exit.
 
     Commands:
@@ -64,13 +64,17 @@ Initialize
     $ populus init --help
     Usage: populus init [OPTIONS]
 
+      or
+    $ populus -p /path/to/directory init
+    Usage: populus init [OPTIONS] to the spceified directory
+
       Generate project layout with an example contract.
 
     Options:
       -h, --help  Show this message and exit.
 
 Running ``$ populus init`` will initialize the current directory with the
-default project layout that populus uses.
+default project layout that populus uses. If ``-p`` argument is provided, populus will init to that directory
 
 * ``./contracts/``
 * ``./contracts/Greeter.sol``

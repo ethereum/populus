@@ -1,6 +1,8 @@
 Quickstart
 ==========
 
+Welcom to Populus! Populus has (almost) everything you need for Ethereum blockchain development.
+
 .. contents:: :local:
 
 
@@ -9,8 +11,8 @@ System Dependencies
 
 Populus depends on the following system dependencies.
 
-* `Solidity`_ : For contract compilation
-* `Go Ethereum`_: For running test chains and contract deployment.
+* The `Solidity`_ Compiler : Contracts are authored in the Solidity language, and then compiled to the bytecode of the Ethereum Virtual Machine (EVM).
+* `Geth`_: The official Go implementation of the Ethereum protocol. The Geth client runs a blockchain node, lets you interact with the blockchain, and also runs and deploys to the test blockchains during development.
 
 In addition, populus needs some system dependencies to be able to install the
 `PyEthereum`_ library.
@@ -39,14 +41,34 @@ OSX
     brew install pkg-config libffi autoconf automake libtool openssl
 
 
-Installation
-------------
+Install Populus
+---------------
 
 Populus can be installed using ``pip`` as follows.
 
 .. code-block:: shell
 
    $ pip install populus
+
+If you are installing on Ubuntu, and working with python3 (recommended):
+
+.. code-block:: shell
+
+    $ pip3 install populus
+
+
+.. note::
+
+    With Ubuntu, use Ubuntu's pip:
+
+    ``$sudo apt-get install python-pip``
+
+    or, for python 3:
+
+    ``$sudo apt-get install python3-pip``
+
+    You may need to install populus with sudo: ``$ sudo -H pip install populus``
+
 
 
 By default populus will use standard library tools for io operations like
@@ -67,7 +89,36 @@ following command.
    $ python setup.py install
 
 
-Initializing a new project
+Verify your installation
+
+.. code-block:: shell
+
+      $ populus
+
+      Usage: populus [OPTIONS] COMMAND [ARGS]...
+
+        Populus
+
+      Options:
+        -p, --project PATH  Specify a populus project directory
+        -l, --logging TEXT  Specify the logging level.  Allowed values are
+                            DEBUG/INFO or their numeric equivalents 10/20
+        -h, --help          Show this message and exit.
+
+      Commands:
+        chain    Manage and run ethereum blockchains.
+        compile  Compile project contracts, storing their...
+        config   Manage and run ethereum blockchains.
+        deploy   Deploys the specified contracts to a chain.
+        init     Generate project layout with an example...
+
+
+Great. Let's have the first populus project.
+
+
+
+
+Initializing a New Project
 --------------------------
 
 Populus can initialize your project using the ``$ populus init`` command.
@@ -86,12 +137,29 @@ Your project will now have a ``./contracts`` directory with a single Solidity
 source file in it named ``Greeter.sol``, as well as a ``./tests`` directory
 with a single test file named ``test_greeter.py``.
 
+Alternatively, you can init a new project by a directory:
+
+.. code-block:: shell
+
+    $ populus -p /path/to/my/project/ init
+
+
 Compiling your contracts
 ------------------------
 
 Before you compile our project, lets take a look at the ``Greeter`` contract
 that is generated as part of the project initialization.
 
+.. code-block:: shell
+
+    $ nano contracts/Greeter.sol
+
+.. note::
+
+    Check your IDE for Solidity extention/package.
+
+
+Here is the contract:
 
 .. code-block:: solidity
 
@@ -113,10 +181,13 @@ that is generated as part of the project initialization.
         }
     }
 
-``Greeter`` is simple contract that is initialized with a default greeting of
-the string ``'Hello'``.  It exposes the ``greet`` function which returns
-whatever string is set as the greeting, as well as a ``setGreeting`` function
-which allows the greeting to be changed.
+``Greeter`` is simple contract:
+
+* The ``contract`` keyword starts a contract definition
+* The contract has one public "state" variable, named ``greeting``.
+* The contract constrator function, ``function Greeter()``, which has the same name of the contract, initializes with a default greeting of the string ``'Hello'``.
+* The function ``greet`` is exposed, and returns whatever string is set as the greeting,
+* Also, the ``setGreeting`` function is available,  and allows the greeting to be changed.
 
 You can now compile the contract using ``$ populus compile``
 
@@ -135,6 +206,16 @@ You can now compile the contract using ``$ populus compile``
 
     > Wrote compiled assets to: ./build/contracts.json
 
+For compiling outside the project directory use:
+
+.. code-block:: shell
+
+    $ populus -p /path/to/my/project/ compile
+
+The build/contracts.json file contains a lot of information that the Solidity compiler produced.
+This is required to deploy and work with the contract. Some important info is the
+application binary interface (ABI) of the contract, which will allow to call it's functions after it's compiled,
+and the bytecode required to deploy the contract, and the bytecode that will run once the contract sits on the blockchain.
 
 Testing your contract
 ---------------------
@@ -163,7 +244,13 @@ following.
 
 
 You should see two tests, one that tests the default greeting, and one that
-tests that we can set a custom greeting.  You can run tests using the
+tests that we can set a custom greeting.
+
+Note that both test functions accept a ``chain`` argument. This "chain" is actually py.test fixture, provided by the populus pytest plugin.
+The chain in the tests is a populus "chain" object that runs a temporary blockchain called "tester". It quits after the test and saves nothing,
+so obviously not usable for long term runnig contracts, but great for testing.
+
+You can run tests using the
 ``py.test`` command line utility which was installed when you installed
 populus.
 
@@ -177,10 +264,56 @@ populus.
 
 You should see something akin to the output above with three passing tests.
 
+Finally, similarly to the tests deployment, test the same deployment from the command line:
+
+.. code-block:: bash
+
+    $ populus deploy --chain tester --no-wait-for-sync
+    > Found 1 contract source files
+    - contracts/Greeter.sol
+    > Compiled 1 contracts
+    - contracts/Greeter.sol:Greeter
+    Please select the desired contract:
+
+        0: Greeter
+
+Type 0 at the prompt, and enter.
+
+.. code-block:: bash
+
+
+    Beginning contract deployment.  Deploying 1 total contracts (1 Specified, 0 because of library dependencies).
+
+    Greeter
+    Deploying Greeter
+    Deploy Transaction Sent: 0x84d23fa8c38a09a3b29c4689364f71343058879639a617763ce675a336033bbe
+    Waiting for confirmation...
+
+    Transaction Mined
+    =================
+    Tx Hash      : 0x84d23fa8c38a09a3b29c4689364f71343058879639a617763ce675a336033bbe
+    Address      : 0xc305c901078781c232a2a521c2af7980f8385ee9
+    Gas Provided : 465729
+    Gas Used     : 365729
+
+
+    Verified contract bytecode @ 0xc305c901078781c232a2a521c2af7980f8385ee9
+    Deployment Successful.
+
+Nice. Of course, since this is an ad-hoc "tester" chain, it quits immediately, and nothing is really saved. But the deployment works and should
+work on a permanent blockchain, like the mainnet or testnet.
+
+Again, outside the project directory use:
+
+.. code-block:: shell
+
+    $ populus -p /path/to/my/project/ deploy --chain tester --no-wait-for-sync
+
+
 Setup for development and contribution
 --------------------------------------
 
-In order to configure the project locally and get the whole test suite passing, you'll 
+In order to configure the project locally and get the whole test suite passing, you'll
 need to make sure you're using the proper version of the ``solc`` compiler. Follow these
 steps to install all the dependencies:
 
@@ -213,7 +346,7 @@ except for ``solc``:
 Install Solidity
 ~~~~~~~~~~~~~~~~
 Here's where the fun begins: you'll have to build Solidity from source, and it
-specifically needs to be the ``release_0.4.8`` branch. Here's how to do that:
+specifically needs to be the ``release_0.4.13`` branch. Here's how to do that:
 
 First, clone the repository and switch to the proper branch:
 
@@ -221,7 +354,16 @@ First, clone the repository and switch to the proper branch:
 
     $ git clone --recursive https://github.com/ethereum/solidity.git
     $ cd solidity
-    $ git checkout release_0.4.8
+    $ git checkout release_0.4.13
+
+You can also download the tar or zip file at:
+
+    https://github.com/ethereum/solidity/releases
+
+.. note::
+
+    Use the tar.gz file to build from source, and make sure, after extracting the file, that the "deps" directory is not empty
+    and actually contains the dependencies.
 
 If you're on a Mac, you may need to accept the Xcode license as well. Make sure
 you have the latest version installed, and if you run into errors, try the following:
@@ -300,6 +442,6 @@ somewhere. Just retrace your steps and you'll figure it out.
 
 
 
-.. _Go Ethereum: https://github.com/ethereum/go-ethereum/
+.. _Geth: https://github.com/ethereum/go-ethereum/
 .. _Solidity: https://github.com/ethereum/solidity/
 .. _PyEthereum: https://github.com/ethereum/pyethereum/

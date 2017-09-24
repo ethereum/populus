@@ -18,7 +18,6 @@ from populus.config import (
     Config,
     load_config as _load_config,
     load_config_schema,
-    write_config as _write_config,
 )
 
 from populus.config.defaults import (
@@ -103,18 +102,6 @@ class Project(object):
     _project_config = None
     _user_config = None
     _project_config_schema = None
-
-    def write_config(self):
-
-        warn_msg = 'Next release of populus will simplify configs. Project write_config will be dropped for simple config file edit'  # noqa: E501
-        warnings.warn(warn_msg, DeprecationWarning)
-        _write_config(
-            self.project_dir,
-            self.config,
-            write_path=self.config_file_path,
-        )
-
-        return self.config_file_path
 
     def load_config(self):
         self._config_cache = None

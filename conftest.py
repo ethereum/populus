@@ -251,7 +251,7 @@ def _updated_project_config(project_dir, request):
             else:
                 project.config[key] = value
 
-        project.write_config()
+        #project.write_config()
 
 
 def pytest_fixture_setup(fixturedef, request):

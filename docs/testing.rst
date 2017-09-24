@@ -57,8 +57,7 @@ Project
 
 The :ref:`Project` object for your project.
 
-This object is important, since other objects, like chain, are derived from it
-
+This project object is initialised first, and the rest of the fixtures are derived from it.
 
 .. code-block:: python
 
@@ -72,27 +71,24 @@ This object is important, since other objects, like chain, are derived from it
 
 How populus finds the project of the project fixture:
 
-1. If no other argument is provided, and pytest is run from withing the project directory, the "project" fixture will be the
-current directory project
+If no other argument is provided, populus assumes that the tested project directory is the one where the tests run from.
+This is true if you run py.test from within the project's directory, or with a positional argument to this projecr's directory,
+e.g. ``$ py.test /path/to/my/project/``.
 
-2. If no other argument is provided, and pytest is run from outside the project's directory, e.g. ``$ py.tests /path/to/dir_foo/``,
-populus will try to load the project fixture from dir_foo
+If the tests are in a different directory, e.g. ``$ py.tests /path/to/tests/``,
+you will have to provide the tested project:
 
-3. Alternatively, you can explictly provide the project you want to populus to load the project fixture from:
-``$ py.test tests_dir --populus-project /path/to/dir_foo``.
+1. With command line argument: ``$ py.test /path/to/tests/ --populus-project /path/to/my/project/``
+2. Or, in a pytest.ini file, with the following entry: ``populus_project=/path/to/my/project/``
+3. Or with an environment variable: ``PYTEST_POPULUS_PROJECT``. E.g., ``$ export PYTEST_POPULUS_PROJECT=/path/to/my/project/``
 
-4. After the command line ``--populus-project`` argument, populus will also try to find a project by an ``populus_project`` entry in pytest.ini file
-(please refer to pytest docs about how pytest finds the pytest.ini file)
-
-5. Finally, populus will look for a project to load in the "project" fixture,
-in an environment variable ``PYTEST_POPULUS_PROJECT``.
-
+If a project is provided in more than one place, then the first is the command line, then pytest.ini, the the environment variable.
 
 .. note:
 
     Providing only the propulus project arg (via command line, or pytest.ini, or the environment variable) will not replace
     py.test own tests finding. So you still need to provide pytest the correct tests directory, or rely on pytest tests
-    searching.
+    collecting.
 
     So if you have a project at /home/username/projects/project_foo, then ``$ pytest --populus-project /home/username/projects/project_foo``
     may not work if you run it say from /home/elsewhere. The argument will only tell pytest where to load the project fixture, but

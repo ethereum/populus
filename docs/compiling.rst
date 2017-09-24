@@ -31,9 +31,9 @@ be done as follows.
     > Wrote compiled assets to: ./build/contracts.json
 
 
-    or:
+Outside the project directory use:
 
-    $ populus -p /path/to/directory compile
+    $ populus -p /path/to/my/project/ compile
 
 
 

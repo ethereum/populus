@@ -64,10 +64,6 @@ Initialize
     $ populus init --help
     Usage: populus init [OPTIONS]
 
-      or
-    $ populus -p /path/to/directory init
-    Usage: populus init [OPTIONS] to the spceified directory
-
       Generate project layout with an example contract.
 
     Options:
@@ -79,3 +75,10 @@ default project layout that populus uses. If ``-p`` argument is provided, populu
 * ``./contracts/``
 * ``./contracts/Greeter.sol``
 * ``./tests/test_greeter.py``
+
+You can also init a project from another directory with:
+
+.. code-block:: shell
+
+    $ populus -p /path/to/my/project/ init
+

@@ -300,7 +300,7 @@ Type 0 at the prompt, and enter.
     Verified contract bytecode @ 0xc305c901078781c232a2a521c2af7980f8385ee9
     Deployment Successful.
 
-Nice. Of course, since this is a the ad-hoc "tester" chain, it quits immediately, and nothing is really saved. But the deployment works and should
+Nice. Of course, since this is an ad-hoc "tester" chain, it quits immediately, and nothing is really saved. But the deployment works and should
 work on a permanent blockchain, like the mainnet or testnet.
 
 Again, outside the project directory use:
@@ -362,8 +362,8 @@ You can also download the tar or zip file at:
 
 .. note::
 
-    Use the tar.gz file to build from source (make sure, after extracting the file, that the "deps" directory is not empty
-    and actually contains the dependencies)
+    Use the tar.gz file to build from source, and make sure, after extracting the file, that the "deps" directory is not empty
+    and actually contains the dependencies.
 
 If you're on a Mac, you may need to accept the Xcode license as well. Make sure
 you have the latest version installed, and if you run into errors, try the following:

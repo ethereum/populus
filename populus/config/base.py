@@ -89,7 +89,7 @@ class Config(object):
         except KeyError:
             if default is empty:
                 raise KeyError(
-                    "Key '{0}' not found in {1}".format(key, self.wrapped)
+                    "Key '{0}' not found in {1}".format(key, self._wrapped)
                 )
             else:
                 value = default

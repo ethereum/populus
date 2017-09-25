@@ -8,9 +8,6 @@ import click
 from populus.compilation import (
     compile_project_contracts,
 )
-from populus.config import (
-    Config,
-)
 
 from .accounts import (
     is_account_locked,
@@ -25,10 +22,7 @@ from .compile import (
 from .contracts import (
     verify_contract_bytecode,
 )
-from .geth import (
-    get_data_dir as get_local_chain_datadir,
-    get_geth_ipc_path,
-)
+
 from .observers import (
     DirWatcher,
 )

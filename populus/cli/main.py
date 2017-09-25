@@ -68,7 +68,7 @@ def main(ctx, project_dir, logging_level):
     ctx.obj = {}
     ctx.obj['PROJECT_DIR'] = project_dir
 
-    if ctx.invoked_subcommand != 'init':
+    if ctx.invoked_subcommand not in ['init', 'upgrade']:
 
         project = Project(project_dir)
 

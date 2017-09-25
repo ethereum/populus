@@ -51,7 +51,8 @@ def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expecte
     project.config['chains.local_c.web3.provider.settings.ipc_path'] = (
         get_geth_ipc_path(get_local_chain_datadir(project.project_dir, 'local_c'))
     )
-    #project.write_config()
+
+    # project.write_config()
 
     @click.command()
     def wrapper():
@@ -61,8 +62,8 @@ def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expecte
     runner = CliRunner()
     result = runner.invoke(wrapper, [], input=stdin)
 
-    #assert result.exit_code == 0
-    #assert expected in result.output
+    # assert result.exit_code == 0
+    # assert expected in result.output
 
 
 @pytest.mark.parametrize(

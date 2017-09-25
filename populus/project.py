@@ -8,6 +8,14 @@ from eth_utils import (
     to_tuple,
 )
 
+from populus.config.defaults import (
+    load_default_config,
+)
+
+from populus.exceptions import (
+    PopulusResourceWarning,
+)
+
 from populus.compilation import (
     compile_project_contracts,
 )
@@ -18,6 +26,7 @@ from populus.config import (
     Config,
     load_config as _load_config,
     load_config_schema,
+    write_config,
 )
 
 from populus.config.defaults import (
@@ -49,6 +58,7 @@ from populus.utils.filesystem import (
 
 from populus.config.helpers import (
     get_json_config_file_path,
+    get_legacy_json_config_file_path,
 )
 
 from populus.utils.testing import (
@@ -61,6 +71,7 @@ class Project(object):
     project_dir = None
     config_file_path = None
     user_config_file_path = None
+    legacy_config_path = None
 
     def __init__(self, project_dir=None, user_config_file_path=None, create_config_file=False):
 
@@ -69,6 +80,7 @@ class Project(object):
         else:
             self.project_dir = os.path.abspath(project_dir)
 
+        # user config
         self.user_config_file_path = user_config_file_path
         if self.user_config_file_path is None:
             self.user_config_file_path = get_user_json_config_file_path()
@@ -81,17 +93,29 @@ class Project(object):
                     user_config_path
                 )
 
+        # legacy config
+        legacy_path = get_legacy_json_config_file_path(self.project_dir)
+        if os.path.exists(legacy_path):
+            self.legacy_config_path = legacy_path
+            warnings.warn(
+                "Found legacy config file at {legacy_path}".format(
+                    legacy_path=legacy_path
+                ),
+                PopulusResourceWarning
+            )
+
+        # project config
         self.config_file_path = get_json_config_file_path(self.project_dir)
         if not os.path.exists(self.config_file_path):
             if create_config_file:
                 defaults_path = get_default_config_path()
                 shutil.copyfile(defaults_path, self.config_file_path)
             else:
-                raise FileNotFoundError(
-                    "No project config file found at {project_dir}".format(
-                        project_dir=self.project_dir
-                    )
-                )
+                if self.legacy_config_path is not None:
+                    msg = "No project config file found at {project_dir}, but a legacy config exists. Try to upgrade"  # noqa: E501
+                else:
+                    msg = "No project config file found at {project_dir}"
+                raise FileNotFoundError(msg.format(project_dir=self.project_dir))
 
         self.load_config()
 
@@ -105,6 +129,8 @@ class Project(object):
 
     def load_config(self):
         self._config_cache = None
+        self._user_config_cache = None
+        self._project_config_cache = None
         self._project_config = _load_config(self.config_file_path)
         self._user_config = _load_config(self.user_config_file_path)
 
@@ -173,6 +199,20 @@ class Project(object):
                 config=self._project_config,
                 schema=self._project_config_schema,
             )
+
+    def clean_config(self):
+
+        items = self.project_config.items(flatten=True)
+
+        default_config = Config(load_default_config(version=self.project_config['version']))
+        default_config.unref()
+        default_project_keys = [x[0] for x in default_config.items(flatten=True)]
+
+        for key, value in items:
+            if self.user_config.get(key) == value and key not in default_project_keys:
+                self.project_config.pop(key)
+
+        write_config(self.project_config, self.config_file_path)
 
     #
     # Project

@@ -83,7 +83,7 @@ you will have to provide the tested project:
 2. Or, in a pytest.ini file, with the following entry: ``populus_project=/path/to/my/project/``
 3. Or with an environment variable: ``PYTEST_POPULUS_PROJECT``. E.g., ``$ export PYTEST_POPULUS_PROJECT=/path/to/my/project/``
 
-If a project is provided in more than one place, then the first is the command line, then pytest.ini, the the environment variable.
+If a project is provided in more than one place, then the first is the command line, then pytest.ini, then the environment variable.
 
 .. note:
 

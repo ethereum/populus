@@ -75,6 +75,8 @@ Above you can see the output for a basic deployment.
 
 If your are outside the project directory, use:
 
+.. code-block:: shell
+
 	$ populus -p /path/to/my/project deploy Wallet -c local_a
 
 

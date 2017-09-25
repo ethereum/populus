@@ -69,7 +69,8 @@ This project object is initialised first, and the rest of the fixtures are deriv
         assert 'MyContract' in project.compiled_contract_data
 
 
-How populus finds the project of the project fixture:
+How populus finds the project of the project fixture
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 If no other argument is provided, populus assumes that the tested project directory is the one where the tests run from.
 This is true if you run py.test from within the project's directory, or with a positional argument to this projecr's directory,

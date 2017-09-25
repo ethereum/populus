@@ -12,7 +12,7 @@ System Dependencies
 Populus depends on the following system dependencies.
 
 * The `Solidity`_ Compiler : Contracts are authored in the Solidity language, and then compiled to the bytecode of the Ethereum Virtual Machine (EVM).
-* `Geth`_: The official Go implementation of the Ethereum protocol. The Geth client runs test blockchains, and deploys the contract to them.
+* `Geth`_: The official Go implementation of the Ethereum protocol. The Geth client runs a blockchain node, lets you interact with the blockchain, and also runs and deploys to the test blockchains during development.
 
 In addition, populus needs some system dependencies to be able to install the
 `PyEthereum`_ library.
@@ -63,7 +63,9 @@ If you are installing on Ubuntu, and working with python3 (recommended):
 
     ``$sudo apt-get install python-pip``
 
-    or, for python 3: ``$sudo apt-get install python3-pip``
+    or, for python 3:
+
+    ``$sudo apt-get install python3-pip``
 
     You may need to install populus with sudo: ``$ sudo -H pip install populus``
 
@@ -182,8 +184,8 @@ Here is the contract:
 ``Greeter`` is simple contract:
 
 * The ``contract`` keyword starts a contract definition
-* The contract has one public "state" variable, named greeting.
-* The contract constrator function, which has the same name of the contract, initializes with a default greeting of the string ``'Hello'``.
+* The contract has one public "state" variable, named ``greeting``.
+* The contract constrator function, ``function Greeter()``, which has the same name of the contract, initializes with a default greeting of the string ``'Hello'``.
 * The function ``greet`` is exposed, and returns whatever string is set as the greeting,
 * Also, the ``setGreeting`` function is available,  and allows the greeting to be changed.
 

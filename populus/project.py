@@ -52,6 +52,9 @@ class Project(object):
     _project_config_schema = None
 
     def write_config(self):
+
+        warn_msg = 'Next release of populus will simplify configs. Project write_config will be dropped for simple config file edit'  # noqa: E501
+        warnings.warn(warn_msg, DeprecationWarning)
         if self.config_file_path is None:
             config_file_path = get_default_project_config_file_path(self.project_dir)
         else:

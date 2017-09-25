@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+import warnings
 
 import click
 
@@ -62,6 +63,8 @@ def config_set(ctx, key_value_pairs):
     """
     Sets the provided key/value pairs in the project config.
     """
+    warn_msg = 'Next release of populus will simplify configs. Config set will be dropped for simple config file edit'  # noqa: E501
+    warnings.warn(warn_msg, DeprecationWarning)
     logger = logging.getLogger('populus.cli.config.set')
     project = ctx.obj['PROJECT']
     for key, value in key_value_pairs:
@@ -104,6 +107,8 @@ def config_delete(ctx, keys):
     """
     Deletes the provided key/value pairs from the project config.
     """
+    warn_msg = "Next release of populus will simplify configs. Config delete will be dropped for simple config file edit"  # noqa: E501
+    warnings.warn(warn_msg, DeprecationWarning)
     logger = logging.getLogger('populus.cli.config.delete')
     project = ctx.obj['PROJECT']
     for key in keys:

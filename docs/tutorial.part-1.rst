@@ -108,3 +108,46 @@ installed when you installed populus.
     tests/test_greeter.py::test_named_greeting PASSED
 
 You should see something akin to the output above with three passing tests.
+
+Behind the scenes, populus uses a pytest plugin that creates a populus project object, and then provide this object,
+(and it's derived objects), to the test functions via a pytest fixture.
+
+Thus, tests run for a specific project.
+
+If you run py.test from within the project directory, populus will assume that the current working directory
+is the project you want to test, and the fixtures will be based on this directory.
+
+The same is true if you provide pytest one positional argument for testing, which is the project directory:
+
+.. code-block:: bash
+
+    $ py.test /path/to/my/project/
+
+Here, populus will provide the fixtures based on the project at ``/path/to/my/project/``. Pytest will also find the tests in that directory.
+Note that populus and py.test look for their files separatly. Pytest looks for and collects the tests, populus for the the populus.json and other project files.
+
+
+When you want to run tests that are saved outside the project directory, you will have to explictly provide the project directory.
+If the tests are at ``/path/to/tests/``, then you can set the tested *project* directory as follows:
+
+1. As a command line argument: ``$ py.test /path/to/tests/ --populus-project /path/to/my/project/``
+2. In a pytest.ini file, with the following entry: ``populus_project=/path/to/my/project/``
+3. With an environment variable: ``PYTEST_POPULUS_PROJECT``. E.g., ``$ export PYTEST_POPULUS_PROJECT=/path/to/my/project/``
+
+If you used method 2 or 3, that is with pytest.ini or an environment variable, then:
+
+.. code-block:: bash
+
+    $ py.test /path/to/tests/
+
+Will do, and populus will figure out the testing project from pytest.ini or the environment variable. The tests found at
+``/path/to/tests/`` will be applied to this project.
+
+.. note::
+
+    For pytest.ini files, make sure the file is in the right location, and that py.test actually picks it.
+    See https://docs.pytest.org/en/latest/customize.html#initialization-determining-rootdir-and-inifile .
+
+So by providing explicit project for testing, you can run tests from one project on another, or if all your projects
+provide a repeating functionality, you can use the same set of tests for all of them.
+

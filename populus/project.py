@@ -1,22 +1,33 @@
 import os
+import shutil
 import itertools
 import warnings
+
+from eth_utils import (
+    to_tuple,
+)
 
 from populus.compilation import (
     compile_project_contracts,
 )
+
 from populus.config import (
     ChainConfig,
     CompilerConfig,
     Config,
-    get_default_config_path,
     load_config as _load_config,
     load_config_schema,
     write_config as _write_config,
 )
+
+from populus.config.defaults import (
+    get_default_config_path,
+)
+
 from populus.utils.chains import (
     get_base_blockchain_storage_dir,
 )
+
 from populus.utils.compile import (
     get_build_asset_dir,
     get_compiled_contracts_asset_path,
@@ -24,29 +35,49 @@ from populus.utils.compile import (
     get_project_source_paths,
     get_test_source_paths,
 )
+
 from populus.utils.filesystem import (
-    relpath,
     get_latest_mtime,
 )
-from populus.utils.config import (
-    check_if_json_config_file_exists,
-    get_default_project_config_file_path,
+
+from populus.config.helpers import (
     get_json_config_file_path,
 )
+
 from populus.utils.testing import (
     get_tests_dir,
 )
 
 
 class Project(object):
-    def __init__(self, config_file_path=None):
-        self.config_file_path = config_file_path
+
+    project_dir = None
+    config_file_path = None
+
+    def __init__(self, project_dir=None, create_config_file=False):
+
+        if project_dir is None:
+            self.project_dir = os.getcwd()
+        else:
+            self.project_dir = os.path.abspath(project_dir)
+
+        self.config_file_path = get_json_config_file_path(self.project_dir)
+        if not os.path.exists(self.config_file_path):
+            if create_config_file:
+                defaults_path = get_default_config_path()
+                shutil.copyfile(defaults_path, self.config_file_path)
+            else:
+                raise FileNotFoundError(
+                    "No project config file found at {project_dir}".format(
+                        project_dir=self.project_dir
+                    )
+                )
+
         self.load_config()
 
     #
     # Config
     #
-    config_file_path = None
 
     _project_config = None
     _project_config_schema = None
@@ -55,33 +86,17 @@ class Project(object):
 
         warn_msg = 'Next release of populus will simplify configs. Project write_config will be dropped for simple config file edit'  # noqa: E501
         warnings.warn(warn_msg, DeprecationWarning)
-        if self.config_file_path is None:
-            config_file_path = get_default_project_config_file_path(self.project_dir)
-        else:
-            config_file_path = self.config_file_path
-
-        self.config_file_path = _write_config(
+        _write_config(
             self.project_dir,
             self.config,
-            write_path=config_file_path,
+            write_path=self.config_file_path,
         )
 
         return self.config_file_path
 
     def load_config(self):
         self._config_cache = None
-
-        if self.config_file_path is None:
-            has_json_config = check_if_json_config_file_exists()
-
-            if has_json_config:
-                path_to_load = get_json_config_file_path()
-            else:
-                path_to_load = get_default_config_path()
-        else:
-            path_to_load = self.config_file_path
-
-        self._project_config = _load_config(path_to_load)
+        self._project_config = _load_config(self.config_file_path)
 
         config_version = self._project_config['version']
         self._project_config_schema = load_config_schema(config_version)
@@ -117,12 +132,6 @@ class Project(object):
     # Project
     #
     @property
-    @relpath
-    def project_dir(self):
-        return self.config.get('populus.project_dir', os.getcwd())
-
-    @property
-    @relpath
     def tests_dir(self):
         return get_tests_dir(self.project_dir)
 
@@ -130,12 +139,10 @@ class Project(object):
     # Contracts
     #
     @property
-    @relpath
     def compiled_contracts_asset_path(self):
         return get_compiled_contracts_asset_path(self.build_asset_dir)
 
     @property
-    @relpath
     def contracts_source_dir(self):
         warnings.warn(DeprecationWarning(
             "project.contracts_source_dir has been replaced by the plural, "
@@ -149,15 +156,15 @@ class Project(object):
         )[0]
 
     @property
-    @relpath
+    @to_tuple
     def contracts_source_dirs(self):
-        return self.config.get(
-            'compilation.contracts_source_dirs',
-            get_contracts_source_dirs(self.project_dir),
-        )
+        source_dirs = self.config.get('compilation.contracts_source_dirs')
+        if source_dirs:
+            return [os.path.join(self.project_dir, contracts_dir) for contracts_dir in source_dirs]
+        else:
+            return get_contracts_source_dirs(self.project_dir)
 
     @property
-    @relpath
     def build_asset_dir(self):
         return get_build_asset_dir(self.project_dir)
 
@@ -243,6 +250,5 @@ class Project(object):
         return chain
 
     @property
-    @relpath
     def base_blockchain_storage_dir(self):
         return get_base_blockchain_storage_dir(self.project_dir)

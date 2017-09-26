@@ -46,7 +46,7 @@ project ``./contracts`` directory.
 	}
 
 
-We can deploy this contract to a local test chain like this.
+We can deploy this contract to a local test chain like this:
 
 .. code-block:: shell
 
@@ -72,6 +72,14 @@ We can deploy this contract to a local test chain like this.
 
 
 Above you can see the output for a basic deployment.
+
+If your are outside the project directory, use:
+
+.. code-block:: shell
+
+	$ populus -p /path/to/my/project deploy Wallet -c local_a
+
+
 
 Programmatically deploy a contract
 ----------------------------------

@@ -10,11 +10,11 @@ from eth_utils import (
     to_ordered_dict,
 )
 
-from .mappings import (
+from populus.utils.mappings import (
     get_nested_key,
     has_nested_key,
 )
-from .module_loading import (
+from populus.utils.module_loading import (
     import_string,
 )
 
@@ -22,23 +22,16 @@ from .module_loading import (
 JSON_CONFIG_FILENAME = './populus.json'
 
 
-def get_json_config_file_path(project_dir=None):
-    if project_dir is None:
-        project_dir = os.getcwd()
+def get_json_config_file_path(project_dir):
 
     json_config_file_path = os.path.join(project_dir, JSON_CONFIG_FILENAME)
     return json_config_file_path
 
 
-def check_if_json_config_file_exists(project_dir=None):
-    if project_dir is None:
-        project_dir = os.getcwd()
+def check_if_json_config_file_exists(project_dir):
 
     json_config_file_path = get_json_config_file_path(project_dir)
     return os.path.exists(json_config_file_path)
-
-
-get_default_project_config_file_path = get_json_config_file_path
 
 
 def get_empty_config():

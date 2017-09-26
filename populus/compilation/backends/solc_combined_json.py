@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import pprint
+import warnings
 
 from cytoolz.dicttoolz import (
     assoc,
@@ -135,6 +136,10 @@ class SolcCombinedJSONBackend(BaseCompilerBackend):
                 "versions <=0.4.8.  The SolcStandardJSONBackend should be used "
                 "for all versions >=0.4.9"
             )
+
+        warn_msg = 'Support for solc <0.4.11 will be dropped in the next populus release'
+        warnings.warn(warn_msg, DeprecationWarning)
+
         super(SolcCombinedJSONBackend, self).__init__(*args, **kwargs)
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):

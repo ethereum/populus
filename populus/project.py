@@ -84,6 +84,9 @@ class Project(object):
 
     def write_config(self):
 
+        warn_msg = 'Next release of populus will simplify configs. Project write_config will be dropped for simple config file edit'  # noqa: E501
+        warnings.warn(warn_msg, DeprecationWarning)
+       
         _write_config(
             self.project_dir,
             self.config,

@@ -72,8 +72,8 @@ This project object is initialised first, and the rest of the fixtures are deriv
 How populus finds the project of the project fixture
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-If no other argument is provided, populus assumes that the tested project directory is the one where the tests run from.
-This is true if you run py.test from within the project's directory, or with a positional argument to this projecr's directory,
+If no other argument is provided, populus defaults to using the current tests directory.
+This is true if you run py.test from within the project's directory, or with a positional argument to this project's directory,
 e.g. ``$ py.test /path/to/my/project/``.
 
 If the tests are in a different directory, e.g. ``$ py.tests /path/to/tests/``,
@@ -81,9 +81,15 @@ you will have to provide the tested project:
 
 1. With command line argument: ``$ py.test /path/to/tests/ --populus-project /path/to/my/project/``
 2. Or, in a pytest.ini file, with the following entry: ``populus_project=/path/to/my/project/``
-3. Or with an environment variable: ``PYTEST_POPULUS_PROJECT``. E.g., ``$ export PYTEST_POPULUS_PROJECT=/path/to/my/project/``
+3. Or with an environment variable: ``PYTEST_POPULUS_PROJECT``. E.g., ``PYTEST_POPULUS_PROJECT=/path/to/my/project/ py.test /path/to/tests/``
 
-If a project is provided in more than one place, then the first is the command line, then pytest.ini, then the environment variable.
+
+The precedence order for these different methods of setting the project directory is:
+
+#. command line
+#. pytest.ini
+#. environment variable
+
 
 .. note:
 

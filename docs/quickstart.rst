@@ -185,9 +185,9 @@ Here is the contract:
 
 * The ``contract`` keyword starts a contract definition
 * The contract has one public "state" variable, named ``greeting``.
-* The contract constrator function, ``function Greeter()``, which has the same name of the contract, initializes with a default greeting of the string ``'Hello'``.
-* The function ``greet`` is exposed, and returns whatever string is set as the greeting,
-* Also, the ``setGreeting`` function is available,  and allows the greeting to be changed.
+* The contract constructor function, ``function Greeter()``, which has the same name of the contract, initializes with a default greeting of the string ``'Hello'``.
+* The ``greet`` function is exposed, and returns whatever string is set as the greeting,
+* The ``setGreeting`` function is available,  and allows the greeting to be changed.
 
 You can now compile the contract using ``$ populus compile``
 
@@ -246,9 +246,9 @@ following.
 You should see two tests, one that tests the default greeting, and one that
 tests that we can set a custom greeting.
 
-Note that both test functions accept a ``chain`` argument. This "chain" is actually py.test fixture, provided by the populus pytest plugin.
-The chain in the tests is a populus "chain" object that runs a temporary blockchain called "tester". It quits after the test and saves nothing,
-so obviously not usable for long term runnig contracts, but great for testing.
+Note that both test functions accept a ``chain`` argument. This "chain" is actually a `py.test fixture <https://docs.pytest.org/en/latest/fixture.html>`_ , provided by the populus pytest plugin.
+The chain in the tests is a populus "chain" object that runs a temporary blockchain called "tester". The tester chain is ephemeral. All blockchain state is reset at the beginning of each test run and is
+only stored in memory, so obviously not usable for long term runnig contracts, but great for testing.
 
 You can run tests using the
 ``py.test`` command line utility which was installed when you installed
@@ -345,8 +345,16 @@ except for ``solc``:
 
 Install Solidity
 ~~~~~~~~~~~~~~~~
-Here's where the fun begins: you'll have to build Solidity from source, and it
-specifically needs to be the ``release_0.4.13`` branch. Here's how to do that:
+You'll have to install solidity, recommended from release 4.11 or greater.
+
+Installtion scripts for binary:
+'''''''''''''''''''''''''''''''
+
+    https://github.com/pipermerriam/py-solc#installing-the-solc-binary
+
+
+Installtion scripts building it:
+''''''''''''''''''''''''''''''''
 
 First, clone the repository and switch to the proper branch:
 

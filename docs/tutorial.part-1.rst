@@ -124,10 +124,7 @@ The same is true if you provide pytest one positional argument for testing, whic
     $ py.test /path/to/my/project/
 
 Here, populus will provide the fixtures based on the project at ``/path/to/my/project/``. Pytest will also find the tests in that directory.
-Note that populus and py.test look for their files separatly. Pytest looks for and collects the tests, populus for the the populus.json and other project files.
 
-
-When you want to run tests that are saved outside the project directory, you will have to explictly provide the project directory.
 If the tests are at ``/path/to/tests/``, then you can set the tested *project* directory as follows:
 
 1. As a command line argument: ``$ py.test /path/to/tests/ --populus-project /path/to/my/project/``

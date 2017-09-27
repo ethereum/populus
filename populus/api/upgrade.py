@@ -21,7 +21,8 @@ from populus.config.versions import (
 import shutil
 
 
-def upgrade_project(project_dir, logger, to_version=None):
+def upgrade_configs(project_dir, logger, to_version=None):
+    """upgrade project and the user config file"""
 
     project = Project(project_dir=project_dir, create_config_file=True)
 
@@ -48,11 +49,11 @@ def upgrade_project(project_dir, logger, to_version=None):
             legacy_config = upgrade_config(
                 legacy_config, ConfigContext.LEGACY, LAST_NO_USER_CONFIG_VERSION
             )
-            shutil.move(
-                project.legacy_config_path,
-                project.legacy_config_path + ".orig"
-            )
 
+        shutil.move(
+            project.legacy_config_path,
+            project.legacy_config_path + ".orig"
+        )
         write_config(legacy_config, project.config_file_path)
         project.reload_config()
 

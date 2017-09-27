@@ -46,7 +46,7 @@ from populus.config.versions import (
         (True, False),
     )),
 )
-def test_legacy_config_upgrade(from_to_version, use_config_object):
+def test_legacy_config_upgrade(project, from_to_version, use_config_object):
     from_version, to_version = from_to_version
     base_initial_config = load_default_config(version=from_version)
     expected_config = load_default_config(version=to_version)

@@ -42,6 +42,13 @@ def update_project_config(*key_value_pairs):
     return outer
 
 
+def user_config_version(version):
+    def outer(fn):
+        fn._user_config_version = version
+        return fn
+    return outer
+
+
 DEFAULT_TESTS_DIR = "./tests/"
 
 

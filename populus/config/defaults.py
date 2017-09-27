@@ -69,3 +69,10 @@ def load_default_config(version=LATEST_VERSION):
     with open(default_config_path) as default_config_file:
         default_config = json.load(default_config_file)
     return default_config
+
+
+def load_user_default_config(version=LATEST_VERSION):
+    default_config_path = get_user_default_config_path(version)
+    with open(default_config_path) as default_config_file:
+        default_config = json.load(default_config_file)
+    return default_config

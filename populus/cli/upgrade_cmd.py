@@ -3,7 +3,7 @@ import click
 from .main import main
 
 from populus.api.upgrade import (
-    upgrade_project,
+    upgrade_configs,
 )
 
 from populus.config.versions import (
@@ -26,4 +26,4 @@ def upgrade_cmd(ctx, to_version):
     logger = logging.getLogger('populus.cli.upgrade')
     project_dir = ctx.obj['PROJECT_DIR']
 
-    upgrade_project(project_dir, logger)
+    upgrade_configs(project_dir, logger)

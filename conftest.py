@@ -70,6 +70,21 @@ def project(request, project_dir):
 
     project = Project(project_dir, create_config_file=True)
 
+    key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])
+    key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
+
+    key_value_pairs = tuple(itertools.chain(
+        key_value_pairs_from_module,
+        key_value_pairs_from_fn,
+    ))
+
+    if key_value_pairs:
+        for key, value in key_value_pairs:
+            if value is None:
+                del project.config[key]
+            else:
+                project.config[key] = value
+
     project.fill_contracts_cache(contracts, mtime)
     request.config.cache.set(
         CACHE_KEY_CONTRACTS,
@@ -232,28 +247,6 @@ def _loaded_test_contract_fixtures(project_dir, request):
         shutil.copy(src_path, dst_path)
 
 
-@pytest.fixture()
-def _updated_project_config(project_dir, request):
-    key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])
-    key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
-
-    key_value_pairs = tuple(itertools.chain(
-        key_value_pairs_from_module,
-        key_value_pairs_from_fn,
-    ))
-
-    if key_value_pairs:
-        project = Project(project_dir, create_config_file=True)
-
-        for key, value in key_value_pairs:
-            if value is None:
-                del project.config[key]
-            else:
-                project.config[key] = value
-
-        #project.write_config()
-
-
 def pytest_fixture_setup(fixturedef, request):
     """
     Injects the following fixtures ahead of the `project` fixture.
@@ -266,7 +259,6 @@ def pytest_fixture_setup(fixturedef, request):
         request.getfixturevalue('project_dir')
         request.getfixturevalue('_loaded_contract_fixtures')
         request.getfixturevalue('_loaded_test_contract_fixtures')
-        request.getfixturevalue('_updated_project_config')
 
 
 @pytest.fixture()

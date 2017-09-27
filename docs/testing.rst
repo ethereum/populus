@@ -47,7 +47,7 @@ Pytest Fixtures
 The test fixtures provided by populus are what make testing easy.  In order to
 use a fixture in your tests all you have to do add an argument with the same
 name to the signature of your test function.
- 
+
 
 
 Project
@@ -57,6 +57,7 @@ Project
 
 The :ref:`Project` object for your project.
 
+This project object is initialised first, and the rest of the fixtures are derived from it.
 
 .. code-block:: python
 
@@ -66,6 +67,43 @@ The :ref:`Project` object for your project.
 
         # raw compiled contract access
         assert 'MyContract' in project.compiled_contract_data
+
+
+How populus finds the project of the project fixture
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+If no other argument is provided, populus defaults to using the current tests directory.
+This is true if you run py.test from within the project's directory, or with a positional argument to this project's directory,
+e.g. ``$ py.test /path/to/my/project/``.
+
+If the tests are in a different directory, e.g. ``$ py.tests /path/to/tests/``,
+you will have to provide the tested project:
+
+1. With command line argument: ``$ py.test /path/to/tests/ --populus-project /path/to/my/project/``
+2. Or, in a pytest.ini file, with the following entry: ``populus_project=/path/to/my/project/``
+3. Or with an environment variable: ``PYTEST_POPULUS_PROJECT``. E.g., ``PYTEST_POPULUS_PROJECT=/path/to/my/project/ py.test /path/to/tests/``
+
+
+The precedence order for these different methods of setting the project directory is:
+
+#. command line
+#. pytest.ini
+#. environment variable
+
+
+.. note:
+
+    Providing only the propulus project arg (via command line, or pytest.ini, or the environment variable) will not replace
+    py.test own tests finding. So you still need to provide pytest the correct tests directory, or rely on pytest tests
+    collecting.
+
+    So if you have a project at /home/username/projects/project_foo, then ``$ pytest --populus-project /home/username/projects/project_foo``
+    may not work if you run it say from /home/elsewhere. The argument will only tell pytest where to load the project fixture, but
+    not where the actual tests are.
+
+    The nice thing is that you can run the same tests suite on diffrent projects, each time apply the same test to another project,
+    where pytest will load the project fixture from another project.
+
 
 
 Chain

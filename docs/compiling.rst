@@ -31,6 +31,16 @@ be done as follows.
     > Wrote compiled assets to: ./build/contracts.json
 
 
+Outside the project directory use
+
+
+.. code-block:: bash
+
+    $ populus -p /path/to/my/project/ compile
+
+
+
+
 Watching
 --------
 

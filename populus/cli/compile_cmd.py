@@ -1,20 +1,10 @@
 import click
 
-from populus.compilation import (
-    compile_project_contracts,
-)
-
-from populus.utils.cli import (
-    watch_project_contracts,
-)
-from populus.utils.compat import (
-    spawn,
-)
-from populus.utils.compile import (
-    write_compiled_sources,
-)
-
 from .main import main
+
+from populus.api.compile_contracts import (
+    compile_project,
+)
 
 
 @main.command('compile')
@@ -36,13 +26,4 @@ def compile_cmd(ctx, watch):
     specify only named contracts in the specified file.
     """
     project = ctx.obj['PROJECT']
-
-    _, compiled_contracts = compile_project_contracts(project)
-    write_compiled_sources(project.compiled_contracts_asset_path, compiled_contracts)
-
-    if watch:
-        thread = spawn(
-            watch_project_contracts,
-            project=project,
-        )
-        thread.join()
+    compile_project(project, watch)

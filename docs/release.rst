@@ -7,8 +7,9 @@ Release Notes
 1.10.0
 ------
 
-- Deprecate support for ``solc<0.4.11``.
 - Support for specifying project directory via any of ``pytest.ini``, ``--populus-project``, or via environment variable ``PYTEST_POPULUS_PROJECT``.
+- Support for running populus commands from outside of the project directory with ``-p/--project``.
+- Deprecate support for ``solc<0.4.11``.
 - Deprecate ``Project.write_config()`` in preparation for configuration API refactors.
 - Deprecate ``$ populus config set`` and ``populus config delete`` commands in preparatin for configuration API refactors.
 

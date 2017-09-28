@@ -27,7 +27,8 @@ from populus.config.versions import (
     V4,
     V5,
     V6,
-    V7
+    V7,
+    FIRST_USER_CONFIG_VERSION
 )
 
 from populus.api.upgrade import (
@@ -43,7 +44,7 @@ from populus.utils.testing import (
     'from_legacy_version',
     (V1, V2, V3, V4, V5, V6)
 )
-@user_config_version(V7)
+@user_config_version(FIRST_USER_CONFIG_VERSION)
 def test_upgrade_to_user_config(project, from_legacy_version):
 
     shutil.copyfile(
@@ -54,7 +55,7 @@ def test_upgrade_to_user_config(project, from_legacy_version):
     os.remove(project.config_file_path)
 
     logger = logging.getLogger("test.test_upgrade_to_user_config")
-    upgrade_configs(project.project_dir, logger, V7)
+    upgrade_configs(project.project_dir, logger, FIRST_USER_CONFIG_VERSION)
 
     upgraded_project = Project(
         project_dir=project.project_dir,
@@ -68,6 +69,6 @@ def test_upgrade_to_user_config(project, from_legacy_version):
     expected_project_config.unref()
 
     assert upgraded_project.legacy_config_path is None
-    assert project.config == expected_user_config
-    assert project.user_config == expected_user_config
-    assert project.project_config == expected_project_config
+    assert upgraded_project.config == expected_user_config
+    assert upgraded_project.user_config == expected_user_config
+    assert upgraded_project.project_config == expected_project_config

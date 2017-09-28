@@ -21,7 +21,8 @@ from populus.config.versions import (
 )
 def upgrade_cmd(ctx, to_version):
     """
-    Generate project layout with an example contract.
+    Upgrade a project config, and if required also the user config
+    Note: the user config is used in other projects as well
     """
     logger = logging.getLogger('populus.cli.upgrade')
     project_dir = ctx.obj['PROJECT_DIR']

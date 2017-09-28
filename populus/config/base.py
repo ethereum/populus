@@ -53,8 +53,14 @@ class Config(object):
         else:
             return self.parent.get_master_config()
 
+    def has_references(self):
+        if [item for item in self.items(flatten=True) if item[0].rpartition(".")[2]=="$ref"]:  # noqa
+            return True
+        else:
+            return False
+
     def unref(self):
-        while [item for item in self.items(flatten=True) if item[0].rpartition(".")[2]=="$ref"]: # NOQA
+        while self.has_references():
             for key, value in self.items(flatten=True):
                 prefix, _, leaf_key = key.rpartition('.')
                 if leaf_key == "$ref":

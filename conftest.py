@@ -107,12 +107,11 @@ def project(request, project_dir, user_config_path):
         key_value_pairs_from_fn,
     ))
 
-    if key_value_pairs:
-        for key, value in key_value_pairs:
-            if value is None:
-                del project.config[key]
-            else:
-                project.config[key] = value
+    for key, value in key_value_pairs:
+        if value is None:
+            del project.config[key]
+        else:
+            project.config[key] = value
 
     project.fill_contracts_cache(contracts, mtime)
     request.config.cache.set(
@@ -238,9 +237,14 @@ def _loaded_contract_fixtures(project_dir, request):
 
 @pytest.fixture()
 def _loaded_test_contract_fixtures(project_dir, request):
-
-    test_contracts_to_load_from_fn = getattr(request.function, '_populus_test_contract_fixtures', [])
-    test_contracts_to_load_from_module = getattr(request.module, '_populus_test_contract_fixtures', [])
+    test_contracts_to_load_from_fn = getattr(
+        request.function, '_populus_test_contract_fixtures',
+        []
+    )
+    test_contracts_to_load_from_module = getattr(
+        request.module, '_populus_test_contract_fixtures',
+        []
+    )
 
     test_contracts_to_load = itertools.chain(
         test_contracts_to_load_from_module,

@@ -28,7 +28,7 @@ from populus.config.versions import (
 
 
 NEW_V6_PATHS = {
-    'compilation.backends.SolcStandardJSONBackend.settings.stdin',
+    'compilation.backends.SolcStandardJSON.settings.stdin',
 }
 
 

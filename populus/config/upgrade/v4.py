@@ -32,14 +32,14 @@ from populus.config.versions import (
 
 NEW_V5_PATHS = {
     'compilation.backends.SolcAutoBackend',
-    'compilation.backends.SolcStandardJSONBackend',
+    'compilation.backends.SolcStandardJSON',
 }
 
 MOVED_V4_PATHS = {
 }
 
 MODIFIED_V4_PATHS = {
-    'compilation.backends.SolcCombinedJSONBackend.settings.output_values',
+    'compilation.backends.SolcCombinedJSON.settings.output_values',
 }
 
 

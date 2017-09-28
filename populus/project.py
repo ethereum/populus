@@ -73,8 +73,9 @@ class Project(object):
     user_config_file_path = None
     legacy_config_path = None
 
-    def __init__(self, project_dir=None, user_config_file_path=None, create_config_file=False):
+    def __init__(self, project_dir=None, user_config_file_path=None, create_config_file=False):  # noqa: E501
 
+        self._reset_configs_cache()
         if project_dir is None:
             self.project_dir = os.getcwd()
         else:
@@ -115,7 +116,9 @@ class Project(object):
                     msg = "No project config file found at {project_dir}, but a legacy config exists. Try to upgrade"  # noqa: E501
                 else:
                     msg = "No project config file found at {project_dir}"
-                raise FileNotFoundError(msg.format(project_dir=self.project_dir))
+                raise FileNotFoundError(
+                    msg.format(project_dir=self.project_dir)
+                )
 
         self.load_config()
 
@@ -125,24 +128,24 @@ class Project(object):
 
     _project_config = None
     _user_config = None
-    _project_config_schema = None
+    _config_schema = None
 
     def load_config(self):
-        self._config_cache = None
-        self._user_config_cache = None
-        self._project_config_cache = None
+        self._reset_configs_cache()
         self._project_config = _load_config(self.config_file_path)
         self._user_config = _load_config(self.user_config_file_path)
 
         config_version = self._project_config['version']
-        self._project_config_schema = load_config_schema(config_version)
+        self._config_schema = load_config_schema(config_version)
+
+    def _reset_configs_cache(self):
+        self._config_cache = None
+        self._user_config_cache = None
+        self._project_config_cache = None
+        self._merged_config_cache = None
 
     def reload_config(self):
         self.load_config()
-
-    _config_cache = None
-    _user_config_cache = None
-    _project_config_cache = None
 
     @property
     def user_config(self):
@@ -150,7 +153,7 @@ class Project(object):
         if self._user_config_cache is None:
             user_config = Config(
                 config=self._user_config,
-                schema=self._project_config_schema,
+                schema=self._config_schema,
             )
             user_config.unref()
             self._user_config_cache = user_config
@@ -159,46 +162,60 @@ class Project(object):
 
     @property
     def project_config(self):
-
         if self._project_config_cache is None:
             project_config = Config(
                 config=self._project_config,
-                schema=self._project_config_schema,
             )
             project_config.unref()
             self._project_config_cache = project_config
 
+            # schema validation
+            # partial project config must be merged to get the entire schema
+            if self._user_config_cache is None:
+                self.user_config
+            self._merge_configs_and_validate_schema()
+
         return self._project_config_cache
+
+    def _merge_configs_and_validate_schema(self):
+        if self._merged_config_cache is None:
+            merged_config = copy.deepcopy(self._user_config_cache)
+            for key, value in self._project_config_cache.items(flatten=True):
+                if key != 'version':
+                    merged_config[key] = value
+            self._merged_config_cache = merged_config
+            # schema validation
+            Config(config=merged_config, schema=self._config_schema)
+
+        return self._merged_config_cache
 
     @property
     def config(self):
-
         warn_msg = '''Support for project.config will be dropped in the next populus release,
         use project_config or user_config or both'''
         warnings.warn(warn_msg, DeprecationWarning)
 
         if self._config_cache is None:
-
-            merged_config = copy.deepcopy(self.user_config)
-            for key, value in self.project_config.items(flatten=True):
-                if key != 'version':
-                    merged_config[key] = value
-            self._config_cache = merged_config
+            self.project_config
+            self.user_config
+            self._config_cache = self._merge_configs_and_validate_schema()
 
         return self._config_cache
 
     @config.setter
     def config(self, value):
+
+        warn_msg = '''Support for project.config will be dropped in the next populus release,
+        use project_config or user_config or both.
+        Setting the config property does not sync user config and project config''' # noqa
+        warnings.warn(warn_msg, DeprecationWarning)
+
         if isinstance(value, Config):
             self._config_cache = value
         else:
-            self._project_config = value
-            config_version = self._project_config['version']
-            self._project_config_schema = load_config_schema(config_version)
-            self._config_cache = Config(
-                config=self._project_config,
-                schema=self._project_config_schema,
-            )
+            config_version = value['version']
+            config_schema = load_config_schema(config_version)
+            self._config_cache = Config(config=value, schema=config_schema)
 
     def clean_config(self):
 

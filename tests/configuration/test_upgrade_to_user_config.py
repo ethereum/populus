@@ -5,7 +5,13 @@ import logging
 
 from populus.config import (
     Config,
+    load_config,
 )
+
+from populus.config.loading import (
+    write_config,
+)
+
 from populus.config.defaults import (
     load_default_config,
     load_user_default_config,
@@ -28,7 +34,7 @@ from populus.config.versions import (
     V5,
     V6,
     V7,
-    FIRST_USER_CONFIG_VERSION
+    FIRST_USER_CONFIG_VERSION,
 )
 
 from populus.api.upgrade import (
@@ -72,3 +78,35 @@ def test_upgrade_to_user_config(project, from_legacy_version):
     assert upgraded_project.config == expected_user_config
     assert upgraded_project.user_config == expected_user_config
     assert upgraded_project.project_config == expected_project_config
+
+
+@user_config_version(FIRST_USER_CONFIG_VERSION)
+def test_upgrade_custom_key(project):
+    legacy_config_file_path = get_legacy_json_config_file_path(project_dir=project.project_dir)
+    shutil.copyfile(
+        get_default_config_path(version=V3),
+        legacy_config_file_path
+    )
+    os.remove(project.config_file_path)
+
+    legacy_key = 'compilation.import_remapping'
+    legacy_value = ['import-path-from-legacy=contracts']
+    upgraded_key = 'compilation.import_remappings'
+
+    legacy_config = Config(load_config(legacy_config_file_path))
+    legacy_config[legacy_key] = legacy_value
+    write_config(legacy_config, legacy_config_file_path)
+
+    logger = logging.getLogger("test.test_upgrade_custom_key")
+    upgrade_configs(project.project_dir, logger, FIRST_USER_CONFIG_VERSION)
+
+    upgraded_project = Project(
+        project_dir=project.project_dir,
+        user_config_file_path=project.user_config_file_path
+    )
+
+    assert upgraded_project.config.get(upgraded_key) == legacy_value
+    assert upgraded_project.project_config.get(upgraded_key) == legacy_value
+
+    default_user_config = Config(load_user_default_config(version=FIRST_USER_CONFIG_VERSION))
+    assert upgraded_project.user_config.get(upgraded_key) == default_user_config.get(upgraded_key)

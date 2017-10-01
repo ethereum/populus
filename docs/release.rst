@@ -2,6 +2,14 @@ Release Notes
 =============
 
 
+.. _v1.10.1-release-notes:
+
+1.10.1
+------
+
+- Upstream bugfix for change to internal ``web3.py`` API.
+
+
 .. _v1.10.0-release-notes:
 
 1.10.0

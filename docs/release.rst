@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+.. _v1.10.2-release-notes:
+
+1.10.2
+------
+
+- Deprecate support for ``gevent`` based threading.
 
 .. _v1.10.1-release-notes:
 

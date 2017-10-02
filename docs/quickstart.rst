@@ -70,17 +70,6 @@ If you are installing on Ubuntu, and working with python3 (recommended):
     You may need to install populus with sudo: ``$ sudo -H pip install populus``
 
 
-
-By default populus will use standard library tools for io operations like
-threading and subprocesses.  Populus can be configured to instead use
-``gevent``.  To install with gevent support:
-
-.. code-block:: shell
-
-   $ pip install populus[gevent]
-
-To enable ``gevent`` set the environment variable ``THREADING_BACKEND=gevent``.
-
 Installation from source can be done from the root of the project with the
 following command.
 

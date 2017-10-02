@@ -35,6 +35,26 @@ from populus.utils.contracts import (
     package_contracts,
 )
 
+from populus.config.defaults import (
+    load_user_default_config,
+)
+
+from populus.config.base import (
+    Config,
+)
+
+from populus.config.helpers import (
+    get_user_json_config_file_path,
+)
+
+from populus.config.defaults import (
+    get_user_default_config_path,
+)
+
+from populus.config.versions import (
+    LATEST_VERSION,
+)
+
 POPULUS_SOURCE_ROOT = os.path.dirname(__file__)
 
 
@@ -60,15 +80,46 @@ def project_dir(tmpdir, monkeypatch):
     return _project_dir
 
 
+@pytest.fixture()
+def user_config_path(tmpdir, request):
+
+    version = getattr(request.function, '_user_config_version', LATEST_VERSION)
+    tmp_user_config_path = tmpdir.join(os.path.basename(get_user_json_config_file_path())).strpath
+    user_defaults_path = get_user_default_config_path(version)
+    shutil.copyfile(user_defaults_path, tmp_user_config_path)
+
+    return tmp_user_config_path
+
+
 CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
 CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
 
+
 @pytest.fixture()
-def project(request, project_dir):
+def project(request, project_dir, user_config_path):
+
     contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
     mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
 
-    project = Project(project_dir, create_config_file=True)
+    project = Project(
+        project_dir=project_dir,
+        user_config_file_path=user_config_path,
+        create_config_file=True
+    )
+
+    key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])
+    key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
+
+    key_value_pairs = tuple(itertools.chain(
+        key_value_pairs_from_module,
+        key_value_pairs_from_fn,
+    ))
+
+    for key, value in key_value_pairs:
+        if value is None:
+            del project.config[key]
+        else:
+            project.config[key] = value
 
     project.fill_contracts_cache(contracts, mtime)
     request.config.cache.set(
@@ -103,6 +154,7 @@ def provider(chain):
 def web3(chain):
     return chain.web3
 
+
 @pytest.fixture()
 def base_contract_factories(chain):
     return package_contracts({
@@ -126,6 +178,12 @@ def write_project_file(project_dir):
         with open(full_path, 'w') as f:
             f.write(content)
     return _write_project_file
+
+
+@pytest.fixture
+def user_config_defaults():
+
+    return Config(load_user_default_config())
 
 
 @pytest.fixture()
@@ -193,8 +251,14 @@ def _loaded_contract_fixtures(project_dir, request):
 
 @pytest.fixture()
 def _loaded_test_contract_fixtures(project_dir, request):
-    test_contracts_to_load_from_fn = getattr(request.function, '_populus_test_contract_fixtures', [])
-    test_contracts_to_load_from_module = getattr(request.module, '_populus_test_contract_fixtures', [])
+    test_contracts_to_load_from_fn = getattr(
+        request.function, '_populus_test_contract_fixtures',
+        []
+    )
+    test_contracts_to_load_from_module = getattr(
+        request.module, '_populus_test_contract_fixtures',
+        []
+    )
 
     test_contracts_to_load = itertools.chain(
         test_contracts_to_load_from_module,
@@ -232,28 +296,6 @@ def _loaded_test_contract_fixtures(project_dir, request):
         shutil.copy(src_path, dst_path)
 
 
-@pytest.fixture()
-def _updated_project_config(project_dir, request):
-    key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])
-    key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
-
-    key_value_pairs = tuple(itertools.chain(
-        key_value_pairs_from_module,
-        key_value_pairs_from_fn,
-    ))
-
-    if key_value_pairs:
-        project = Project(project_dir, create_config_file=True)
-
-        for key, value in key_value_pairs:
-            if value is None:
-                del project.config[key]
-            else:
-                project.config[key] = value
-
-        project.write_config()
-
-
 def pytest_fixture_setup(fixturedef, request):
     """
     Injects the following fixtures ahead of the `project` fixture.
@@ -266,7 +308,6 @@ def pytest_fixture_setup(fixturedef, request):
         request.getfixturevalue('project_dir')
         request.getfixturevalue('_loaded_contract_fixtures')
         request.getfixturevalue('_loaded_test_contract_fixtures')
-        request.getfixturevalue('_updated_project_config')
 
 
 @pytest.fixture()

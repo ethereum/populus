@@ -6,7 +6,7 @@ def load_config(config_file_path):
     return config
 
 
-def write_config(project_dir, config, write_path):
+def write_config(config, write_path):
     with open(write_path, 'w') as config_file:
         anyconfig.dump(
             dict(config),

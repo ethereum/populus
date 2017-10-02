@@ -30,7 +30,7 @@ def init_project(project_dir, logger):
 
     if has_json_config:
         logger.info(
-            "Found existing `populus.json` file.  Not writing default config."
+            "Found existing `project.json` file.  Not writing default config."
         )
 
     project = Project(project_dir, create_config_file=True)

@@ -35,6 +35,14 @@ from populus.utils.contracts import (
     package_contracts,
 )
 
+from populus.config.defaults import (
+    load_user_default_config,
+)
+
+from populus.config.base import (
+    Config,
+)
+
 from populus.config.helpers import (
     get_user_json_config_file_path,
 )
@@ -170,6 +178,12 @@ def write_project_file(project_dir):
         with open(full_path, 'w') as f:
             f.write(content)
     return _write_project_file
+
+
+@pytest.fixture
+def user_config_defaults():
+
+    return Config(load_user_default_config())
 
 
 @pytest.fixture()

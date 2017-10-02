@@ -3,7 +3,6 @@ import os
 import shutil
 import itertools
 import warnings
-
 from eth_utils import (
     to_tuple,
 )
@@ -139,10 +138,8 @@ class Project(object):
         self._config_schema = load_config_schema(config_version)
 
     def _reset_configs_cache(self):
-        self._config_cache = None
         self._user_config_cache = None
         self._project_config_cache = None
-        self._merged_config_cache = None
 
     def reload_config(self):
         self.load_config()
@@ -157,65 +154,60 @@ class Project(object):
             )
             user_config.unref()
             self._user_config_cache = user_config
+            self.merge_user_and_project_configs(user_config, self.project_config)
 
         return self._user_config_cache
 
     @property
     def project_config(self):
         if self._project_config_cache is None:
-            project_config = Config(
-                config=self._project_config,
-            )
+            project_config = Config(config=self._project_config)
             project_config.unref()
             self._project_config_cache = project_config
 
             # schema validation
             # partial project config must be merged to get the entire schema
-            if self._user_config_cache is None:
-                self.user_config
-            self._merge_configs_and_validate_schema()
+            self.merge_user_and_project_configs(self.user_config, project_config)
 
         return self._project_config_cache
 
-    def _merge_configs_and_validate_schema(self):
-        if self._merged_config_cache is None:
-            merged_config = copy.deepcopy(self._user_config_cache)
-            for key, value in self._project_config_cache.items(flatten=True):
-                if key != 'version':
-                    merged_config[key] = value
-            self._merged_config_cache = merged_config
-            # schema validation
-            Config(config=merged_config, schema=self._config_schema)
+    @project_config.setter
+    def project_config(self, value):
+        if isinstance(value, Config):
+            self._project_config_cache = value
+        else:
+            self._project_config_cache = Config(config=value)
 
-        return self._merged_config_cache
+    def merge_user_and_project_configs(self, user_config, project_config):
+        merged_config = copy.deepcopy(self.user_config)
+        for key, value in self.project_config.items(flatten=True):
+            if key != 'version':
+                merged_config[key] = value
+
+        return merged_config
+
+    def validate_config_schema(self):
+        merged_config = self.merge_user_and_project_configs()
+        Config(config=merged_config, schema=self._config_schema)
 
     @property
     def config(self):
-        warn_msg = '''Support for project.config will be dropped in the next populus release,
-        use project_config or user_config or both'''
+        warn_msg = (
+            "Support for project.config will be dropped in the next populus release"
+            "use project_config or user_config or both"
+        )
         warnings.warn(warn_msg, DeprecationWarning)
-
-        if self._config_cache is None:
-            self.project_config
-            self.user_config
-            self._config_cache = self._merge_configs_and_validate_schema()
-
-        return self._config_cache
+        return self.merge_user_and_project_configs(self.user_config, self.project_config)
 
     @config.setter
     def config(self, value):
 
-        warn_msg = '''Support for project.config will be dropped in the next populus release,
-        use project_config or user_config or both.
-        Setting the config property does not sync user config and project config''' # noqa
+        warn_msg = (
+            "Support for project.config will be dropped in the next populus release"
+            "use project_config or user_config."
+        )
         warnings.warn(warn_msg, DeprecationWarning)
-
-        if isinstance(value, Config):
-            self._config_cache = value
-        else:
-            config_version = value['version']
-            config_schema = load_config_schema(config_version)
-            self._config_cache = Config(config=value, schema=config_schema)
+        self.project_config = value
 
     def clean_config(self):
 

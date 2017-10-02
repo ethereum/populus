@@ -138,6 +138,7 @@ class Project(object):
         self._config_schema = load_config_schema(config_version)
 
     def _reset_configs_cache(self):
+        self._merged_config_cache = None
         self._user_config_cache = None
         self._project_config_cache = None
 
@@ -171,43 +172,31 @@ class Project(object):
 
         return self._project_config_cache
 
-    @project_config.setter
-    def project_config(self, value):
-        if isinstance(value, Config):
-            self._project_config_cache = value
-        else:
-            self._project_config_cache = Config(config=value)
-
     def merge_user_and_project_configs(self, user_config, project_config):
-        merged_config = copy.deepcopy(self.user_config)
-        for key, value in self.project_config.items(flatten=True):
-            if key != 'version':
-                merged_config[key] = value
+        if self._merged_config_cache is None:
+            merged_config = copy.deepcopy(self.user_config)
+            for key, value in self.project_config.items(flatten=True):
+                if key != 'version':
+                    merged_config[key] = value
+            Config(config=merged_config, schema=self._config_schema)
+            self._merged_config_cache = merged_config
 
-        return merged_config
-
-    def validate_config_schema(self):
-        merged_config = self.merge_user_and_project_configs()
-        Config(config=merged_config, schema=self._config_schema)
+        return self._merged_config_cache
 
     @property
     def config(self):
-        warn_msg = (
-            "Support for project.config will be dropped in the next populus release"
-            "use project_config or user_config or both"
-        )
-        warnings.warn(warn_msg, DeprecationWarning)
+
         return self.merge_user_and_project_configs(self.user_config, self.project_config)
 
     @config.setter
     def config(self, value):
-
-        warn_msg = (
-            "Support for project.config will be dropped in the next populus release"
-            "use project_config or user_config."
-        )
-        warnings.warn(warn_msg, DeprecationWarning)
-        self.project_config = value
+        if isinstance(value, Config):
+            self._merged_config_cache = value
+        else:
+            self._merged_config_cache = Config(
+                config=value,
+                schema=self._config_schema
+            )
 
     def clean_config(self):
 

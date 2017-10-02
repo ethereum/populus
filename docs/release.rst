@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _v1.10.3-release-notes:
+
+1.10.3
+------
+
+- Add deprecation warning for upcoming removal of python 2 support.
+
+
 .. _v1.10.2-release-notes:
 
 1.10.2

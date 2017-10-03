@@ -25,7 +25,7 @@ from .main import main
 @click.option(
     'wait_for_sync',
     '--wait-for-sync/--no-wait-for-sync',
-    default=True,
+    default=False,
     help=(
         "Determines whether the deploy command should wait until the chain is "
         "fully synced before deployment"

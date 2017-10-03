@@ -162,7 +162,10 @@ class Project(object):
     @property
     def project_config(self):
         if self._project_config_cache is None:
-            project_config = Config(config=self._project_config)
+            project_config = Config(
+                config=self._project_config,
+                parent=Config(self._user_config)
+            )
             project_config.unref()
             self._project_config_cache = project_config
 

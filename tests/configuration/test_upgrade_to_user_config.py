@@ -33,7 +33,6 @@ from populus.config.versions import (
     V4,
     V5,
     V6,
-    V7,
     FIRST_USER_CONFIG_VERSION,
 )
 
@@ -68,10 +67,10 @@ def test_upgrade_to_user_config(project, from_legacy_version):
         user_config_file_path=project.user_config_file_path
     )
 
-    expected_user_config = Config(load_user_default_config(V7))
+    expected_user_config = Config(load_user_default_config(FIRST_USER_CONFIG_VERSION))
     expected_user_config.unref()
 
-    expected_project_config = Config(load_default_config(V7))
+    expected_project_config = Config(load_default_config(FIRST_USER_CONFIG_VERSION))
     expected_project_config.unref()
 
     assert upgraded_project.legacy_config_path is None

@@ -1,4 +1,3 @@
 tox>=1.8.0
 hypothesis>=3.4.2
 pytest-xdist==1.18.1
-populus>=2.0.0a1

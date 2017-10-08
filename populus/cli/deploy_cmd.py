@@ -17,8 +17,10 @@ from .main import main
     '-c',
     help=(
         "Specifies the chain that contracts should be deployed to. The chains "
-        "mainnet' and 'morden' are pre-configured to connect to the public "
-        "networks.  Other values should be predefined in your populus.ini"
+        "'mainnet' and 'ropsten' are pre-configured to connect to the public "
+        "networks, 'tester' and 'testrpc' are pre-configured tests chains, "
+        "'web3tester' provides the web3.py Web3EthereumTesterProvider. "
+        "Other values should be predefined in your populus config files"
     ),
     default=None,
 )
@@ -27,7 +29,7 @@ from .main import main
     '--rpc-path',
     '-r',
     help=(
-        "Specify http or https to the rpc node"
+        "Specify http or https to the rpc node, "
         "e.g. https://mainnet.infura.io"
     ),
     default=None,
@@ -37,7 +39,7 @@ from .main import main
     '--ipc-path',
     '-i',
     help=(
-        "Specify a path to the ipc socket of the a geth instance"
+        "Specify a path to the ipc socket of the geth instance, "
         "e.g. /home/username/.ethereum/geth/geth.ipc"
     ),
     default=None,

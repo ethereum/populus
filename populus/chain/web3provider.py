@@ -1,5 +1,7 @@
 from .base import BaseChain
 from web3 import Web3, HTTPProvider, IPCProvider
+from web3.providers.eth_tester import EthereumTesterProvider
+from eth_tester import EthereumTester
 
 from populus.utils.functional import (
     cached_property,
@@ -37,3 +39,13 @@ class Web3IPCProviderChain(BaseWeb3Chain):
         if not self._running:
             raise ValueError("Chain must be running prior to accessing web3")
         return Web3(IPCProvider(self.ipc_path))
+
+
+class Web3EthereumTesterProviderChain(BaseWeb3Chain):
+
+    @cached_property
+    def web3(self):
+        if not self._running:
+            raise ValueError("Chain must be running prior to accessing web3")
+        tester = EthereumTester()
+        return Web3(EthereumTesterProvider(tester))

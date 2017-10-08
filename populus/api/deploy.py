@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-
+import collections
 import logging
 
 import click
@@ -8,7 +8,6 @@ from populus.utils.chains import (
     is_synced,
 )
 from populus.utils.cli import (
-    select_chain,
     deploy_contract_and_verify,
     select_project_contract,
 )
@@ -43,14 +42,24 @@ def echo_post_deploy_message(web3, deployed_contracts):
         ))
 
 
-def deploy(project, logger, chain_name, wait_for_sync, contracts_to_deploy):
+def deploy(project, logger, wait_for_sync, contracts_to_deploy, chain_name=None, rpc_path=None, ipc_path=None):  # noqa: E501
     """
     Deploys the specified contracts to a chain.
     """
 
-    # Determine which chain should be used.
-    if not chain_name:
-        chain_name = select_chain(project)
+    # Determine which chain should be used
+    if collections.Counter([chain_name, rpc_path, ipc_path])[None] != 2:
+        # user must provide cli arg for chain
+        raise ValueError("Provide chain OR rpc-path OR ipc-path")
+
+    if chain_name:
+        deploy_to_chain = project.get_chain(chain_name)
+
+    if rpc_path:
+        deploy_to_chain = project.get_web3http_chain(rpc_path)
+
+    if ipc_path:
+        deploy_to_chain = project.get_web3ipc_chain(ipc_path)
 
     compiled_contracts = project.compiled_contract_data
 
@@ -74,7 +83,7 @@ def deploy(project, logger, chain_name, wait_for_sync, contracts_to_deploy):
         # Potentially display the currently deployed status.
         contracts_to_deploy = [select_project_contract(project)]
 
-    with project.get_chain(chain_name) as chain:
+    with deploy_to_chain as chain:
         provider = chain.provider
         registrar = chain.registrar
 

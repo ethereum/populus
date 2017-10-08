@@ -64,6 +64,9 @@ from populus.utils.testing import (
     get_tests_dir,
 )
 
+WEB3_HTTP_CHAIN_NAME = "web3http"
+WEB3_IPC_CHAIN_NAME = "web3ipc"
+
 
 class Project(object):
 
@@ -334,6 +337,16 @@ class Project(object):
         if chain_config is None:
             chain_config = self.get_chain_config(chain_name)
         chain = chain_config.get_chain(self, chain_name)
+        return chain
+
+    def get_web3http_chain(self, rpc_path):
+        chain = self.get_chain(WEB3_HTTP_CHAIN_NAME)
+        chain.rpc_path = rpc_path
+        return chain
+
+    def get_web3ipc_chain(self, ipc_path):
+        chain = self.get_chain(WEB3_IPC_CHAIN_NAME)
+        chain.ipc_path = ipc_path
         return chain
 
     @property

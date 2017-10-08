@@ -27,6 +27,10 @@ from .observers import (
     DirWatcher,
 )
 
+from web3.utils.empty import (
+    Empty,
+)
+
 
 def select_chain(project):
     """
@@ -136,7 +140,12 @@ def deploy_contract_and_verify(chain,
     web3 = chain.web3
     logger = logging.getLogger('populus.utils.cli.deploy_contract_and_verify')
 
-    if is_account_locked(web3, web3.eth.defaultAccount or web3.eth.coinbase):
+    if isinstance(web3.eth.defaultAccount, Empty):
+        # instance should have a coinbase
+        # TODO: add --account arg (index or address), and set default account here if provided
+        web3.eth.defaultAccount = web3.eth.coinbase
+
+    if is_account_locked(web3, web3.eth.defaultAccount):
         try:
             chain.wait.for_unlock(web3.eth.defaultAccount or web3.eth.coinbase, 5)
         except Timeout:

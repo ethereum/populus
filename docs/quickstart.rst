@@ -104,8 +104,20 @@ Verify your installation
 
 Great. Let's have the first populus project.
 
+A Word of Caution
+-----------------
 
+Populus is a development environment. It was designed to make things easy and fun for the Python
+Ethereum developer. We use test blockchains, demo accounts, simple passwords, everything that is required to help you focus on the code.
 
+But once the code is ready for work and deployment with real Eth, you should be careful.
+As there is a clear difference between running your iOS app in the Xcode simulator to the real actions of the app on the iPhone,
+or to take another example, between running a website localy on 127.0.0.1 vs. running it on a real server which is opened to the entire
+internet, there **is** a difference between blockchain development environment, and when you deploy and send real Eth.
+
+The core issue, as a developer, is that once you unlock an account, there is a running process with access to your Eth. Any mistake
+or security breach can cause loosing this Eth. This is not an issue with test blockchains and test tokens, but with real Eth it is.
+Luckily, there are simple and effective practices to keep your Eth safe. See `Protecting yourself and your funds <https://myetherwallet.github.io/knowledge-base/getting-started/protecting-yourself-and-your-funds.html>`_
 
 Initializing a New Project
 --------------------------

@@ -7,10 +7,34 @@ Introduction
 ------------
 
 Populus is designed to be highly configurable through the project configuration
-file.  By default, populus will load the file name ``populus.json`` from the
-root of your project.
+file.
 
-The ``$ populus init`` command will write the full default configuration. See `geth accounts managment <https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts>`
+By default, populus will load the configuration from two files: the user-scope main config file
+at ``~/populus/config.json``, and the project-scope config file, at the project directory,
+``project.json``.
+
+Both files share the same JSON schema. You should use the ``project.json`` file for local change that apply to specific project,
+and the user-scope file for the environment configs, which apply to all your projects.
+
+When a configuration key exists in both the user config and the project config, the project config overrides the user config.
+However, progrmatically you have access to both configs and can decide in runtime to choose otherwise.
+
+The ``$ populus init`` command will writes a minimal ``project.json`` default file.
+
+.. note::
+
+  The ``project.json`` file is required, and all the populus commands require a directory with a project config file.
+
+A note for django users
+^^^^^^^^^^^^^^^^^^^^^^
+
+If you are used to django's ``settings.py`` file, populus is quite different.
+The configuration is saved in json files, and on purpuse.
+While saving the configuration in a Python module is convinient, and often looks nicer, there is a caveat: a python module is after all
+a runnable code. With an Ethereum development platform, that deals directly with money, we think that it's safer to put the config in static external files.
+
+The option to change the configuration dynamically is still available, in run time, with the ``project.config propery``.
+But otherwise, Populus configuration comes from static JSON files, and what you see is what you get. No surprises.
 
 
 What you can Configure
@@ -118,7 +142,7 @@ Chains
 ^^^^^^
 
 The ``chains`` key within the configuration file declares what chains populus
-has access to and how to connect to them.  Populus comes pre-configured with
+has access to, and how to connect to them.  Populus comes pre-configured with
 the following chains.
 
 * ``'mainnet'``: Connects to the public ethereum mainnet via ``geth``.
@@ -137,6 +161,13 @@ the following chains.
         }
       }
     }
+
+
+
+External Chains
+^^^^^^^^^^^^^^^
+
+
 
 
 Individual Chain Settings

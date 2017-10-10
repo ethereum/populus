@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import copy
+import warnings
 
 try:
     from contextlib import ExitStack
@@ -82,6 +83,17 @@ class LoggedMainnetGethProcess(LoggingMixin, LiveGethProcess):
 class BaseGethChain(BaseChain):
     stack = None
     geth = None
+
+    def __init__(self, *args, **kwargs):
+
+        warn_msg = (
+            "Support for this chain will be dropped in the next populus version"
+            "Populus will not run the chains, and will use the better and more robust"
+            "Web3.py providers directly, as ExternalChain."
+            "Please configure your chains as ExternalChain."
+        )
+        warnings.warn(warn_msg, DeprecationWarning)
+        super(BaseGethChain, self).__init__(*args, **kwargs)
 
     def initialize_chain(self):
         # context manager shenanigans

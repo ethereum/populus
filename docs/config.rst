@@ -10,7 +10,7 @@ Populus is designed to be highly configurable through the project configuration
 file.  By default, populus will load the file name ``populus.json`` from the
 root of your project.
 
-The ``$ populus init`` command will write the full default configuration.
+The ``$ populus init`` command will write the full default configuration. See `geth accounts managment <https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts>`
 
 
 What you can Configure
@@ -489,7 +489,7 @@ Populus ships with many defaults which can be overridden as you see fit.
 Built-in defaults
 ^^^^^^^^^^^^^^^^^
 
-Populus ships with the following *default* configuration.  
+Populus ships with the following *default* configuration.
 
 .. literalinclude:: ../populus/assets/defaults.config.json
    :language: javascript

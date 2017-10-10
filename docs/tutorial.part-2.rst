@@ -67,11 +67,10 @@ The ``chain_data`` directory is where geth will store the blockchain data. It's 
 since we didn't run this local chain at all.
 
 Then, the ``keystore`` directory, where the "wallets" are saved. A wallet file is a special file that
-stores an ethereum account. Here we see one wallet file,
-which starts with ``UTC--2017-10-10T11-36-58.745314398Z--eb9ae85fa8f6d8853afe45799d966dca89edd9aa``.
+stores an ethereum account. Here we see one wallet file, ``UTC--2017-10-10T11-36-58.745314398Z--eb9ae85fa8f6d8853afe45799d966dca89edd9aa``.
 The first part of the wallet file name is the time that the wallet was created,
 and the second part is the account address. You should see similar file name on your machine,
-but of course with a different time-stamp and different address.
+but of course with a different time-stamp and a different address.
 
 Here is the wallet:
 
@@ -99,7 +98,6 @@ Here is the wallet:
 The wallet doesn't save any info regarding the account balance,
 transactions, etc - this info is saved on the blockchain. It does, however, allows you to unlock an account, send Ethereum,
 and run transactions with this account.
-it transactions.
 
 The wallet file is encrypted with a password. To unlock the account in the wallet, geth requires the password.
 Here, populus saved the password in a password file:
@@ -120,8 +118,8 @@ Accounts
 ''''''''
 
 Populus created the account for you, but you can create more accounts with ``geth account new``. You can keep
-as many wallets as you want in the keystore. One wallet, which you can set, is the primary default account is called
-"etherbase" or "coinbase", but you can use any wallet you save in the keystore, as long as you have the password to unlock it.
+as many wallets as you want in the keystore. One wallet, which you can set, is the primary default account, called
+"etherbase" or "coinbase". You can use any wallet you save in the keystore, as long as you have the password to unlock it.
 See `geth accounts managment <https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts>`_ .
 
 .. note::
@@ -136,7 +134,7 @@ See `geth accounts managment <https://github.com/ethereum/go-ethereum/wiki/Manag
 The Genesis Block
 '''''''''''''''''
 
-The next file is `genesis.json`. This is the definision of the first block of the chain,
+The next file is ``genesis.json```. This is the definition of the first block of the chain,
 which is called the "genesis" block. Every blockchain starts with an initial genesis block, the #0 block.
 The real ethereum genesis block can be seen `here <https://etherscan.io/block/0>`_.
 
@@ -171,8 +169,10 @@ The genesis block parent hash is 0, since it's the first block.
 
 The nice thing about having your very own money minting facility,
 is that you can mint money quite easily! So the genesis block allocates to the default account not less than one billion ether.
-Think of it as monopoly money: it looks like a real money, it behaves like a real money, but it will not get you much in the grocery store.
+Think of it as monopoly money: it looks like real money, it behaves like real money, but it will not get you much in the grocery store.
 However, this local chain Eth is very handy for development and testing.
+
+.. _runing_local_blockchain:
 
 Running the Local Blockchain
 ----------------------------
@@ -314,6 +314,6 @@ So the next step is to deploy the Greeter contract with Populus to the horton lo
 
 .. note::
 
-  To stop geth, go the terminal where it's running, and type Ctrl+C. If it's runs as a daemon,
+  To stop geth, go the terminal where it's running, and type Ctrl+C. If it runs as a daemon,
   use ``kill INT <pid>``, where pid is the geth process id.
 

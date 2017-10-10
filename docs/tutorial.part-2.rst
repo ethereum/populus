@@ -136,7 +136,7 @@ See `geth accounts managment <https://github.com/ethereum/go-ethereum/wiki/Manag
 The Genesis Block
 '''''''''''''''''
 
-The next file is `genesis.json`. This is the definisions of the first block of the chain,
+The next file is `genesis.json`. This is the definision of the first block of the chain,
 which is called the "genesis" block. Every blockchain starts with an initial genesis block, the #0 block.
 The real ethereum genesis block can be seen `here <https://etherscan.io/block/0>`_.
 
@@ -179,13 +179,14 @@ Running the Local Blockchain
 
 Great. Everything is in place to run your own local blockchain.
 
-Before the first run, you need to initiate this blockchain. Go ahead and init the chain, with the script that populus created:
+Before the first run, you need to initiate this blockchain.
+Go ahead and init the chain, with the script that populus created:
 
 .. code-block:: bash
 
   $ chains/horton/./init_chain.sh
 
-.. Geth will init the blockchain.
+Geth will init the blockchain:
 
 .. code-block:: bash
 
@@ -196,7 +197,12 @@ Before the first run, you need to initiate this blockchain. Go ahead and init th
   INFO [10-10|07:17:48] Writing custom genesis block
   INFO [10-10|07:17:48] Successfully wrote genesis state         database=lightchaindata                                                                   hash=ab7daa…b26156
 
-Geth just created the blockchain, and added some additional files, where geth stores the blockchain data:
+.. note::
+
+  You need to run the init script only once for each new chain
+
+
+When geth created the blockchain, it added some files, where it stores the blockchain data:
 
 .. code-block:: bash
 
@@ -264,7 +270,7 @@ IPC allows connection from the same machine, which is safer.
 Where the Blockchain is Actually Running?
 -----------------------------------------
 
-The block chain that runs now does not relate to populus. Populus just created some files, but it's
+The blockchain that runs now does not relate to populus. Populus just created some files, but it's
 an independent geth process which runs on your machine.
 
 You can verify it, using the web3 javascript console. In another terminal, open a console that attaches to this blockchain:

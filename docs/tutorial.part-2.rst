@@ -15,7 +15,7 @@ to the blockchain.
 
 One of the nice things about Ethereum is the *protocol*, a protocol which specifies how to run a blockchain.
 Theoretically, you can use this exact protocol to run your own blockchain, which is private and totally
-seprated from the "official" Ethereum blockchain and it's nodes.
+seprated from the mainnet Ethereum blockchain and it's nodes.
 
 Although the private Ether you will mint in this private blockchain are not worth a lot in the outside world
 (but who knows?), such private, local blockchain is a great tool for development. It simulates
@@ -26,7 +26,7 @@ Once the contract is ready, working, and tested on your local chain, you can dep
 to the distributed ethereum blockchains: testnet, the testing network, and then to the real Ethereum
 blockchain, with real money and by paying real gas (in Eth) for the deployment.
 
-In this tutorial we will create, and deploy to, a local chain called "horton".
+In this tutorial we will create, and deploy to, a local chain we'll name "horton".
 
 Create a *Local* chain
 --------------------------

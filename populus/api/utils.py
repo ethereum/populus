@@ -62,10 +62,10 @@ GENESIS_BLOCK = '''
 '''
 
 
-def new_local_chain(project_dir, chain_dir):
+def new_local_chain(project_dir, chain_name):
     chains_path = os.path.join(project_dir, 'chains')
     ensure_path_exists(chains_path)
-    chain_dir = os.path.join(chains_path, chain_dir)
+    chain_dir = os.path.join(chains_path, chain_name)
     data_dir = os.path.join(chain_dir, 'chain_data')
     overrides = {
         'data_dir': data_dir,

@@ -346,7 +346,7 @@ HTTP
 
 The important thing to remeber is that Populus will **not** run geth for you. You will
 have to run geth, and then Populus will use the chain configuration to connect to this **already running** process via Web3.
-If you created a local chain with ``$ populus chain new`` command, Populus will create an executable that you
+If you created a local chain with the ``$ populus chain new`` command, Populus will create an executable that you
 can use to run the chain, see :ref:`runing_local_blockchain`
 
 

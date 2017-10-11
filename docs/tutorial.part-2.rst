@@ -109,15 +109,16 @@ Here, populus saved the password in a password file:
 
 The default password we used, tells. It's designated for development and testing, not when using real Eth.
 
-Why to save the password in a file *at all*? Because otherwise, you will have to manually enter
-the password each time geth starts, and moreover, sometimes it's hard to spot the password prompt
-with all the info that geth spits. So a password file is more convinient, but of course, should be fully secured,
+Why to save the password in a file *at all*? Because you can provide this file path
+to geth with the ``password`` commnad line argument. Otherwise, you will have to manually enter
+the password each time geth starts. Moreover, sometimes it's hard to spot the password prompt
+with all the info that geth spits. So a password file is more convinient, but obviously should be fully secured,
 with the right permissions.
 
 Accounts
 ''''''''
 
-Populus created the account for you, but you can create more accounts with ``geth account new``. You can keep
+Populus created the account for you, but you can create more accounts with ``$ geth account new``. You can keep
 as many wallets as you want in the keystore. One wallet, which you can set, is the primary default account, called
 "etherbase" or "coinbase". You can use any wallet you save in the keystore, as long as you have the password to unlock it.
 See `geth accounts managment <https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts>`_ .
@@ -279,8 +280,8 @@ You can verify it, using the web3 javascript console. In another terminal, open 
 
   $ geth attach /home/mary/projects/myproject/chains/horton/chain_data/geth.ipc
 
-Use the actual IPC endpoint path that runs on your machine, you can take a look at ``run_chain.sh``
-to see this path as well).
+Use the actual IPC endpoint path that runs on your machine. You can take a look at ``run_chain.sh``
+to see this path.
 
 The web3.js console looks like this :
 
@@ -306,9 +307,15 @@ Check your account balance:
 
 Wow! you already have even more than the original allocation of one billion! These are the rewards for successful mining. Boy, the rich get richer.
 
-You can work in the console for additional web3.js commands.
+.. note::
+
+  Wei is the unit that `getBalance` returns by default, and `fromWei` converts Wei to Ethereum.
+  See the `Ethereum units denominations <http://ethdocs.org/en/latest/ether.html#denominations>`_
+
+
+You can work in the geth console and try other web3.js commands.
 But as much as we love javascript, if you were missing those brackets and semicolons you would
-not be here, in the populus docs, would you?
+not be here, in the Populus docs, would you?
 
 So the next step is to deploy the Greeter contract with Populus to the horton local chain.
 

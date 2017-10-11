@@ -120,7 +120,7 @@ Well done!
 .. note::
 
   We used here ``--no-wait-for-sync``, since the account has (a lot of) Eth from the get go, allocated
-  in the genesis block. However, if you work with testnet or mainnet, the running geth node must sync at least until the block
-  with the transactions that sent the required eth for the gas, to your account.
-
+  in the genesis block. However, if you work with testnet or mainnet, you must sync at least until the block
+  with the transactions that sent some Eth to the account you are deploying from. Otherwise, your local geth will not know
+  that there is Eth in the account to pay for the gas. Once the chain is synced, you can deploy immidiatly.
 

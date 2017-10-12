@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+.. _v1.11.0-release-notes:
+
+1.11.0
+------
+
+- Update to confguration API to support both *project* level configuration files as well as *user* level configuration files.
+- ``--wait-for-sync`` cli argument in ``$ populus deploy`` now defaults to ``False`` (previous defaulted to ``True``)
+- Deprecation of Go-Ethereum based ``Chain`` objects in preparation for upcoming *Environments* API which will replace the *Chain* API.
+- New ``$ populus chain new`` command for initializing local development chains.
+- Removal of ``$ populus config set`` and ``$ populus config delete`` CLI comands.
+
+
 .. _v1.10.3-release-notes:
 
 1.10.3

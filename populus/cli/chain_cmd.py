@@ -1,6 +1,9 @@
 import logging
-
 import click
+
+from populus.api.utils import (
+    new_local_chain,
+)
 
 from populus.chain import (
     BaseGethChain,
@@ -9,6 +12,7 @@ from populus.chain import (
 from populus.utils.compat import (
     sleep,
 )
+
 from populus.utils.geth import (
     reset_chain,
 )
@@ -23,6 +27,17 @@ def chain_cmd(ctx):
     Manage and run ethereum blockchains.
     """
     pass
+
+
+@chain_cmd.command('new')
+@click.argument('chain_name', nargs=1, default="local")
+@click.pass_context
+def chain_new(ctx, chain_name):
+    """
+    Create the scripts required to run a local geth blockchain
+    """
+    project = ctx.obj['PROJECT']
+    new_local_chain(project.project_dir, chain_name)
 
 
 @chain_cmd.command('reset')

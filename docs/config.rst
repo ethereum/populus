@@ -6,14 +6,40 @@ Configuration
 Introduction
 ------------
 
-Populus is designed to be highly configurable through the project configuration
-file.  By default, populus will load the file name ``populus.json`` from the
-root of your project.
+Populus is designed to be highly configurable through the configuration
+files.
 
-The ``$ populus init`` command will write the full default configuration.
+By default, populus will load the configuration from two files: the user-scope main config file
+at ``~/.populus/config.json``, and the project-scope config file, at the project directory,
+``project.json``.
+
+Both files share the same JSON schema. You should use the ``project.json`` file for local changes that
+apply to specific project,
+and the user-scope file for the environment configs, which apply to all your projects.
+
+When a configuration key exists in both the user-config and the project-config, the project-config overrides the user-config.
+However, progrmatically you have access to both configs and can decide in runtime to choose otherwise.
+
+The ``$ populus init`` command writes a minimal ``project.json`` default file to the project directory.
+
+.. note::
+
+  The ``project.json`` file is required, and all the populus commands require a directory with a project config file.
+
+A Note for Django users
+^^^^^^^^^^^^^^^^^^^^^^
+
+If you are used to django's ``settings.py`` file, populus is quite different.
+The configuration is saved in JSON files, on purpuse.
+While saving the configuration in a Python module is convinient, and often looks nicer, there is a caveat: a python module is after all
+a programmble, running code. With an Ethereum development platform, that deals directly with money, we think
+it's safer to put the configurations in static, non programmble, and external files.
+
+The option to change the configuration dynamically is still available in run time, using the ``project.config`` propery.
+But otherwise, Populus configuration comes from static JSON files. What you see is what you get, no surprises.
 
 
-What you can Configure
+What You Can Configure
 ^^^^^^^^^^^^^^^^^^^^^^
 
 This config file controls many aspects of populus that are configurable.
@@ -118,7 +144,7 @@ Chains
 ^^^^^^
 
 The ``chains`` key within the configuration file declares what chains populus
-has access to and how to connect to them.  Populus comes pre-configured with
+has access to, and how to connect to them.  Populus comes pre-configured with
 the following chains.
 
 * ``'mainnet'``: Connects to the public ethereum mainnet via ``geth``.
@@ -137,6 +163,7 @@ the following chains.
         }
       }
     }
+
 
 
 Individual Chain Settings
@@ -244,8 +271,6 @@ Available options are:
 
     A ``geth`` backed chain which connects to the main public network.
 
-
-
 Web3
 """"
 
@@ -255,6 +280,83 @@ Configuration for the Web3 instance that will be used with this chain.  See
 * key: ``chains.<chain-name>.web3``
 * value: Web3 Configuration
 * required: Yes
+
+
+Custom Chains Using the ExternalChain Class
+-------------------------------------------
+
+You can define your own custom chains. Custom chains should use the ``ExternalChain`` class,
+which lets you access a Web3 provider. Web3 is the actual layer that connects to the running geth process,
+and let Populus interact with the blockchain.
+
+.. note::
+  If you are familiar with web development, then you can think of
+  Web3 as the underlying WSGI. In web development WSGI hooks to Apache or Nginx, here we have Web3 that hooks
+  to geth.
+
+The minimum configuration that Web3 requires are *either*:
+
+* ``IPCProvider``: connects to geth via IPC, by the configured ``ipc_path``
+* ``HTTPProvider``: connects via http or https to geth's rpc, by the configured ``endpoint_uri``
+
+Here are two examples of a custom ``ExternalChain`` configuration.
+
+IPC
+
+.. code-block:: javascript
+
+    "chains": {
+      "horton": {
+        "chain": {
+          "class": "populus.chain.ExternalChain"
+        },
+        "web3": {
+          "provider": {
+            "class": "web3.providers.ipc.IPCProvider",
+            "settings": {
+              "ipc_path": "./chains/horton/geth.ipc"
+            }
+          }
+        },
+        ...
+      }
+    }
+
+HTTP
+
+.. code-block:: javascript
+
+    "chains": {
+      "local_chain": {
+        "chain": {
+          "class": "populus.chain.ExternalChain"
+        },
+        "web3": {
+          "provider": {
+            "class": "web3.providers.rpc.HTTPProvider",
+            "settings": {
+              "endpoint_uri": "https://127.0.0.1:8545"
+            }
+          }
+        },
+        ...
+      }
+    }
+
+
+The important thing to remeber is that Populus will **not** run geth for you. You will
+have to run geth, and then Populus will use the chain configuration to connect to this **already running** process via Web3.
+If you created a local chain with the ``$ populus chain new`` command, Populus will create an executable that you
+can use to run the chain, see :ref:`runing_local_blockchain`
+
+
+In the next Populus version, all the chains will be configured as ``ExternalChain``
+
+For more details on Web3, see the `Web3 documentation <https://web3py.readthedocs.io/en/latest/>`_ .
+
+
+
+
 
 
 Web3 Configuration
@@ -489,7 +591,7 @@ Populus ships with many defaults which can be overridden as you see fit.
 Built-in defaults
 ^^^^^^^^^^^^^^^^^
 
-Populus ships with the following *default* configuration.  
+Populus ships with the following *default* configuration.
 
 .. literalinclude:: ../populus/assets/defaults.config.json
    :language: javascript

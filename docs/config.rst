@@ -10,7 +10,7 @@ Populus is designed to be highly configurable through the configuration
 files.
 
 By default, populus will load the configuration from two files: the user-scope main config file
-at ``~/populus/config.json``, and the project-scope config file, at the project directory,
+at ``~/.populus/config.json``, and the project-scope config file, at the project directory,
 ``project.json``.
 
 Both files share the same JSON schema. You should use the ``project.json`` file for local changes that

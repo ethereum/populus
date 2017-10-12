@@ -4,7 +4,7 @@ Part 3: Deploy to a Local Chain
 .. contents:: :local:
 
 
-At part 2 of the tutoria you created a local chain named 'horton'. Now, we will deploy
+At part 2 of the tutorial you created a local chain named 'horton'. Now, we will deploy
 the Greeter contract to this chain.
 
 
@@ -59,11 +59,19 @@ The ``ipc_path`` should be the exact ipc_path on your machine. If you are not su
 copy-paste the path from the ``run_chain.sh`` script in the ``chains/horton/`` directory.
 
 
+.. note::
+
+  Populus uses JSON schema configuration files, on purpose. We think that for blockchain development, it's safer to
+  use static, external configuration, than a Python module. For more about JSON
+  based configuration see `JSON Schema <http://json-schema.org/>`_.
+
 Note the line ``{"$ref": "contracts.backends.JSONFile"}``. There is a ``$ref``, but the reference
-key does not exist in the file. This is beacuase the ``project.json`` config file is complementary
+key does not exist in the file. This is beacuase the ``project.json`` config file is *complementary*
 to the main populus user-scope config file, at ``~/.populus/config.json``. The user config holds
-for all your populus projects, and you can ``$ref`` the user config keys in the any project config
-file.
+for all your populus projects, and you can use the ``project.json`` just for the configuration changes
+that you need for a specific project. Thus, you can ``$ref`` the user-config keys in any project configuration file.
+
+
 
 
 Running the Chain

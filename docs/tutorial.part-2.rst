@@ -271,7 +271,7 @@ IPC allows connection from the same machine, which is safer.
 Where the Blockchain is Actually Running?
 -----------------------------------------
 
-The blockchain that runs now does not relate to populus. Populus just created some files, but it's
+The blockchain that runs now does not relate to populus. Populus just created some files, but the chain is
 an independent geth process which runs on your machine.
 
 You can verify it, using the web3 javascript console. In another terminal, open a console that attaches to this blockchain:

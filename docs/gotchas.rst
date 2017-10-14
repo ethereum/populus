@@ -68,15 +68,19 @@ to having a compiled executable without the source. When you compile with Populu
 The ABI tells the EVM how to correctly call the compiled bytecode and pad the arguments. Without it, there is no way to do it.
 **Don't loose the ABI**.
 
-[16] There is actually a bit convuluted way to call a contract without the ABI.  With an address ``call`` method
-it's possible to call the fallback function, just provide the argumensts. If the first argument in ``call``
-is a ``byte4`` this argument is assumed as a function signature, and then arguments 2..n are given to this function.
-But not loosing the ABI is better. To forward the entire remaining gas to the receiving contract use ``addr.call.value(x)()``
+[16] There is actually a bit convuluted way to call a contract without the ABI.  With the address ``call`` method
+it's possible to call the fallback function, just provide the arguments. It's also an easy way to call
+a contract if the fallback is the main function you work with. If the first argument of the ``call``
+is a ``byte4`` type, this first argument is assumed to be a function signature, and then arguments 2..n are given to this function
+(but not loosing the ABI is better). To forward the entire remaining gas to the receiving contract use ``addr.call.value(x)()``
 
 
-[17] When a contract sends money to another contract, **the called contract gets execution control** and can call your caller *before* you updated
-the transaction. Therefore, after this second call, the balance will *not* reflect the already sent money. To avoid this, always
-update the amount another account is allowed to get *before* you send money, and revert if the send failed.
+[17] When a contract sends money to another contract, **the called contract gets execution control** and can call your caller *before*
+it returns, and before you updated your state variables. Therefore, after this second call,
+your contract runs agian while the state variables do *not* reflect the already sent money.
+In other words: the callee can get the money, then call the sender in a state that does not tell that money was sent.
+To avoid it, always
+update the state variables that hold the amount which another account is allowed to get *before* you send money, and revert if the transaction failed.
 
 [18] Moreover, the called contract can run code or recursion that will exceed the max EVM stack depth of 1024, and **trigger exception
 which will bubble up to your calling contract**.
@@ -85,10 +89,10 @@ which will bubble up to your calling contract**.
 and you will not have to transfer execution control to another account.
 
 [20] Contracts are **stateful**. Once you send money to a contract, it's there. You can't reinstall, or redeploy
-(or restart, or patch, or fix bug, or git pull... you get the idea).
+(or restart, or patch, or fix a bug, or git pull... you get the idea).
 If you didn't provide a mechanism to withdraw the funds in the first place, it's lost. If you want to update the source
 of a deployed contract, you can't.
-If you want to deploy a new version and didn't provide a mechanism to send the money to the new version (and other state data),
+If you want to deploy a new version and didn't provide a mechanism to send the money to the new version,
 you are stuck with the old one.
 
 
@@ -144,52 +148,56 @@ balance is 0 and geth refuses to run actions that require funds for gas - then *
 sync until the block with the transactions that sent money to this account.
 
 [38] Scope and visibility in Solidity are only in terms of the running code. When the EVM runs your contract's code, it does care
-for ``public``, ``external``, ``internal`` etc. But none of these scope visibility keywords have **no effect** on the
+for ``public``, ``external``, ``internal`` etc. But these scope visibility keywords have **no effect** on the
 information that the blockchain exposes to the outside world.
 
-[39] If you don't explicity set a ``payable`` modifier it will **reject Eth sent**.
+[39] If you don't explicity set a ``payable`` modifier to a function, it will **reject the Eth that was sent in the transaction**.
 
 [40] It's **not** possible to get a list of all the ``mapping`` variable keys or values, like ``mydict.keys()`` or ``mydict.values()``
 in Python. You'll have to handle such lists yourself, if required.
 
-[41] The contract's Constructor runs only once **when the contract is created**, and can't be called later. A constructor is
+[41] The contract's Constructor runs only once **when the contract is created**, and can't be called again. The constructor is
 optional.
 
 [42] This **is** the answer.
 
 [43] Inheritence in Solidity is different. Usually you have a Class, a Subclass, each is an independent object you can access.
-In Solidity, the inheritance is more syntatic, and the final compilation is one contract bytecode that
-the compiler **copied from the parent classes**. In this context, ``private``
+In Solidity, the inheritance is more syntatic, and the final compilation is one contract bytecode with parent class
+members that the compiler **copied from the parent classes**. In this context, ``private`` is just a notion of state variables and functions
+that the compiler will *not* copy.
 
 [44] Memory reads are limited to a width of 256 bits, while writes can be either 8 bits or 256 bits wide
 
 [45] ``throw`` terminates and **reverts all** changes to the state and to Ether balances. The used gas is not refunded.
 
-[46] ``internal`` functions can be called only from the contract itself.
-
-[48] ``function`` is  a legit variable type, and can be passed as an argument to another function.
+[46] ``function`` is  a **legit variable type**, and can be passed as an argument to another function.
 If a function type variable is not initialized, calling it will result in an exception.
 
-[49] Mappings are only allowed for **state** variables
+[47] Mappings are only allowed for **state** variables
 
-[50] ``delete`` does not actually deletes, but assigns the initial value. It's a special **kind of assignment** actually.
+[48] ``delete`` does not actually deletes, but assigns the initial value. It's a special **kind of assignment** actually.
 Deleting a local ``var`` variable that points to a state variable will except, since the "deleted" variable (the pointer)
 has no initial value to reset to.
 
-[51] Declared variables are implictly initiated to their **initial default** value at the begining of the function.
+[49] Declared variables are implictly initiated to their **initial default** value at the begining of the function.
 
-[52] You can declare a function as ``constant``, or the new term ``view``, which theoretaclly should declare a "safe"
+[50] You can declare a function as ``constant``, or the new term ``view``, which theoretaclly should declare a "safe"
 function that does not the alter state. Yet the compiler **does not enfore it.**
 
-[53] To access an ``external`` function ``f`` from within the contract it was declared from, use ``this.f``. In other cases you
+[51] ``internal`` functions can be called only from the contract itself.
+
+[52] To access an ``external`` function ``f`` from within the same contract it was declared in, use ``this.f``. In other cases you
 don't need ``this`` (*this* is kinda bonus, no?)
 
+[53] ``private`` is important only if there are **derived contracts**, where ``private`` denotes the members that
+the compiler does not copy to the derived contracts. Otherwise, from within a contract, ``private`` is the same as ``internal``.
+
 [54] ``external`` is available only for functions. ``public``, ``internal`` and ``private`` are available for both functions
-and state variables. The interface of a contract is thus it's ``external`` and ``public`` memebers.
+and state variables. The **contract's interface** is built from it's ``external`` and ``public`` memebers.
 
-[55] The compiler will **automatically** generate an accessor ("get" function) for ``public`` state variables.
+[55] The compiler will **automatically** generate an accessor ("get" function) for the ``public`` state variables.
 
-[56] ``now`` is the **current block** timestamp
+[56] ``now`` is the time stamp of the **current block**
 
 [57] **Ethereum units** ``wei``, ``finney``, ``szabo`` or ``ether`` are reserved words, and can be used in experessions and literals.
 
@@ -207,7 +215,7 @@ Yes, we know. You want more:
     * `Solidity security considerations <http://solidity.readthedocs.io/en/develop/security-considerations.html?highlight=pitfalls#security-considerations>`_
     * `Even more subtleties <https://github.com/ethereum/wiki/wiki/Subtleties>`_
     * `Solidity style guide <http://solidity.readthedocs.io/en/develop/style-guide.html>`_
-    * `Protecting yourself and your funds from MyEtherWallet <https://myetherwallet.github.io/knowledge-base/getting-started/protecting-yourself-and-your-funds.html>`_
-    * `Ethereum security from OpenZeppelin <https://blog.zeppelin.solutions/onward-with-ethereum-smart-contract-security-97a827e47702>`_
-    * `Best smart contracts practices from Consensys <https://github.com/ConsenSys/smart-contract-best-practices>`_
-    * `Writing robust smart contracts in Solidity from colony.io <https://blog.colony.io/writing-more-robust-smart-contracts-99ad0a11e948>`_
+    * `Ethereum security, from OpenZeppelin <https://blog.zeppelin.solutions/onward-with-ethereum-smart-contract-security-97a827e47702>`_
+    * `Protecting yourself and your funds, from MyEtherWallet <https://myetherwallet.github.io/knowledge-base/getting-started/protecting-yourself-and-your-funds.html>`_
+    * `Best smart contracts practices, from Consensys <https://github.com/ConsenSys/smart-contract-best-practices>`_
+    * `Writing robust smart contracts in Solidity ,from colony.io <https://blog.colony.io/writing-more-robust-smart-contracts-99ad0a11e948>`_

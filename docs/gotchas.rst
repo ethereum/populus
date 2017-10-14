@@ -10,8 +10,8 @@ environment. Items are not sorted by priority.
 
 **This is all the fun, isn't it? So here is our TOP 10, no wait 59, issues.**
 
-[1] Everything that the contract **runs** on the blockchain costs money, the gas.
-Everycalculation, and there is a price for each action the EVM takes on behalf of your contract. Try to offload as much computations as you can to the client.
+[1] Everything that the contract **runs** on the blockchain, every calculation, costs money, the gas.
+There is a price for each action the EVM takes on behalf of your contract. Try to offload as much computations as you can to the client.
 E.g., suppose you want to calculate the average donation in a contract that collects money and counts donations.
 The contract should only provide the total donations, and the number of donations, then calculate the average in the client code.
 
@@ -49,7 +49,7 @@ This is the function you will hit when sending money in a transaction that has v
 a function in the contract.
 
 [11] If a contract has no fallback function, or it has one without the ``payable`` modifier, then a simple transaction
-that sends Ether to the contract will fail.
+that just sends the contract some Ether, without calling any function, will fail.
 
 [12] Contracts are saved on the blockchain in a compiled EVM (ethereum virtual machine) bytecode.
 There is **no way** to understand from the bytecode what the contract actually does.
@@ -60,7 +60,7 @@ matches the bytecode on the blockchain.
 [13] Never **send Eth** to a contract unless you absolutely positively trust it's author, or you verified the bytecode against a source compilation
 yourself.
 
-[14] Never **call** a contract unless you absolutely positively trust it's author, or you verified the bytecode against a source compilation
+[14] Never **call** a contract, never call a function of a contract, unless you absolutely positively trust it's author, or you verified the bytecode against a source compilation
 yourself.
 
 [15] If you loose the ABI, you will not be able to call the contract other than the fallback function. The situation is very similar

@@ -1,14 +1,14 @@
 Solidity and Smart Contracts Gotchas
 =====================================
 
-Solidity is a fairly simple language (on purpose). However, the "mental model"
-of smart contracts development against the blockchain is different. We compiled a (by no means complete) list of subtle issues
-which may be non-obvious, or even confusing at time,  to what you expect from a "common" programming
-environment (items are not sorted by priority).
+Solidity itself is a fairly simple language, on purpose. However, the "mental model"
+of smart contracts development against the blockchain is unique. We compiled a (by no means complete) list of
+subtle issues which may be non-obvious, or even confusing at times,  to what you expect from a "common" programming
+environment. Items are not sorted by priority.
 
 .. role:: strike
 
-**But this is all the fun, isn't it? So here is our TOP 10, no wait 59, issues.**
+**This is all the fun, isn't it? So here is our TOP 10, no wait 59, issues.**
 
 [1] Everything that the contract **runs** on the blockchain costs money, the gas.
 Everycalculation, and there is a price for each action the EVM takes on behalf of your contract. Try to offload as much computations as you can to the client.

@@ -19,6 +19,7 @@ Contents
     project
     config
     chain
+    gotchas
     release
     modules
     API Documentation <populus>

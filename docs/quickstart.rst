@@ -144,6 +144,7 @@ Alternatively, you can init a new project by a directory:
 
     $ populus -p /path/to/my/project/ init
 
+.. _greete_quickstart:
 
 Compiling your contracts
 ------------------------

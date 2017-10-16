@@ -27,29 +27,28 @@ But you can read the logs from the client, and they are much cheaper.
 There is a high initial cost to setting the storage to non zero (touching the storage). Never reset and reintiate the storage.
 
 [5] Everything the contracts uses for temporary memory costs money, the gas. The pricing of using **memory**, the part that is cleared once execution done (think RAM), is not linear either,
-and cost per the same unit of usage increases sharply once you used a lot of memory, trying to avoid unreasonable memory usage.
+and cost per the same unit of usage increases sharply once you used a lot of memory. Try to avoid unreasonable memory usage.
 
-[6] Even when you free storage, the gas you paid for that storage is **partially** refundble if. So don't use storage as a temporary store.
+[6] Even when you free storage, the gas you paid for that storage is **partially** refundble if. Don't use storage as a temporary store.
 
 [7] Each time you **deploy** a contract, it costs money, the gas.
-So the habbit of pushing the whole codebase after every small commit, costs a lot of money.
+So the habbit of pushing the whole codebase after every small commit, can cost a lot of money.
 When possible, try to breakdown the functionality to small focused contracts. If you fix one, you don't have to re-deploy the others. Use library contracts (see below). Removing a contrat is partially refundble, but less than deployment.
 
 [8] No, sorry. Refunds will never exceed the gas provided in the transaction that initiated the refundble action. In fact,
 **refund is maxed to 50% of the gas** in that tansaction.
 
-[9] Whenever you just send money to a contract (transaction with value > 0), **even without calling any function**,
-you run it's code, and the contract gets an opportunity to call other functions.
+[9] Whenever you just send money to a contract (a transaction with value > 0), **even without calling any function**,
+you run the contract's code.  The contract gets an opportunity to call other functions.
 Etheruem is different from Bitcoin: even simple money sending runs code
-(infact Bitcoin has a simple stack based scripts, but the common case is simple money sending transactions)
+(infact Bitcoin has a simple stack based scripts, but the common case is simple money transfers)
 
 [10] Every contract can have one un-named function, the fallback function,
-which the contract **runs when it's called without a specific function**.
-This is the function you will hit when sending money in a transaction that has value, but not data to explictly call
-a function in the contract.
+which the contract **runs when it's called even if no specific function was named in the transaction**.
+This is the function you will hit when sending money in a transaction that just has value.
 
 [11] If a contract has no fallback function, or it has one without the ``payable`` modifier, then a simple transaction
-that just sends the contract some Ether, without calling any function, will fail.
+that just sends the contract Ether, without calling any function, will fail.
 
 [12] Contracts are saved on the blockchain in a compiled EVM (ethereum virtual machine) bytecode.
 There is **no way** to understand from the bytecode what the contract actually does.
@@ -71,12 +70,12 @@ The ABI tells the EVM how to correctly call the compiled bytecode and pad the ar
 [16] There is actually a bit convuluted way to call a contract without the ABI.  With the address ``call`` method
 it's possible to call the fallback function, just provide the arguments. It's also an easy way to call
 a contract if the fallback is the main function you work with. If the first argument of the ``call``
-is a ``byte4`` type, this first argument is assumed to be a function signature, and then arguments 2..n are given to this function
-(but not loosing the ABI is better). To forward the entire remaining gas to the receiving contract use ``addr.call.value(x)()``
+is a ``byte4`` type, **this first argument is assumed to be a function signature**, and then arguments 2..n are given to this function
+(but not loosing the ABI is better). To call and forward the entire remaining gas to the callee contract use ``addr.call.value(x)()``
 
 
 [17] When a contract sends money to another contract, **the called contract gets execution control** and can call your caller *before*
-it returns, and before you updated your state variables. Therefore, after this second call,
+it returns, and before you updated your state variables. This is a *re-entry attack*. Therefore, after this second call,
 your contract runs agian while the state variables do *not* reflect the already sent money.
 In other words: the callee can get the money, then call the sender in a state that does not tell that money was sent.
 To avoid it, always
@@ -96,8 +95,9 @@ If you want to deploy a new version and didn't provide a mechanism to send the m
 you are stuck with the old one.
 
 
-[21] ``call`` and ``delegatecall`` invoke other contracts, but can't catch exceptions in these contracts. The only indication that you will get if the call excepted
-is if these function return ``false``. This implies that providing an address to non-existent contract to ``call`` and ``delegatecall``
+[21] ``call`` and ``delegatecall`` invoke other contracts, but can't catch exceptions in these contracts. 
+The only indication that you will get if the call excepted
+is when these functions return ``false``. This implies that providing an address to non-existent contract to ``call`` and ``delegatecall``
 will **invoke nothing but w/o exception**. You will still get ``true``. Check existence *before* the call.
 
 
@@ -109,7 +109,7 @@ with care, typically only for library contracts that you absolutely trust.
 [23] ``call`` on the client is a web3 option that behaves exactly like sending a real transaction, but it will **not change the blockchain
 state**. It's kinda dry-run transaction, which is great for testing (and it's not related at all to the Solidity ``call``)
 
-[24] **Trusted** libraries are a good way to save gas of repeating deployments,  for code that is actually reusable.
+[24] **Trusted** contract libraries are a good way to save gas of repeating deployments,  for code that is actually reusable.
 
 [25] The EVM stack limit is 1024 deep. For deeply nested operations, prefer working in **steps and loops, over recursions**.
 
@@ -119,7 +119,7 @@ Also any assignment to a state variables. Avoid it when possible.
 [27] Assigning a memory variable to a storage variable always creates a pointer, which will not be aware if the **underlying state
 variable changed**
 
-[28] Don't use rounding for Eth in the contract, since **it will cost you lost money that was rounded**.
+[28] Don't use rounding for Eth in the contract, since **it will cost you the lost money that was rounded**.
 Use the very fine grained Eth units instead.
 
 [29] The default money unit, both in Solidity and Web3, like ``msg.value``, or getting the balance, is always **Wei**.
@@ -148,10 +148,13 @@ balance is 0 and geth refuses to run actions that require funds for gas - then *
 sync until the block with the transactions that sent money to this account.
 
 [38] Scope and visibility in Solidity are only in terms of the running code. When the EVM runs your contract's code, it does care
-for ``public``, ``external``, ``internal`` etc. But these scope visibility keywords have **no effect** on the
-information that the blockchain exposes to the outside world.
+for ``public``, ``external`` or ``internal``. The EVM doesn't use these keywords,
+but visibility is enforced in the bytecode and exposed interface (this is not just a compiler hint).
+However, these scope visibility definitions have **no effect** on the
+information that the blockchain exposes to the outside world. 
 
 [39] If you don't explicity set a ``payable`` modifier to a function, it will **reject the Eth that was sent in the transaction**.
+If no function has ``payable``, the contract can't accept Ether.
 
 [40] It's **not** possible to get a list of all the ``mapping`` variable keys or values, like ``mydict.keys()`` or ``mydict.values()``
 in Python. You'll have to handle such lists yourself, if required.
@@ -168,7 +171,7 @@ that the compiler will *not* copy.
 
 [44] Memory reads are limited to a width of 256 bits, while writes can be either 8 bits or 256 bits wide
 
-[45] ``throw`` terminates and **reverts all** changes to the state and to Ether balances. The used gas is not refunded.
+[45] ``throw`` and ``revert`` terminate and **revert all** changes to the state and to Ether balances. The used gas is not refunded.
 
 [46] ``function`` is  a **legit variable type**, and can be passed as an argument to another function.
 If a function type variable is not initialized, calling it will result in an exception.
@@ -203,7 +206,9 @@ and state variables. The **contract's interface** is built from it's ``external`
 
 [58] **Time units** ``seconds``, ``minutes``, ``hours``, ``days``, ``weeks`` and ``years``, are reserved words, and can be used in experessions and literals.
 
-[59] The ``msg``, ``block`` and ``tx`` variables always exist in the **global namespace**, and you can use
+[59] There is no type conversion from non-boolean to boolean types. ``if (1) { ... }`` is not valid Solidity.
+
+[60] The ``msg``, ``block`` and ``tx`` variables always exist in the **global namespace**, and you can use
 them and their members without any prior decleration or assignment
 
 

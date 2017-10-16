@@ -19,6 +19,7 @@ Contents
     project
     config
     chain
+    dev_cycle
     gotchas
     release
     modules

@@ -8,7 +8,7 @@ environment. Items are not sorted by priority.
 
 .. role:: strike
 
-**This is all the fun, isn't it? So here is our TOP 10, no wait 59, issues.**
+**This is all the fun, isn't it? So here is our TOP 10, no wait 60, issues.**
 
 [1] Everything that the contract **runs** on the blockchain, every calculation, costs money, the gas.
 There is a price for each action the EVM takes on behalf of your contract. Try to offload as much computations as you can to the client.
@@ -96,9 +96,10 @@ you are stuck with the old one.
 
 
 [21] ``call`` and ``delegatecall`` invoke other contracts, but can't catch exceptions in these contracts. 
-The only indication that you will get if the call excepted
-is when these functions return ``false``. This implies that providing an address to non-existent contract to ``call`` and ``delegatecall``
-will **invoke nothing but w/o exception**. You will still get ``true``. Check existence *before* the call.
+The only indication that you will get if the call excepted, is when these functions return ``false``. 
+This implies that providing an address of non-existent contract to ``call`` and ``delegatecall``
+will **invoke nothing but still no exception**. You get ``true`` for *both* successful run *and* calling non-existent contract.
+Check existence of a contract in the address, *before* the call.
 
 
 [22] ``delegatecall`` is a powerful option, yet you have to be careful. It runs another contract code but **in the context of your
@@ -165,8 +166,8 @@ optional.
 [42] This **is** the answer.
 
 [43] Inheritence in Solidity is different. Usually you have a Class, a Subclass, each is an independent object you can access.
-In Solidity, the inheritance is more syntatic, and the final compilation is one contract bytecode with parent class
-members that the compiler **copied from the parent classes**. In this context, ``private`` is just a notion of state variables and functions
+In Solidity, the inheritance is more syntatic. In the final compilation the compilers **copies the parent class members**, 
+and creates a bytecode of the derived contract with the *copied* memebers. In this context, ``private`` is just a notion of state variables and functions
 that the compiler will *not* copy.
 
 [44] Memory reads are limited to a width of 256 bits, while writes can be either 8 bits or 256 bits wide
@@ -174,7 +175,7 @@ that the compiler will *not* copy.
 [45] ``throw`` and ``revert`` terminate and **revert all** changes to the state and to Ether balances. The used gas is not refunded.
 
 [46] ``function`` is  a **legit variable type**, and can be passed as an argument to another function.
-If a function type variable is not initialized, calling it will result in an exception.
+If a function type variable is not initialized, calling it will obviously result in an exception.
 
 [47] Mappings are only allowed for **state** variables
 
@@ -185,7 +186,7 @@ has no initial value to reset to.
 [49] Declared variables are implictly initiated to their **initial default** value at the begining of the function.
 
 [50] You can declare a function as ``constant``, or the new term ``view``, which theoretaclly should declare a "safe"
-function that does not the alter state. Yet the compiler **does not enfore it.**
+function that does not alter the state. Yet the compiler **does not enfore it.**
 
 [51] ``internal`` functions can be called only from the contract itself.
 

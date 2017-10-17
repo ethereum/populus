@@ -62,9 +62,9 @@ and arguments structure of the *bytecode* contract's interface, and the address 
 on the mainnet.
 
 .. note::
-  To deploy a *new* Donator "contract", maybe to another blockchain, or to another address on the same blockchain,
-  we need a Web3 contract *object*, but this time the object does requires a compiled
-  "contract", from the Solidity source file "contract".
+  To deploy a *new* ``Donator`` contract, maybe to another blockchain, or to another address on the same blockchain,
+  we also need a Web3 contract *object*, but this time the object does require a compiled
+  "contract"
 
 Actually when we say ""contract", we deal with three different things:
 
@@ -110,6 +110,11 @@ as a *python object with python functions*, and returns this object to the test 
 From this point onward, you have a *Python* object, with *Python* methods, that correspond to the original deployed contract
 bytecode on the blockchain. Cool, isn't it?
 
+.. note::
+  
+    For the contract name you use the Solidity contract name, ``Donator``, and *not* the file name, ``Donator.sol``.
+    A Solidity source file can include more than one contract definition (as a Python file can include more than one class definition).
+
 Get the blockchain
 ''''''''''''''''''
 
@@ -123,13 +128,17 @@ You don't have to declare or assign it, it's just ready and available for your f
 The Populus testing fixtures comes from the Populus py.test plug-in, which prepares for you several useful fixtures: ``project``,
 ``chain``, ``provider``, ``registrar`` and ``web3``. All these fixtures are part of the Populus API. See :ref:`populus_testing`
 
+.. note::
+
+  The tester chain creates and unlocks new accounts in each run, so you don't have to supply a private key or a wallet.
+
 
 Run the First Test: Public State Variable
--------------------------------------
+-----------------------------------------
 
 We are ready for the first test: we have a test function that runs the ``tester`` chain, and using ``get_or_deploy_contract('Donator')``
 it compiles ``Donator.sol``, deploys it to the ``tester`` chain, gets a Python contract object that wraps the actual contract's
-bytecode on the chain, and assign this object to a variable,``donator``.
+bytecode on the chain, and assign this object to a variable, ``donator``.
 
 Once we have the ``donator`` contract as a Python object, we can call any function of this contract. You get the *contract's*
 interface with ``call()``. Reminder: ``call`` behaves exactly as a transaction, but does not alter state. It's like a "dry-run".

@@ -66,10 +66,10 @@ the public key from the private key, but the opposite is impossible.
 **Address**: A combination of alphanumeric characters that is derived from the public key.
 
 **Ethereum Account**: An address that is used on the blockchain. There are inifinite potential combinations
-of alphanumeric characters, but only when someone has a private key that the address is derived from, 
-the alphanumeric combination of an address can be used as an *account*.
+of alphanumeric characters, but only when someone has the private key that the address was derived from,
+this address can be used as an *account*.
 
-**Transaction**: A message that is sent from one account to another. The message can contain Ether (the digital currency),
+**Transaction**: A message that one account sends to another. The message can contain Ether (the digital currency),
 and data. The data is used to run a contract if the account has one.
 
 **Why the private key and the public key?** The keys mechanism can confirm that the transaction was indeed authorised by the account owner, 
@@ -91,7 +91,7 @@ is found it is added to the blockchain on top of the current last block.
 e.g. if two nodes suggest two different block for the next block, the nodes gets a decision by consensus.
 
 **Consensus**: Miners get rewards when they find a valid block, and a valid block is valid only if it's built on a valid parent block,
-and *accepted by the majority of nodes on the blockchain**. So miners are incentivised to reject false blocks and false transactions. 
+and *accepted by the majority of nodes on the blockchain*. So miners are incentivised to reject false blocks and false transactions. 
 They know that if they work on a false transaction (say a cheat), then there
 is high probability that other nodes will reject it, and their work effort will be lost without rewards.
 They prefer to find valid blocks with valid transacions, and send them as fast as possible to the blockchain.
@@ -100,8 +100,8 @@ They prefer to find valid blocks with valid transacions, and send them as fast a
 of the direct line of the blockchain. 
 If the blockchain is ``block1`` >> ``block2`` >> ``block3`` >> ``block4``, and a miner found another valid block on top of ``block3``, say ``block4a``,
 but wasn't fast enough to introduce it to the chain, it will still get *partial* rewards.
-The faster miner, of ``block4``, will get the *full* rewards.  ``block4`` is included on the direct sequence of the blockchain,
-and ``block4a``  is not used but included as an "*uncle*".
+The faster miner, of ``block4``, will get the *full* rewards. ``block4`` is included in the direct sequence of the blockchain,
+and ``block4a``  is not used in the sequence but included as an "*uncle*".
 The idea is to spread compenstatations among miners and avoid "the winner takes it all" monopoly.
 
 **Contract**: The word ""contract" is used for three different (albeit related) concepts: 

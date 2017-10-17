@@ -97,7 +97,7 @@ Here is the new contract code:
       function Donator() {
         default_usd_rate = 350;
       }
-      modifier money_sent() { if (!msg.value > 0) revert; _; }
+      modifier money_sent() { if (!msg.value > 0) throw; _; }
       function donate(uint usd_rate) public payable money_sent {
           donations_total += msg.value;
           donations_count += 1;
@@ -173,7 +173,7 @@ variable without prior decleration or assignment. To find out how much
 Ether was sent, use ``msg.value``.
 
 **Modifiers**:
-``modifier money_sent() { if (!msg.value > 0) revert; _; }``. The term "modifier" is a bit confusing. 
+``modifier money_sent() { if (!msg.value > 0) throw; _; }``. The term "modifier" is a bit confusing. 
 A modifier of a function is  *another* function that injects, or modifies, code, typically to verify some pre-existing condition.
 Since the donate function uses the modifier ``function donate(uint usd_rate) public payable money_sent {...}``,
 then ``money_sent`` will run *before* ``donate``. The code in ``donate`` will run only if ``msg.value > 0``, and make sure

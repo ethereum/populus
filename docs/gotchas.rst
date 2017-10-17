@@ -166,8 +166,8 @@ optional.
 [42] This **is** the answer.
 
 [43] Inheritence in Solidity is different. Usually you have a Class, a Subclass, each is an independent object you can access.
-In Solidity, the inheritance is more syntatic. In the final compilation the compilers **copies the parent class members**, 
-and creates a bytecode of the derived contract with the *copied* memebers. In this context, ``private`` is just a notion of state variables and functions
+In Solidity, the inheritance is more syntatic. In the final compilation the compiler **copies the parent class members**, 
+to create the bytecode of the derived contract with the *copied* memebers. In this context, ``private`` is just a notion of state variables and functions
 that the compiler will *not* copy.
 
 [44] Memory reads are limited to a width of 256 bits, while writes can be either 8 bits or 256 bits wide

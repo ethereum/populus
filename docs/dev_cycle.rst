@@ -1,7 +1,7 @@
 Development Cycle
 =================
 
-Full contract development cycle in Python, with Populus and Web3.
+Full contract development cycle in Python, with Populus and Web3.py.
 
 
 Contents
@@ -10,5 +10,7 @@ Contents
 .. toctree::
     :maxdepth: 1
 
+    dev_cycle.intro
     dev_cycle.part-01
     dev_cycle.part-02
+    dev_cycle.part-03

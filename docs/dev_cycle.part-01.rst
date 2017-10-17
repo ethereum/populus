@@ -4,20 +4,6 @@ Part 1: Solidity Contract
 .. contents:: :local:
 
 
-Introduction
-------------
-
-We will take a walk through an entire contract development cycle, with Python, Populus and Web3.py.
-Typical iteration will include:
-
-* Writing the contract
-* Testing, fixing bugs
-* Deployment to a local chain, make sure everything works
-* Deployment to testnet,
-* Finally deployment to mainnet which will cost real gas
-* Interaction with the contract on the blockchain.
-
-
 Start a New Project
 -------------------
 
@@ -82,7 +68,7 @@ Ok, time to add a new contract.
 
 
 In this example we will work with a very simple contract that accepts donations for later use.
-The contract will also handle the donations' USD value.
+The contract will also handle the donations value in USD.
 
 Since the ETH/USD exchange rate fluctates, typically upward, we want to track not only how much ETH the contract collected,
 but also the accumulating USD value of the donations *at the time of the donation*.
@@ -111,7 +97,7 @@ Here is the new contract code:
       function Donator() {
         default_usd_rate = 350;
       }
-      modifier money_sent() { if (!msg.value > 0) throw; _; }
+      modifier money_sent() { if (!msg.value > 0) revert; _; }
       function donate(uint usd_rate) public payable money_sent {
           donations_total += msg.value;
           donations_count += 1;

@@ -1,3 +1,5 @@
+.. _populus_testing:
+
 Testing
 =======
 

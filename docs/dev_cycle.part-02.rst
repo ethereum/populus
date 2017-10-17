@@ -120,11 +120,11 @@ Nice. The two contracts are now compiled. Take a look at the file that Populus j
 Tester Deployment
 -----------------
 
-You now have two compiled contracts are now ready for deployment. 
+You now have two compiled contracts, ready for deployment. 
 
 The first deployment step is to verify that it works on the ``tester`` chain. This is an ephemeral blockchain. 
 It runs localy, and resets each time is starts. The state of the chain when it runs is kept only in memory,
-and deleted when done. It's a great tool for a testing.
+and cleared when done. It's a great tool for a testing.
 
 Deploy to the ``tester`` chain:
 
@@ -159,7 +159,7 @@ When you deploy a contract Populus re-compiles *all* the contracts, but deploys 
 
 Well, deployment works. Since the ``tester`` chain is not persistent, everything was deleted, but the deployment should work on persistent
 chains: it's the same Ethereum protocol. Check for yourself and run the deploy again, it will re-dploy exactly the same,since
-each starts from reset state.
+each starts from a reset state.
 
 
 Interim Summary

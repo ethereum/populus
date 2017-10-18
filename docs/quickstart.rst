@@ -182,7 +182,7 @@ Here is the contract:
         }
     }
 
-``Greeter`` is simple contract:
+``Greeter`` is a simple contract:
 
 * The ``contract`` keyword starts a contract definition
 * The contract has one public "state" variable, named ``greeting``.
@@ -346,15 +346,15 @@ except for ``solc``:
 
 Install Solidity
 ~~~~~~~~~~~~~~~~
-You'll have to install solidity, recommended from release 4.11 or greater.
+You'll have to install solidity, recommended from release 0.4.11 or greater.
 
-Installtion scripts for binary:
+Installation scripts for binary:
 '''''''''''''''''''''''''''''''
 
     https://github.com/pipermerriam/py-solc#installing-the-solc-binary
 
 
-Installtion scripts building it:
+Installation scripts building it:
 ''''''''''''''''''''''''''''''''
 
 First, clone the repository and switch to the proper branch:
@@ -446,10 +446,6 @@ directory with the ``virtualenv`` activated), you're ready to run the tests.
 
 At this point, all your tests should pass. If they don't, you're probably missing a dependency
 somewhere. Just retrace your steps and you'll figure it out.
-
-
-
-
 
 .. _Geth: https://github.com/ethereum/go-ethereum/
 .. _Solidity: https://github.com/ethereum/solidity/

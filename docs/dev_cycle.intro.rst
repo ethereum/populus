@@ -79,7 +79,7 @@ that claims to sent it.
 
 **Mining**: Bundling a group of transactions into a block
 
-**Why mining is hard?** Because the miner needs to bundle transactions with additional input that requires significant
+**Why mining is hard?** Because the miner needs to bundle the transactions with an additional input that requires significant
 computational effort to find. Without this addtional input, the block is not valid.
 
 **Rewards**: The reward that a miner gets when it finds a valid block
@@ -123,11 +123,11 @@ the EVM needs the ABI in order to know how to call the bytecode.
 
 **geth**: The official implemntation of an Ethereum blockchain node, written in Go
 
-**gas**: The price that users pay to run computational actions on the blockchain (deploying a new contract, send money, run a contract function, storage)
+**gas**: The price that users pay to run computational actions on the blockchain (deploying a new contract, send money, run a contract function, storage, memory)
 
 **mainnet**: The Ethereum blockchain
 
-**testnet**: An Ethereum blockchain for testing. It behaves exactly as mainnet, but you don't use real to pay for the Ether and the gas
+**testnet**: An Ethereum blockchain for testing. It behaves exactly as mainnet, but you don't use real Ether to send money and pay for the gas
 
 **Local chain**: A blockchain that runs localy, has it's own blocks, and does not sync to any other blockchain. Useful for development
 and testing

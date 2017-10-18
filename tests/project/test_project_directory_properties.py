@@ -35,3 +35,9 @@ def test_project_directory_properties(project_dir):
 
     base_blockchain_storage_dir = get_base_blockchain_storage_dir(project_dir)
     assert is_same_path(project.base_blockchain_storage_dir, base_blockchain_storage_dir)
+
+
+def test_py_version_file_error():
+
+    with pytest.raises(OSError):
+        p = Project()  # noqa: F841

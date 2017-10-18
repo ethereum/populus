@@ -435,13 +435,6 @@ directory with the ``virtualenv`` activated), you're ready to run the tests.
 At this point, all your tests should pass. If they don't, you're probably missing a dependency
 somewhere. Just retrace your steps and you'll figure it out.
 
-Notes
------
-You can also interact programmatically with the chain to which you deploy through the `Web3.py`_ API. Read more about it in the Web3.py `Docs`_.
-
-
 .. _Geth: https://github.com/ethereum/go-ethereum/
 .. _Solidity: https://github.com/ethereum/solidity/
 .. _PyEthereum: https://github.com/ethereum/pyethereum/
-.. _Web3.py: https://github.com/pipermerriam/web3.py
-.. _Docs: http://web3py.readthedocs.io

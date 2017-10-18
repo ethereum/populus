@@ -29,7 +29,7 @@ We will need a local private blockchain. This local blockchain
 is an excellent tool for development: it runs on your machine, does not take the time to sync the real blockchain, does not
 costs real gas and fast to respond.
 Yet the local chain works with the same Ethereum protocol. If a contract runs
-on the local chain, it should run on mainnet as well. See :ref:`runing_local_blockchain` .
+on the local chain, it should run on mainnet as well.
 
 .. note::
     If you are familiar to web development, then running a local blockchain is
@@ -48,6 +48,52 @@ We will create a a local chain we'll name "horton":
     INFO [10-14|12:31:31] Allocated cache and file handles         database=/home/mary/projects/donations/chains/horton/chain_data/geth/lightchaindata cache=16 handles=16
     INFO [10-14|12:31:31] Writing custom genesis block
     INFO [10-14|12:31:31] Successfully wrote genesis state         database=lightchaindata                                                                        hash=faa498…370bf1
+
+Add this local chain to the project config. 
+
+.. code-block:: shell
+
+    $ nano project.json
+    
+The file should look as follows. Update ``ipc_path`` to the actual path on
+your machine (if you are not sure about the path, take a 
+look at ``chains/horton/run_chain.sh``).
+
+.. code-block:: javascript
+
+  {
+    "version":"7",
+    "compilation":{
+      "contracts_source_dirs": ["./contracts"],
+      "import_remappings": []
+    },
+    "chains": {
+      "horton": {
+        "chain": {
+          "class": "populus.chain.ExternalChain"
+        },
+        "web3": {
+          "provider": {
+            "class": "web3.providers.ipc.IPCProvider",
+          "settings": {
+            "ipc_path":"/home/mary/projects/donations/horton/chain_data/geth.ipc"
+          }
+         }
+        },
+        "contracts": {
+          "backends": {
+            "JSONFile": {"$ref": "contracts.backends.JSONFile"},
+            "ProjectContracts": {
+              "$ref": "contracts.backends.ProjectContracts"
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+For more on the horton local chain see :ref:`runing_local_blockchain` .
 
 Everything is ready.
 

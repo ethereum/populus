@@ -78,12 +78,17 @@ transaction.
 
     function donate(uint usd_rate) public payable money_sent {...}
     
-This argument is provided in  a *Python* donate function: ``donator.transact({'value':650}).donate(380)``. Populus gives you *Python* interface to a bytecode
-contract. Nice, no?
+This argument is provided in the test as *Python* donate function:
+
+.. code-block:: python
+
+    donator.transact({'value':650}).donate(380).
+    
+Populus gives you a *Python* interface to a bytecode contract. Nice, no?
 
 **[6] Asserts**: We expect the ``donations_total`` to be ``500 + 650 = 1150``, the ``donations_count`` is 2,
 and the ``default_usd_rate`` to match the last update, 380. The test gets the varaibles with ``call``, but in the case
-of a "getter" it does not matter, since a "getter" function will not change state wether it's calls with ``transact`` or ``call``.
+of a "getter" it doesn't matter, since a "getter" function will not change the contract's state wether it's called with ``transact`` or ``call``.
 
 Run the test:
 
@@ -102,6 +107,10 @@ Run the test:
         
 Voila. The two tests pass.
 
+
+.. note::
+
+    Fallback function calls are still not supported in Populus
 
 
 

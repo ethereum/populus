@@ -8,7 +8,7 @@ environment. Items are not sorted by priority.
 
 .. role:: strike
 
-**This is all the fun, isn't it? So here is our TOP 10, no wait 60, issues.**
+**This is all the fun, isn't it? So here is our TOP 10, no wait 62, issues.**
 
 [1] Everything that the contract **runs** on the blockchain, every calculation, costs money, the gas.
 There is a price for each action the EVM takes on behalf of your contract. Try to offload as much computations as you can to the client.
@@ -148,68 +148,74 @@ Eth you need** for these actions.
 balance is 0 and geth refuses to run actions that require funds for gas - then **your local node is not synced**. You must
 sync until the block with the transactions that sent money to this account.
 
-[38] Scope and visibility in Solidity are only in terms of the running code. When the EVM runs your contract's code, it does care
+[38] Once the contract is on the blockchain, there is **no builtin way to shut it down** or block it from responding to 
+messages. If the contract has a bug, an issue, a hack that let hackers steal funds, you can't shutdown, or go to "maintenance" mode, unless you provided
+a mechanism for that in the contract code beforehand. 
+
+[39] Unless you provided a function that kills the contract, there is **no builtin way to delete** it from the blockchain.
+
+[40] Scope and visibility in Solidity are only in terms of the running code. When the EVM runs your contract's code, it does care
 for ``public``, ``external`` or ``internal``. The EVM doesn't use these keywords,
-but visibility is enforced in the bytecode and exposed interface (this is not just a compiler hint).
-However, these scope visibility definitions have **no effect** on the
+but visibility is enforced in the bytecode and the exposed interface (this is not just a compiler hint).
+However, the scope visibility definitions have **no effect** on the
 information that the blockchain exposes to the outside world. 
 
-[39] If you don't explicity set a ``payable`` modifier to a function, it will **reject the Eth that was sent in the transaction**.
+[41] If you don't explicity set a ``payable`` modifier to a function, it will **reject the Eth that was sent in the transaction**.
 If no function has ``payable``, the contract can't accept Ether.
 
-[40] It's **not** possible to get a list of all the ``mapping`` variable keys or values, like ``mydict.keys()`` or ``mydict.values()``
+[42] This **is** the answer. 
+
+[43] It's **not** possible to get a list of all the ``mapping`` variable keys or values, like ``mydict.keys()`` or ``mydict.values()``
 in Python. You'll have to handle such lists yourself, if required.
 
-[41] The contract's Constructor runs only once **when the contract is created**, and can't be called again. The constructor is
+[44] The contract's Constructor runs only once **when the contract is created**, and can't be called again. The constructor is
 optional.
 
-[42] This **is** the answer.
-
-[43] Inheritence in Solidity is different. Usually you have a Class, a Subclass, each is an independent object you can access.
+[45] Inheritence in Solidity is different. Usually you have a Class, a Subclass, each is an independent object you can access.
 In Solidity, the inheritance is more syntatic. In the final compilation the compiler **copies the parent class members**, 
 to create the bytecode of the derived contract with the *copied* memebers. In this context, ``private`` is just a notion of state variables and functions
 that the compiler will *not* copy.
 
-[44] Memory reads are limited to a width of 256 bits, while writes can be either 8 bits or 256 bits wide
+[46] Memory reads are limited to a width of 256 bits, while writes can be either 8 bits or 256 bits wide
 
-[45] ``throw`` and ``revert`` terminate and **revert all** changes to the state and to Ether balances. The used gas is not refunded.
+[47] ``throw`` and ``revert`` terminate and **revert all** changes to the state and to Ether balances. The used gas is not refunded.
 
-[46] ``function`` is  a **legit variable type**, and can be passed as an argument to another function.
+[48] ``function`` is  a **legit variable type**, and can be passed as an argument to another function.
 If a function type variable is not initialized, calling it will obviously result in an exception.
 
-[47] Mappings are only allowed for **state** variables
+[49] Mappings are only allowed for **state** variables
 
-[48] ``delete`` does not actually deletes, but assigns the initial value. It's a special **kind of assignment** actually.
+[50] ``delete`` does not actually deletes, but assigns the initial value. It's a special **kind of assignment** actually.
 Deleting a local ``var`` variable that points to a state variable will except, since the "deleted" variable (the pointer)
 has no initial value to reset to.
 
-[49] Declared variables are implictly initiated to their **initial default** value at the begining of the function.
+[51] Declared variables are implictly initiated to their **initial default** value at the begining of the function.
 
-[50] You can declare a function as ``constant``, or the new term ``view``, which theoretaclly should declare a "safe"
+[52] You can declare a function as ``constant``, or the new term ``view``, which theoretaclly should declare a "safe"
 function that does not alter the state. Yet the compiler **does not enfore it.**
 
-[51] ``internal`` functions can be called only from the contract itself.
+[53] ``internal`` functions can be called only from the contract itself.
 
-[52] To access an ``external`` function ``f`` from within the same contract it was declared in, use ``this.f``. In other cases you
+[54] To access an ``external`` function ``f`` from within the same contract it was declared in, use ``this.f``. In other cases you
 don't need ``this`` (*this* is kinda bonus, no?)
 
-[53] ``private`` is important only if there are **derived contracts**, where ``private`` denotes the members that
+[55] ``private`` is important only if there are **derived contracts**, where ``private`` denotes the members that
 the compiler does not copy to the derived contracts. Otherwise, from within a contract, ``private`` is the same as ``internal``.
 
-[54] ``external`` is available only for functions. ``public``, ``internal`` and ``private`` are available for both functions
+[56] ``external`` is available only for functions. ``public``, ``internal`` and ``private`` are available for both functions
 and state variables. The **contract's interface** is built from it's ``external`` and ``public`` memebers.
 
-[55] The compiler will **automatically** generate an accessor ("get" function) for the ``public`` state variables.
+[57] The compiler will **automatically** generate an accessor ("get" function) for the ``public`` state variables.
 
-[56] ``now`` is the time stamp of the **current block**
+[58] ``now`` is the time stamp of the **current block**
 
-[57] **Ethereum units** ``wei``, ``finney``, ``szabo`` or ``ether`` are reserved words, and can be used in experessions and literals.
+[59] **Ethereum units** ``wei``, ``finney``, ``szabo`` or ``ether`` are reserved words, and can be used in experessions and literals.
 
-[58] **Time units** ``seconds``, ``minutes``, ``hours``, ``days``, ``weeks`` and ``years``, are reserved words, and can be used in experessions and literals.
+[60] **Time units** ``seconds``, ``minutes``, ``hours``, ``days``, ``weeks`` and ``years``, are reserved words, and can be used in experessions and literals.
 
-[59] There is no type conversion from non-boolean to boolean types. ``if (1) { ... }`` is not valid Solidity.
+[61] There is **no type conversion from non-boolean** to boolean types. ``if (1) { ... }`` is not valid Solidity.
 
-[60] The ``msg``, ``block`` and ``tx`` variables always exist in the **global namespace**, and you can use
+[62] The ``msg``, ``block`` and ``tx`` variables always exist in the **global namespace**, and you can use
 them and their members without any prior decleration or assignment
 
 

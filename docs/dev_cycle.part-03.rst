@@ -3,8 +3,8 @@ Part 3: First Test
 
 .. contents:: :local:
 
-Test Files and Chain
---------------------
+Tests and Chains
+----------------
 
 For testing, we will use the ``tester`` chain again. It's very convinient blockchain for tests,
 because it reset on each run, and the state is saved only in memory and cleared after each run.

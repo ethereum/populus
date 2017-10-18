@@ -40,4 +40,4 @@ def test_project_directory_properties(project_dir):
 def test_py_version_file_error():
 
     with pytest.raises(OSError):
-        p = Project()  # noqa: F841
+        Project()

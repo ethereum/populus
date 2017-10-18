@@ -170,7 +170,7 @@ Here is the contract:
         }
     }
 
-``Greeter`` is simple contract:
+``Greeter`` is a simple contract:
 
 * The ``contract`` keyword starts a contract definition
 * The contract has one public "state" variable, named ``greeting``.
@@ -434,10 +434,6 @@ directory with the ``virtualenv`` activated), you're ready to run the tests.
 
 At this point, all your tests should pass. If they don't, you're probably missing a dependency
 somewhere. Just retrace your steps and you'll figure it out.
-
-
-
-
 
 .. _Geth: https://github.com/ethereum/go-ethereum/
 .. _Solidity: https://github.com/ethereum/solidity/

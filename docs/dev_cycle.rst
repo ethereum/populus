@@ -15,3 +15,4 @@ Contents
     dev_cycle.part-02
     dev_cycle.part-03
     dev_cycle.part-04
+    dev_cycle.part-05

@@ -88,7 +88,8 @@ Running programatically from code
 
 The ``populus.Project.get_chain(chain_name, chain_config=None)`` method returns
 a ``populus.chain.Chain`` instance that can be used within your code to run any
-populus chain.
+populus chain. Also read up on the `Web3.py`_ library, which offers additional
+functions to communicate with an Ethereum blockchain.
 
 Lets look at a basic example of using the ``temp`` chain.
 
@@ -145,3 +146,5 @@ Here is an example of running the ``tester`` blockchain.
     blockNumber: 2
 
 .. note:: The ``testrpc`` chain can be run in the same manner.
+
+.. _Web3.py: http://web3py.readthedocs.io/en/latest/

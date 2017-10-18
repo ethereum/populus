@@ -6,7 +6,6 @@ Part 5: Edge Cases Tests
 Test a Modifier "throw" Exception
 ---------------------------------
 
-
 In the contract we used a modifier, to enforce a pre-condition on the ``donate`` function:
 A donation should not be of value 0, otherwise the modifier will ``throw``. We wanted this modifier
 to make sure that the donations counter will not increment for zero donations:
@@ -80,5 +79,22 @@ Run the tests:
 
 
 Works, all 4 tests passed.
+
+Fallback Function
+-----------------
+
+At the moment, Populus does not have a builtin option to call fallback function.
+To run it, you can send a simple transaction with Web3, or even better: write another function that you can test,
+and let the ``fallback`` only call this function
+
+Interim Summary
+---------------
+
+    * Working Contract
+    * All tests pass
+
+The next step is to deploy the contract to a persisetent chain.
+
+
 
 

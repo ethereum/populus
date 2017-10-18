@@ -87,8 +87,10 @@ This argument is provided in the test as *Python* donate function:
 Populus gives you a *Python* interface to a bytecode contract. Nice, no?
 
 **[6] Asserts**: We expect the ``donations_total`` to be ``500 + 650 = 1150``, the ``donations_count`` is 2,
-and the ``default_usd_rate`` to match the last update, 380. The test gets the varaibles with ``call``, but in the case
-of a "getter" it doesn't matter, since a "getter" function will not change the contract's state wether it's called with ``transact`` or ``call``.
+and the ``default_usd_rate`` to match the last update, 380.
+
+The test gets the varaibles with ``call``, and should update instanrly because it's a local ``tester`` chain. On a distributed
+blockchain it will take sometime until the transactions are mined and actually change the state.
 
 Run the test:
 

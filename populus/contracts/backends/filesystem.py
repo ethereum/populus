@@ -90,7 +90,12 @@ class JSONFileBackend(BaseContractBackend):
     #
     @property
     def registrar_path(self):
-        return self.config.get('file_path', './registrar.json')
+        file_path = self.config.get('file_path', './registrar.json')
+        project_dir = self.chain.project.project_dir
+        if os.path.dirname(os.path.abspath(file_path)) == project_dir:
+            return file_path
+        else:
+            return os.path.join(project_dir, file_path)
 
     @property
     def registrar_data(self):

@@ -95,8 +95,8 @@ If you want to deploy a new version and didn't provide a mechanism to send the m
 you are stuck with the old one.
 
 
-[21] ``call`` and ``delegatecall`` invoke other contracts, but can't catch exceptions in these contracts. 
-The only indication that you will get if the call excepted, is when these functions return ``false``. 
+[21] ``call`` and ``delegatecall`` invoke other contracts, but can't catch exceptions in these contracts.
+The only indication that you will get if the call excepted, is when these functions return ``false``.
 This implies that providing an address of non-existent contract to ``call`` and ``delegatecall``
 will **invoke nothing but still no exception**. You get ``true`` for *both* successful run *and* calling non-existent contract.
 Check existence of a contract in the address, *before* the call.
@@ -108,7 +108,9 @@ consume all, and send the money away to another account. You can't hedge the cal
 with care, typically only for library contracts that you absolutely trust.
 
 [23] ``call`` on the client is a web3 option that behaves exactly like sending a real transaction, but it will **not change the blockchain
-state**. It's kinda dry-run transaction, which is great for testing (and it's not related at all to the Solidity ``call``)
+state**. It's kinda dry-run transaction, which is great for testing (and it's not related at all to the Solidity ``call``).
+``call`` is also useful to get info from the current state, without changing it. Since no state is changed,
+it runs on the local node, saving expensive gas.
 
 [24] **Trusted** contract libraries are a good way to save gas of repeating deployments,  for code that is actually reusable.
 
@@ -148,9 +150,9 @@ Eth you need** for these actions.
 balance is 0 and geth refuses to run actions that require funds for gas - then **your local node is not synced**. You must
 sync until the block with the transactions that sent money to this account.
 
-[38] Once the contract is on the blockchain, there is **no builtin way to shut it down** or block it from responding to 
+[38] Once the contract is on the blockchain, there is **no builtin way to shut it down** or block it from responding to
 messages. If the contract has a bug, an issue, a hack that let hackers steal funds, you can't shutdown, or go to "maintenance" mode, unless you provided
-a mechanism for that in the contract code beforehand. 
+a mechanism for that in the contract code beforehand.
 
 [39] Unless you provided a function that kills the contract, there is **no builtin way to delete** it from the blockchain.
 
@@ -158,12 +160,12 @@ a mechanism for that in the contract code beforehand.
 for ``public``, ``external`` or ``internal``. The EVM doesn't use these keywords,
 but visibility is enforced in the bytecode and the exposed interface (this is not just a compiler hint).
 However, the scope visibility definitions have **no effect** on the
-information that the blockchain exposes to the outside world. 
+information that the blockchain exposes to the outside world.
 
 [41] If you don't explicity set a ``payable`` modifier to a function, it will **reject the Eth that was sent in the transaction**.
 If no function has ``payable``, the contract can't accept Ether.
 
-[42] This **is** the answer. 
+[42] This **is** the answer.
 
 [43] It's **not** possible to get a list of all the ``mapping`` variable keys or values, like ``mydict.keys()`` or ``mydict.values()``
 in Python. You'll have to handle such lists yourself, if required.
@@ -172,7 +174,7 @@ in Python. You'll have to handle such lists yourself, if required.
 optional.
 
 [45] Inheritence in Solidity is different. Usually you have a Class, a Subclass, each is an independent object you can access.
-In Solidity, the inheritance is more syntatic. In the final compilation the compiler **copies the parent class members**, 
+In Solidity, the inheritance is more syntatic. In the final compilation the compiler **copies the parent class members**,
 to create the bytecode of the derived contract with the *copied* memebers. In this context, ``private`` is just a notion of state variables and functions
 that the compiler will *not* copy.
 

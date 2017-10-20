@@ -66,6 +66,11 @@ The ``chain new`` command added a new directory: `chains`, and within it, the `h
 The ``chain_data`` directory is where geth will store the blockchain data. It's empty, for now,
 since we didn't run this local chain at all.
 
+.. _tutorial_wallets:
+
+Wallets
+'''''''
+
 Then, the ``keystore`` directory, where the "wallets" are saved. A wallet file is a special file that
 stores an ethereum account. Here we see one wallet file, ``UTC--2017-10-10T11-36-58.745314398Z--eb9ae85fa8f6d8853afe45799d966dca89edd9aa``.
 The first part of the wallet file name is the time that the wallet was created,
@@ -114,6 +119,8 @@ to geth with the ``password`` commnad line argument. Otherwise, you will have to
 the password each time geth starts. Moreover, sometimes it's hard to spot the password prompt
 with all the info that geth spits. So a password file is more convinient, but obviously should be fully secured,
 with the right permissions.
+
+.. _tutorial_accounts:
 
 Accounts
 ''''''''

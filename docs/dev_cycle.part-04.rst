@@ -57,7 +57,8 @@ With Populus, you initiate a transaction with ``transact``, and a call with ``ca
 
 * *Transactions*: Send a transaction, run the contract code, transfer funds, and *change* the state of the contract and it's balance. This change will be permenant, and synced to the entire blockchain.
 
-* *Call*: Behaves exactly as a transaction, but once done, everything is revert and no state is changed. A call is kinda "dry-run"
+* *Call*: Behaves exactly as a transaction, but once done, everything is revert and no state is changed. A call is kinda "dry-run",
+and an efficient way to query the current state without expensive gas costs.
 
 
 **[4] Test transactions**: The test commits two transactions, and send funds in both. In the first the ``value`` of the funds is 500,

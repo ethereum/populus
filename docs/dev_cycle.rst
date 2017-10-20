@@ -17,3 +17,4 @@ Contents
     dev_cycle.part-04
     dev_cycle.part-05
     dev_cycle.part-06
+    dev_cycle.part-07

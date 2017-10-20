@@ -220,6 +220,8 @@ like the ``tester`` in-memory ephemeral chain that we used in the tests, and was
     ``mainnet`` and ``testnet`` this persistency is synced between many nodes on the blockchain. However the concept is the same:
     a persistent contract.
 
+.. _populus_registrar:
+
 Registrar
 ---------
 

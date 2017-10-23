@@ -58,8 +58,8 @@ to ``testnet``, then we have another "contract", the code that sits on ``testnet
 which is another blockchain, we now have three contracts: the source file, the bytecode on ``testnet``, and the bytecode on ``mainnet``.
 
 But wait, there is more! To interact with an *existing* contract on say ``mainnet``, we need a Web3 "contract" *object*. This object does
-not need the solidity source, since the bytcode is alreadt compiled and deployed. It does need the ABI,  the functions
-and arguments structure of the *bytecode* contract's interface, and the address of this *bytecode* contract
+not need the solidity source, since the bytcode is alreadt compiled and deployed. It does need the ABI: the ABI is the detailed
+specification of the functions and arguments structure of the *bytecode* contract's interface, and the address of this *bytecode* contract
 on the mainnet.
 
 .. note::
@@ -119,27 +119,27 @@ bytecode on the blockchain. Cool, isn't it?
 Get the blockchain
 ''''''''''''''''''
 
-Another bonus is the ``chain``, at ``def test_default_usd_rate(chain)``. It gives the test function a Python object
+Another bonus is the ``chain`` object, provided as an argument at ``def test_default_usd_rate(chain)``. It gives the test function a Python object
 that corresponds to a running blockchain, the ``tester`` blockchain.
 Reminder: The ``tester`` chain is ephemeral, saved only in memory, and will reset on every test run.
 
 The ``chain`` argument is a py.test *fixture*: in py.test world it's a special argument that the test function can accept.
-You don't have to declare or assign it, it's just ready and available for your function.
+You don't have to declare or assign it, it's just ready and available for your test.
 
 The Populus testing fixtures comes from the Populus py.test plug-in, which prepares for you several useful fixtures: ``project``,
 ``chain``, ``provider``, ``registrar`` and ``web3``. All these fixtures are part of the Populus API. See :ref:`populus_testing`
 
 .. note::
 
-  The tester chain creates and unlocks new accounts in each run, so you don't have to supply a private key or a wallet.
+  The ``tester`` also chain creates and unlocks new accounts in each run, so you don't have to supply a private key or a wallet.
 
 
 Run the First Test: Public State Variable
 -----------------------------------------
 
-We are ready for the first test: we have a test function that runs the ``tester`` chain, and using ``get_or_deploy_contract('Donator')``
+Ready for the first test: we have a test function that runs the ``tester`` chain. Using ``get_or_deploy_contract('Donator')``
 it compiles ``Donator.sol``, deploys it to the ``tester`` chain, gets a Python contract object that wraps the actual contract's
-bytecode on the chain, and assign this object to a variable, ``donator``.
+bytecode on the chain, and assigns this object to a variable, ``donator``.
 
 Once we have the ``donator`` contract as a Python object, we can call any function of this contract. You get the *contract's*
 interface with ``call()``. Reminder: ``call`` behaves exactly as a transaction, but does not alter state. It's like a "dry-run".

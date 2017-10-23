@@ -49,14 +49,14 @@ We will create a a local chain we'll name "horton":
     INFO [10-14|12:31:31] Writing custom genesis block
     INFO [10-14|12:31:31] Successfully wrote genesis state         database=lightchaindata                                                                        hash=faa498…370bf1
 
-Add this local chain to the project config. 
+Add this local chain to the project config.
 
 .. code-block:: shell
 
     $ nano project.json
-    
+
 The file should look as follows. Update ``ipc_path`` to the actual path on
-your machine (if you are not sure about the path, take a 
+your machine (if you are not sure about the path, take a
 look at ``chains/horton/run_chain.sh``).
 
 .. code-block:: javascript
@@ -76,7 +76,7 @@ look at ``chains/horton/run_chain.sh``).
           "provider": {
             "class": "web3.providers.ipc.IPCProvider",
           "settings": {
-            "ipc_path":"/home/mary/projects/donations/horton/chain_data/geth.ipc"
+            "ipc_path":"/home/mary/projects/donations/chains/horton/chain_data/geth.ipc"
           }
          }
         },
@@ -130,7 +130,7 @@ Here is the new contract code:
 
     pragma solidity ^0.4.0;
 
-    /// TUTORIAL CONTRACT DO NOT USE IN PRODUCTIO
+    /// TUTORIAL CONTRACT DO NOT USE IN PRODUCTION
     /// @title Donations collecting contract
 
     contract Donator {
@@ -162,14 +162,14 @@ Here is the new contract code:
 Save the code to ``contracts/Donator.sol``.
 
 
-Quick Solidity Overview 
+Quick Solidity Overview
 -----------------------
 
 **Pragma**:
 Every Solidity source should provide the compiler compatability: `pragma solidity ^0.4.0;`
 
 **Contract definition**:
-The ``contract`` keyword starts a new contract definition, named ``Donator``. 
+The ``contract`` keyword starts a new contract definition, named ``Donator``.
 
 .. note::
 
@@ -178,14 +178,14 @@ The ``contract`` keyword starts a new contract definition, named ``Donator``.
 **State variables**:
 The contract has 4 state variables: ``donations_total``, ``donations_usd``, ``donations_count`` and ``default_usd_rate``.
 A state variable is defined in the *contract scope*.
-State variables are saved in the contract's persisten *storage*, 
+State variables are saved in the contract's persisten *storage*,
 kept after the transaction run ends, and synced to every node on the blockchain.
 
 **Visibility:**
 The ``public`` decleration ensures that all state variables and the ``donate`` function will be available for the callers
 of the contrat, in the contract's interface.
 
-.. note::   
+.. note::
     For the public state variables, the compiler actually creates an accessor function
     which if you had to type manually could look like: ``function total() public returns (uint) {return donations_total;}``
 
@@ -194,17 +194,17 @@ Since we are dealing with numbers, the only data type we use here is ``uint``, u
 are declated in steps of 8 bits, ``unint8``, ``uint16`` etc. When the bits indicator is omitted, like ``int`` or ``uint``, the compiler will
 assumes ``uint256``.
 
-.. note:: 
+.. note::
 
-    If you know in advance the the maximum size of a variable, better to limit the type and save the gas of extra 
+    If you know in advance the the maximum size of a variable, better to limit the type and save the gas of extra
     memory or storage.
-    
+
 As of version 0.4.17 Solidity does *not* support decimal point types. If you need decimal point, you will have to manauly handle
 the fixed point calculations with integers. For the sake of simplicty, the example uses only ints.
 
-    
+
 **Constructor**:
-The function ``function Donator()`` is a constructor. A constructor function's name is always identical to the contract's name. 
+The function ``function Donator()`` is a constructor. A constructor function's name is always identical to the contract's name.
 It runs once, when the contract is created, and can't be called again. Here we set the ``default_usd_rate``, to be used
 when the donator didn't provide the effective exchange rate. Providing a constructor function is optional.
 
@@ -215,21 +215,23 @@ updates the total donated, both of Ether and USD value. It also updates the defa
 
 **Magic Variables**:
 In every contract you get three magic variables in the global scope: ``msg``, ``block`` and ``tx``. You can use these
-variable without prior decleration or assignment. To find out how much 
+variable without prior decleration or assignment. To find out how much
 Ether was sent, use ``msg.value``.
 
 **Modifiers**:
-``modifier money_sent() { if (!msg.value > 0) throw; _; }``. The term "modifier" is a bit confusing. 
+``modifier money_sent() { if (!msg.value > 0) throw; _; }``. The term "modifier" is a bit confusing.
 A modifier of a function is  *another* function that injects, or modifies, code, typically to verify some pre-existing condition.
 Since the donate function uses the modifier ``function donate(uint usd_rate) public payable money_sent {...}``,
 then ``money_sent`` will run *before* ``donate``. The code in ``donate`` will run only if ``msg.value > 0``, and make sure
 that the ``donations_count`` does not increase by a zero donation.
 
 .. note::
-    
+
     The modifier syntax uses ``_;`` to tell solidity where to insert the *modified* function.
     We can of course check the include the modifier condition the original function, but a declared modifier is handy
     when you want to use the same pre-condition validation in more than one function.
+
+.. _fallback_func:
 
 **Fallback**:
 The weired function without a name, ``function () payable {...}``, is the "fallback". It calls ``donate``, so when somebody just
@@ -241,9 +243,9 @@ with  ``address.call``, and (b) when just send just Ether, in a transaction that
 
     If a contract has a fallback function, and you should assume it has one, then just sending
     Ether to a contract invokes code execution.
-    
+
 **Payable**:
-``function donate(uint usd_rate) public payable money_sent {...}`` and ``function () payable {...}`` use the *payable* 
+``function donate(uint usd_rate) public payable money_sent {...}`` and ``function () payable {...}`` use the *payable*
 builtin modifier, in order to accept Ether. Otherwise, without this modifier, a transaction that sends Ether will fail.
 If none of the contract functions has a ``payable`` modifier, the contract can't accept Ether.
 
@@ -258,18 +260,18 @@ Side Note
 This Donator example is fairly simple.
 
 If you are following the Ethereum world for a while, you probably noticed that many Ethereum projects are much more complex.
-People and companies try to use contracts to manage distributed activity among very large groups, 
+People and companies try to use contracts to manage distributed activity among very large groups,
 assuming you need special, usually complex, code and strategies that defend against bad actores.
-Some noticeable initiatives are the decentrelized autonomous organizations (DAO), 
+Some noticeable initiatives are the decentrelized autonomous organizations (DAO),
 getting groups decisions where the voting rights are proportional to the Ether the voter sent to the contract,
-or crowd funding with Ether, initial coin offerings (ICO), 
+or crowd funding with Ether, initial coin offerings (ICO),
 feeds that send the contract up-to-date data from the "outside world", etc.
 
 Don't let these projects intimidate you.
 
 If you have a simple Ethereum based idea that is useful,
 even for you personally, or to family and friends, go ahead and implement it. A small group of people that already know each other and
-**trust** each other don't need the complex overhead. Just make sure the contract code is correct. You can do really nice things, 
+**trust** each other don't need the complex overhead. Just make sure the contract code is correct. You can do really nice things,
 some are not possible without Ethereum.
 
 We would be delighted to hear how it worked!

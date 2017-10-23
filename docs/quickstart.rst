@@ -104,6 +104,8 @@ Verify your installation
 
 Great. Let's have the first populus project.
 
+.. _a_word_of_caution:
+
 A Word of Caution
 -----------------
 
@@ -116,7 +118,24 @@ or to take another example, between running a website localy on 127.0.0.1 vs. ru
 internet, there **is** a difference between blockchain development environment, and when you deploy and send real Eth.
 
 The core issue, as a developer, is that once you unlock an account, there is a running process with access to your Eth. Any mistake
-or security breach can cause loosing this Eth. This is not an issue with test blockchains and test tokens, but with real Eth it is.
+or security breach can cause loosing this Eth. This is not an issue with test blockchains and test tokens,
+but with real Eth it is.
+
+As a rule:
+
+[1] When you unlock an account to use real Ether, the unlocked account balance should have only the minimum
+Ether required for gas and the money transfers you unlocked if for. Ethereum accounts are free,
+so it will cost you nothing to have a dedicated account for your development, where you will send only
+the Ether you need it for, from time to time.
+
+[2] Never unlock a real Ether account on a remote node. You can use a remote node, but not for actions
+that require an unlocked account. When you unlock an account on a remote node, anybody with access
+to the node has access to your funds. In other words, the geth instance that unlocked your acount
+should run on your local protected machine.
+
+[3] Geth allows you to provide a password file, which is handy (more on it later). The password file should be
+protected by permissions.
+
 Luckily, there are simple and effective practices to keep your Eth safe. See `Protecting yourself and your funds <https://myetherwallet.github.io/knowledge-base/getting-started/protecting-yourself-and-your-funds.html>`_
 
 Initializing a New Project

@@ -33,7 +33,7 @@ We don't need the Greeter example for this project, so delete it:
 
 Now, before we start writing tests, pause for a moment: What are we actually testing? Obviously a contract, but what *is* a contract?
 
-.. _what_is_a_contract
+.. _what_is_a_contract:
 
 What is a Contract?
 -------------------

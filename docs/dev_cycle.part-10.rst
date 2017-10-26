@@ -362,8 +362,8 @@ The test should fail:
   E       AssertionError: assert functools.partial(<function call_contract_function at 0x7f6245b39bf8>, <web3.contract.PopulusContract object at 0x7f624466e748>, 'owner', {'to': '0xc305c901078781c232a2a521c2af7980f8385ee9'}) == '0x82a978b3f5962a5b0957d9ee9eef472ee55b42f1'
 
 
-Yes. ``donator3.call().owner`` is wrong. Confusing. Reminder: ``owner`` should be accessed as a function,
-that the compiler builds for every public state variable.
+Yes. ``donator3.call().owner`` is wrong. Confusing. Reminder: ``owner`` should be accessed as a *function*,
+and *not* as a property, The compiler builds these functions for every public state variable.
 
 Fix every occurence of ``call().owner`` to ``call().owner()``. E.g., into:
 
@@ -453,13 +453,21 @@ Run the test:
   ========================================== 6 passed, 29 warnings in 1.93 seconds ====
 
 
-Ok, all the inherited members passed: The ``Ownable`` constructor that sets ``owner`` and runs for when you deployed
-the *subclass*, the ``onlyOwner`` modifier, and the ``transferOwnership`` funcion.
+Ok, all the inherited members passed: The ``Ownable`` constructor that sets ``owner`` ran when you deployed
+it's subclass, ``Donator3``. The parent modifier ``onlyOwner`` works as a modifier to a subclass function,
+and the ``transferOwnership`` parent's funcion can be called by clients via the subclass interface.
+
+.. note::
+
+  If you will deploy ``Donator3`` to a local chain, say ``horton``, and look at the ``registrar.json``, you
+  will not see an entry for ``Ownable``. The reason is that although Solidity has a full complex multiple inheritence
+  model (and ``super``), the final result is once contract. Solidity just copies the inherited code to this contract.
 
 
 Interim Summary
 ---------------
 
-* You used a library open sourced contract
-* You added an ownership control to the contract
+* You used an open sourced contract
+* You imported one contract to another
+* You added an ownership control to a contract
 * You used inheritence and tested it

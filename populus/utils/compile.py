@@ -36,7 +36,7 @@ from .deploy import (
     compute_deploy_order,
 )
 from .filesystem import (
-    recursive_find_files,
+    find_solidity_source_files,
     ensure_file_exists,
 )
 from .json import (
@@ -71,15 +71,6 @@ def get_compiled_contracts_asset_path(build_asset_dir):
         COMPILED_CONTRACTS_ASSET_FILENAME,
     )
     return compiled_contracts_asset_path
-
-
-@to_tuple
-def find_solidity_source_files(base_dir):
-    return (
-        os.path.relpath(source_file_path)
-        for source_file_path
-        in recursive_find_files(base_dir, "*.sol")
-    )
 
 
 def get_project_source_paths(contracts_source_dir):

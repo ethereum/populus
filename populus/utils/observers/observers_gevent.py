@@ -40,7 +40,9 @@ class GeventObserver(object):
             try:
                 with gevent.Timeout(2):
                     hub.wait(watcher)
-            except:
+            except gevent.hub.LoopExit:
+                break
+            except gevent.Timeout:
                 continue
             if os.path.isdir(path):
                 new = set(os.listdir(path))

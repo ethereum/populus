@@ -46,7 +46,7 @@ def wait_for_block_number(web3, block_number=1, timeout=120, poll_interval=None)
             rm.request_blocking("evm_mine", [])
         return web3.eth.getBlock(block_number)
     return poll_until(
-        poll_fn=lambda: web3.blockNumber,
+        poll_fn=lambda: web3.eth.blockNumber,
         success_fn=lambda v: v >= block_number,
         timeout=timeout,
         poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),

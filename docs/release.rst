@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+.. _v1.11.1-release-notes:
+
+1.11.1
+------
+
+- Bugfix for wait utils in ``wait_for_block``.
+
+
 .. _v1.11.0-release-notes:
 
 1.11.0

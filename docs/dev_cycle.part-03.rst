@@ -60,18 +60,7 @@ which is another blockchain, we now have three contracts: the source file, the b
 But wait, there is more! To interact with an *existing* contract on say ``mainnet``, we need a Web3 "contract" *object*. This object does
 not need the solidity source, since the bytcode is alreadt compiled and deployed. It does need the ABI: the ABI is the detailed
 specification of the functions and arguments structure of the *bytecode* contract's interface, and the address of this *bytecode* contract
-on the mainnet.
-
-.. note::
-  To deploy a *new* ``Donator`` contract, maybe to another blockchain, or to another address on the same blockchain,
-  we also need a Web3 contract *object*, but this time the object does require a compiled
-  "contract"
-
-Actually when we say ""contract", we deal with three different things:
-
-#. **Contract Instance**: Bytecode on a blockchain
-#. **Solidiy Source**: A Solidity contract definition, like ``contract Donator {...}``
-#. **Web3 Object**: An object that provides methods to deploy a new contract instance, or interact with an existing one
+on the mainnet. Again, a contract might be the bytecode on the blockchain, a Solidty source, or a web3.py contract object.
 
 
 Testing a Contract
@@ -167,7 +156,7 @@ To recap, ``defaultUsdRate`` is a ``public`` variable, hence the compiler automa
 an accessor function, a "get", that returns this variable. The test just used this function.
 
 
-What is the expected retrun value? It's 350. We assigned to it 350 in the *constructor*, the function that runs once,
+What is the expected return value? It's 350. We assigned to it 350 in the *constructor*, the function that runs once,
 when the contract is created. The test function should deploy ``Donator`` on the ``tester`` chain, but nothing else is called afterwards,
 so the initial value should not be changed.
 
@@ -185,6 +174,12 @@ Run the test:
   tests/test_donator.py .
 
   ================================================= 1 passed, 5 warnings in 0.29 seconds ======
+
+
+.. note::
+
+  Usually you don't want to use ```--disable-pytest-warnings```, because the warnings provide important infromation.
+  We use it here to make the output less confusing, for the tutorial only.
 
 
 Interim Summary

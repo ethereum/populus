@@ -25,19 +25,6 @@ We assume that your read 1-2 intros about Ethereum and the blockchain, and know 
 You don't need the complex math of the elliptic curves, but to get a grasp of the basic concepts, and the basic idea: A system that prevents bad behaviour not by moral rules, but
 by incentives. Incentinve that make honest behaviour *more* profitable (let this bold concept sink in for a moment).
 
-Two good intros:
-
-* `A 101 Noob Intro to Programming Smart Contracts on Ethereum <https://medium.com/@ConsenSys/a-101-noob-intro-to-programming-smart-contracts-on-ethereum-695d15c1dab4>`_, from Consensys
-
-* `A Gentle Intorduction to Ethereum <https://bitsonblocks.net/2016/10/02/a-gentle-introduction-to-ethereum/>`_, from bitsonblocks
-
-And to go a little deeper:
-
-* `The Etherum Whitepaper <https://github.com/ethereum/wiki/wiki/White-Paper>`_, by Vitalik Buterin
-
-* `The Bitcoin Book <https://github.com/bitcoinbook/bitcoinbook>`_ (Some of the Bitcoin concepts are different in Ethereum, but in any case it's useful to understand the difference)
-
-
 Development Steps
 -----------------
 We will take a walk through an entire contract development cycle, with Python, Populus and Web3.py.
@@ -52,10 +39,10 @@ Typical iteration will include:
 * Interaction with the contract on the blockchain.
 
 
-Glossery
+Glossary
 --------
 
-Just a succint reference, as a reminder if you need it during the tutorial (in a "chronological" order)
+Just a succinct reference, as a reminder if you need it during the tutorial (in a "chronological" order)
 
 **Private Key**: A long combination of alphanumeric characters. There is almost zero chance that the algorithm
 that creates this combination will create the same combination twice.

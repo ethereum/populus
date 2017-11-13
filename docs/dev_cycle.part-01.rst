@@ -128,7 +128,7 @@ Here is the new contract code:
 
 .. code-block:: solidity
 
-    pragma solidity ^0.4.0;
+    pragma solidity ^0.4.11;
 
     /// TUTORIAL CONTRACT DO NOT USE IN PRODUCTION
     /// @title Donations collecting contract
@@ -166,7 +166,7 @@ Quick Solidity Overview
 -----------------------
 
 **Pragma**:
-Every Solidity source should provide the compiler compatability: `pragma solidity ^0.4.0;`
+Every Solidity source should provide the compiler compatability: `pragma solidity ^0.4.11;`
 
 **Contract definition**:
 The ``contract`` keyword starts a new contract definition, named ``Donator``.

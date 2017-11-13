@@ -146,7 +146,7 @@ The new contract should look as follows:
 .. code-block:: solidity
 
 
-    pragma solidity ^0.4.0;
+    pragma solidity ^0.4.11;
 
     /// TUTORIAL CONTRACT DO NOT USE IN PRODUCTION
     /// @title Donations collecting contract

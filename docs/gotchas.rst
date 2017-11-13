@@ -222,14 +222,5 @@ them and their members without any prior decleration or assignment
 
 
 Nice! You got here.
-Yes, we know. You want more:
+Yes, we know. You want more. See :ref:`writing_contracts_resources`
 
-.. seealso::
-
-    * `Solidity security considerations <http://solidity.readthedocs.io/en/develop/security-considerations.html?highlight=pitfalls#security-considerations>`_
-    * `Even more subtleties <https://github.com/ethereum/wiki/wiki/Subtleties>`_
-    * `Solidity style guide <http://solidity.readthedocs.io/en/develop/style-guide.html>`_
-    * `Ethereum security, from OpenZeppelin <https://blog.zeppelin.solutions/onward-with-ethereum-smart-contract-security-97a827e47702>`_
-    * `Protecting yourself and your funds, from MyEtherWallet <https://myetherwallet.github.io/knowledge-base/getting-started/protecting-yourself-and-your-funds.html>`_
-    * `Best smart contracts practices, from Consensys <https://github.com/ConsenSys/smart-contract-best-practices>`_
-    * `Writing robust smart contracts in Solidity ,from colony.io <https://blog.colony.io/writing-more-robust-smart-contracts-99ad0a11e948>`_

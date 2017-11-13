@@ -21,9 +21,11 @@ Contents
     chain
     dev_cycle
     gotchas
+    resources
     release
     modules
     API Documentation <populus>
+
 
 
 Indices and tables

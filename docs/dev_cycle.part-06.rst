@@ -289,7 +289,7 @@ Edit the contract file:
 
 .. code-block:: solidity
 
-    pragma solidity ^0.4.0;
+    pragma solidity ^0.4.11;
 
     contract Greeter {
         string public greeting;

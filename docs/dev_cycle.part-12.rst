@@ -129,6 +129,7 @@ use a chain for tests
 
 .. py:module:: populus.chain.tester
 .. py:class:: TesterChain
+
 An ephemeral chain that saves data to memory and resets on every run, great for testing
 (similar to a blank slate DB for each test run)
 
@@ -205,10 +206,12 @@ A handler of contracts instances and addresses on chains.
 
 
 .. py:attribute:: def set_contract_address(...)
+
 set a contract address in the registrar
 
 
 .. py:attribute:: get_contract_addresses (...)
+
 Retrieve a contract address in the registrar
 
 

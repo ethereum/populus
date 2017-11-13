@@ -27,7 +27,7 @@ The ``$ populus init`` command writes a minimal ``project.json`` default file to
   The ``project.json`` file is required, and all the populus commands require a directory with a project config file.
 
 A Note for Django users
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are used to django's ``settings.py`` file, populus is quite different.
 The configuration is saved in JSON files, on purpuse.
@@ -355,10 +355,6 @@ In the next Populus version, all the chains will be configured as ``ExternalChai
 For more details on Web3, see the `Web3 documentation <https://web3py.readthedocs.io/en/latest/>`_ .
 
 
-
-
-
-
 Web3 Configuration
 ------------------
 
@@ -593,7 +589,7 @@ Built-in defaults
 
 Populus ships with the following *default* configuration.
 
-.. literalinclude:: ../populus/assets/defaults.config.json
+.. literalinclude:: ../populus/assets/defaults.v7.config.json
    :language: javascript
 
 

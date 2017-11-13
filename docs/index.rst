@@ -22,10 +22,8 @@ Contents
     dev_cycle
     gotchas
     resources
-    release
     modules
-    API Documentation <populus>
-
+    release
 
 
 Indices and tables

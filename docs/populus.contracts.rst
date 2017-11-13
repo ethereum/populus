@@ -43,14 +43,6 @@ populus.contracts.registrar module
     :undoc-members:
     :show-inheritance:
 
-populus.contracts.store module
-------------------------------
-
-.. automodule:: populus.contracts.store
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

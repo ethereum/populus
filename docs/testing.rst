@@ -57,7 +57,7 @@ Project
 
 * ``project``
 
-The :ref:`Project` object for your project.
+The Project object for your project.
 
 This project object is initialised first, and the rest of the fixtures are derived from it.
 
@@ -130,7 +130,7 @@ A running ``'tester'`` test chain.
 
 
 Registrar
-~~~~~
+~~~~~~~~~
 
 * ``registrar``
 
@@ -138,7 +138,7 @@ Convenience fixture for the ``chain.registrar`` property.
 
 
 Provider
-~~~~~
+~~~~~~~~
 
 * ``provider``
 

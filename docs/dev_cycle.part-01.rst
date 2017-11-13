@@ -124,6 +124,10 @@ in terms of Ether, but similar donations in terms of USD.
 In other words, two donations of say $30 will have different amounts in ETH if the exchange rate changed between
 the donations. As a simple solution, we will ask donators to provide the effective ETH/USD exchange rate when they send their (hopefully generous) donations.
 
+:raw:
+  :file: assets/Donator.sol
+
+
 Here is the new contract code:
 
 .. code-block:: solidity

@@ -225,7 +225,7 @@ nested keys:
 .. code-block:: python
 
     >>> from populus.project import Project
-    >>> p = Project('/home/aviah/tutorials/projects/donations')
+    >>> p = Project('/home/mary/projects/donations')
     >>> p.config
     {'chains': {'web3http': {'web3': {'foo': 'baz'}, 'chain': {'class': ....
     >>> p.config.keys()

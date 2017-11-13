@@ -29,7 +29,7 @@ The script should look as follows:
 
     from populus.project import Project
 
-    p = Project(project_dir="/home/aviah/tutorials/projects/donations/")
+    p = Project(project_dir="/home/mary/projects/donations/")
     with p.get_chain('horton') as chain:
         donator, _ = chain.provider.get_or_deploy_contract('Donator')
 
@@ -386,7 +386,7 @@ Open a Python shell and create a new account:
 .. code-block:: python
 
     >>> from populus.project import Project
-    >>> p = Project(project_dir="/home/aviah/tutorials/projects/donations/")
+    >>> p = Project(project_dir="/home/mary/projects/donations/")
     >>> with p.get_chain('horton') as chain:
     ...     donator2, _ = chain.provider.get_or_deploy_contract('Donator2c')
     >>> w3 = chain.web3

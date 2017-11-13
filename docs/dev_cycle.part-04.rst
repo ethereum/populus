@@ -248,11 +248,17 @@ Edit the contract:
     $ nano contracts/Donator.sol
 
 
-And fix the line to:
+We could fix the line into:
 
 .. code-block:: solidity
 
     uint inUsd = msg.value * usd_rate / 10**18;
+
+But Solidity can do the math for you, and Ether units are reserved words. So fix to:
+
+.. code-block:: solidity
+
+    uint inUsd = msg.value * usd_rate / 1 ether;
 
 Run the tests again:
 
@@ -291,26 +297,3 @@ Interim Summary
 
 
 The contract seems Ok, but to be on the safe side, we will run next a few tests for the edge cases.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

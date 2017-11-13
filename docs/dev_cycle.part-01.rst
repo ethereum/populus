@@ -23,7 +23,7 @@ Create a directory for the project:
 
 
 You just created a new populus project. Populus created an example contract called ``Greeter`` and some tests.
-To learn about the greeter example see the :ref:`Quickstart <greete_quickstart>`.
+To learn about the greeter example see the :ref:`Quickstart <greeter_quickstart>`.
 
 We will need a local private blockchain. This local blockchain
 is an excellent tool for development: it runs on your machine, does not take the time to sync the real blockchain, does not

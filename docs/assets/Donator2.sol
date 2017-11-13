@@ -25,7 +25,7 @@ contract Donator2 {
         donationsTotal += msg.value;
         donationsCount += 1;
         defaultUsdRate = usd_rate;
-        uint inUsd = msg.value * usd_rate / 10**18;
+        uint inUsd = msg.value * usd_rate / 1 ether;
         donationsUsd += inUsd;
     }
 

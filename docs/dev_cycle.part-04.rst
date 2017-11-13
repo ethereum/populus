@@ -25,8 +25,8 @@ After the edit, the file should look as follows:
 
     def test_donate(chain):
         donator, deploy_tx_hash = chain.provider.get_or_deploy_contract('Donator')
-        donator.transact({'value':500}).donate(370)
-        donator.transact({'value':650}).donate(380)
+        donator.transact({'value':500}).donate(37)
+        donator.transact({'value':650}).donate(38)
         donationsCount = donator.call().donationsCount()
         donationsTotal = donator.call().donationsTotal()
         defaultUsdRate = donator.call().defaultUsdRate()
@@ -50,7 +50,7 @@ object with Python methods. This object is stored in the ``donator`` variable.
 
 .. code-block:: python
 
-    donator.transact({'value':500}).donate(370)
+    donator.transact({'value':500}).donate(37)
 
 Reminder: we have two options to interact with a contract on the blockchain, *transactions* and *calls*.
 With Populus, you initiate a transaction with ``transact``, and a call with ``call``:
@@ -81,7 +81,7 @@ This argument is provided in the test as *Python* donate function:
 
 .. code-block:: python
 
-    donator.transact({'value':650}).donate(380).
+    donator.transact({'value':650}).donate(38).
 
 Populus gives you a *Python* interface to a bytecode contract. Nice, no?
 
@@ -128,14 +128,14 @@ Add the following test to the bottom of the file:
         ONE_ETH_IN_WEI = 10**18  # 1 ETH == 1,000,000,000,000,000,000 Wei
 
         donator, deploy_tx_hash = chain.provider.get_or_deploy_contract('Donator')
-        donator.transact({'value':ONE_ETH_IN_WEI}).donate(400)
-        donator.transact({'value':(2 * ONE_ETH_IN_WEI)}).donate(500)
+        donator.transact({'value':ONE_ETH_IN_WEI}).donate(4)
+        donator.transact({'value':(2 * ONE_ETH_IN_WEI)}).donate(5)
         donationsUsd = donator.call().donationsUsd()
 
-        # donated 1 ETH in  $400 per ETH = $400
-        # donated 2 ETH in $500 per ETH = 2 * $500 = $1,000
-        # total $ value donated = $400 + $1,000 = $1,400
-        assert donationsUsd == 1400
+        # donated 1 ETH in  $4 per ETH = $4
+        # donated 2 ETH in $5 per ETH = 2 * $5 = $10
+        # total $ value donated = $4 + $10 = $14
+        assert donationsUsd == 14
 
 The test sends donations worth of 3 Ether. Reminder: by default, all contract functions
 and contract interactions are handled in *Wei*.
@@ -149,26 +149,26 @@ on the blockchain. We use the ``tester`` chain, so the state is reset on each te
 
 .. code-block:: python
 
-    donator.transact({'value':ONE_ETH_IN_WEI}).donate(400)
+    donator.transact({'value':ONE_ETH_IN_WEI}).donate(4)
 
-Donate Wei worth of 1 Ether, where the effective ETH/USD rate is $400. That is, $400 per Ether,
-and a total *USD* value of $400
+Donate Wei worth of 1 Ether, where the effective ETH/USD rate is $4. That is, $4 per Ether,
+and a total *USD* value of $4
 
 **Second transaction**
 
 .. code-block:: python
 
-    donator.transact({'value':(2 * ONE_ETH_IN_WEI)}).donate(500)
+    donator.transact({'value':(2 * ONE_ETH_IN_WEI)}).donate(5)
 
-Donate Wei worth of *2* Ether, where the effective ETH/USD rate is $500. Wow, seems that the markets run for Eth!
-It's $500 per Ether, and total *USD* value of 2 * $500 = $1,000
+Donate Wei worth of *2* Ether, where the effective ETH/USD rate is $5 (no markets sepculations on the tutorial)
+It's $5 per Ether, and total *USD* value of 2 * $5 = $10
 
-Hence we excpect the total *USD* value of these two donations to be $400 + $1,000 = $1,400
+Hence we excpect the total *USD* value of these two donations to be $4 + $10 = $14
 
 .. code-block:: python
 
     donationsUsd = donator.call().donationsUsd()
-    assert donationsUsd == 1400
+    assert donationsUsd == 14
 
 
 OK, that wan't too complicated. Run the test:
@@ -199,15 +199,15 @@ And the py.test results:
             ONE_ETH_IN_WEI = 10**18  # 1 ETH == 1,000,000,000,000,000,000 Wei
 
             donator, deploy_tx_hash = chain.provider.get_or_deploy_contract('Donator')
-            donator.transact({'value':ONE_ETH_IN_WEI}).donate(400)
-            donator.transact({'value':(2 * ONE_ETH_IN_WEI)}).donate(500)
+            donator.transact({'value':ONE_ETH_IN_WEI}).donate(4)
+            donator.transact({'value':(2 * ONE_ETH_IN_WEI)}).donate(5)
             donationsUsd = donator.call().donationsUsd()
 
-            # donated 1 ETH at $400 per ETH = $400
-            # donated 2 ETH at $500 per ETH = 2 * $500 = $1,000
-            # total $ value donated = $400 + $1,000 = $1,400
-    >       assert donationsUsd == 1400
-    E       assert 1400000000000000000000 == 1400
+            # donated 1 ETH at $4 per ETH = $4
+            # donated 2 ETH at $5 per ETH = 2 * $5 = $10
+            # total $ value donated = $4 + $10 = $14
+    >       assert donationsUsd == 14
+    E       assert 14000000000000000000 == 14
 
     tests/test_donator.py:32: AssertionError
     ======================================= 1 failed, 2 passed, 15 warnings in 0.95 seconds =========
@@ -215,7 +215,7 @@ And the py.test results:
 
 Ooops. Something went wrong. But this is what tests are all about.
 
-Py.test tells us that the assert failed. Instead of 1,400, the ``donationsUsd`` is 1400000000000000000000.
+Py.test tells us that the assert failed. Instead of 14, the ``donationsUsd`` is 14000000000000000000.
 And you know the saying: a billion here, a billion there, and pretty soon you're talking about real money.
 
 Where is the bug? you maybe guessed it already, but let's take a look at the contract's ``donate`` function:

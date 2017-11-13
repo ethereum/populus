@@ -310,7 +310,7 @@ Unlike a transaction, ``call`` doesn't change state:
 .. code-block:: python
 
     >>> transaction = {'value':50,'from':w3.eth.coinbase}
-    >>>> donator.call(transaction).donate(100)
+    >>>> donator.call(transaction).donate(10)
     []
     >>> w3.fromWei(w3.eth.getBalance(donator.address),'ether')
     >>> Decimal('113')

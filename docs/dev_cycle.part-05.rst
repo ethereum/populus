@@ -34,7 +34,7 @@ And add the following test to the bottom of the file:
 
         donator, deploy_tx_hash = chain.provider.get_or_deploy_contract('Donator')
         with pytest.raises(TransactionFailed):
-            donator.transact({'value':0}).donate(400)
+            donator.transact({'value':0}).donate(4)
 
         defaultUsdRate = donator.call().defaultUsdRate()
         assert defaultUsdRate == 350
@@ -46,7 +46,7 @@ The test transaction is of 0 value:
 
 .. code-block:: python
 
-    donator.transact({'value':0}).donate(400)
+    donator.transact({'value':0}).donate(4)
 
 So the modifier should ``throw``.
 
@@ -59,7 +59,7 @@ of the constructor
   defaultUsdRate = 350;
   }
 
-And ignore the test transaction with ``.donate(400)``.
+And ignore the test transaction with ``.donate(4)``.
 
 Run the tests:
 

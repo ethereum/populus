@@ -12,8 +12,8 @@ to make sure that the donations counter will not increment for zero donations:
 
 .. code-block:: solidity
 
-   modifier money_sent() { if (!(msg.value > 0)) throw; _; }
-   function donate(uint usd_rate) public payable money_sent {...}
+   modifier nonZeroValue() { if (!(msg.value > 0)) throw; _; }
+   function donate(uint usd_rate) public payable nonZeroValue {...}
 
 
 Edit the tests file:
@@ -36,8 +36,8 @@ And add the following test to the bottom of the file:
         with pytest.raises(TransactionFailed):
             donator.transact({'value':0}).donate(400)
 
-        default_usd_rate = donator.call().default_usd_rate()
-        assert default_usd_rate == 350
+        defaultUsdRate = donator.call().defaultUsdRate()
+        assert defaultUsdRate == 350
 
 
 Simple test. Note the py.test syntax for *expected* exceptions: ``with pytest.raises(...)``.
@@ -50,13 +50,13 @@ The test transaction is of 0 value:
 
 So the modifier should ``throw``.
 
-Since the transaction should fail, the ``default_usd_rate`` should remain the same, with the original initialisation
+Since the transaction should fail, the ``defaultUsdRate`` should remain the same, with the original initialisation
 of the constructor
 
 .. code-block:: solidity
 
   function Donator() {
-  default_usd_rate = 350;
+  defaultUsdRate = 350;
   }
 
 And ignore the test transaction with ``.donate(400)``.

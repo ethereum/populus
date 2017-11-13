@@ -128,14 +128,14 @@ Now we need the ABI. Go to the other terminal window:
     $ solc --abi contract/Donator.sol
     ======= contracts/Donator.sol:Donator =======
     Contract JSON ABI
-    [{"constant":true,"inputs":[],"name":"donations_count","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donations_usd","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"default_usd_rate","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donations_total","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"usd_rate","type":"uint256"}],"name":"donate","outputs":[],"payable":true,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"payable":true,"type":"fallback"}]
+    [{"constant":true,"inputs":[],"name":"donationsCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donationsUsd","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"defaultUsdRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donationsTotal","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"usd_rate","type":"uint256"}],"name":"donate","outputs":[],"payable":true,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"payable":true,"type":"fallback"}]
 
 Copy only the long list ``[{"constant":true,"inputs":[]....]``, get back to the python shell,
 and paste the abi inside single quotes, like ``'[...]'`` as follows:
 
 .. code-block:: python
 
-    >>> abi_js = '[{"constant":true,"inputs":[],"name":"donations_count","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donations_usd","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"default_usd_rate","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donations_total","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"usd_rate","type":"uint256"}],"name":"donate","outputs":[],"payable":true,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"payable":true,"type":"fallback"}]'
+    >>> abi_js = '[{"constant":true,"inputs":[],"name":"donationsCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donationsUsd","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"defaultUsdRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donationsTotal","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"usd_rate","type":"uint256"}],"name":"donate","outputs":[],"payable":true,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"payable":true,"type":"fallback"}]'
 
 
 Your python shell should look like this:
@@ -147,7 +147,7 @@ Your python shell should look like this:
     >>> w3
     >>> <web3.main.Web3 object at 0x7f29dcc7c048>
     >>> address = "0xb8d9d2afbe18fd6ac43042164ece9691eb9288ed"
-    >>> abi_js = '[{"constant":true,"inputs":[],"name":"donations_count","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donations_usd","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"default_usd_rate","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donations_total","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"usd_rate","type":"uint256"}],"name":"donate","outputs":[],"payable":true,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"payable":true,"type":"fallback"}]'
+    >>> abi_js = '[{"constant":true,"inputs":[],"name":"donationsCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donationsUsd","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"defaultUsdRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"donationsTotal","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"usd_rate","type":"uint256"}],"name":"donate","outputs":[],"payable":true,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"payable":true,"type":"fallback"}]'
 
 
 From now on, we will stay in the python shell.
@@ -174,9 +174,9 @@ Let's verify it:
 
 .. code-block:: python
 
-    >>> donator.call().donations_count()
+    >>> donator.call().donationsCount()
     4
-    >>> donator.call().donations_total()
+    >>> donator.call().donationsTotal()
     8000000000000000000
 
 Works.
@@ -202,8 +202,8 @@ object and returns it to you (and if the contract is not deployed, it will deplo
     on your side is **exactly the same** as the bytecode at the said address on the blockchain.
 
 
-Note that ``donations_total`` is *not* the account balance as it is saved in the *blockchain* state.
-It's rather a *contract* state. If we made a calculation mistake with ``donations_total`` then it won't
+Note that ``donationsTotal`` is *not* the account balance as it is saved in the *blockchain* state.
+It's rather a *contract* state. If we made a calculation mistake with ``donationsTotal`` then it won't
 reflect the actual Ether balance of the contract.
 
 So all these doantions are not in the balance? Let's see:
@@ -213,7 +213,7 @@ So all these doantions are not in the balance? Let's see:
     >>> w3.eth.getBalacne(donator.address)
     8000000000000000000
 
-Phew. It's OK. The ``donations_total`` is exactly the same as the "official" balance.
+Phew. It's OK. The ``donationsTotal`` is exactly the same as the "official" balance.
 
 And in Ether:
 
@@ -252,9 +252,9 @@ immidiately:
 
 .. code-block:: python
 
-    >>> donator.call().donations_total()
+    >>> donator.call().donationsTotal()
     13000000000000000000
-    >>> donator.call().default_usd_rate()
+    >>> donator.call().defaultUsdRate()
     7
     >>> w3.fromWei(w3.eth.getBalance(donator.address),'ether')
     Decimal('13')
@@ -274,9 +274,9 @@ Check the state:
 
 .. code-block:: python
 
-    >>> donator.call().donations_total()
+    >>> donator.call().donationsTotal()
     113000000000000000000
-    >>> donator.call().default_usd_rate()
+    >>> donator.call().defaultUsdRate()
     7
     >>> w3.fromWei(w3.eth.getBalance(donator.address),'ether')
     Decimal('113')
@@ -296,12 +296,12 @@ If you answered *fallback* you would be correct. The contract has a fallback fun
 
     // fallback function
      function () payable {
-       donate(default_usd_rate);
+       donate(defaultUsdRate);
      }
 
 A :ref:`fallback function <fallback_func>` is the one un-named function you can optionally include in a contract. If it
 exists, the EVM will call it when you just send Ether, without a function call. In ``Donator``,
-the fallback just calls ``donate`` with the current ``default_usd_rate``. This is why the balance
+the fallback just calls ``donate`` with the current ``defaultUsdRate``. This is why the balance
 *did* increase by 100 Ether, but the ETH/USD rate didn't change
 (there are also other options to invoke the fallback).
 
@@ -314,7 +314,7 @@ Unlike a transaction, ``call`` doesn't change state:
     []
     >>> w3.fromWei(w3.eth.getBalance(donator.address),'ether')
     >>> Decimal('113')
-    >>> donator.call().default_usd_rate()
+    >>> donator.call().defaultUsdRate()
     >>> 7
 
 Console Interaction With Accounts

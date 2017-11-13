@@ -98,10 +98,10 @@ The test file should look as follows:
 
 .. code-block:: python
 
-  def test_default_usd_rate(chain):
+  def test_defaultUsdRate(chain):
       donator, deploy_tx_hash _ = chain.provider.get_or_deploy_contract('Donator')
-      default_usd_rate = donator.call().default_usd_rate()
-      assert default_usd_rate == 350
+      defaultUsdRate = donator.call().defaultUsdRate()
+      assert defaultUsdRate == 350
 
 
 The magic happens with ``get_or_deploy_contract``. This function gets an existing contract if it exists on the blockchain, and if it
@@ -119,7 +119,7 @@ bytecode on the blockchain. Cool, isn't it?
 Get the blockchain
 ''''''''''''''''''
 
-Another bonus is the ``chain`` object, provided as an argument at ``def test_default_usd_rate(chain)``. It gives the test function a Python object
+Another bonus is the ``chain`` object, provided as an argument at ``def test_defaultUsdRate(chain)``. It gives the test function a Python object
 that corresponds to a running blockchain, the ``tester`` blockchain.
 Reminder: The ``tester`` chain is ephemeral, saved only in memory, and will reset on every test run.
 
@@ -149,21 +149,21 @@ The first test important line is:
 
 .. code-block:: python
 
-  default_usd_rate = donator.call().default_usd_rate()
+  defaultUsdRate = donator.call().defaultUsdRate()
 
 In the Solidity source code we had:
 
 .. code-block:: solidity
 
   ...
-  uint public default_usd_rate;
+  uint public defaultUsdRate;
   ...
   function Donator() {
-    default_usd_rate = 350;
+    defaultUsdRate = 350;
   }
   ...
 
-To recap, ``default_usd_rate`` is a ``public`` variable, hence the compiler automatically created
+To recap, ``defaultUsdRate`` is a ``public`` variable, hence the compiler automatically created
 an accessor function, a "get", that returns this variable. The test just used this function.
 
 

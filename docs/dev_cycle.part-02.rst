@@ -55,13 +55,13 @@ If you copy-pasted the ``Donator`` contract example, you will get:
     File "/usr/local/lib/python3.5/dist-packages/solc/main.py", line 184, in compile_standard
       message=error_message,
   solc.exceptions.SolcError: contracts/Donator.sol:21:5: DeclarationError: Identifier not found or not unique.
-  uin in_usd = msg.value * usd_rate;
+  uin inUsd = msg.value * usd_rate;
   ^-^
 
       > command: `solc --standard-json`
       > return code: `0`
       > stderr:
-      {"contracts":{},"errors":[{"component":"general","formattedMessage":"contracts/Donator.sol:21:5: DeclarationError: Identifier not found or not unique.\n    uin in_usd = msg.value * usd_rate;\n    ^-^\n","message":"Identifier not found or not unique.","severity":"error","type":"DeclarationError"}],"sources":{}}
+      {"contracts":{},"errors":[{"component":"general","formattedMessage":"contracts/Donator.sol:21:5: DeclarationError: Identifier not found or not unique.\n    uin inUsd = msg.value * usd_rate;\n    ^-^\n","message":"Identifier not found or not unique.","severity":"error","type":"DeclarationError"}],"sources":{}}
 
       > stdout:
 
@@ -73,10 +73,10 @@ To undersatnd what went wrong, just look at the compiler's output. The error mes
 .. code-block:: bash
 
   solc.exceptions.SolcError: contracts/Donator.sol:21:5: DeclarationError: Identifier not found or not unique.
-  uin in_usd = msg.value * usd_rate;
+  uin inUsd = msg.value * usd_rate;
   ^-^
 
-Oh. Ok. ``uin in_usd`` should be ``uint in_usd``. Edit and fix it:
+Oh. Ok. ``uin inUsd`` should be ``uint inUsd``. Edit and fix it:
 
 
 .. code-block:: bash
@@ -87,7 +87,7 @@ The fixed line should be:
 
 .. code-block:: solidity
 
-  uint in_usd = msg.value * usd_rate;
+  uint inUsd = msg.value * usd_rate;
 
 .. note::
 

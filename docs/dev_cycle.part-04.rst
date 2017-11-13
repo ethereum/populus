@@ -17,23 +17,23 @@ After the edit, the file should look as follows:
 .. code-block:: python
 
 
-    def test_default_usd_rate(chain):
+    def test_defaultUsdRate(chain):
         donator, deploy_tx_hash = chain.provider.get_or_deploy_contract('Donator')
-        default_usd_rate = donator.call().default_usd_rate()
-        assert default_usd_rate == 350
+        defaultUsdRate = donator.call().defaultUsdRate()
+        assert defaultUsdRate == 350
 
 
     def test_donate(chain):
         donator, deploy_tx_hash = chain.provider.get_or_deploy_contract('Donator')
         donator.transact({'value':500}).donate(370)
         donator.transact({'value':650}).donate(380)
-        donations_count = donator.call().donations_count()
-        donations_total = donator.call().donations_total()
-        default_usd_rate = donator.call().default_usd_rate()
+        donationsCount = donator.call().donationsCount()
+        donationsTotal = donator.call().donationsTotal()
+        defaultUsdRate = donator.call().defaultUsdRate()
 
-        assert donations_total == 1150
-        assert donations_count == 2
-        assert default_usd_rate == 380
+        assert donationsTotal == 1150
+        assert donationsCount == 2
+        assert defaultUsdRate == 380
 
 
 You added another test, ``test_donations``. The second test is similar to the first one:
@@ -75,7 +75,7 @@ transaction.
 
 .. code-block:: solidity
 
-    function donate(uint usd_rate) public payable money_sent {...}
+    function donate(uint usd_rate) public payable nonZeroValue {...}
 
 This argument is provided in the test as *Python* donate function:
 
@@ -85,8 +85,8 @@ This argument is provided in the test as *Python* donate function:
 
 Populus gives you a *Python* interface to a bytecode contract. Nice, no?
 
-**[6] Asserts**: We expect the ``donations_total`` to be ``500 + 650 = 1150``, the ``donations_count`` is 2,
-and the ``default_usd_rate`` to match the last update, 380.
+**[6] Asserts**: We expect the ``donationsTotal`` to be ``500 + 650 = 1150``, the ``donationsCount`` is 2,
+and the ``defaultUsdRate`` to match the last update, 380.
 
 The test gets the varaibles with ``call``, and should update instanrly because it's a local ``tester`` chain. On a distributed
 blockchain it will take sometime until the transactions are mined and actually change the state.
@@ -130,12 +130,12 @@ Add the following test to the bottom of the file:
         donator, deploy_tx_hash = chain.provider.get_or_deploy_contract('Donator')
         donator.transact({'value':ONE_ETH_IN_WEI}).donate(400)
         donator.transact({'value':(2 * ONE_ETH_IN_WEI)}).donate(500)
-        donations_usd = donator.call().donations_usd()
+        donationsUsd = donator.call().donationsUsd()
 
         # donated 1 ETH in  $400 per ETH = $400
         # donated 2 ETH in $500 per ETH = 2 * $500 = $1,000
         # total $ value donated = $400 + $1,000 = $1,400
-        assert donations_usd == 1400
+        assert donationsUsd == 1400
 
 The test sends donations worth of 3 Ether. Reminder: by default, all contract functions
 and contract interactions are handled in *Wei*.
@@ -167,8 +167,8 @@ Hence we excpect the total *USD* value of these two donations to be $400 + $1,00
 
 .. code-block:: python
 
-    donations_usd = donator.call().donations_usd()
-    assert donations_usd == 1400
+    donationsUsd = donator.call().donationsUsd()
+    assert donationsUsd == 1400
 
 
 OK, that wan't too complicated. Run the test:
@@ -201,12 +201,12 @@ And the py.test results:
             donator, deploy_tx_hash = chain.provider.get_or_deploy_contract('Donator')
             donator.transact({'value':ONE_ETH_IN_WEI}).donate(400)
             donator.transact({'value':(2 * ONE_ETH_IN_WEI)}).donate(500)
-            donations_usd = donator.call().donations_usd()
+            donationsUsd = donator.call().donationsUsd()
 
             # donated 1 ETH at $400 per ETH = $400
             # donated 2 ETH at $500 per ETH = 2 * $500 = $1,000
             # total $ value donated = $400 + $1,000 = $1,400
-    >       assert donations_usd == 1400
+    >       assert donationsUsd == 1400
     E       assert 1400000000000000000000 == 1400
 
     tests/test_donator.py:32: AssertionError
@@ -215,26 +215,26 @@ And the py.test results:
 
 Ooops. Something went wrong. But this is what tests are all about.
 
-Py.test tells us that the assert failed. Instead of 1,400, the ``donations_usd`` is 1400000000000000000000.
+Py.test tells us that the assert failed. Instead of 1,400, the ``donationsUsd`` is 1400000000000000000000.
 And you know the saying: a billion here, a billion there, and pretty soon you're talking about real money.
 
 Where is the bug? you maybe guessed it already, but let's take a look at the contract's ``donate`` function:
 
 .. code-block:: solidity
 
-    function donate(uint usd_rate) public payable money_sent {
-        donations_total += msg.value;
-        donations_count += 1;
-        default_usd_rate = usd_rate;
-        uint in_usd = msg.value * usd_rate;
-        donations_usd += in_usd;
+    function donate(uint usd_rate) public payable nonZeroValue {
+        donationsTotal += msg.value;
+        donationsCount += 1;
+        defaultUsdRate = usd_rate;
+        uint inUsd = msg.value * usd_rate;
+        donationsUsd += inUsd;
         }
 
 Now it's clear:
 
 .. code-block:: solidity
 
-    uint in_usd = msg.value * usd_rate;
+    uint inUsd = msg.value * usd_rate;
 
 This line multiplies ``msg.value``, which is in Wei, by ``usd_rate``, which is the exchange rate per *Ether*.
 
@@ -252,7 +252,7 @@ And fix the line to:
 
 .. code-block:: solidity
 
-    uint in_usd = msg.value * usd_rate / 10**18;
+    uint inUsd = msg.value * usd_rate / 10**18;
 
 Run the tests again:
 

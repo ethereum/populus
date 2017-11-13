@@ -34,7 +34,7 @@ The script should look as follows:
         donator, _ = chain.provider.get_or_deploy_contract('Donator')
 
     # state variable
-    donations_total = donator.call().donations_total()
+    donationsTotal = donator.call().donationsTotal()
 
     # access to Web3 with the chain web3 property
     w3 = chain.web3
@@ -42,17 +42,17 @@ The script should look as follows:
     # the account balance as saved by the blockchain
     donator_balance = w3.fromWei(w3.eth.getBalance(donator.address),'ether')
 
-    print (donations_total)
+    print (donationsTotal)
     print (donator_balance)
 
 
 The script is very similar to what you already done so far. It starts with a ``Project``
 object which is the main entry point to the Populus API. From the project
 we get the chain, and a contract object.
-Then the script grabs the ``donations_total`` with a ``call``, no need for a transaction.
+Then the script grabs the ``donationsTotal`` with a ``call``, no need for a transaction.
 Finally, with the Web3 API, we get the contract's balance as it is saved on the chain.
 
-Both ``donations_total`` and the balance are in Wei. The web3 API ``fromWei`` converts it to Ether.
+Both ``donationsTotal`` and the balance are in Wei. The web3 API ``fromWei`` converts it to Ether.
 
 Two things to notice. A minor style change:
 
@@ -257,15 +257,15 @@ The script should look as follows:
     with p.get_chain('horton') as chain:
         donator2, _ = chain.provider.get_or_deploy_contract('Donator2')
 
-    donations_count = donator2.call().donations_count()
-    donations_total = donator2.call().donations_total()
-    donations_usd = donator2.call().donations_total()
+    donationsCount = donator2.call().donationsCount()
+    donationsTotal = donator2.call().donationsTotal()
+    donationsUsd = donator2.call().donationsTotal()
     w3 = chain.web3
     balance = w3.fromWei(w3.eth.getBalance(donator2.address),'ether')
 
-    print("donations_count {:d}".format(donations_count))
-    print("donations_total {:d}".format(donations_total))
-    print("donations_usd {:d}".format(donations_usd))
+    print("donationsCount {:d}".format(donationsCount))
+    print("donationsTotal {:d}".format(donationsTotal))
+    print("donationsUsd {:d}".format(donationsUsd))
     print("balance {:f}".format(balance))
 
 Again, we use the Populus API to get a handle to the ``Project``,
@@ -278,9 +278,9 @@ Run the script:
 
     $ python scripts/donator2_state.py
 
-    donations_count 0
-    donations_total 0
-    donations_usd 0
+    donationsCount 0
+    donationsTotal 0
+    donationsUsd 0
     balance 0.000000
 
 
@@ -327,9 +327,9 @@ Check state:
 .. code-block:: shell
 
     $ python scripts/donator2_state.py
-    donations_count 0
-    donations_total 0
-    donations_usd 0
+    donationsCount 0
+    donationsTotal 0
+    donationsUsd 0
     balance 0.000000
 
 Still nothing. Wait a few seconds, then try again:
@@ -337,9 +337,9 @@ Still nothing. Wait a few seconds, then try again:
 .. code-block:: shell
 
     $ python scripts/donator2_state.py
-    donations_count 3
-    donations_total 126000000000000000000
-    donations_usd 630
+    donationsCount 3
+    donationsTotal 126000000000000000000
+    donationsUsd 630
     balance 126
 
 
@@ -466,17 +466,17 @@ Quit the Python shell, and check the contract's balance, or more precisely, the 
 .. code-block:: shell
 
     $ python scripts/donator2_state.py
-    donations_count 3
-    donations_total 126000000000000000000
-    donations_usd 630
+    donationsCount 3
+    donationsTotal 126000000000000000000
+    donationsUsd 630
     balance 0.000000
 
-Correct. The balance is 0, yet ``donations_total`` that saves a running total of the *accepted* donations, shows all the 3
+Correct. The balance is 0, yet ``donationsTotal`` that saves a running total of the *accepted* donations, shows all the 3
 accepted donations of 42 Ether each.
 
 .. note::
 
-    ``donations_total`` is a state variable that is saved in the *contract's* storage. The ``balance`` is the balance
+    ``donationsTotal`` is a state variable that is saved in the *contract's* storage. The ``balance`` is the balance
     in Wei of the *address* of the contract, which is saved as part of the *blockchain's* status.
 
 As an exercise, add some tests to test the ``withdrawAll`` functionality on ``Donator2``.

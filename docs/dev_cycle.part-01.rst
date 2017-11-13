@@ -148,7 +148,7 @@ The ``contract`` keyword starts a new contract definition, named ``Donator``.
     Contracts names should follow class naming rules (like MyWallet, GoodLuck or WhyNot).
 
 **State variables**:
-The contract has 4 state variables: ``donations_total``, ``donations_usd``, ``donations_count`` and ``default_usd_rate``.
+The contract has 4 state variables: ``donationsTotal``, ``donationsUsd``, ``donationsCount`` and ``defaultUsdRate``.
 A state variable is defined in the *contract scope*.
 State variables are saved in the contract's persisten *storage*,
 kept after the transaction run ends, and synced to every node on the blockchain.
@@ -159,7 +159,7 @@ of the contrat, in the contract's interface.
 
 .. note::
     For the public state variables, the compiler actually creates an accessor function
-    which if you had to type manually could look like: ``function total() public returns (uint) {return donations_total;}``
+    which if you had to type manually could look like: ``function total() public returns (uint) {return donationsTotal;}``
 
 **Data types**:
 Since we are dealing with numbers, the only data type we use here is ``uint``, unsigned integer. The ``int`` and ``uint``
@@ -177,7 +177,7 @@ the fixed point calculations with integers. For the sake of simplicty, the examp
 
 **Constructor**:
 The function ``function Donator()`` is a constructor. A constructor function's name is always identical to the contract's name.
-It runs once, when the contract is created, and can't be called again. Here we set the ``default_usd_rate``, to be used
+It runs once, when the contract is created, and can't be called again. Here we set the ``defaultUsdRate``, to be used
 when the donator didn't provide the effective exchange rate. Providing a constructor function is optional.
 
 
@@ -191,11 +191,11 @@ variable without prior decleration or assignment. To find out how much
 Ether was sent, use ``msg.value``.
 
 **Modifiers**:
-``modifier money_sent() { if (!msg.value > 0) throw; _; }``. The term "modifier" is a bit confusing.
+``modifier nonZeroValue() { if (!msg.value > 0) throw; _; }``. The term "modifier" is a bit confusing.
 A modifier of a function is  *another* function that injects, or modifies, code, typically to verify some pre-existing condition.
-Since the donate function uses the modifier ``function donate(uint usd_rate) public payable money_sent {...}``,
-then ``money_sent`` will run *before* ``donate``. The code in ``donate`` will run only if ``msg.value > 0``, and make sure
-that the ``donations_count`` does not increase by a zero donation.
+Since the donate function uses the modifier ``function donate(uint usd_rate) public payable nonZeroValue {...}``,
+then ``nonZeroValue`` will run *before* ``donate``. The code in ``donate`` will run only if ``msg.value > 0``, and make sure
+that the ``donationsCount`` does not increase by a zero donation.
 
 .. note::
 
@@ -217,12 +217,12 @@ with  ``address.call``, and (b) when just send just Ether, in a transaction that
     Ether to a contract invokes code execution.
 
 **Payable**:
-``function donate(uint usd_rate) public payable money_sent {...}`` and ``function () payable {...}`` use the *payable*
+``function donate(uint usd_rate) public payable nonZeroValue {...}`` and ``function () payable {...}`` use the *payable*
 builtin modifier, in order to accept Ether. Otherwise, without this modifier, a transaction that sends Ether will fail.
 If none of the contract functions has a ``payable`` modifier, the contract can't accept Ether.
 
 **Initial Values**:
-Note that ``donations_total += msg.value;`` was used before any assignment to ``donations_total``. The variables are auto initiated
+Note that ``donationsTotal += msg.value;`` was used before any assignment to ``donationsTotal``. The variables are auto initiated
 with default values.
 
 

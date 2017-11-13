@@ -76,26 +76,26 @@ And add a few lines, as follows:
         print("Deploy Transaction {tx}".format(tx=deploy_tx_hash))
 
     # Get contract state with calls
-    donations_count = donator.call().donations_count()
-    donations_total = donator.call().donations_total()
+    donationsCount = donator.call().donationsCount()
+    donationsTotal = donator.call().donationsTotal()
 
     # Client side
     ONE_ETH_IN_WEI = 10**18  # 1 ETH == 1,000,000,000,000,000,000 Wei
-    total_ether = donations_total/ONE_ETH_IN_WEI
-    avg_donation = donations_total/donations_count if donations_count > 0 else 0
+    total_ether = donationsTotal/ONE_ETH_IN_WEI
+    avg_donation = donationsTotal/donationsCount if donationsCount > 0 else 0
     status_msg = (
         "Total of {:,.2f} Ether accepted in {:,} donations, "
         "an avergage of {:,.2f} Wei per donation."
         )
 
-    print (status_msg.format(total_ether, donations_count, avg_donation))
+    print (status_msg.format(total_ether, donationsCount, avg_donation))
 
 Pretty much similar to what we did so far: The script starts with the ``Project`` object,
 the main entry point to the Populus API. The project object provides a ``chain`` object (as long as
 this chain is defined in the project-scope or user-scope configs),
 and once you have the ``chain`` you can get the contract *instance* on that chain.
 
-Then we get the ``donations_count`` and the ``donations_total`` with ``call``. Populus, via Web3, calls
+Then we get the ``donationsCount`` and the ``donationsTotal`` with ``call``. Populus, via Web3, calls
 the running geth node, and geth grabs and return these two state variables
 from the contract's storage. Even if we had used geth as a node to ``mainnet``, a sync node can get this info
 localy.
@@ -106,10 +106,10 @@ These are the same public variables that you declared in the ``Donator`` Solidit
 
     contract Donator {
 
-        uint public donations_total;
-        uint public donations_usd;
-        uint public donations_count;
-        uint public default_usd_rate;
+        uint public donationsTotal;
+        uint public donationsUsd;
+        uint public donationsCount;
+        uint public defaultUsdRate;
 
         ...
     }
@@ -174,19 +174,19 @@ Update the script:
         print("Deploy Transaction {tx}".format(tx=deploy_tx_hash))
 
     # Get contract state with calls
-    donations_count = donator.call().donations_count()
-    donations_total = donator.call().donations_total()
+    donationsCount = donator.call().donationsCount()
+    donationsTotal = donator.call().donationsTotal()
 
     # Client side
     ONE_ETH_IN_WEI = 10**18  # 1 ETH == 1,000,000,000,000,000,000 Wei
-    total_ether = donations_total/ONE_ETH_IN_WEI
-    avg_donation = donations_total/donations_count if donations_count > 0 else 0
+    total_ether = donationsTotal/ONE_ETH_IN_WEI
+    avg_donation = donationsTotal/donationsCount if donationsCount > 0 else 0
     status_msg = (
         "Total of {:,.2f} Ether accepted in {:,} donations, "
         "an avergage of {:,.2f} Wei per donation."
         )
 
-    print (status_msg.format(total_ether, donations_count, avg_donation))
+    print (status_msg.format(total_ether, donationsCount, avg_donation))
 
     # Donate
     donation = ONE_ETH_IN_WEI * random.randint(1,10)

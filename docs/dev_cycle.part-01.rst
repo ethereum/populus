@@ -124,43 +124,11 @@ in terms of Ether, but similar donations in terms of USD.
 In other words, two donations of say $30 will have different amounts in ETH if the exchange rate changed between
 the donations. As a simple solution, we will ask donators to provide the effective ETH/USD exchange rate when they send their (hopefully generous) donations.
 
-:raw:
-  :file: assets/Donator.sol
-
 
 Here is the new contract code:
 
-.. code-block:: solidity
-
-    pragma solidity ^0.4.11;
-
-    /// TUTORIAL CONTRACT DO NOT USE IN PRODUCTION
-    /// @title Donations collecting contract
-
-    contract Donator {
-
-      uint public donations_total;
-      uint public donations_usd;
-      uint public donations_count;
-      uint public default_usd_rate;
-
-      function Donator() {
-        default_usd_rate = 350;
-      }
-      modifier money_sent() { if (!msg.value > 0) throw; _; }
-      function donate(uint usd_rate) public payable money_sent {
-          donations_total += msg.value;
-          donations_count += 1;
-          default_usd_rate = usd_rate;
-          uin in_usd = msg.value * usd_rate;
-          donations_usd += in_usd;
-      }
-      // fallback function
-      function () payable {
-        donate(default_usd_rate);
-      }
-     }
-
+.. literalinclude:: ./assets/Donator.sol
+   :language: solidity
 
 
 Save the code to ``contracts/Donator.sol``.

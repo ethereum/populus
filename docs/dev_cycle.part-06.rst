@@ -287,25 +287,8 @@ missed it too.
 
 Edit the contract file:
 
-.. code-block:: solidity
-
-    pragma solidity ^0.4.11;
-
-    contract Greeter {
-        string public greeting;
-
-        function Greeter() {
-            greeting = 'Hello';
-        }
-
-        function setGreeting(string _greeting) public {
-            greeting = _greeting;
-        }
-
-        function greet() constant returns (string) {
-            return greeting;
-        }
-    }
+.. literalinclude:: ./assets/Greeter.sol
+   :language: solidity
 
 
 Deploy to ``horton``, after you make sure the chain runs:

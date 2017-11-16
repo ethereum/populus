@@ -66,6 +66,7 @@ def temporary_dir(tmpdir):
 
 @pytest.fixture()
 def project_dir(tmpdir, monkeypatch):
+    assert False
     _project_dir = str(tmpdir.mkdir("project-dir"))
 
     # setup project directories

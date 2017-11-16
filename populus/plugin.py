@@ -19,13 +19,11 @@ from populus.config.helpers import (
 
 
 def pytest_addoption(parser):
-
     parser.addoption("--populus-project", help="populus project root directory")
     parser.addini("populus_project", "populus project root directory")
 
 
 def get_populus_option(cmdline_option, ini_option, environ_var, pytestconfig, default=None):
-
     if pytestconfig.getoption(cmdline_option, default=False):
             return pytestconfig.getoption(cmdline_option)
     else:
@@ -43,13 +41,12 @@ CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
 
 @pytest.fixture()
 def project(request, pytestconfig):
-
     project_dir = get_populus_option(
         cmdline_option="--populus-project",
         ini_option="populus_project",
         environ_var="PYTEST_POPULUS_PROJECT",
         pytestconfig=pytestconfig,
-        default=pytestconfig.args[0]
+        default=os.getcwd(),
     )
 
     if not os.path.exists(get_json_config_file_path(project_dir)):

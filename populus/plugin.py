@@ -1,4 +1,5 @@
 import os
+import sys
 import pytest
 
 from populus.project import Project
@@ -16,6 +17,10 @@ from populus.utils.json import (
 from populus.config.helpers import (
     get_json_config_file_path,
 )
+
+
+if sys.version_info.major == 2:
+    FileNotFoundError = OSError
 
 
 def pytest_addoption(parser):

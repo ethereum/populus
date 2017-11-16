@@ -42,16 +42,16 @@ Check your project directory, which should look as follows:
 .. code-block:: bash
 
   ├── chains
-  │   └── horton
-  │       ├── chain_data
-  │       │   └── keystore
-  │       │       └── UTC--2017-10-10T11-36-58.745314398Z--eb9ae85fa8f6d8853afe45799d966dca89edd9aa
-  │       ├── genesis.json
-  │       ├── init_chain.sh
-  │       ├── password
-  │       └── run_chain.sh
+  │   └── horton
+  │       ├── chain_data
+  │       │   └── keystore
+  │       │       └── UTC--2017-10-10T11-36-58.745314398Z--eb9ae85fa8f6d8853afe45799d966dca89edd9aa
+  │       ├── genesis.json
+  │       ├── init_chain.sh
+  │       ├── password
+  │       └── run_chain.sh
   ├── contracts
-  │   └── Greeter.sol
+  │   └── Greeter.sol
   ├── project.json
   └── tests
       └── test_greeter.py
@@ -65,6 +65,11 @@ The ``chain new`` command added a new directory: `chains`, and within it, the `h
 
 The ``chain_data`` directory is where geth will store the blockchain data. It's empty, for now,
 since we didn't run this local chain at all.
+
+.. _tutorial_wallets:
+
+Wallets
+'''''''
 
 Then, the ``keystore`` directory, where the "wallets" are saved. A wallet file is a special file that
 stores an ethereum account. Here we see one wallet file, ``UTC--2017-10-10T11-36-58.745314398Z--eb9ae85fa8f6d8853afe45799d966dca89edd9aa``.
@@ -114,6 +119,8 @@ to geth with the ``password`` commnad line argument. Otherwise, you will have to
 the password each time geth starts. Moreover, sometimes it's hard to spot the password prompt
 with all the info that geth spits. So a password file is more convinient, but obviously should be fully secured,
 with the right permissions.
+
+.. _tutorial_accounts:
 
 Accounts
 ''''''''
@@ -210,21 +217,21 @@ When geth created the blockchain, it added some files, where it stores the block
   chains/
   └── horton
       ├── chain_data
-      │   ├── geth
-      │   │   ├── chaindata
-      │   │   │   ├── 000001.log
-      │   │   │   ├── CURRENT
-      │   │   │   ├── LOCK
-      │   │   │   ├── LOG
-      │   │   │   └── MANIFEST-000000
-      │   │   └── lightchaindata
-      │   │       ├── 000001.log
-      │   │       ├── CURRENT
-      │   │       ├── LOCK
-      │   │       ├── LOG
-      │   │       └── MANIFEST-000000
-      │   └── keystore
-      │       └── UTC--2017-10-10T14-17-37.895269081Z--62c4b5955c028ab16bfc5cc57e09af6370a270a1
+      │   ├── geth
+      │   │   ├── chaindata
+      │   │   │   ├── 000001.log
+      │   │   │   ├── CURRENT
+      │   │   │   ├── LOCK
+      │   │   │   ├── LOG
+      │   │   │   └── MANIFEST-000000
+      │   │   └── lightchaindata
+      │   │       ├── 000001.log
+      │   │       ├── CURRENT
+      │   │       ├── LOCK
+      │   │       ├── LOG
+      │   │       └── MANIFEST-000000
+      │   └── keystore
+      │       └── UTC--2017-10-10T14-17-37.895269081Z--62c4b5955c028ab16bfc5cc57e09af6370a270a1
       ├── genesis.json
       ├── init_chain.sh
       ├── password
@@ -323,4 +330,3 @@ So the next step is to deploy the Greeter contract with Populus to the horton lo
 
   To stop geth, go the terminal where it's running, and type Ctrl+C. If it runs as a daemon,
   use ``kill INT <pid>``, where pid is the geth process id.
-

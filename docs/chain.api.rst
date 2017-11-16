@@ -27,10 +27,10 @@ Chain API
 .. _chain-api-registrar:
 .. py:attribute:: BaseChain.registrar
 
-    Accessor for the :ref:`Registrar API <chain-registrar>`.
+    Accessor for Registrar API
 
 
 .. _chain-api-provider:
 .. py:attribute:: BaseChain.provider
 
-    Accessor for the :ref:`Provider API <chain-provider>`.
+    Accessor for the Provider API

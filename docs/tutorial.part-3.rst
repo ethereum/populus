@@ -1,3 +1,5 @@
+.. _deploy_to_local_chain:
+
 Part 3: Deploy to a Local Chain
 ===============================
 

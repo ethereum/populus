@@ -77,7 +77,7 @@ Release Notes
 - Deprecate: ``project.contracts_source_dir`` and releated setting
   ``compilation.contracts_source_dir``.
 - New API: ``project.contracts_source_dirs`` replaces deprecated singular
-  ``project.contracts_source_dir``.  
+  ``project.contracts_source_dir``.
 - New setting ``compilation.contracts_source_dirs``.
 
 
@@ -202,8 +202,8 @@ Release Notes
 1.6.0
 -----
 
-- Introduce new :ref:`Registrar API <chain-registrar>`.
-- Introduce new :ref:`Provider API <chain-provider>`.
+- Introduce new Registrar API.
+- Introduce new Provider API
 - Deprecate ``Chain.get_contract_factory``, ``Chain.get_contract`` and ``Chain.is_contract_available`` APIs.
 - Deprecate ``Chain.contract_factories`` API.
 - Deprecate ``Chain.deployed_contracts`` API.

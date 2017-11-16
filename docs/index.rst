@@ -19,9 +19,11 @@ Contents
     project
     config
     chain
-    release
+    dev_cycle
+    gotchas
+    resources
     modules
-    API Documentation <populus>
+    release
 
 
 Indices and tables

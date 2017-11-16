@@ -24,31 +24,26 @@ LEGACY_JSON_CONFIG_FILENAME = './populus.json'
 USER_JSON_CONFIG_FILENAME = '~/.populus/config.json'
 
 
-def get_user_json_config_file_path():
-
+def get_user_config_file_path():
     return os.path.expanduser(USER_JSON_CONFIG_FILENAME)
 
 
 def check_if_user_json_config_file_exists():
-
     json_config_file_path = get_user_json_config_file_path()
     return os.path.exists(json_config_file_path)
 
 
-def get_json_config_file_path(project_dir):
-
+def get_project_config_file_path(project_dir):
     json_config_file_path = os.path.join(project_dir, JSON_CONFIG_FILENAME)
     return json_config_file_path
 
 
 def get_legacy_json_config_file_path(project_dir):
-
     json_config_file_path = os.path.join(project_dir, LEGACY_JSON_CONFIG_FILENAME)
     return json_config_file_path
 
 
 def check_if_json_config_file_exists(project_dir):
-
     json_config_file_path = get_json_config_file_path(project_dir)
     return os.path.exists(json_config_file_path)
 

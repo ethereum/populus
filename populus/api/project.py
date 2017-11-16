@@ -33,6 +33,9 @@ def init_project(project_dir, logger):
             "Found existing `project.json` file.  Not writing default config."
         )
 
+                defaults_path = get_default_config_path()
+                shutil.copyfile(defaults_path, self.config_file_path)
+
     project = Project(project_dir, create_config_file=True)
     logger.info(
         "Wrote default populus configuration to `./{0}`.".format(

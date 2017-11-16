@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+.. _v1.11.2-release-notes:
+
+1.11.2
+------
+
+- Bugfix for running tests without explicitely declared project root dir.
+
+
+
 .. _v1.11.1-release-notes:
 
 1.11.1

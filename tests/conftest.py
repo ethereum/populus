@@ -55,7 +55,7 @@ from populus.config.versions import (
     LATEST_VERSION,
 )
 
-POPULUS_SOURCE_ROOT = os.path.dirname(__file__)
+POPULUS_SOURCE_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
 @pytest.fixture()
@@ -96,7 +96,11 @@ CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
 
 
 @pytest.fixture()
-def project(request, project_dir, user_config_path):
+def project(request,
+            project_dir,
+            user_config_path,
+            _loaded_contract_fixtures,
+            _loaded_test_contract_fixtures):
 
     contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
     mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
@@ -294,20 +298,6 @@ def _loaded_test_contract_fixtures(project_dir, request):
             raise ValueError("File already present at '{0}'".format(dst_path))
 
         shutil.copy(src_path, dst_path)
-
-
-def pytest_fixture_setup(fixturedef, request):
-    """
-    Injects the following fixtures ahead of the `project` fixture.
-
-    - project_dir
-    - _loaded_contract_fixtures
-    - _loaded_test_contract_fixtures
-    """
-    if fixturedef.argname == 'project':
-        request.getfixturevalue('project_dir')
-        request.getfixturevalue('_loaded_contract_fixtures')
-        request.getfixturevalue('_loaded_test_contract_fixtures')
 
 
 @pytest.fixture()

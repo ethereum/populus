@@ -1,8 +1,10 @@
 import copy
+import itertools
 import os
 import shutil
-import itertools
+import sys
 import warnings
+
 from eth_utils import (
     to_tuple,
 )
@@ -63,6 +65,10 @@ from populus.config.helpers import (
 from populus.utils.testing import (
     get_tests_dir,
 )
+
+
+if sys.version_info.major == 2:
+    FileNotFoundError = OSError
 
 
 class Project(object):

@@ -36,7 +36,7 @@ from populus.utils.contracts import (
 )
 
 from populus.config.defaults import (
-    load_user_default_config,
+    load_populus_default_config,
 )
 
 from populus.config.base import (
@@ -44,7 +44,7 @@ from populus.config.base import (
 )
 
 from populus.config.helpers import (
-    get_user_json_config_file_path,
+    get_populus_config_file_path,
 )
 
 from populus.config.defaults import (
@@ -81,14 +81,14 @@ def project_dir(tmpdir, monkeypatch):
 
 
 @pytest.fixture()
-def user_config_path(tmpdir, request):
+def populus_config_path(tmpdir, request):
 
-    version = getattr(request.function, '_user_config_version', LATEST_VERSION)
-    tmp_user_config_path = tmpdir.join(os.path.basename(get_user_json_config_file_path())).strpath
+    version = getattr(request.function, '_populus_config_version', LATEST_VERSION)
+    tmp_populus_config_path = tmpdir.join(os.path.basename(get_populus_config_file_path())).strpath
     user_defaults_path = get_user_default_config_path(version)
-    shutil.copyfile(user_defaults_path, tmp_user_config_path)
+    shutil.copyfile(user_defaults_path, tmp_populus_config_path)
 
-    return tmp_user_config_path
+    return tmp_populus_config_path
 
 
 CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
@@ -96,14 +96,14 @@ CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
 
 
 @pytest.fixture()
-def project(request, project_dir, user_config_path):
+def project(request, project_dir, populus_config_path):
 
     contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
     mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
 
     project = Project(
         project_dir=project_dir,
-        user_config_file_path=user_config_path,
+        populus_config_file_path=populus_config_path,
         create_config_file=True
     )
 
@@ -181,9 +181,9 @@ def write_project_file(project_dir):
 
 
 @pytest.fixture
-def user_config_defaults():
+def populus_config_defaults():
 
-    return Config(load_user_default_config())
+    return Config(load_populus_default_config())
 
 
 @pytest.fixture()

@@ -1,6 +1,6 @@
 import copy
+
 import os
-import shutil
 import itertools
 import warnings
 from eth_utils import (
@@ -9,10 +9,6 @@ from eth_utils import (
 
 from populus.config.defaults import (
     load_default_config,
-)
-
-from populus.exceptions import (
-    PopulusResourceWarning,
 )
 
 from populus.compilation import (
@@ -29,13 +25,13 @@ from populus.config import (
 )
 
 from populus.config.defaults import (
-    get_default_config_path,
-    get_user_default_config_path,
+    get_default_populus_config_path,
 )
 
 from populus.config.helpers import (
-    check_if_user_json_config_file_exists,
-    get_user_json_config_file_path,
+    get_populus_config_file_path,
+    get_project_config_file_path,
+    get_legacy_config_file_path,
 )
 
 from populus.utils.chains import (
@@ -51,13 +47,7 @@ from populus.utils.compile import (
 )
 
 from populus.utils.filesystem import (
-    ensure_path_exists,
     get_latest_mtime,
-)
-
-from populus.config.helpers import (
-    get_json_config_file_path,
-    get_legacy_json_config_file_path,
 )
 
 from populus.utils.testing import (
@@ -66,58 +56,49 @@ from populus.utils.testing import (
 
 
 class Project(object):
-
     project_dir = None
-    config_file_path = None
-    user_config_file_path = None
-    legacy_config_path = None
 
-    def __init__(self, project_dir=None, user_config_file_path=None, create_config_file=False):  # noqa: E501
+    populus_config_file_path = None
+    project_config_file_path = None
 
-        self._reset_configs_cache()
+    def __init__(self, project_dir=None, populus_config_file_path=None):
         if project_dir is None:
             self.project_dir = os.getcwd()
         else:
             self.project_dir = os.path.abspath(project_dir)
 
-        # user config
-        self.user_config_file_path = user_config_file_path
-        if self.user_config_file_path is None:
-            self.user_config_file_path = get_user_json_config_file_path()
-            if not check_if_user_json_config_file_exists():
-                user_config_path = get_user_json_config_file_path()
-                user_defaults_path = get_user_default_config_path()
-                ensure_path_exists(os.path.dirname(user_config_path))
-                shutil.copyfile(
-                    user_defaults_path,
-                    user_config_path
-                )
-
-        # legacy config
-        legacy_path = get_legacy_json_config_file_path(self.project_dir)
+        # check if there is a legacy config file laying around.
+        legacy_path = get_legacy_config_file_path(self.project_dir)
         if os.path.exists(legacy_path):
-            self.legacy_config_path = legacy_path
-            warnings.warn(
-                "Found legacy config file at {legacy_path}".format(
+            raise ValueError(
+                "Found legacy config file at {legacy_path}.  Please upgrade "
+                "your configuration file to continue using populus.".format(
                     legacy_path=legacy_path
                 ),
-                PopulusResourceWarning
             )
 
+        # user config
+        if populus_config_file_path is None:
+            populus_config_file_path = get_populus_config_file_path()
+
+        if os.path.exists(populus_config_file_path):
+            self.populus_config_file_path = populus_config_file_path
+        else:
+            self.populus_config_file_path = get_default_populus_config_path()
+
         # project config
-        self.config_file_path = get_json_config_file_path(self.project_dir)
-        if not os.path.exists(self.config_file_path):
-            if create_config_file:
-                defaults_path = get_default_config_path()
-                shutil.copyfile(defaults_path, self.config_file_path)
-            else:
-                if self.legacy_config_path is not None:
-                    msg = "No project config file found at {project_dir}, but a legacy config exists. Try to upgrade"  # noqa: E501
-                else:
-                    msg = "No project config file found at {project_dir}"
-                raise FileNotFoundError(
-                    msg.format(project_dir=self.project_dir)
+        project_config_file_path = get_project_config_file_path(self.project_dir)
+        if not os.path.exists(project_config_file_path):
+            raise FileNotFoundError(
+                "Populus was unable to find a `project.json` in the root of the "
+                "project directory {0}.  Please ensure that this is the correct "
+                "project directory and that there is a valid populus project "
+                "config file present in the root of that directory".format(
+                    self.project_dir,
                 )
+            )
+
+        self.project_config_file_path = get_project_config_file_path(self.project_dir)
 
         self.load_config()
 
@@ -126,58 +107,35 @@ class Project(object):
     #
 
     _project_config = None
-    _user_config = None
+    _populus_config = None
     _config_schema = None
 
     def load_config(self):
-        self._reset_configs_cache()
-        self._project_config = _load_config(self.config_file_path)
-        self._user_config = _load_config(self.user_config_file_path)
+        self._raw_populus_config = _load_config(self.populus_config_file_path)
+        self._raw_project_config = _load_config(self.config_file_path)
 
-        config_version = self._project_config['version']
-        self._config_schema = load_config_schema(config_version)
+        # TODO: handle missing `version` key gracefully
+        populus_config_version = self._raw_populus_config['version']
+        project_config_version = self._raw_project_config['version']
 
-    def _reset_configs_cache(self):
-        self._merged_config_cache = None
-        self._user_config_cache = None
-        self._project_config_cache = None
+        self._populus_config_schema = load_config_schema(populus_config_version)
+        self._project_config_schema = load_config_schema(project_config_version)
+
+        self.populus_config = Config(
+            config=self._raw_populus_config,
+            schema=self._populus_config_schema,
+        )
+        self.project_config = Config(
+            config=self._raw_project_config,
+            schema=self._project_config_schema,
+        )
 
     def reload_config(self):
         self.load_config()
 
-    @property
-    def user_config(self):
-
-        if self._user_config_cache is None:
-            user_config = Config(
-                config=self._user_config,
-                schema=self._config_schema,
-            )
-            user_config.unref()
-            self._user_config_cache = user_config
-            self.merge_user_and_project_configs(user_config, self.project_config)
-
-        return self._user_config_cache
-
-    @property
-    def project_config(self):
-        if self._project_config_cache is None:
-            project_config = Config(
-                config=self._project_config,
-                parent=Config(self._user_config)
-            )
-            project_config.unref()
-            self._project_config_cache = project_config
-
-            # schema validation
-            # partial project config must be merged to get the entire schema
-            self.merge_user_and_project_configs(self.user_config, project_config)
-
-        return self._project_config_cache
-
-    def merge_user_and_project_configs(self, user_config, project_config):
+    def merge_user_and_project_configs(self, populus_config, project_config):
         if self._merged_config_cache is None:
-            merged_config = copy.deepcopy(self.user_config)
+            merged_config = copy.deepcopy(self.populus_config)
             for key, value in self.project_config.items(flatten=True):
                 if key != 'version':
                     merged_config[key] = value
@@ -189,7 +147,7 @@ class Project(object):
     @property
     def config(self):
 
-        return self.merge_user_and_project_configs(self.user_config, self.project_config)
+        return self.merge_user_and_project_configs(self.populus_config, self.project_config)
 
     @config.setter
     def config(self, value):
@@ -210,7 +168,7 @@ class Project(object):
         default_project_keys = [x[0] for x in default_config.items(flatten=True)]
 
         for key, value in items:
-            if self.user_config.get(key) == value and key not in default_project_keys:
+            if self.populus_config.get(key) == value and key not in default_project_keys:
                 self.project_config.pop(key)
 
         write_config(self.project_config, self.config_file_path)

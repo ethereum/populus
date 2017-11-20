@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+import time
 
 import click
 
@@ -11,9 +12,6 @@ from populus.utils.cli import (
     select_chain,
     deploy_contract_and_verify,
     select_project_contract,
-)
-from populus.utils.compat import (
-    sleep,
 )
 from populus.utils.deploy import (
     get_deploy_order,
@@ -82,7 +80,7 @@ def deploy(project, logger, chain_name, wait_for_sync, contracts_to_deploy):
         if wait_for_sync:
             logger.info("Waiting for chain to start syncing....")
             while chain.wait.for_syncing() and is_synced(chain.web3):
-                sleep(1)
+                time.sleep(1)
             logger.info("Chain sync complete")
 
         # Get the deploy order.

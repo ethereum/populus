@@ -37,17 +37,8 @@ setup(
         "cytoolz>=0.8.2",
         "toposort>=1.4",
         "watchdog>=0.8.3",
-        "web3>=3.7.1",
+        "web3>=3.16.2",
     ],
-    extras_require={
-        'gevent': [
-            "gevent>=1.1.2,<1.2.0",  # https://github.com/gevent/gevent/issues/916
-            "web3[gevent]>=3.7.1",
-            "eth-testrpc[gevent]>=1.3.0",
-            "py-geth[gevent]>=1.9.0",
-            "py-solc[gevent]>=1.2.0",
-        ],
-    },
     license="MIT",
     zip_safe=False,
     entry_points={

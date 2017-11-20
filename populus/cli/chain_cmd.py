@@ -1,4 +1,6 @@
 import logging
+import time
+
 import click
 
 from populus.api.utils import (
@@ -7,10 +9,6 @@ from populus.api.utils import (
 
 from populus.chain import (
     BaseGethChain,
-)
-
-from populus.utils.compat import (
-    sleep,
 )
 
 from populus.utils.geth import (
@@ -88,6 +86,6 @@ def chain_run(ctx, chain_name, mine, verbosity):
     with chain:
         try:
             while True:
-                sleep(0.2)
+                time.sleep(0.2)
         except KeyboardInterrupt:
             pass

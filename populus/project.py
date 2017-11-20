@@ -236,19 +236,6 @@ class Project(object):
         return get_compiled_contracts_asset_path(self.build_asset_dir)
 
     @property
-    def contracts_source_dir(self):
-        warnings.warn(DeprecationWarning(
-            "project.contracts_source_dir has been replaced by the plural, "
-            "project.contracts_source_dirs which is an iterable of all source "
-            "directories populus will search for contracts.  Please update your "
-            "code accordingly as this API will be removed in a future release"
-        ))
-        return self.config.get(
-            'compilation.contracts_source_dir',
-            get_contracts_source_dirs(self.project_dir),
-        )[0]
-
-    @property
     @to_tuple
     def contracts_source_dirs(self):
         source_dirs = self.config.get('compilation.contracts_source_dirs')
@@ -266,7 +253,11 @@ class Project(object):
 
     def get_all_source_file_paths(self):
         return tuple(itertools.chain(
-            get_project_source_paths(self.contracts_source_dir),
+            itertools.chain.from_iterable(
+                get_project_source_paths(source_dir)
+                for source_dir
+                in self.contracts_source_dirs
+            ),
             get_test_source_paths(self.tests_dir),
         ))
 

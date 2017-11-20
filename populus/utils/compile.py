@@ -73,25 +73,6 @@ def get_compiled_contracts_asset_path(build_asset_dir):
     return compiled_contracts_asset_path
 
 
-@to_tuple
-def find_solidity_source_files(base_dir):
-    return (
-        os.path.relpath(source_file_path)
-        for source_file_path
-        in recursive_find_files(base_dir, "*.sol")
-    )
-
-
-def get_project_source_paths(contracts_source_dir):
-    project_source_paths = find_solidity_source_files(contracts_source_dir)
-    return project_source_paths
-
-
-def get_test_source_paths(tests_dir):
-    test_source_paths = find_solidity_source_files(tests_dir)
-    return test_source_paths
-
-
 def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):
     logger = logging.getLogger('populus.compilation.write_compiled_sources')
     ensure_file_exists(compiled_contracts_asset_path)

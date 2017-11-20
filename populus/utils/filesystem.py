@@ -85,9 +85,23 @@ def is_executable_available(program):
 
 @to_tuple
 def recursive_find_files(base_dir, pattern):
+    """
+    Recursively traverse directory tree and find files matching pattern.
+
+    :param base_dir: Base directory to start crawling.
+    :param pattern: File pattern, to match again.
+                    Either string (single pattern match) or tuple (multiple patterns)
+    """
+
+    def match(filename, pattern):
+        if isinstance(pattern, tuple):
+            return any([fnmatch.fnmatch(filename, p) for p in pattern])
+        else:
+            return fnmatch.fnmatch(filename, pattern)
+
     for dirpath, _, filenames in os.walk(base_dir):
         for filename in filenames:
-            if fnmatch.fnmatch(filename, pattern):
+            if match(filename, pattern):
                 yield os.path.join(dirpath, filename)
 
 

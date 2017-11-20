@@ -48,8 +48,6 @@ from populus.utils.compile import (
     get_build_asset_dir,
     get_compiled_contracts_asset_path,
     get_contracts_source_dirs,
-    get_project_source_paths,
-    get_test_source_paths,
 )
 
 from populus.utils.filesystem import (

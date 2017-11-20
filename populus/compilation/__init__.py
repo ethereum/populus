@@ -5,8 +5,6 @@ import logging
 import os
 
 from populus.utils.compile import (
-    get_project_source_paths,
-    get_test_source_paths,
     validate_compiled_contracts,
     post_process_compiled_contracts,
 )
@@ -24,9 +22,10 @@ def _get_contract_key(contract_data):
 
 def compile_project_contracts(project):
     logger = logging.getLogger('populus.compilation.compile_project_contracts')
+    compiler_backend = project.get_compiler_backend()
 
     project_contract_source_paths = tuple(itertools.chain.from_iterable(
-        get_project_source_paths(source_dir)
+        compiler_backend.get_project_source_paths(source_dir)
         for source_dir
         in project.contracts_source_dirs
     ))
@@ -36,7 +35,7 @@ def compile_project_contracts(project):
         ", ".join(project_contract_source_paths),
     )
 
-    test_contract_source_paths = get_test_source_paths(project.tests_dir)
+    test_contract_source_paths = compiler_backend.get_test_source_paths(project.tests_dir)
     logger.debug(
         "Found %s test source files: %s",
         len(test_contract_source_paths),
@@ -48,7 +47,6 @@ def compile_project_contracts(project):
         test_contract_source_paths,
     ))
 
-    compiler_backend = project.get_compiler_backend()
     base_compiled_contracts = compiler_backend.get_compiled_contracts(
         source_file_paths=all_source_paths,
         import_remappings=project.config.get('compilation.import_remappings'),

@@ -263,9 +263,10 @@ class Project(object):
     _cached_compiled_contracts = None
 
     def get_all_source_file_paths(self):
+        compiler_backend = self.get_compiler_backend()
         return tuple(itertools.chain(
-            get_project_source_paths(self.contracts_source_dir),
-            get_test_source_paths(self.tests_dir),
+            compiler_backend.get_project_source_paths(self.contracts_source_dir),
+            compiler_backend.get_test_source_paths(self.tests_dir),
         ))
 
     def is_compiled_contract_cache_stale(self):

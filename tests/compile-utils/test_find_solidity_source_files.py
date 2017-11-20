@@ -2,9 +2,6 @@ import itertools
 import os
 
 from populus import Project
-from populus.utils.compile import (
-    find_solidity_source_files,
-)
 from populus.utils.filesystem import (
     is_same_path,
 )
@@ -12,8 +9,9 @@ from populus.utils.filesystem import (
 
 def test_gets_correct_files_default_dir(project_dir, write_project_file):
     project = Project(project_dir, create_config_file=True)
+    compiler_backend = project.get_compiler_backend()
     file_names = tuple(itertools.chain.from_iterable(
-        find_solidity_source_files(source_dir)
+        compiler_backend.get_project_source_paths(source_dir)
         for source_dir
         in project.contracts_source_dirs
     ))

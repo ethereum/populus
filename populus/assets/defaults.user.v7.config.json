@@ -165,7 +165,11 @@
             }
           }
         }
-      }
+      },
+      "ViperBackend": {
+        "class": "populus.compilation.backends.ViperBackend",
+        "settings": {}
+      },
     },
     "backend": {
       "$ref": "compilation.backends.SolcAutoBackend"

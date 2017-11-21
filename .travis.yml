@@ -53,13 +53,13 @@ before_install:
   - if [ -n "$GETH_VERSION" ]; then mkdir -p $HOME/.ethash; fi
 install:
   # solc
-  - if [ -n "$SOLC_VERSION" ]; then travis_retry pip3 install "py-solc>=1.2.0"; fi
-  - if [ -n "$SOLC_VERSION" ]; then python3 -m solc.install $SOLC_VERSION; fi
+  - if [ -n "$SOLC_VERSION" ]; then travis_retry pip install "py-solc>=1.2.0"; fi
+  - if [ -n "$SOLC_VERSION" ]; then python -m solc.install $SOLC_VERSION; fi
   - if [ -n "$SOLC_VERSION" ]; then export SOLC_BINARY="$SOLC_BASE_INSTALL_PATH/solc-$SOLC_VERSION/bin/solc"; fi
   - if [ -n "$SOLC_VERSION" ]; then export LD_LIBRARY_PATH="$SOLC_BASE_INSTALL_PATH/solc-$SOLC_VERSION/bin"; fi
   # geth
-  - if [ -n "$GETH_VERSION" ]; then travis_retry pip3 install "py-geth>=1.9.0"; fi
-  - if [ -n "$GETH_VERSION" ]; then python3 -m geth.install $GETH_VERSION; fi
+  - if [ -n "$GETH_VERSION" ]; then travis_retry pip install "py-geth>=1.9.0"; fi
+  - if [ -n "$GETH_VERSION" ]; then python -m geth.install $GETH_VERSION; fi
   - if [ -n "$GETH_VERSION" ]; then export GETH_BINARY="$GETH_BASE_INSTALL_PATH/geth-$GETH_VERSION/bin/geth"; fi
   # package
   - travis_retry pip install setuptools --upgrade

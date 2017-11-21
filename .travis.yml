@@ -9,37 +9,38 @@ env:
     - GOROOT=/usr/lib/go-1.7
     - PYTEST_ADDOPTS="-n 2"
 matrix:
-  # Solc 0.4.8
-  - python: "2.7"
-    env: SOLC_VERSION=v0.4.8 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
-  - python: "3.4"
-    env: SOLC_VERSION=v0.4.8 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
-  - python: "3.5"
-    env: SOLC_VERSION=v0.4.8 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
-  # Solc 0.4.11
-  - python: "2.7"
-    env: SOLC_VERSION=v0.4.11 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
-  - python: "3.4"
-    env: SOLC_VERSION=v0.4.11 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
-  - python: "3.5"
-    env: SOLC_VERSION=v0.4.11 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
-  # Solc 0.4.12
-  - python: "2.7"
-    env: SOLC_VERSION=v0.4.12 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
-  - python: "3.4"
-    env: SOLC_VERSION=v0.4.12 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
-  - python: "3.5"
-    env: SOLC_VERSION=v0.4.12 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
-  # Solc 0.4.13
-  - python: "2.7"
-    env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
-  - python: "3.4"
-    env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
-  - python: "3.5"
-    env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
-  # Linting
-  - python: "3.5"
-    env: TOX_POSARGS="-e flake8"
+  include:
+    # Solc 0.4.8
+    - python: "2.7"
+      env: SOLC_VERSION=v0.4.8 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
+    - python: "3.4"
+      env: SOLC_VERSION=v0.4.8 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
+    - python: "3.5"
+      env: SOLC_VERSION=v0.4.8 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    # Solc 0.4.11
+    - python: "2.7"
+      env: SOLC_VERSION=v0.4.11 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
+    - python: "3.4"
+      env: SOLC_VERSION=v0.4.11 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
+    - python: "3.5"
+      env: SOLC_VERSION=v0.4.11 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    # Solc 0.4.12
+    - python: "2.7"
+      env: SOLC_VERSION=v0.4.12 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
+    - python: "3.4"
+      env: SOLC_VERSION=v0.4.12 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
+    - python: "3.5"
+      env: SOLC_VERSION=v0.4.12 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    # Solc 0.4.13
+    - python: "2.7"
+      env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
+    - python: "3.4"
+      env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
+    - python: "3.5"
+      env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    # Linting
+    - python: "3.5"
+      env: TOX_POSARGS="-e flake8"
 cache:
   - pip: true
   - directories:

@@ -1,7 +1,7 @@
 import random
+import socket
 
-from .compat import (
-    socket,
+from .wait import (
     Timeout,
 )
 

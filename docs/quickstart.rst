@@ -361,7 +361,6 @@ except for ``solc``:
 
     $ pip install -r requirements-dev.txt
     $ pip install -r requirements-docs.txt
-    $ pip install -r requirements-gevent.txt
     $ pip install -e .
 
 Install Solidity

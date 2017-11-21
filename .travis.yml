@@ -1,6 +1,4 @@
 language: python
-python:
-  - "3.5"
 dist: trusty
 sudo: required
 env:
@@ -9,18 +7,40 @@ env:
     - GETH_BASE_INSTALL_PATH=$TRAVIS_BUILD_DIR
     - CHAIN_SYNC_BLOCK_DELTA=100
     - GOROOT=/usr/lib/go-1.7
-    - PYTEST_ADDOPTS="-n 3"
-  matrix:
+    - PYTEST_ADDOPTS="-n 2"
+matrix:
+  include:
     # Solc 0.4.8
-    - SOLC_VERSION=v0.4.8 TOX_POSARGS="-e py27-stdlib -e py27-gevent -e py34-stdlib -e py34-gevent -e py35-stdlib -e py35-gevent" GETH_VERSION=v1.6.6
+    - python: "2.7"
+      env: SOLC_VERSION=v0.4.8 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
+    - python: "3.4"
+      env: SOLC_VERSION=v0.4.8 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
+    - python: "3.5"
+      env: SOLC_VERSION=v0.4.8 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
     # Solc 0.4.11
-    - SOLC_VERSION=v0.4.11 TOX_POSARGS="-e py27-stdlib -e py27-gevent -e py34-stdlib -e py34-gevent -e py35-stdlib -e py35-gevent" GETH_VERSION=v1.6.6
+    - python: "2.7"
+      env: SOLC_VERSION=v0.4.11 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
+    - python: "3.4"
+      env: SOLC_VERSION=v0.4.11 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
+    - python: "3.5"
+      env: SOLC_VERSION=v0.4.11 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
     # Solc 0.4.12
-    - SOLC_VERSION=v0.4.12 TOX_POSARGS="-e py27-stdlib -e py27-gevent -e py34-stdlib -e py34-gevent -e py35-stdlib -e py35-gevent" GETH_VERSION=v1.6.6
+    - python: "2.7"
+      env: SOLC_VERSION=v0.4.12 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
+    - python: "3.4"
+      env: SOLC_VERSION=v0.4.12 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
+    - python: "3.5"
+      env: SOLC_VERSION=v0.4.12 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
     # Solc 0.4.13
-    - SOLC_VERSION=v0.4.13 TOX_POSARGS="-e py27-stdlib -e py27-gevent -e py34-stdlib -e py34-gevent -e py35-stdlib -e py35-gevent" GETH_VERSION=v1.6.6
+    - python: "2.7"
+      env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py27"
+    - python: "3.4"
+      env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
+    - python: "3.5"
+      env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
     # Linting
-    - TOX_POSARGS="-e flake8"
+    - python: "3.5"
+      env: TOX_POSARGS="-e flake8"
 cache:
   - pip: true
   - directories:
@@ -33,13 +53,13 @@ before_install:
   - if [ -n "$GETH_VERSION" ]; then mkdir -p $HOME/.ethash; fi
 install:
   # solc
-  - if [ -n "$SOLC_VERSION" ]; then travis_retry pip3 install "py-solc>=1.2.0"; fi
-  - if [ -n "$SOLC_VERSION" ]; then python3 -m solc.install $SOLC_VERSION; fi
+  - if [ -n "$SOLC_VERSION" ]; then travis_retry pip install "py-solc>=1.2.0"; fi
+  - if [ -n "$SOLC_VERSION" ]; then python -m solc.install $SOLC_VERSION; fi
   - if [ -n "$SOLC_VERSION" ]; then export SOLC_BINARY="$SOLC_BASE_INSTALL_PATH/solc-$SOLC_VERSION/bin/solc"; fi
   - if [ -n "$SOLC_VERSION" ]; then export LD_LIBRARY_PATH="$SOLC_BASE_INSTALL_PATH/solc-$SOLC_VERSION/bin"; fi
   # geth
-  - if [ -n "$GETH_VERSION" ]; then travis_retry pip3 install "py-geth>=1.9.0"; fi
-  - if [ -n "$GETH_VERSION" ]; then python3 -m geth.install $GETH_VERSION; fi
+  - if [ -n "$GETH_VERSION" ]; then travis_retry pip install "py-geth>=1.9.0"; fi
+  - if [ -n "$GETH_VERSION" ]; then python -m geth.install $GETH_VERSION; fi
   - if [ -n "$GETH_VERSION" ]; then export GETH_BINARY="$GETH_BASE_INSTALL_PATH/geth-$GETH_VERSION/bin/geth"; fi
   # package
   - travis_retry pip install setuptools --upgrade

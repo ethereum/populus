@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import gevent_monkeypatch  # noqa: F401
-
 import os
 
 import pytest
@@ -37,6 +35,9 @@ from populus.utils.contracts import (
 
 from populus.config.defaults import (
     load_user_default_config,
+)
+from populus.utils.wait import (
+    Timeout,
 )
 
 from populus.config.base import (
@@ -192,10 +193,6 @@ def user_config_defaults():
 
 @pytest.fixture()
 def wait_for_unlock():
-    from populus.utils.compat import (
-        Timeout,
-    )
-
     def _wait_for_unlock(web3):
         with Timeout(5) as timeout:
             while True:

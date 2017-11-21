@@ -2,8 +2,8 @@ from __future__ import absolute_import
 
 import copy
 
-from populus.config.defaults import (
-    load_default_config,
+from populus.config.helpers import (
+    load_default_legacy_config,
 )
 
 from populus.config.validation import (
@@ -34,8 +34,8 @@ def upgrade_v6_to_v7(v6_config):
             )
         )
 
-    v6_default = load_default_config(version=V6)
-    v7_default = load_default_config(version=V7)
+    v6_default = load_default_legacy_config(version=V6)
+    v7_default = load_default_legacy_config(version=V7)
 
     v6_default_config = Config(v6_default)
     v6_default_config.unref()

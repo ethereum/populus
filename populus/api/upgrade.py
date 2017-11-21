@@ -1,18 +1,14 @@
 import copy
+import logging
+
 from populus.config import (
     load_config,
     write_config,
 )
-
 from populus.config.upgrade import (
-    upgrade_config,
+    upgrade_config as _upgrade_config,
     ConfigContext,
 )
-
-from populus.project import (
-    Project,
-)
-
 from populus.config.versions import (
     LATEST_VERSION,
     LAST_NO_USER_CONFIG_VERSION,
@@ -21,18 +17,26 @@ from populus.config.versions import (
 import shutil
 
 
-def upgrade_configs(project_dir, logger, to_version=None):
-    """upgrade project and the user config file"""
+logger = logging.getLogger('populus.api.upgrade')
 
-    project = Project(project_dir=project_dir, create_config_file=True)
 
+# TODO: rename to something not so closely named as `populus.config.upgrade.upgrade_config`
+def upgrade_configs(project_dir, to_version=None):
+    """
+    Performs an upgrade on the project and populus config files to the
+    specified version (defaulting to the current latest version)
+    """
     if to_version is None:
         to_version = LATEST_VERSION
 
-    user_config = copy.deepcopy(project.user_config)
-    if int(user_config['version']) < int(LATEST_VERSION):
-        user_config = upgrade_config(user_config, ConfigContext.USER)
-        write_config(user_config, project.user_config_file_path)
+    project_config_file_path = get_project_config_file_path(project_dir)
+    # TODO: handle the config file not existing
+    config_file_is_present = check_if_proj
+    project_config = load_config(project_config_file_path)
+
+    if int(populus_config['version']) < int(LATEST_VERSION):
+        populus_config = upgrade_config(populus_config, ConfigContext.USER)
+        write_config(populus_config, project.populus_config_file_path)
 
     if project.legacy_config_path is not None:
 

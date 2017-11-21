@@ -24,7 +24,6 @@ def upgrade_cmd(ctx, to_version):
     Upgrade a project config, and if required also the user config
     Note: the user config is used in other projects as well
     """
-    logger = logging.getLogger('populus.cli.upgrade')
     project_dir = ctx.obj['PROJECT_DIR']
 
-    upgrade_configs(project_dir, logger)
+    upgrade_configs(project_dir)

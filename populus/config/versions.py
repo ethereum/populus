@@ -13,10 +13,10 @@ KNOWN_LEGACY_VERSIONS = {V1, V2, V3, V4, V5, V6}
 
 # Config versions after the creation of the populus config file at
 # ~/.populus/config
-KNOWN_POPULUS_VERSIONS = {V6, V7, V8}
+KNOWN_VERSIONS = {V6, V7, V8}
 
 # The last version prior to the populus config introduction
-LAST_NO_POPULUS_CONFIG_VERSION = V6
+LAST_LEGACY_CONFIG_VERSION = V6
 
 # The first version that the populus config was introduced.
 FIRST_POPULUS_CONFIG_VERSION = V7

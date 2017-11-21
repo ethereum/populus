@@ -8,10 +8,6 @@ from eth_utils import (
     to_tuple,
 )
 
-from populus.config.defaults import (
-    load_default_config,
-)
-
 from populus.compilation import (
     compile_project_contracts,
 )
@@ -25,7 +21,7 @@ from populus.config import (
     write_config,
 )
 
-from populus.config.defaults import (
+from populus.config.helpers import (
     get_default_populus_config_path,
 )
 
@@ -163,10 +159,12 @@ class Project(object):
             )
 
     def clean_config(self):
-
+        # TODO: figure out what to do with this method.
         items = self.project_config.items(flatten=True)
 
-        default_config = Config(load_default_config(version=self.project_config['version']))
+        default_config = Config(load_default_project_config(
+            version=self.project_config['version']
+        ))
         default_config.unref()
         default_project_keys = [x[0] for x in default_config.items(flatten=True)]
 

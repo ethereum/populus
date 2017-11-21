@@ -1,4 +1,6 @@
 import copy
+import functools
+import warnings
 
 import anyconfig
 
@@ -6,6 +8,9 @@ from eth_utils import (
     to_tuple,
 )
 
+from populus.exceptions import (
+    ValidationError,
+)
 from populus.utils.empty import (
     empty,
 )
@@ -26,12 +31,39 @@ from .validation import (
 )
 
 
+def deprecated_if_no_refs(message):
+    '''
+    Decorate a deprecated function, with info about what to use instead, like:
+
+    @deprecated_for("toBytes()")
+    def toAscii(arg):
+        ...
+    '''
+    def decorator(to_wrap):
+        @functools.wraps(to_wrap)
+        def wrapper(self, *args, **kwargs):
+            if not self.allow_refs:
+                warnings.simplefilter('always', DeprecationWarning)
+                warnings.warn(
+                    message,
+                    category=DeprecationWarning,
+                    stacklevel=2,
+                )
+                warnings.simplefilter('default', DeprecationWarning)
+            return to_wrap(self, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
 class Config(object):
     parent = None
     default_config_info = None
     _wrapped = None
+    allow_refs = None
 
-    def __init__(self, config=None, parent=None, schema=None):
+    def __init__(self, config=None, parent=None, schema=None, allow_refs=True):
+        self.allow_refs = allow_refs
+
         if config is None:
             config = get_empty_config()
         elif isinstance(config, dict) and hasattr(anyconfig, 'to_container'):
@@ -44,21 +76,45 @@ class Config(object):
         if self.schema is not None:
             self.validate()
 
+        if not self.allow_refs:
+            if self.has_references:
+                raise ValidationError(
+                    "This config object was initialized with allow_refs=False "
+                    "but the configuration contains references."
+                )
+            elif self.parent is not None:
+                raise ValidationError(
+                    "This config object was configured with a `parent`.  This "
+                    "functionality is not compatable with allow_refs=True"
+                )
+
     def validate(self):
         validate_config(self._wrapped)
 
+    #
+    # DEPRECATED $ref logic
+    #
+    @property
+    def has_references(self):
+        has_refs = any(
+            item[0].rpartition(".")[-1] == "$ref"
+            for item
+            in self.items(flatten=True)
+        )
+        return has_refs
+
+    @deprecated_if_no_refs(
+        "The `$ref` API has been deprecated and is slated for removal"
+    )
     def get_master_config(self):
         if self.parent is None:
             return self
         else:
             return self.parent.get_master_config()
 
-    def has_references(self):
-        if [item for item in self.items(flatten=True) if item[0].rpartition(".")[2]=="$ref"]:  # noqa
-            return True
-        else:
-            return False
-
+    @deprecated_if_no_refs(
+        "The `$ref` API has been deprecated and is slated for removal"
+    )
     def unref(self):
         while self.has_references():
             for key, value in self.items(flatten=True):
@@ -66,26 +122,39 @@ class Config(object):
                 if leaf_key == "$ref":
                     self[prefix] = self.get(prefix)
 
+    @deprecated_if_no_refs(
+        "The `$ref` API has been deprecated and is slated for removal"
+    )
     def resolve(self, value):
         if isinstance(value, dict):
             return resolve_config(value, self.get_master_config())
         else:
             return value
 
+    #
+    # Core config API
+    #
     def get(self, key, default=None):
         try:
             value = get_nested_key(self._wrapped, key)
         except KeyError:
             return default
-        return self.resolve(value)
+
+        if self.allow_refs:
+            return self.resolve(value)
+        else:
+            return value
 
     def get_config(self, key, config_class=None):
         if config_class is None:
             config_class = Config
         try:
-            return config_class(
-                copy.deepcopy(self.resolve(self[key])), parent=self
-            )
+            value = self.get(key)
+            if self.allow_refs:
+                return config_class(copy.deepcopy(value), parent=self)
+            else:
+                return config_class(copy.deepcopy(value))
+
         except KeyError:
             return config_class(get_empty_config(), parent=self)
 
@@ -100,7 +169,10 @@ class Config(object):
             else:
                 value = default
 
-        return self.resolve(value)
+        if self.allow_refs:
+            return self.resolve(value)
+        else:
+            return value
 
     def setdefault(self, key, value):
         try:
@@ -149,7 +221,10 @@ class Config(object):
 
     def __getitem__(self, key):
         try:
-            return self.resolve(get_nested_key(self._wrapped, key))
+            if self.allow_refs:
+                return self.resolve(get_nested_key(self._wrapped, key))
+            else:
+                return get_nested_key(self._wrapped, key)
         except KeyError:
             raise KeyError(
                 "Key '{0}' not found in {1}".format(

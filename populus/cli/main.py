@@ -38,6 +38,9 @@ def validate_logging_level(ctx, param, value):
         )
 
 
+COMMANDS_WHICH_OPERATE_ON_CONFIG = {'init', 'upgrade'}
+
+
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option(
     '--project',
@@ -68,8 +71,9 @@ def main(ctx, project_dir, logging_level):
     ctx.obj = {}
     ctx.obj['PROJECT_DIR'] = project_dir
 
-    if ctx.invoked_subcommand not in ('init', 'upgrade'):
-
+    # we only do this initialization if the command they are running is not one
+    # of the few that operates on the config file itself.
+    if ctx.invoked_subcommand not in COMMANDS_WHICH_OPERATE_ON_CONFIG:
         project = Project(project_dir)
 
         config_version = project.config['version']
@@ -79,7 +83,7 @@ def main(ctx, project_dir, logging_level):
             old_config_version_msg = (
                 "================ warning =================\n"
                 "Your populus config file is current at version {0}. "
-                "The latest version is {1}.  You can use the `populus config "
+                "The latest version is {1}.  You can use the `populus "
                 "upgrade` command to upgrade your config file to the latest version\n"
                 "================ warning =================\n\n".format(
                     config_version,

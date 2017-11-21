@@ -10,13 +10,27 @@ import shutil
 import itertools
 
 from populus import Project
+from populus.config.base import (
+    Config,
+)
+from populus.config.helpers import (
+    get_default_populus_config_path,
+    get_default_project_config_path,
+    get_populus_config_file_path,
+    get_project_config_file_path,
+    load_default_populus_config,
+)
 
-from populus.utils.chains import (
-    get_base_blockchain_storage_dir,
+from populus.config.loading import (
+    load_config,
+    write_config,
+)
+
+from populus.config.versions import (
+    LATEST_VERSION,
 )
 from populus.utils.compile import (
     get_contracts_source_dirs,
-    get_build_asset_dir,
 )
 from populus.utils.filesystem import (
     ensure_path_exists,
@@ -26,36 +40,66 @@ from populus.utils.testing import (
     get_tests_dir,
     link_bytecode_by_name,
 )
-
 from populus.utils.json import (
     normalize_object_for_json,
 )
-
 from populus.utils.contracts import (
     package_contracts,
 )
-
-from populus.config.defaults import (
-    load_populus_default_config,
+from populus.utils.mappings import (
+    set_nested_key,
+    delete_nested_key,
 )
 
-from populus.config.base import (
-    Config,
-)
-
-from populus.config.helpers import (
-    get_populus_config_file_path,
-)
-
-from populus.config.defaults import (
-    get_user_default_config_path,
-)
-
-from populus.config.versions import (
-    LATEST_VERSION,
-)
 
 POPULUS_SOURCE_ROOT = os.path.dirname(__file__)
+
+
+@pytest.fixture()
+def populus_config_dir(tmpdir, monkeypatch):
+    """
+    Since populus uses the user's $HOME directory to house the populus config, we want to be sure that our tests are not using any configuration that's been written there.
+    """
+    _populus_config_dir = str(tmpdir.mkdir("populus-config"))
+    monkeypatch.setenv('POPULUS_DIR', _populus_config_dir)
+    return _populus_config_dir
+
+
+@pytest.fixture()
+def populus_config_path(populus_config_dir, request):
+    if hasattr(request.function, '_populus_config_version'):
+        config_version = getattr(request.function, '_populus_config_version')
+    elif hasattr(request.module, '_populus_config_version'):
+        config_version = getattr(request.module, '_populus_config_version')
+    else:
+        config_version = None
+
+    config_file_path = get_populus_config_file_path()
+    defaults_file_path = get_default_populus_config_path(config_version)
+
+    populus_config = load_config(defaults_file_path)
+
+    key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])
+    key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
+
+    key_value_pairs = tuple(itertools.chain(
+        key_value_pairs_from_module,
+        key_value_pairs_from_fn,
+    ))
+
+    for key, value in key_value_pairs:
+        if value is None:
+            delete_nested_key(populus_config, key)
+        else:
+            set_nested_key(populus_config, key, value)
+
+    if key_value_pairs or config_version is not None:
+        write_config(populus_config, config_file_path)
+        return config_file_path
+    else:
+        # Since we have no custom configuration we can just let populus
+        # fallback to the default latest version of the populus config.
+        return None
 
 
 @pytest.fixture()
@@ -68,12 +112,6 @@ def temporary_dir(tmpdir):
 def project_dir(tmpdir, monkeypatch):
     _project_dir = str(tmpdir.mkdir("project-dir"))
 
-    # setup project directories
-    for source_dir in get_contracts_source_dirs(_project_dir):
-        ensure_path_exists(source_dir)
-    ensure_path_exists(get_build_asset_dir(_project_dir))
-    ensure_path_exists(get_base_blockchain_storage_dir(_project_dir))
-
     monkeypatch.chdir(_project_dir)
     monkeypatch.syspath_prepend(_project_dir)
 
@@ -81,34 +119,22 @@ def project_dir(tmpdir, monkeypatch):
 
 
 @pytest.fixture()
-def populus_config_path(tmpdir, request):
+def project_config_path(project_dir, request):
+    if hasattr(request.function, '_project_config_version'):
+        config_version = getattr(request.function, '_project_config_version')
+    elif hasattr(request.module, '_project_config_version'):
+        config_version = getattr(request.module, '_project_config_version')
+    else:
+        config_version = LATEST_VERSION
 
-    version = getattr(request.function, '_populus_config_version', LATEST_VERSION)
-    tmp_populus_config_path = tmpdir.join(os.path.basename(get_populus_config_file_path())).strpath
-    user_defaults_path = get_user_default_config_path(version)
-    shutil.copyfile(user_defaults_path, tmp_populus_config_path)
+    config_file_path = get_project_config_file_path(project_dir)
+    defaults_file_path = get_default_project_config_path(config_version)
 
-    return tmp_populus_config_path
+    project_config = load_config(defaults_file_path)
 
-
-CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
-CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
-
-
-@pytest.fixture()
-def project(request, project_dir, populus_config_path):
-
-    contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
-    mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
-
-    project = Project(
-        project_dir=project_dir,
-        populus_config_file_path=populus_config_path,
-        create_config_file=True
-    )
-
-    key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])
-    key_value_pairs_from_module = getattr(request.module, '_populus_config_key_value_pairs', [])
+    # setup any module or test specific configuration
+    key_value_pairs_from_fn = getattr(request.function, '_project_config_key_value_pairs', [])
+    key_value_pairs_from_module = getattr(request.module, '_project_config_key_value_pairs', [])
 
     key_value_pairs = tuple(itertools.chain(
         key_value_pairs_from_module,
@@ -117,10 +143,32 @@ def project(request, project_dir, populus_config_path):
 
     for key, value in key_value_pairs:
         if value is None:
-            del project.config[key]
+            delete_nested_key(project_config, key)
         else:
-            project.config[key] = value
+            set_nested_key(project_config, key, value)
 
+    # write the project config to disk
+    write_config(project_config, config_file_path)
+
+    return config_file_path
+
+
+CACHE_KEY_MTIME = "populus/project/compiled_contracts_mtime"
+CACHE_KEY_CONTRACTS = "populus/project/compiled_contracts"
+
+
+@pytest.fixture()
+def project(request, project_dir, project_config_path, populus_config_path):
+    contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
+    mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
+
+    project = Project(
+        project_dir=project_dir,
+        populus_config_file_path=populus_config_path,
+    )
+
+    # TODO: is this still necessary?  Seems like we set the cache *every* run
+    # which is a lot of overhead.
     project.fill_contracts_cache(contracts, mtime)
     request.config.cache.set(
         CACHE_KEY_CONTRACTS,
@@ -182,8 +230,7 @@ def write_project_file(project_dir):
 
 @pytest.fixture
 def populus_config_defaults():
-
-    return Config(load_populus_default_config())
+    return Config(load_default_populus_config())
 
 
 @pytest.fixture()

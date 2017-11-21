@@ -14,7 +14,7 @@ from populus.utils.json import (
 )
 
 from populus.config.helpers import (
-    get_json_config_file_path,
+    get_populus_config_file_path,
 )
 
 
@@ -52,7 +52,7 @@ def project(request, pytestconfig):
         default=pytestconfig.args[0]
     )
 
-    if not os.path.exists(get_json_config_file_path(project_dir)):
+    if not os.path.exists(get_populus_config_file_path(project_dir)):
         raise FileNotFoundError(
             "No populus project found for testing in {project_dir}".format(
                 project_dir=project_dir

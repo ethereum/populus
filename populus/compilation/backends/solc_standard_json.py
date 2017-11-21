@@ -90,7 +90,7 @@ def normalize_compilation_result(compilation_result):
 
 class SolcStandardJSONBackend(BaseCompilerBackend):
     project_source_extensions = ('*.sol', )
-    test_source_extensions = ('*.sol', )
+    test_source_extensions = ('Test*.sol', )
 
     def __init__(self, *args, **kwargs):
         if get_solc_version() not in Spec('>=0.4.11'):

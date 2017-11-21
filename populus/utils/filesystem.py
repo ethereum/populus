@@ -105,24 +105,6 @@ def recursive_find_files(base_dir, pattern):
                 yield os.path.join(dirpath, filename)
 
 
-@to_tuple
-def find_solidity_source_files(base_dir):
-    return (
-        os.path.relpath(source_file_path)
-        for source_file_path
-        in recursive_find_files(base_dir, "*.sol")
-    )
-
-
-@to_tuple
-def find_solidity_test_files(base_dir):
-    return (
-        os.path.relpath(source_file_path)
-        for source_file_path
-        in recursive_find_files(base_dir, "Test*.sol")
-    )
-
-
 @contextlib.contextmanager
 def tempdir(*args, **kwargs):
     directory = _tempfile.mkdtemp(*args, **kwargs)

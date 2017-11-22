@@ -44,7 +44,6 @@
         "chain": {"$ref": "#/definitions/ChainClassConfig"},
         "web3": {
           "anyOf": [
-            {"$ref": "#/definitions/NameReference"},
             {"$ref": "#/definitions/Web3Config"}
           ]
         }
@@ -63,7 +62,6 @@
         },
         "backend": {
           "anyOf": [
-            {"$ref": "#/definitions/NameReference"},
             {"$ref": "#/definitions/CompilerBackendConfig"}
           ]
         },
@@ -173,10 +171,6 @@
           "type": "object"
         }
       }
-    },
-    "NameReference": {
-      "title": "A named reference to an existing configuration elsewhere in the config file",
-      "type": "string"
     },
     "SolcCompilerSettings": {
       "title": "Settings for the solc command line compiler",

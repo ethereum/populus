@@ -16,9 +16,6 @@ from eth_utils import (
 from .base import (
     BaseCompilerBackend,
 )
-from .solc_combined_json import (
-    SolcCombinedJSONBackend,
-)
 from .solc_standard_json import (
     SolcStandardJSONBackend,
 )
@@ -28,14 +25,12 @@ def get_solc_backend_class_for_version(solc_version):
     if is_string(solc_version):
         solc_version = Version(solc_version)
 
-    if solc_version in Spec('<=0.4.8'):
-        return SolcCombinedJSONBackend
-    elif solc_version in Spec('>=0.4.11'):
+    if solc_version in Spec('>=0.4.11'):
         return SolcStandardJSONBackend
     else:
         raise OSError(
             "The installed solc compiler is not supported.  Supported versions "
-            "of the solc compiler are <=0.4.8 and >=0.4.11"
+            "of the solc compiler are >=0.4.11"
         )
 
 

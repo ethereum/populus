@@ -129,6 +129,9 @@ def post_process_compiled_contracts(compiled_contracts):
 
 
 class SolcCombinedJSONBackend(BaseCompilerBackend):
+    project_source_glob = ('*.sol', )
+    test_source_glob = ('Test*.sol', )
+
     def __init__(self, *args, **kwargs):
         if get_solc_version() not in Spec('<=0.4.8'):
             raise OSError(

@@ -9,6 +9,10 @@ from populus.utils.filesystem import (
 
 def test_gets_correct_files_default_dir(project_dir, write_project_file):
     project = Project(project_dir, create_config_file=True)
+    project.config['compilation']['backend'] = {
+        'class': 'populus.compilation.backends.ViperBackend',
+    }
+
     compiler_backend = project.get_compiler_backend()
     file_names = tuple(itertools.chain.from_iterable(
         compiler_backend.get_project_source_paths(source_dir)
@@ -17,14 +21,15 @@ def test_gets_correct_files_default_dir(project_dir, write_project_file):
     ))
 
     should_match = {
-        'contracts/SolidityContract.sol',
-        'contracts/AnotherFile.sol',
+        'contracts/SolidityContract.v.py',
+        'contracts/AnotherFile.vy',
     }
 
     should_not_match = {
-        'contracts/BackedUpContract.sol.bak',
-        'contracts/Swapfile.sol.swp',
-        'contracts/not-contract.txt',
+        'contracts/Swapfile.v.py.swp',
+        'contracts/Swapfile.v.py.txt',
+        'contracts/BackedUpContract.vy.bak',
+        'contracts/not-contract.vy.txt',
     }
 
     for filename in should_match:

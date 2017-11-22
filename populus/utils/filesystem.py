@@ -85,28 +85,29 @@ def is_executable_available(program):
 
 @to_tuple
 def recursive_find_files(base_dir, pattern):
+    """
+    Recursively traverse directory tree and find files matching pattern.
+
+    :param base_dir: Base directory to start crawling.
+    :param pattern: File pattern, to match again.
+                    Either string (single pattern match) or tuple (multiple patterns)
+    """
+
+    def match(filename, pattern):
+        if is_list_like(pattern):
+            return any([fnmatch.fnmatch(filename, p) for p in pattern])
+        elif is_string(pattern):
+            return fnmatch.fnmatch(filename, pattern)
+        else:
+            raise TypeError(
+                "Pattern must either be a string pattern or a list of patterns." +
+                "  Got {0}".format(pattern)
+            )
+
     for dirpath, _, filenames in os.walk(base_dir):
         for filename in filenames:
-            if fnmatch.fnmatch(filename, pattern):
+            if match(filename, pattern):
                 yield os.path.join(dirpath, filename)
-
-
-@to_tuple
-def find_solidity_source_files(base_dir):
-    return (
-        os.path.relpath(source_file_path)
-        for source_file_path
-        in recursive_find_files(base_dir, "*.sol")
-    )
-
-
-@to_tuple
-def find_solidity_test_files(base_dir):
-    return (
-        os.path.relpath(source_file_path)
-        for source_file_path
-        in recursive_find_files(base_dir, "Test*.sol")
-    )
 
 
 @contextlib.contextmanager

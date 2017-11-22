@@ -40,6 +40,9 @@ def get_solc_backend_class_for_version(solc_version):
 
 
 class SolcAutoBackend(BaseCompilerBackend):
+    project_source_glob = ('*.sol', )
+    test_source_glob = ('Test*.sol', )
+
     def __init__(self, settings):
         proxy_backend_class = get_solc_backend_class_for_version(get_solc_version())
         self.proxy_backend = proxy_backend_class(settings)

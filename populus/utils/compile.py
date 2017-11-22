@@ -36,7 +36,6 @@ from .deploy import (
     compute_deploy_order,
 )
 from .filesystem import (
-    find_solidity_source_files,
     ensure_file_exists,
 )
 from .json import (
@@ -71,16 +70,6 @@ def get_compiled_contracts_asset_path(build_asset_dir):
         COMPILED_CONTRACTS_ASSET_FILENAME,
     )
     return compiled_contracts_asset_path
-
-
-def get_project_source_paths(contracts_source_dir):
-    project_source_paths = find_solidity_source_files(contracts_source_dir)
-    return project_source_paths
-
-
-def get_test_source_paths(tests_dir):
-    test_source_paths = find_solidity_source_files(tests_dir)
-    return test_source_paths
 
 
 def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):

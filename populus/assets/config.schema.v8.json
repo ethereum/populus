@@ -8,17 +8,14 @@
       "type": "string",
       "enum": ["8"]
     },
-    "chains": {
-      "$ref": "#/definitions/ProjectChainsConfig"
+    "environments": {
+      "$ref": "#/definitions/Environments"
     },
     "compilation": {
-      "$ref": "#/definitions/CompilationConfig"
+      "$ref": "#/definitions/Compilations"
     },
-    "contracts": {
-      "$ref": "#/definitions/ContractsConfig"
-    },
-    "web3": {
-      "$ref": "#/definitions/ProjectWeb3Config"
+    "testing": {
+      "$ref": "#/definitions/Tests"
     }
   },
   "definitions": {
@@ -65,21 +62,21 @@
             {"$ref": "#/definitions/CompilerBackendConfig"}
           ]
         },
-        "backends": {
-          "title": "The compiler backends used by this project",
-          "additionalProperties": false,
-          "patternProperties": {
-            "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
-              "$ref": "#/definitions/CompilerBackendConfig"
-            }
-          }
-        },
         "import_remappings": {
           "title": "Import remappings that should be passed into the compiler",
           "type": "array",
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "Compilations": {
+      "title": "The configurations for compilation.",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+          "$ref": "#/definitions/CompilationConfig"
         }
       }
     },
@@ -101,11 +98,9 @@
       "properties": {
         "backends": {
           "title": "The contract backends used by this project",
-          "additionalProperties": false,
-          "patternProperties": {
-            "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
-              "$ref": "#/definitions/ContractBackendConfig"
-            }
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContractBackendConfig"
           }
         }
       }
@@ -113,18 +108,34 @@
     "ContractBackendConfig": {
       "title": "Configuration for a contract backend",
       "type": "object",
-      "required": ["class", "priority"],
+      "required": ["class"],
       "properties": {
         "class": {
           "$ref": "#/definitions/PythonImportPath"
         },
-        "priority": {
-          "title": "The priority of this backend",
-          "type": "integer"
-        },
         "settings": {
           "title": "Backend specific settings",
           "type": "object"
+        }
+      }
+    },
+    "EnvironmentConfig": {
+      "connections": {
+        "title": "The ways that populus can connect to this environment",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+            "$ref": "#/definitions/Web3Config"
+          }
+        }
+      }
+    },
+    "Environments": {
+      "title": "The environments that populus can interact with",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
+          "$ref": "#/definitions/EnvironmentConfig"
         }
       }
     },
@@ -138,39 +149,10 @@
       "type": "string",
       "pattern": "^[a-zA-Z][_a-zA-Z0-9]*(?:\\.[a-zA-Z][_a-zA-Z0-9]*)*$"
     },
-    "ProjectChainsConfig": {
-      "title": "The configuration for each chain declared by this project",
-      "type": "object",
-      "additionalProperties": false,
-      "patternProperties": {
-        "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
-          "$ref": "#/definitions/ChainConfig"
-        }
-      }
+    "TestConfig": {
+      "web3": TODOTODO
     },
-    "ProjectWeb3Config": {
-      "title": "Project level web3 configurations",
-      "type": "object",
-      "additionalProperties": false,
-      "patternProperties": {
-        "^[a-zA-Z0-9][-_a-zA-Z0-9]*$": {
-          "$ref": "#/definitions/Web3Config"
-        }
-      }
-    },
-    "ProviderConfig": {
-      "title": "Configuration for the provider of a web3 instance",
-      "type": "object",
-      "required": ["class"],
-      "properties": {
-        "class": {
-          "$ref": "#/definitions/PythonImportPath"
-        },
-        "settings": {
-          "title": "Provider specific settings",
-          "type": "object"
-        }
-      }
+    "Tests": {
     },
     "SolcCompilerSettings": {
       "title": "Settings for the solc command line compiler",
@@ -193,7 +175,7 @@
       "type": "object",
       "properties": {
         "provider": {
-          "$ref": "#/definitions/ProviderConfig"
+          "$ref": "#/definitions/Web3ProviderConfig"
         },
         "eth": {
           "$ref": "#/definitions/Web3EthConfig"
@@ -206,6 +188,20 @@
       "properties": {
         "default_account": {
           "$ref": "#/definitions/EthereumAddress"
+        }
+      }
+    },
+    "Web3ProviderConfig": {
+      "title": "Configuration for the provider of a web3 instance",
+      "type": "object",
+      "required": ["class"],
+      "properties": {
+        "class": {
+          "$ref": "#/definitions/PythonImportPath"
+        },
+        "settings": {
+          "title": "Provider specific settings",
+          "type": "object"
         }
       }
     }

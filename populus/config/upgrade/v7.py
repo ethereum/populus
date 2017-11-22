@@ -86,7 +86,11 @@ def upgrade_v7_to_v8(v7_project_config, v7_populus_config):
 
     v7_default_project = load_default_project_config(version=V7)
     v8_default_project = load_default_populus_config(version=V8)
-    _perform_v7_to_v8_upgrade(v7_project_config, v7_default_project, v8_default_project)
+
+    if v7_project_config == v7_default_project:
+        return v8_default_project
+    else:
+        _perform_v7_to_v8_upgrade(v7_project_config, v7_default_project, v8_default_project)
 
 
 def _is_ref(value):

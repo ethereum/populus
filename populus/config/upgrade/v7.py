@@ -60,6 +60,11 @@ REF_KEYS = (
 )
 
 
+REMOVED_KEYS = {
+    "compilation.backends.SolcCombinedJSON",
+}
+
+
 def upgrade_v7_to_v8(v7_project_config, v7_populus_config):
     v7_default_populus = load_default_populus_config(version=V7)
     v8_default_populus = load_default_populus_config(version=V8)
@@ -77,11 +82,11 @@ def upgrade_v7_to_v8(v7_project_config, v7_populus_config):
         shutil.copy(populus_config_file_path, backup_file_path)
         os.remove(populus_config_file_path)
     else:
-        _upgrade_v7_to_v8(v7_populus_config, v7_default_populus, v8_default_populus)
+        _perform_v7_to_v8_upgrade(v7_populus_config, v7_default_populus, v8_default_populus)
 
     v7_default_project = load_default_project_config(version=V7)
     v8_default_project = load_default_populus_config(version=V8)
-    _upgrade_v7_to_v8(v7_project_config, v7_default_project, v8_default_project)
+    _perform_v7_to_v8_upgrade(v7_project_config, v7_default_project, v8_default_project)
 
 
 def _is_ref(value):
@@ -100,7 +105,7 @@ def _is_ref(value):
     return True
 
 
-def _upgrade_v7_to_v8(v7_config, v7_default, v8_default):
+def _perform_v7_to_v8_upgrade(v7_config, v7_default, v8_default):
     """
     Upgrade a v7 config file to a v8 config file.
     """
@@ -127,7 +132,6 @@ def _upgrade_v7_to_v8(v7_config, v7_default, v8_default):
         )
         shutil.copy(populus_config_file_path, backup_file_path)
         os.remove(populus_config_file_path)
-        return None
         return v8_default_config
 
     # V8 just moved to user config, no change in keys
@@ -135,20 +139,22 @@ def _upgrade_v7_to_v8(v7_config, v7_default, v8_default):
     upgraded_v7_config['version'] = V8
 
     for key in REF_KEYS:
-        default_value = get_nested_key(v7_default_config)
+        default_v8_value = get_nested_key(v7_default_config)
 
         if not has_nested_key(v7_config, key):
-            set_nested_key(upgraded_v7_config, key, default_value)
+            set_nested_key(upgraded_v7_config, key, default_v8_value)
             continue
 
         current_value = get_nested_key(v7_config, key)
 
-        if current_value == default_value:
-            set_nested_key(upgraded_v7_config, key, default_value)
+        if current_value == default_v8_value:
+            set_nested_key(upgraded_v7_config, key, default_v8_value)
         elif _is_ref(current_value):
             ref_value = current_value['$ref']
 
             if has_nested_key(v7_config, ref_value):
+                # If it is a reference **and** the reference exists, replace it
+                # with referenced value.
                 resolved_ref_value = get_nested_key(v7_config, ref_value)
                 set_nested_key(upgraded_v7_config, key, resolved_ref_value)
             else:
@@ -158,7 +164,7 @@ def _upgrade_v7_to_v8(v7_config, v7_default, v8_default):
                     "path {1}".format(key, ref_value)
                 )
         else:
-            # this case just leaves the key the same as it's currently set.
+            # If it's not the default and it's not a reference,
             pass
             set_nested_key(upgraded_v7_config, key, current_value)
 

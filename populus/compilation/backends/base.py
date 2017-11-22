@@ -14,8 +14,8 @@ from populus.utils.filesystem import (
 
 class BaseCompilerBackend(object):
     compiler_settings = None
-    project_source_extensions = None
-    test_source_extensions = None
+    project_source_glob = None
+    test_source_glob = None
 
     def __init__(self, settings):
         self.compiler_settings = settings
@@ -25,15 +25,17 @@ class BaseCompilerBackend(object):
         raise NotImplementedError("Must be implemented by subclasses")
 
     @to_tuple
-    def _find_source_files(self, base_dir, extensions):
+    def get_project_source_paths(self, contracts_source_dir):
         return (
             os.path.relpath(source_file_path)
             for source_file_path
-            in recursive_find_files(base_dir, extensions)
+            in recursive_find_files(contracts_source_dir, self.project_source_glob)
         )
 
-    def get_project_source_paths(self, contracts_source_dir):
-        return self._find_source_files(contracts_source_dir, self.project_source_extensions)
-
+    @to_tuple
     def get_test_source_paths(self, tests_dir):
-        return self._find_source_files(tests_dir, self.test_source_extensions)
+        return (
+            os.path.relpath(source_file_path)
+            for source_file_path
+            in recursive_find_files(tests_dir, self.test_source_glob)
+        )

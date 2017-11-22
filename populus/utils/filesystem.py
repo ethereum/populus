@@ -94,10 +94,15 @@ def recursive_find_files(base_dir, pattern):
     """
 
     def match(filename, pattern):
-        if isinstance(pattern, tuple):
+        if is_list_like(pattern):
             return any([fnmatch.fnmatch(filename, p) for p in pattern])
-        else:
+        elif is_string(pattern):
             return fnmatch.fnmatch(filename, pattern)
+        else:
+            raise TypeError(
+                "Pattern must either be a string pattern or a list of patterns." +
+                "  Got {0}".format(pattern)
+            )
 
     for dirpath, _, filenames in os.walk(base_dir):
         for filename in filenames:

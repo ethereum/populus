@@ -6,7 +6,7 @@ from populus.config import (
     write_config,
 )
 from populus.config.upgrade import (
-    upgrade_config as _upgrade_config,
+    upgrade_config,
     ConfigContext,
 )
 from populus.config.versions import (
@@ -20,8 +20,7 @@ import shutil
 logger = logging.getLogger('populus.api.upgrade')
 
 
-# TODO: rename to something not so closely named as `populus.config.upgrade.upgrade_config`
-def upgrade_configs(project_dir, to_version=None):
+def do_config_upgrade(project_dir, to_version=None):
     """
     Performs an upgrade on the project and populus config files to the
     specified version (defaulting to the current latest version)

@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import itertools
 import logging
+import time
 
 import click
 
@@ -12,19 +13,17 @@ from populus.compilation import (
 from .accounts import (
     is_account_locked,
 )
-from .compat import (
-    Timeout,
-    sleep,
-)
 from .compile import (
     write_compiled_sources,
 )
 from .contracts import (
     verify_contract_bytecode,
 )
-
 from .observers import (
     DirWatcher,
+)
+from .wait import (
+    Timeout,
 )
 
 from web3.utils.empty import (
@@ -234,7 +233,7 @@ def watch_project_contracts(project, compiler_settings):
 
     try:
         while True:
-            sleep(0.1)
+            time.sleep(0.1)
     except KeyboardInterrupt:
         pass
 

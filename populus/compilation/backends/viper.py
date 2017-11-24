@@ -1,6 +1,5 @@
 import pprint
 import os
-import fnmatch
 
 from .base import (
     BaseCompilerBackend,
@@ -20,12 +19,8 @@ class ViperBackend(BaseCompilerBackend):
         self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
 
         compiled_contracts = []
-        paths = [
-            x for x in source_file_paths
-            if any([fnmatch.fnmatch(x, p) for p in self.project_source_extensions])
-        ]
 
-        for contract_path in paths:
+        for contract_path in source_file_paths:
             code = open(contract_path).read()
             abi = compiler.mk_full_signature(code)
             bytecode = '0x' + compiler.compile(code).hex()

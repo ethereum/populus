@@ -2,10 +2,8 @@ import itertools
 
 import pytest
 
-from populus.utils.compat import (
-    Timeout,
-)
 from populus.utils.wait import (
+    Timeout,
     poll_until,
 )
 

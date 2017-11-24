@@ -81,7 +81,7 @@ def link_bytecode_by_name(bytecode, link_references, **link_names_and_values):
 
 def viper_installed():
     try:
-        import viper
+        import viper  # noqa: F401
         return True
     except ImportError:
         return False

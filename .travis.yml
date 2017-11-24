@@ -38,6 +38,8 @@ matrix:
       env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
     - python: "3.5"
       env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    - python: "3.6"
+      env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py36" INSTALL_VIPER="true"
     # Linting
     - python: "3.5"
       env: TOX_POSARGS="-e flake8"
@@ -61,6 +63,8 @@ install:
   - if [ -n "$GETH_VERSION" ]; then travis_retry pip install "py-geth>=1.9.0"; fi
   - if [ -n "$GETH_VERSION" ]; then python -m geth.install $GETH_VERSION; fi
   - if [ -n "$GETH_VERSION" ]; then export GETH_BINARY="$GETH_BASE_INSTALL_PATH/geth-$GETH_VERSION/bin/geth"; fi
+  # install viper if necessary.
+  - if [ -z "$INSTALL_VIPER"]; then pip install https://github.com/jacqueswww/viper/archive/bytecode_runtime_output.zip; fi
   # package
   - travis_retry pip install setuptools --upgrade
   - travis_retry pip install tox

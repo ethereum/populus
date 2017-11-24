@@ -7,8 +7,8 @@ from .base import (
 
 
 class ViperBackend(BaseCompilerBackend):
-    project_source_extensions = ('*.v.py', '*.vy')
-    test_source_extensions = ('test_*.v.py', 'test_*.vy')
+    project_source_glob = ('*.v.py', '*.vy')
+    test_source_glob = ('test_*.v.py', 'test_*.vy')
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
         try:

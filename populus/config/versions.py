@@ -5,7 +5,6 @@ V4 = '4'
 V5 = '5'
 V6 = '6'
 V7 = '7'
-V7_VIPER = '7-viper'
 
 KNOWN_LEGACY_VERSIONS = {V1, V2, V3, V4, V5, V6}
 KNOWN_USER_VERSIONS = {V6, V7}

@@ -64,7 +64,7 @@ install:
   - if [ -n "$GETH_VERSION" ]; then python -m geth.install $GETH_VERSION; fi
   - if [ -n "$GETH_VERSION" ]; then export GETH_BINARY="$GETH_BASE_INSTALL_PATH/geth-$GETH_VERSION/bin/geth"; fi
   # install viper if necessary.
-  - if [ -z "$INSTALL_VIPER"]; then pip install https://github.com/jacqueswww/viper/archive/bytecode_runtime_output.zip; fi
+  - if [ -n "$INSTALL_VIPER"]; then pip install https://github.com/ethereum/viper/archive/master.zip; fi
   # package
   - travis_retry pip install setuptools --upgrade
   - travis_retry pip install tox

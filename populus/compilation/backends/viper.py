@@ -14,7 +14,7 @@ class ViperBackend(BaseCompilerBackend):
         try:
             from viper import compiler
         except ImportError:
-            raise Exception('viper needs to be installed to use ViperBackend as compiler backend.')
+            raise ImportError('viper needs to be installed to use ViperBackend as compiler backend.')
 
         self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
 

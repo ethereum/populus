@@ -1,7 +1,17 @@
 Release Notes
 =============
 
+.. _v2.0.0-release-notes:
+
+2.0.0
+-----
+
+- Drop gevent support.
+- Change upstream dependency for ``ethereum-utils`` to new library name ``eth-utils``
+
+
 .. _v1.11.2-release-notes:
+
 
 1.11.2
 ------

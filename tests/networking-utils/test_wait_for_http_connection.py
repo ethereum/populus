@@ -1,7 +1,4 @@
-import pytest
-
-import os
-import random
+import threading
 
 try:
     from http.server import (
@@ -14,31 +11,25 @@ except ImportError:
         BaseHTTPRequestHandler,
     )
 
-from populus.utils.compat import (
-    spawn,
-    Timeout,
-)
 from populus.utils.networking import (
     get_open_port,
     wait_for_connection,
 )
-
-
-def can_test_connect_with_gevent():
-    if os.environ.get('THREADING_BACKEND', 'stdlib') != 'gevent':
-        return True
-    try:
-        from gevent import monkey
-    except ImportError:
-        return False
-
-    return monkey.is_module_patched('socket')
-
-
-@pytest.mark.skipif(
-    can_test_connect_with_gevent(),
-    reason="Bad configuration for gevent based testing",
+from populus.utils.timeout import (
+    Timeout,
 )
+
+
+def _spawn(target, args, kwargs):
+    thread = threading.Thread(
+        target=target,
+        args=args,
+        kwargs=kwargs,
+    )
+    thread.daemon = True
+    thread.start()
+
+
 def test_wait_for_connection_success():
     success_tracker = {}
     port = get_open_port()
@@ -74,8 +65,8 @@ def test_wait_for_connection_success():
         success_tracker.setdefault('server_success', True)
         success_tracker['server_exited'] = True
 
-    spawn(_do_client)
-    spawn(_do_server)
+    _spawn(_do_client)
+    _spawn(_do_server)
 
     try:
         with Timeout(5) as _timeout:
@@ -104,12 +95,12 @@ def test_wait_for_connection_failure():
         else:
             success_tracker['client_success'] = True
 
-    spawn(_do_client)
+    _spawn(_do_client)
 
     try:
         with Timeout(5) as _timeout:
             while 'client_success' not in success_tracker:
-                _timeout.sleep(random.random())
+                _timeout.sleep(0.1)
     except Timeout:
         pass
 

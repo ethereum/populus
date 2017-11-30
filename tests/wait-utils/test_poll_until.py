@@ -2,7 +2,7 @@ import itertools
 
 import pytest
 
-from populus.utils.compat import (
+from populus.utils.timeout import (
     Timeout,
 )
 from populus.utils.wait import (

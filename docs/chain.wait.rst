@@ -13,7 +13,7 @@ Each chain object exposes the following API through a property
 :ref:`Chain.wait <chain-api-wait>`.  
 
 * The ``timeout`` parameter sets the default number of seconds that each method
-  will block before raising a :class:`~populus.utils.compat.Timeout` exception.  
+  will block before raising a :class:`~populus.utils.timeout.Timeout` exception.  
 * The ``poll_interval`` determines how long it should wait between polling.  If
   ``poll_interval == None`` then a random value between 0 and 1 second will be
   used for the polling interval.

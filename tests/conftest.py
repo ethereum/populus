@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import gevent_monkeypatch  # noqa: F401
-
 import os
 
 import pytest
@@ -18,39 +16,36 @@ from populus.utils.compile import (
     get_contracts_source_dirs,
     get_build_asset_dir,
 )
+from populus.utils.contracts import (
+    package_contracts,
+)
 from populus.utils.filesystem import (
     ensure_path_exists,
     get_latest_mtime,
+)
+from populus.utils.json import (
+    normalize_object_for_json,
 )
 from populus.utils.testing import (
     get_tests_dir,
     link_bytecode_by_name,
 )
-
-from populus.utils.json import (
-    normalize_object_for_json,
-)
-
-from populus.utils.contracts import (
-    package_contracts,
+from populus.utils.timeout import (
+    Timeout,
 )
 
 from populus.config.defaults import (
     load_user_default_config,
 )
-
 from populus.config.base import (
     Config,
 )
-
 from populus.config.helpers import (
     get_user_json_config_file_path,
 )
-
 from populus.config.defaults import (
     get_user_default_config_path,
 )
-
 from populus.config.versions import (
     LATEST_VERSION,
 )
@@ -192,10 +187,6 @@ def user_config_defaults():
 
 @pytest.fixture()
 def wait_for_unlock():
-    from populus.utils.compat import (
-        Timeout,
-    )
-
     def _wait_for_unlock(web3):
         with Timeout(5) as timeout:
             while True:

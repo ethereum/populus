@@ -1,12 +1,11 @@
 import functools
-import random
 
 from web3.providers.tester import (
     EthereumTesterProvider,
     TestRPCProvider,
 )
 
-from .compat import (
+from .timeout import (
     Timeout,
 )
 
@@ -31,7 +30,7 @@ def wait_for_transaction_receipt(web3, txn_hash, timeout=120, poll_interval=None
         poll_fn=functools.partial(web3.eth.getTransactionReceipt, txn_hash),
         success_fn=lambda r: r is not None and r['blockHash'] is not None,
         timeout=timeout,
-        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else 0.1,
     )
 
 
@@ -49,7 +48,7 @@ def wait_for_block_number(web3, block_number=1, timeout=120, poll_interval=None)
         poll_fn=lambda: web3.eth.blockNumber,
         success_fn=lambda v: v >= block_number,
         timeout=timeout,
-        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else 0.1,
     )
 
 
@@ -63,7 +62,7 @@ def wait_for_unlock(web3, account=None, timeout=120, poll_interval=None):
         poll_fn=functools.partial(is_account_locked, web3, account),
         success_fn=lambda v: v,
         timeout=timeout,
-        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else 0.1,
     )
 
 
@@ -72,7 +71,7 @@ def wait_for_peers(web3, peer_count=1, timeout=120, poll_interval=None):
         poll_fn=lambda: web3.net.peerCount,
         success_fn=lambda v: v >= peer_count,
         timeout=timeout,
-        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else 0.1,
     )
 
 
@@ -81,7 +80,7 @@ def wait_for_syncing(web3, timeout=120, poll_interval=None):
         poll_fn=lambda: web3.eth.syncing,
         success_fn=lambda v: v,
         timeout=timeout,
-        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else 0.1,
     )
 
 
@@ -90,5 +89,5 @@ def wait_for_popen(proc, timeout=5, poll_interval=None):
         poll_fn=lambda: proc.poll,
         success_fn=lambda v: v,
         timeout=timeout,
-        poll_interval_fn=lambda: poll_interval if poll_interval is not None else random.random(),
+        poll_interval_fn=lambda: poll_interval if poll_interval is not None else 0.1,
     )

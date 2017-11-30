@@ -1,7 +1,6 @@
-import random
+import socket
 
-from .compat import (
-    socket,
+from .timeout import (
     Timeout,
 )
 
@@ -23,7 +22,7 @@ def wait_for_connection(host, port, timeout=30):
             try:
                 s.connect((host, port))
             except (socket.timeout, socket.error, OSError):
-                _timeout.sleep(random.random())
+                _timeout.sleep(0.1)
                 continue
             else:
                 s.close()

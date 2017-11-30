@@ -33,7 +33,7 @@ from populus.utils.mappings import (
 )
 
 
-REF_KEYS = (
+KEYS_TO_DEREFERENCE = (
     "chains.mainnet.web3",
     "chains.mainnet.contracts.backends.JSONFile",
     "chains.mainnet.contracts.backends.Memory",
@@ -122,28 +122,16 @@ def _perform_v7_to_v8_upgrade(v7_config, v7_default, v8_default):
             )
         )
 
-    # TODO: remove the unreffing
     v7_default_config = Config(v7_default)
-    v7_default_config.unref()
-
     v8_default_config = Config(v8_default)
-
-    if v7_config == v7_default_config:
-        populus_config_file_path = get_populus_config_file_path()
-        backup_file_path = "{0}.{1}.backup".format(
-            populus_config_file_path,
-            int(time.time()),
-        )
-        shutil.copy(populus_config_file_path, backup_file_path)
-        os.remove(populus_config_file_path)
-        return v8_default_config
 
     # V8 just moved to user config, no change in keys
     upgraded_v7_config = copy.deepcopy(v7_config)
     upgraded_v7_config['version'] = V8
 
-    for key in REF_KEYS:
-        default_v8_value = get_nested_key(v7_default_config)
+    for key in KEYS_TO_DEREFERENCE:
+        default_v7_value = get_nested_key(v7_default_config)
+        default_v8_value = get_nested_key(v8_default_config)
 
         if not has_nested_key(v7_config, key):
             set_nested_key(upgraded_v7_config, key, default_v8_value)
@@ -151,7 +139,7 @@ def _perform_v7_to_v8_upgrade(v7_config, v7_default, v8_default):
 
         current_value = get_nested_key(v7_config, key)
 
-        if current_value == default_v8_value:
+        if current_value == default_v7_value:
             set_nested_key(upgraded_v7_config, key, default_v8_value)
         elif _is_ref(current_value):
             ref_value = current_value['$ref']
@@ -168,8 +156,8 @@ def _perform_v7_to_v8_upgrade(v7_config, v7_default, v8_default):
                     "path {1}".format(key, ref_value)
                 )
         else:
-            # If it's not the default and it's not a reference,
+            # If it's not the default and it's not a reference we just want to
+            # retain the previous value.
             pass
-            set_nested_key(upgraded_v7_config, key, current_value)
 
     return upgraded_v7_config

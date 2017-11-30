@@ -43,6 +43,7 @@ from populus.utils.compile import (
 
 from populus.utils.filesystem import (
     get_latest_mtime,
+    is_same_path,
 )
 
 from populus.utils.testing import (
@@ -71,19 +72,32 @@ class Project(object):
         if os.path.exists(legacy_path):
             raise ValueError(
                 "Found legacy config file at {legacy_path}.  Please upgrade "
-                "your configuration file to continue using populus.".format(
+                "your configuration file to continue using populus.  If you "
+                "already have an upgrade `project.json` config file please "
+                "relocate the legacy configuration file.".format(
                     legacy_path=legacy_path
                 ),
             )
 
-        # user config
+        # populus config
+        default_populus_config_path = get_default_populus_config_path()
+
         if populus_config_file_path is None:
             populus_config_file_path = get_populus_config_file_path()
-
-        if os.path.exists(populus_config_file_path):
-            self.populus_config_file_path = populus_config_file_path
+            if os.path.exists(populus_config_file_path):
+                self.populus_config_file_path = populus_config_file_path
+            else:
+                self.populus_config_file_path = get_default_populus_config_path()
         else:
-            self.populus_config_file_path = get_default_populus_config_path()
+            if os.path.exists(populus_config_file_path):
+                self.populus_config_file_path = populus_config_file_path
+            else:
+                raise ValueError(
+                    "The Populus configuration file was set to {0} but no file "
+                    "was found at that location.".format(
+                        populus_config_file_path,
+                    )
+                )
 
         # project config
         project_config_file_path = get_project_config_file_path(self.project_dir)

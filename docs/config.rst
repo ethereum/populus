@@ -102,7 +102,7 @@ folder.
 
 * ``stdin`` is `Solidity Input Description as JSON <http://solidity.readthedocs.io/en/develop/using-the-compiler.html?highlight=input%20description#input-description>`_
 
-* ``command_line_options`` are passed to Solidity compiler command line, as given keyword arguments to `py-solc` package's `solc.wrapper.solc_wrapper <https://github.com/pipermerriam/py-solc/blob/3a6de359dc31375df46418e6ffd7f45ab9567287/solc/wrapper.py#L20>_`
+* ``command_line_options`` are passed to Solidity compiler command line, as given keyword arguments to `py-solc` package's `solc.wrapper.solc_wrapper <https://github.com/ethereum/py-solc/blob/3a6de359dc31375df46418e6ffd7f45ab9567287/solc/wrapper.py#L20>_`
 
 Contract Source Directory
 """""""""""""""""""""""""
@@ -133,7 +133,7 @@ Settings for the compiler backend
 Configuring compiler for extra
 """"""""""""""""""""""""""""""
 
-Set `solc import path remappings <https://github.com/pipermerriam/py-solc#import-path-remappings>`_. This is especially useful if you want to use libraries like `OpenZeppelin <https://github.com/OpenZeppelin/zeppelin-solidity/>`_ with your project. Then you can directly import Zeppelin contracts like ``import "zeppelin/contracts/token/TransferableToken.sol";``.
+Set `solc import path remappings <https://github.com/ethereum/py-solc#import-path-remappings>`_. This is especially useful if you want to use libraries like `OpenZeppelin <https://github.com/OpenZeppelin/zeppelin-solidity/>`_ with your project. Then you can directly import Zeppelin contracts like ``import "zeppelin/contracts/token/TransferableToken.sol";``.
 
 * key: ``compilation.import_remappings``
 * value: Array of strings

@@ -119,7 +119,7 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
         }
 
         # solc command line options as passed to solc_wrapper()
-        # https://github.com/pipermerriam/py-solc/blob/3a6de359dc31375df46418e6ffd7f45ab9567287/solc/wrapper.py#L20
+        # https://github.com/ethereum/py-solc/blob/3a6de359dc31375df46418e6ffd7f45ab9567287/solc/wrapper.py#L20
         command_line_options = self.compiler_settings.get("command_line_options", {})
 
         # Get Solidity Input Description settings section

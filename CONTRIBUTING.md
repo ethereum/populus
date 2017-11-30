@@ -3,7 +3,7 @@
 To start development for Populus you should begin by cloning the repo.
 
 ```bash
-$ git clone git@github.com/pipermerriam/populus.git
+$ git clone git@github.com/ethereum/populus.git
 ```
 
 

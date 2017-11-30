@@ -1,8 +1,11 @@
 import operator
 import itertools
 
-from eth_utils import (
+from cytoolz import (
     compose,
+)
+
+from eth_utils import (
     force_text,
     is_dict,
     sort_return,
@@ -22,7 +25,7 @@ def set_nested_key(config, key, value):
     )
     tail_setter = operator.methodcaller('__setitem__', key_tail, value)
 
-    setter_fn = compose(*itertools.chain(head_setters, (tail_setter,)))
+    setter_fn = compose(*reversed(tuple((itertools.chain(head_setters, (tail_setter,))))))
 
     # must write to both the config_for_read and config_for_write
     return setter_fn(config)
@@ -40,7 +43,7 @@ def get_nested_key(config, key):
 
     tail_getter = operator.itemgetter(key_tail)
 
-    getter_fn = compose(*itertools.chain(head_getters, (tail_getter,)))
+    getter_fn = compose(*reversed(tuple(itertools.chain(head_getters, (tail_getter,)))))
 
     try:
         return getter_fn(config)
@@ -65,7 +68,7 @@ def delete_nested_key(config, key):
     )
     tail_deleter = operator.methodcaller('__delitem__', key_tail)
 
-    del_fn = compose(*itertools.chain(head_getters, (tail_deleter,)))
+    del_fn = compose(*reversed(tuple(itertools.chain(head_getters, (tail_deleter,)))))
 
     return del_fn(config)
 
@@ -90,7 +93,7 @@ def pop_nested_key(config, key):
     )
     tail_popper = operator.methodcaller('pop', key_tail)
 
-    popper_fn = compose(*itertools.chain(head_getters, (tail_popper,)))
+    popper_fn = compose(*reversed(tuple(itertools.chain(head_getters, (tail_popper,)))))
 
     return popper_fn(config)
 

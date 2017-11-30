@@ -45,6 +45,7 @@ from populus.utils.testing import (
 )
 
 
+@pytest.mark.filterwarnings('ignore:Found legacy config file at')
 @pytest.mark.parametrize(
     'from_legacy_version',
     (V1, V2, V3, V4, V5, V6)
@@ -79,6 +80,7 @@ def test_upgrade_to_user_config(project, from_legacy_version):
     assert upgraded_project.project_config == expected_project_config
 
 
+@pytest.mark.filterwarnings('ignore:Found legacy config file at')
 @user_config_version(FIRST_USER_CONFIG_VERSION)
 def test_upgrade_custom_key(project):
     legacy_config_file_path = get_legacy_json_config_file_path(project_dir=project.project_dir)

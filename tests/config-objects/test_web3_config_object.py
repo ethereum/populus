@@ -72,7 +72,7 @@ def test_getting_web3_instance():
     web3_config = Web3Config({'provider': {'class': 'web3.providers.ipc.IPCProvider'}})
     web3 = web3_config.get_web3()
 
-    assert isinstance(web3.currentProvider, IPCProvider)
+    assert isinstance(web3.providers[0], IPCProvider)
 
 
 def test_default_account_property():

@@ -83,7 +83,7 @@ def poll_until(poll_fn, success_fn, timeout, poll_interval_fn):
 
 
 def is_tester_web3(web3):
-    return isinstance(web3.currentProvider, (TestRPCProvider, EthereumTesterProvider))
+    return isinstance(web3.providers[0], (TestRPCProvider, EthereumTesterProvider))
 
 
 def wait_for_transaction_receipt(web3, txn_hash, timeout=120, poll_interval=None):

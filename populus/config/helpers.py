@@ -4,8 +4,11 @@ import os
 
 import anyconfig
 
-from eth_utils import (
+from cytoolz import (
     compose,
+)
+
+from eth_utils import (
     is_string,
     to_ordered_dict,
 )
@@ -131,8 +134,8 @@ def sort_prioritized_configs(backend_configs, master_config):
 
     return sorted(
         resolved_backend_configs,
-        key=compose(*(
-            operator.itemgetter(1),
+        key=compose(
             operator.itemgetter('priority'),
-        )),
+            operator.itemgetter(1),
+        ),
     )

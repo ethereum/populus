@@ -371,7 +371,7 @@ You'll have to install solidity, recommended from release 0.4.11 or greater.
 Installation scripts for binary:
 '''''''''''''''''''''''''''''''
 
-    https://github.com/pipermerriam/py-solc#installing-the-solc-binary
+    https://github.com/ethereum/py-solc#installing-the-solc-binary
 
 
 Installation scripts building it:

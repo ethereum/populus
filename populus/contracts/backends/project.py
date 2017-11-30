@@ -16,7 +16,7 @@ from .base import (
 class ProjectContractsBackend(BaseContractBackend):
     """
     Provides access to compiled contract assets sources from the project
-    `contracts_source_dir`
+    `contracts_source_dirs`
     """
     is_provider = True
     is_registrar = False

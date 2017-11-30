@@ -28,7 +28,7 @@ class TestRPCChain(BaseChain):
 
         self._running = True
 
-        self.rpc_methods = self.web3.currentProvider.server.application.rpc_methods
+        self.rpc_methods = self.web3.providers[0].server.application.rpc_methods
 
         self.rpc_methods.full_reset()
         self.rpc_methods.rpc_configure('eth_mining', False)
@@ -43,11 +43,11 @@ class TestRPCChain(BaseChain):
         if not self._running:
             raise ValueError("The TesterChain is not running")
         try:
-            self.web3.currentProvider.server.stop()
-            self.web3.currentProvider.server.close()
-            self.web3.currentProvider.thread.kill()
+            self.web3.providers[0].server.stop()
+            self.web3.providers[0].server.close()
+            self.web3.providers[0].thread.kill()
         except AttributeError:
-            self.web3.currentProvider.server.shutdown()
-            self.web3.currentProvider.server.server_close()
+            self.web3.providers[0].server.shutdown()
+            self.web3.providers[0].server.server_close()
         finally:
             self._running = False

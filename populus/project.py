@@ -234,19 +234,6 @@ class Project(object):
         return get_compiled_contracts_asset_path(self.build_asset_dir)
 
     @property
-    def contracts_source_dir(self):
-        warnings.warn(DeprecationWarning(
-            "project.contracts_source_dir has been replaced by the plural, "
-            "project.contracts_source_dirs which is an iterable of all source "
-            "directories populus will search for contracts.  Please update your "
-            "code accordingly as this API will be removed in a future release"
-        ))
-        return self.config.get(
-            'compilation.contracts_source_dir',
-            get_contracts_source_dirs(self.project_dir),
-        )[0]
-
-    @property
     @to_tuple
     def contracts_source_dirs(self):
         source_dirs = self.config.get('compilation.contracts_source_dirs')
@@ -262,12 +249,14 @@ class Project(object):
     _cached_compiled_contracts_mtime = None
     _cached_compiled_contracts = None
 
+    @to_tuple
     def get_all_source_file_paths(self):
         compiler_backend = self.get_compiler_backend()
-        return tuple(itertools.chain(
-            compiler_backend.get_project_source_paths(self.contracts_source_dir),
-            compiler_backend.get_test_source_paths(self.tests_dir),
-        ))
+        return itertools.chain.from_iterable(
+            compiler_backend.get_project_source_paths(source_dir)
+            for source_dir
+            in self.contracts_source_dirs
+        )
 
     def is_compiled_contract_cache_stale(self):
         if self._cached_compiled_contracts is None:

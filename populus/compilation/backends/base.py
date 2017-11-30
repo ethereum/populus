@@ -25,11 +25,11 @@ class BaseCompilerBackend(object):
         raise NotImplementedError("Must be implemented by subclasses")
 
     @to_tuple
-    def get_project_source_paths(self, contracts_source_dir):
+    def get_project_source_paths(self, source_dir):
         return (
             os.path.relpath(source_file_path)
             for source_file_path
-            in recursive_find_files(contracts_source_dir, self.project_source_glob)
+            in recursive_find_files(source_dir, self.project_source_glob)
         )
 
     @to_tuple

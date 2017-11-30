@@ -224,9 +224,9 @@ The following configuration options can be set to control aspects of how
 Populus compiles your project contracts.
 
 
-* ``compilation.contracts_source_dir``
+* ``compilation.contracts_source_dirs``
 
-  Defaults to ``./contracts``.  This sets the root path where populus will
+  Defaults to ``[./contracts]``.  This sets the paths where populus will
   search for contract source files.
 
 * ``compilation.settings.optimize``

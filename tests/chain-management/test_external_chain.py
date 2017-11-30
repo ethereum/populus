@@ -7,4 +7,4 @@ def test_external_chain(project):
     project.config['chains.external.contracts.backends.Memory'] = {'$ref': 'contracts.backends.Memory'}  # noqa: E501
 
     with project.get_chain('external') as external_chain:
-        assert isinstance(external_chain.web3.currentProvider, EthereumTesterProvider)
+        assert isinstance(external_chain.web3.providers[0], EthereumTesterProvider)

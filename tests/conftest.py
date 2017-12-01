@@ -109,7 +109,6 @@ def project(request,
     project = Project(
         project_dir=project_dir,
         user_config_file_path=user_config_path,
-        create_config_file=True
     )
 
     key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])

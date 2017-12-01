@@ -71,7 +71,7 @@ New Project:
     from populus.project import Project
     # will create a new project.json file
     # will not create the default project structure you get with the command line populus init
-    p = Project(project_dir='/home/mary/project/donations',create_config_file=True)
+    p = Project(project_dir='/home/mary/project/donations')
 
 
 PopulusContract

@@ -33,6 +33,7 @@ from populus.config.versions import (
     V4,
     V5,
     V6,
+    V7,
     FIRST_USER_CONFIG_VERSION,
 )
 
@@ -48,7 +49,7 @@ from populus.utils.testing import (
 @pytest.mark.filterwarnings('ignore:Found legacy config file at')
 @pytest.mark.parametrize(
     'from_legacy_version',
-    (V1, V2, V3, V4, V5, V6)
+    (V1, V2, V3, V4, V5, V6, V7)
 )
 @user_config_version(FIRST_USER_CONFIG_VERSION)
 def test_upgrade_to_user_config(project, from_legacy_version):

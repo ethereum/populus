@@ -11,6 +11,7 @@ from .versions import (
     V5,
     V6,
     V7,
+    V8,
     LATEST_VERSION
 )
 
@@ -22,8 +23,10 @@ DEFAULT_V4_CONFIG_FILENAME = "defaults.v4.config.json"
 DEFAULT_V5_CONFIG_FILENAME = "defaults.v5.config.json"
 DEFAULT_V6_CONFIG_FILENAME = "defaults.v6.config.json"
 DEFAULT_V7_CONFIG_FILENAME = "defaults.v7.config.json"
+DEFAULT_V8_CONFIG_FILENAME = "defaults.v8.config.json"
 
 DEFAULT_USER_V7_CONFIG_FILENAME = "defaults.user.v7.config.json"
+DEFAULT_USER_V8_CONFIG_FILENAME = "defaults.user.v8.config.json"
 
 
 DEFAULT_CONFIG_FILENAMES = {
@@ -34,10 +37,12 @@ DEFAULT_CONFIG_FILENAMES = {
     V5: DEFAULT_V5_CONFIG_FILENAME,
     V6: DEFAULT_V6_CONFIG_FILENAME,
     V7: DEFAULT_V7_CONFIG_FILENAME,
+    V8: DEFAULT_V8_CONFIG_FILENAME,
 }
 
 DEFAULT_USER_CONFIG_FILENAMES = {
     V7: DEFAULT_USER_V7_CONFIG_FILENAME,
+    V8: DEFAULT_USER_V8_CONFIG_FILENAME,
 }
 
 

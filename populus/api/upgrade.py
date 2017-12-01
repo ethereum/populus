@@ -24,7 +24,7 @@ import shutil
 def upgrade_configs(project_dir, logger, to_version=None):
     """upgrade project and the user config file"""
 
-    project = Project(project_dir=project_dir, create_config_file=True)
+    project = Project(project_dir=project_dir)
 
     if to_version is None:
         to_version = LATEST_VERSION

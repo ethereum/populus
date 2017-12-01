@@ -27,7 +27,7 @@ def test_select_project_contract_helper_a(project_dir,
     write_project_file('contracts/ContractB.sol', 'contract B { function B() {}}')
     write_project_file('contracts/ContractC.sol', 'contract C { function C() {}}')
 
-    project = Project(project_dir, create_config_file=True)
+    project = Project(project_dir)
 
     assert 'A' in project.compiled_contract_data
     assert 'B' in project.compiled_contract_data
@@ -60,7 +60,7 @@ def test_select_project_contract_helper_b(project_dir,
     write_project_file('contracts/ContractB.sol', 'contract B { function B() {}}')
     write_project_file('contracts/ContractC.sol', 'contract C { function C() {}}')
 
-    project = Project(project_dir, create_config_file=True)
+    project = Project(project_dir)
 
     assert 'A' in project.compiled_contract_data
     assert 'B' in project.compiled_contract_data

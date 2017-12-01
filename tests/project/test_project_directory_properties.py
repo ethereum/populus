@@ -14,7 +14,7 @@ from populus.utils.filesystem import (
 
 
 def test_project_directory_properties(project_dir):
-    project = Project(project_dir, create_config_file=True)
+    project = Project(project_dir)
 
     contracts_source_dirs = get_contracts_source_dirs(project_dir)
     for left, right in zip(project.contracts_source_dirs, contracts_source_dirs):

@@ -64,7 +64,7 @@ def project(request, pytestconfig):
     contracts = request.config.cache.get(CACHE_KEY_CONTRACTS, None)
     mtime = request.config.cache.get(CACHE_KEY_MTIME, None)
 
-    project = Project(project_dir, create_config_file=True)
+    project = Project(project_dir)
 
     project.fill_contracts_cache(contracts, mtime)
     request.config.cache.set(

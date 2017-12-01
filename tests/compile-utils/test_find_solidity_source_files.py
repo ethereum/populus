@@ -8,7 +8,7 @@ from populus.utils.filesystem import (
 
 
 def test_gets_correct_files_default_dir(project_dir, write_project_file):
-    project = Project(project_dir, create_config_file=True)
+    project = Project(project_dir)
     compiler_backend = project.get_compiler_backend()
     file_names = tuple(itertools.chain.from_iterable(
         compiler_backend.get_project_source_paths(source_dir)

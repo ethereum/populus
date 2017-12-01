@@ -41,13 +41,13 @@ def upgrade_v7_to_v8(v7_config):
     v7_default_config.unref()
 
     v8_default_config = Config(v8_default)
-    v8_default_config.unref()
 
     if v7_config == v7_default_config:
         return v8_default_config
 
-    # V8 just moved to user config, no change in keys
-    upgraded_v7_config = copy.deepcopy(v7_config)
+    # V8 just removes all of the `$ref` values from the config.
+    upgraded_v7_config = Config(copy.deepcopy(v7_config))
+    upgraded_v7_config.unref()
     upgraded_v7_config['version'] = V8
 
     return upgraded_v7_config

@@ -34,7 +34,8 @@ from populus.config.versions import (
     V5,
     V6,
     V7,
-    FIRST_USER_CONFIG_VERSION,
+    V8,
+    LATEST_VERSION,
 )
 
 from populus.api.upgrade import (
@@ -51,7 +52,7 @@ from populus.utils.testing import (
     'from_legacy_version',
     (V1, V2, V3, V4, V5, V6, V7)
 )
-@user_config_version(FIRST_USER_CONFIG_VERSION)
+@user_config_version(V8)
 def test_upgrade_to_user_config(project, from_legacy_version):
 
     shutil.copyfile(
@@ -62,17 +63,17 @@ def test_upgrade_to_user_config(project, from_legacy_version):
     os.remove(project.config_file_path)
 
     logger = logging.getLogger("test.test_upgrade_to_user_config")
-    upgrade_configs(project.project_dir, logger, FIRST_USER_CONFIG_VERSION)
+    upgrade_configs(project.project_dir, logger, LATEST_VERSION)
 
     upgraded_project = Project(
         project_dir=project.project_dir,
         user_config_file_path=project.user_config_file_path
     )
 
-    expected_user_config = Config(load_user_default_config(FIRST_USER_CONFIG_VERSION))
+    expected_user_config = Config(load_user_default_config(LATEST_VERSION))
     expected_user_config.unref()
 
-    expected_project_config = Config(load_default_config(FIRST_USER_CONFIG_VERSION))
+    expected_project_config = Config(load_default_config(LATEST_VERSION))
     expected_project_config.unref()
 
     assert upgraded_project.legacy_config_path is None
@@ -82,7 +83,7 @@ def test_upgrade_to_user_config(project, from_legacy_version):
 
 
 @pytest.mark.filterwarnings('ignore:Found legacy config file at')
-@user_config_version(FIRST_USER_CONFIG_VERSION)
+@user_config_version(V8)
 def test_upgrade_custom_key(project):
     legacy_config_file_path = get_legacy_json_config_file_path(project_dir=project.project_dir)
     shutil.copyfile(
@@ -100,7 +101,7 @@ def test_upgrade_custom_key(project):
     write_config(legacy_config, legacy_config_file_path)
 
     logger = logging.getLogger("test.test_upgrade_custom_key")
-    upgrade_configs(project.project_dir, logger, FIRST_USER_CONFIG_VERSION)
+    upgrade_configs(project.project_dir, logger, V8)
 
     upgraded_project = Project(
         project_dir=project.project_dir,
@@ -110,5 +111,5 @@ def test_upgrade_custom_key(project):
     assert upgraded_project.config.get(upgraded_key) == legacy_value
     assert upgraded_project.project_config.get(upgraded_key) == legacy_value
 
-    default_user_config = Config(load_user_default_config(version=FIRST_USER_CONFIG_VERSION))
+    default_user_config = Config(load_user_default_config(version=V8))
     assert upgraded_project.user_config.get(upgraded_key) == default_user_config.get(upgraded_key)

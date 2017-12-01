@@ -17,8 +17,8 @@ from populus.utils.mappings import (
     deep_merge_dicts,
 )
 
-from populus.config.defaults import (
-    load_default_config,
+from populus.config.helpers import (
+    load_default_legacy_config,
 )
 from populus.config.validation import (
     get_validation_errors,
@@ -55,8 +55,8 @@ def upgrade_v3_to_v4(v3_config):
             )
         )
 
-    v3_default_config = load_default_config(version=V3)
-    v4_default_config = load_default_config(version=V4)
+    v3_default_config = load_default_legacy_config(version=V3)
+    v4_default_config = load_default_legacy_config(version=V4)
 
     if v3_config == v3_default_config:
         return v4_default_config

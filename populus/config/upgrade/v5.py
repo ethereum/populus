@@ -14,8 +14,8 @@ from populus.utils.mappings import (
     pop_nested_key,
 )
 
-from populus.config.defaults import (
-    load_default_config,
+from populus.config.helpers import (
+    load_default_legacy_config,
 )
 from populus.config.validation import (
     get_validation_errors,
@@ -45,8 +45,8 @@ def upgrade_v5_to_v6(v5_config):
             )
         )
 
-    v5_default_config = load_default_config(version=V5)
-    v6_default_config = load_default_config(version=V6)
+    v5_default_config = load_default_legacy_config(version=V5)
+    v6_default_config = load_default_legacy_config(version=V6)
 
     if v5_config == v5_default_config:
         return v6_default_config

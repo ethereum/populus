@@ -18,8 +18,9 @@ from populus.config.versions import (
     V5,
     V6,
     V7,
+    V8,
     KNOWN_LEGACY_VERSIONS,
-    KNOWN_USER_VERSIONS,
+    KNOWN_VERSIONS,
     LATEST_VERSION,
 )
 from .v1 import upgrade_v1_to_v2
@@ -28,6 +29,7 @@ from .v3 import upgrade_v3_to_v4
 from .v4 import upgrade_v4_to_v5
 from .v5 import upgrade_v5_to_v6
 from .v6 import upgrade_v6_to_v7
+from .v7 import upgrade_v7_to_v8
 
 
 UPGRADE_SEQUENCE = {
@@ -37,6 +39,7 @@ UPGRADE_SEQUENCE = {
     V4: V5,
     V5: V6,
     V6: V7,
+    V7: V8,
 }
 
 UPGRADE_FUNCTIONS = {
@@ -46,6 +49,7 @@ UPGRADE_FUNCTIONS = {
     V4: upgrade_v4_to_v5,
     V5: upgrade_v5_to_v6,
     V6: upgrade_v6_to_v7,
+    V7: upgrade_v7_to_v8,
 }
 
 
@@ -85,9 +89,11 @@ def get_upgrade_sequence(start_version, end_version, known_versions):
 def upgrade_config(config, config_context, to_version=LATEST_VERSION):
 
     if config_context == ConfigContext.USER:
-        known_versions = KNOWN_USER_VERSIONS
+        known_versions = KNOWN_VERSIONS
     elif config_context == ConfigContext.LEGACY:
         known_versions = KNOWN_LEGACY_VERSIONS
+    else:
+        raise ValueError("config_context must be either USER or LEGACY")
 
     try:
         current_version = config['version']

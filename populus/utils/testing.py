@@ -35,6 +35,15 @@ def load_test_contract_fixture(fixture_path_or_name, dst_path=None):
 
 def update_project_config(*key_value_pairs):
     def outer(fn):
+        if not hasattr(fn, '_project_config_key_value_pairs'):
+            fn._project_config_key_value_pairs = []
+        fn._project_config_key_value_pairs.extend(key_value_pairs)
+        return fn
+    return outer
+
+
+def update_populus_config(*key_value_pairs):
+    def outer(fn):
         if not hasattr(fn, '_populus_config_key_value_pairs'):
             fn._populus_config_key_value_pairs = []
         fn._populus_config_key_value_pairs.extend(key_value_pairs)
@@ -42,9 +51,16 @@ def update_project_config(*key_value_pairs):
     return outer
 
 
-def user_config_version(version):
+def project_config_version(version):
     def outer(fn):
-        fn._user_config_version = version
+        fn._project_config_version = version
+        return fn
+    return outer
+
+
+def populus_config_version(version):
+    def outer(fn):
+        fn._populus_config_version = version
         return fn
     return outer
 

@@ -1,9 +1,8 @@
-import logging
 import click
 from .main import main
 
 from populus.api.upgrade import (
-    upgrade_configs,
+    do_config_upgrade,
 )
 
 from populus.config.versions import (
@@ -24,7 +23,6 @@ def upgrade_cmd(ctx, to_version):
     Upgrade a project config, and if required also the user config
     Note: the user config is used in other projects as well
     """
-    logger = logging.getLogger('populus.cli.upgrade')
     project_dir = ctx.obj['PROJECT_DIR']
 
-    upgrade_configs(project_dir, logger)
+    do_config_upgrade(project_dir)

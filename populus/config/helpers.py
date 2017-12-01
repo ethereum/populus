@@ -13,6 +13,23 @@ from eth_utils import (
     to_ordered_dict,
 )
 
+from populus import ASSETS_DIR
+from populus.config.loading import (
+    load_config,
+)
+from populus.config.versions import (
+    V1,
+    V2,
+    V3,
+    V4,
+    V5,
+    V6,
+    V7,
+    V8,
+    LATEST_VERSION,
+    KNOWN_LEGACY_VERSIONS,
+    LAST_LEGACY_CONFIG_VERSION,
+)
 from populus.utils.mappings import (
     get_nested_key,
     has_nested_key,
@@ -21,39 +38,140 @@ from populus.utils.module_loading import (
     import_string,
 )
 
+LEGACY_CONFIG_FILENAME = './populus.json'
 
-JSON_CONFIG_FILENAME = './project.json'
-LEGACY_JSON_CONFIG_FILENAME = './populus.json'
-USER_JSON_CONFIG_FILENAME = '~/.populus/config.json'
+PROJECT_CONFIG_FILENAME = './project.json'
 
+POPULUS_CONFIG_FILENAME = './config.json'
+DEFAULT_POPULUS_DIR = '~/.populus'
 
-def get_user_json_config_file_path():
+DEFAULT_V1_CONFIG_FILENAME = "defaults.v1.config.json"
+DEFAULT_V2_CONFIG_FILENAME = "defaults.v2.config.json"
+DEFAULT_V3_CONFIG_FILENAME = "defaults.v3.config.json"
+DEFAULT_V4_CONFIG_FILENAME = "defaults.v4.config.json"
+DEFAULT_V5_CONFIG_FILENAME = "defaults.v5.config.json"
+DEFAULT_V6_CONFIG_FILENAME = "defaults.v6.config.json"
+DEFAULT_V7_CONFIG_FILENAME = "defaults.v7.config.json"
+DEFAULT_V8_CONFIG_FILENAME = "config.project.defaults.v8.json"
 
-    return os.path.expanduser(USER_JSON_CONFIG_FILENAME)
-
-
-def check_if_user_json_config_file_exists():
-
-    json_config_file_path = get_user_json_config_file_path()
-    return os.path.exists(json_config_file_path)
-
-
-def get_json_config_file_path(project_dir):
-
-    json_config_file_path = os.path.join(project_dir, JSON_CONFIG_FILENAME)
-    return json_config_file_path
+DEFAULT_POPULUS_V7_CONFIG_FILENAME = "defaults.populus.v7.config.json"
+DEFAULT_POPULUS_V8_CONFIG_FILENAME = "config.populus.defaults.v8.json"
 
 
-def get_legacy_json_config_file_path(project_dir):
+LEGACY_DEFAULT_CONFIG_FILENAMES = {
+    V1: DEFAULT_V1_CONFIG_FILENAME,
+    V2: DEFAULT_V2_CONFIG_FILENAME,
+    V3: DEFAULT_V3_CONFIG_FILENAME,
+    V4: DEFAULT_V4_CONFIG_FILENAME,
+    V5: DEFAULT_V5_CONFIG_FILENAME,
+}
 
-    json_config_file_path = os.path.join(project_dir, LEGACY_JSON_CONFIG_FILENAME)
-    return json_config_file_path
+DEFAULT_CONFIG_FILENAMES = {
+    V6: DEFAULT_V6_CONFIG_FILENAME,
+    V7: DEFAULT_V7_CONFIG_FILENAME,
+    V8: DEFAULT_V8_CONFIG_FILENAME,
+}
+
+DEFAULT_POPULUS_CONFIG_FILENAMES = {
+    V8: DEFAULT_POPULUS_V8_CONFIG_FILENAME,
+}
 
 
-def check_if_json_config_file_exists(project_dir):
+#
+# Populus level config utils
+#
+def get_default_populus_config_path(version=LATEST_VERSION):
 
-    json_config_file_path = get_json_config_file_path(project_dir)
-    return os.path.exists(json_config_file_path)
+    try:
+        return os.path.join(ASSETS_DIR, DEFAULT_POPULUS_CONFIG_FILENAMES[version])
+    except KeyError:
+        raise KeyError(
+            "`version` must be one of {0}".format(
+                sorted(tuple(DEFAULT_POPULUS_CONFIG_FILENAMES.keys()))
+            )
+        )
+
+
+def load_default_populus_config(version=LATEST_VERSION):
+    default_config_path = get_default_populus_config_path(version)
+    default_config = load_config(default_config_path)
+    return default_config
+
+
+def get_populus_config_file_path():
+    return os.path.expanduser(os.path.join(
+        os.environ.get(
+            'POPULUS_DIR',
+            DEFAULT_POPULUS_DIR,
+        ),
+        POPULUS_CONFIG_FILENAME
+    ))
+
+
+def check_if_populus_config_file_exists():
+    populus_config_file_path = get_populus_config_file_path()
+    return os.path.exists(populus_config_file_path)
+
+
+#
+# Project level config utils
+#
+def get_default_project_config_path(version=LATEST_VERSION):
+    try:
+        return os.path.join(ASSETS_DIR, DEFAULT_CONFIG_FILENAMES[version])
+    except KeyError:
+        raise KeyError(
+            "`version` must be one of {0}".format(
+                sorted(tuple(DEFAULT_CONFIG_FILENAMES.keys()))
+            )
+        )
+
+
+def load_default_project_config(version=LATEST_VERSION):
+    default_config_path = get_default_project_config_path(version)
+    default_config = load_config(default_config_path)
+    return default_config
+
+
+def get_project_config_file_path(project_dir):
+    project_config_file_path = os.path.join(project_dir, PROJECT_CONFIG_FILENAME)
+    return project_config_file_path
+
+
+def check_if_project_config_file_exists(project_dir):
+    project_config_file_path = get_project_config_file_path(project_dir)
+    return os.path.exists(project_config_file_path)
+
+
+#
+# LEGACY config utils
+#
+def get_default_legacy_config_path(version):
+    if version not in KNOWN_LEGACY_VERSIONS:
+        raise ValueError(
+            "The requested version v{0} is not part of the legacy config "
+            "versions.  The last legacy version was v{1}".format(
+                version,
+                LAST_LEGACY_CONFIG_VERSION,
+            )
+        )
+    return os.path.join(ASSETS_DIR, DEFAULT_CONFIG_FILENAMES[version])
+
+
+def load_default_legacy_config(version):
+    default_config_path = get_default_legacy_config_path(version)
+    default_config = load_config(default_config_path)
+    return default_config
+
+
+def get_legacy_config_file_path(project_dir):
+    legacy_config_file_path = os.path.join(project_dir, LEGACY_CONFIG_FILENAME)
+    return legacy_config_file_path
+
+
+def check_if_legacy_config_file_exists(project_dir):
+    legacy_config_file_path = get_legacy_config_file_path(project_dir)
+    return os.path.exists(legacy_config_file_path)
 
 
 def get_empty_config():

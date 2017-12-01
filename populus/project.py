@@ -26,7 +26,6 @@ from populus.config import (
     Config,
     load_config as _load_config,
     load_config_schema,
-    write_config,
 )
 
 from populus.config.defaults import (
@@ -102,7 +101,7 @@ class Project(object):
         # project config
         config_file_path = get_json_config_file_path(self.project_dir)
 
-        if os.path.exists(self.config_file_path):
+        if os.path.exists(config_file_path):
             self.config_file_path = config_file_path
         else:
             self.config_file_path = get_default_config_path()
@@ -200,8 +199,6 @@ class Project(object):
         for key, value in items:
             if self.user_config.get(key) == value and key not in default_project_keys:
                 self.project_config.pop(key)
-
-        write_config(self.project_config, self.config_file_path)
 
     #
     # Project

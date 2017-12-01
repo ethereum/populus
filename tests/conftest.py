@@ -186,7 +186,6 @@ def write_project_file(project_dir):
 
 @pytest.fixture
 def user_config_defaults():
-
     return Config(load_user_default_config())
 
 

@@ -1,7 +1,6 @@
-import os
+import logging
 import pytest
 import shutil
-import logging
 
 from populus.config import (
     Config,
@@ -33,7 +32,6 @@ from populus.config.versions import (
     V4,
     V5,
     V6,
-    V7,
     V8,
     LATEST_VERSION,
 )
@@ -50,7 +48,7 @@ from populus.utils.testing import (
 @pytest.mark.filterwarnings('ignore:Found legacy config file at')
 @pytest.mark.parametrize(
     'from_legacy_version',
-    (V1, V2, V3, V4, V5, V6, V7)
+    (V1, V2, V3, V4, V5, V6)
 )
 @user_config_version(V8)
 def test_upgrade_to_user_config(project, from_legacy_version):
@@ -59,8 +57,6 @@ def test_upgrade_to_user_config(project, from_legacy_version):
         get_default_config_path(version=from_legacy_version),
         get_legacy_json_config_file_path(project_dir=project.project_dir)
     )
-
-    os.remove(project.config_file_path)
 
     logger = logging.getLogger("test.test_upgrade_to_user_config")
     upgrade_configs(project.project_dir, logger, LATEST_VERSION)
@@ -90,7 +86,6 @@ def test_upgrade_custom_key(project):
         get_default_config_path(version=V3),
         legacy_config_file_path
     )
-    os.remove(project.config_file_path)
 
     legacy_key = 'compilation.import_remapping'
     legacy_value = ['import-path-from-legacy=contracts']

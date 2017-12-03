@@ -1,0 +1,65 @@
+;;; ---------------------------------------------------------------------------
+;;; @title Lovely Little Greeter
+;;; @author Noel Maersk <veox>
+;;; WARNING: untested!
+
+(seq
+  ;; --------------------------------------------------------------------------
+  ;; CONSTANTS
+
+  (def 'initial-greeting (lit 0x40 "Hello, lovely!.. <3"))
+  (def 'current-greeting 0x1337) ; storage location - 0xef690cc0 too confusing
+
+  (def 'greet        0xcfae3217) ; greet()
+  (def 'greeting     0xef690cc0) ; greeting(): public storage in Solidity
+  (def 'set-greeting 0xa4136862) ; setGreeting(string)
+
+  ;; --------------------------------------------------------------------------
+  ;; STDLIB
+
+  ;; --------------------------------------------------------------------------
+  ;; @author Daniel Ellison <zigguratt>
+  ;; @notice Shifts the leftmost 4 bytes of a 32-byte number right by 28 bytes.
+  ;; @dev 0x14ab90388092664827928d90384c73d82c5bf21abb61dd7d4971fc65f4851dfb
+  ;;      0x0000000000000000000000000000000000000000000000000000000014ab9038
+  ;; @param input A 32-byte number.
+
+  (def 'shift-right (input)
+       (div input (exp 2 224)))
+
+  ;; --------------------------------------------------------------------------
+  ;; @author Daniel Ellison <zigguratt>
+  ;; @notice Determines whether the supplied function ID matches a known
+  ;;         function hash and executes <code-body> if so.
+  ;; @dev The function ID is in the leftmost four bytes of the call data.
+  ;; @param function-hash The four-byte hash of a known function signature.
+  ;; @param code-body The code to run in the case of a match.
+
+  (def 'function (function-hash code-body)
+       (when (= (shift-right (calldataload 0x00)) function-hash)
+         code-body))
+
+  ;; --------------------------------------------------------------------------
+  ;; INIT
+
+  (sstore current-greeting initial-greeting)
+
+  ;; --------------------------------------------------------------------------
+  ;; CODE
+
+  (returnlll
+   (seq
+     ;;
+     (def 'new-greeting (calldataload 0x04))
+     (function set-greeting
+               (sstore current-greeting new-greeting))
+
+     ;;
+     (function greet
+               (return (sload current-greeting)))
+     ;; for compatibility with Greeter.sol
+     (function greeting
+               (return (sload current-greeting)))
+     )
+   )
+  )

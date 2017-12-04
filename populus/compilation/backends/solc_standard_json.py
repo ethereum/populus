@@ -114,7 +114,16 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
             'language': 'Solidity',
             'sources': sources,
             'settings': {
-                'remappings': import_remappings
+                'remappings': import_remappings,
+                'outputSelection': {
+                    '*': {
+                        '*': [ 'metadata',
+                               'evm.bytecode',
+                               'evm.bytecode.linkReferences',
+                               'evm.deployedBytecode',
+                               'evm.deployedBytecode.linkReferences' ]
+                    }
+                }
             }
         }
 

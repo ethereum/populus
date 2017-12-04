@@ -117,11 +117,11 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
                 'remappings': import_remappings,
                 'outputSelection': {
                     '*': {
-                        '*': [ 'metadata',
-                               'evm.bytecode',
-                               'evm.bytecode.linkReferences',
-                               'evm.deployedBytecode',
-                               'evm.deployedBytecode.linkReferences' ]
+                        '*': ['metadata',
+                              'evm.bytecode',
+                              'evm.bytecode.linkReferences',
+                              'evm.deployedBytecode',
+                              'evm.deployedBytecode.linkReferences']
                     }
                 }
             }

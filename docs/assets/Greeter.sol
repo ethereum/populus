@@ -1,9 +1,10 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.0;
 
 contract Greeter {
     string public greeting;
 
-    function Greeter() {
+    // TODO: Populus seems to get no bytecode if `internal`
+    function Greeter() public {
         greeting = 'Hello';
     }
 
@@ -11,7 +12,7 @@ contract Greeter {
         greeting = _greeting;
     }
 
-    function greet() constant returns (string) {
+    function greet() public constant returns (string) {
         return greeting;
     }
 }

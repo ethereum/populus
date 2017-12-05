@@ -1,11 +1,10 @@
 import pprint
 
-from cytoolz.dicttoolz import (
+from cytoolz import (
     assoc,
-)
-from cytoolz.functoolz import (
-    pipe,
+    concatv,
     partial,
+    pipe,
 )
 
 from semantic_version import (
@@ -32,6 +31,11 @@ from populus.utils.compile import (
 )
 from populus.utils.linking import (
     normalize_standard_json_link_references,
+)
+from populus.utils.mappings import (
+    has_nested_key,
+    get_nested_key,
+    set_nested_key,
 )
 
 from .base import (
@@ -76,7 +80,7 @@ def normalize_standard_json_contract_data(contract_data):
 def normalize_compilation_result(compilation_result):
     """
     Take the result from the --standard-json compilation and flatten it into an
-    interable of contract data dictionaries.
+    iterable of contract data dictionaries.
     """
     for source_path, file_contracts in compilation_result['contracts'].items():
         for contract_name, raw_contract_data in file_contracts.items():
@@ -86,6 +90,19 @@ def normalize_compilation_result(compilation_result):
                 partial(assoc, key='source_path', value=source_path),
                 partial(assoc, key='name', value=contract_name),
             )
+
+
+REQUIRED_OUTPUT_SELECTION = [
+    'abi',
+    'metadata',
+    'evm.bytecode',
+    'evm.bytecode.object',
+    'evm.bytecode.linkReferences',
+    'evm.deployedBytecode',
+    'evm.deployedBytecode.object',
+    'evm.deployedBytecode.linkReferences',
+]
+OUTPUT_SELECTION_KEY = 'settings.outputSelection.*.*'
 
 
 class SolcStandardJSONBackend(BaseCompilerBackend):
@@ -103,7 +120,11 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
         self.logger.debug("Import remappings: %s", import_remappings)
-        self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
+        self.logger.debug("Compiler Settings PRE: %s", pprint.pformat(self.compiler_settings))
+
+        # DEBUG
+        self.compiler_settings['output_values'] = []
+        self.logger.debug("Compiler Settings POST: %s", pprint.pformat(self.compiler_settings))
 
         if 'remappings' in self.compiler_settings and import_remappings is not None:
             self.logger.warn("Import remappings setting will by overridden by backend settings")
@@ -117,11 +138,7 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
                 'remappings': import_remappings,
                 'outputSelection': {
                     '*': {
-                        '*': [
-                            'abi',
-                            'metadata',
-                            'evm',
-                        ]
+                        '*': REQUIRED_OUTPUT_SELECTION
                     }
                 }
             }
@@ -136,6 +153,15 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
         std_input_settings = self.compiler_settings.get("stdin", {})
         std_input['settings'].update(std_input_settings)
 
+        # Make sure the output selection has all of the required output values.
+        if has_nested_key(std_input, OUTPUT_SELECTION_KEY):
+            current_selection = get_nested_key(std_input, OUTPUT_SELECTION_KEY)
+            output_selection = list(set(concatv(current_selection, REQUIRED_OUTPUT_SELECTION)))
+        else:
+            output_selection = REQUIRED_OUTPUT_SELECTION
+
+        set_nested_key(std_input, OUTPUT_SELECTION_KEY, output_selection)
+
         self.logger.debug("std_input sections: %s", std_input.keys())
         self.logger.debug("Input Description JSON settings are: %s", std_input["settings"])
         self.logger.debug("Command line options are: %s", command_line_options)
@@ -145,4 +171,5 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
             return {}
 
         compiled_contracts = normalize_compilation_result(compilation_result)
+
         return compiled_contracts

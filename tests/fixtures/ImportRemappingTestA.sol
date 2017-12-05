@@ -4,6 +4,6 @@ import {RemapImported} from "import-path-for-A/RemapImported.sol";
 
 
 contract ImportRemappingTestA is RemapImported {
-  function ImportRemappingTestA() {
+  function ImportRemappingTestA() public {
   }
 }

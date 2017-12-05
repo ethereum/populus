@@ -5,7 +5,7 @@ import {Abstract} from "./Abstract.sol";
 
 
 contract UsesAbstract is Abstract {
-  function doSomething() returns (bool) {
+  function doSomething() public returns (bool) {
     return true;
   }
 }

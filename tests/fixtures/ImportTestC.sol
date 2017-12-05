@@ -4,6 +4,6 @@ import {ImportTestB} from "./ImportTestB.sol";
 
 
 contract ImportTestC is ImportTestB {
-  function ImportTestC() {
+  function ImportTestC() public {
   }
 }

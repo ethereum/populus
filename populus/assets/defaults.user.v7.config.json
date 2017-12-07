@@ -161,7 +161,16 @@
               "runs": 500
             },
             "outputSelection": {
-              "*": {"*": ["abi", "metadata", "evm"]}
+              "*":
+                {"*": [
+                  "abi",
+                  "metadata",
+                  "evm.bytecode.object",
+                  "evm.bytecode.linkReferences",
+                  "evm.deployedBytecode.object",
+                  "evm.deployedBytecode.linkReferences"
+                ]
+              }
             }
           }
         }

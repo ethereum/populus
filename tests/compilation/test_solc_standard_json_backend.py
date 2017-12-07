@@ -133,7 +133,16 @@ def test_compiling_with_local_import_remappings(project):
                 'stdin': {
                     'optimizer': {'enabled': True, 'runs': 500},
                     'outputSelection': {
-                        '*': {'*': ['abi', 'metadata', 'evm']},
+                        '*': {
+                            '*': [
+                                'abi',
+                                'metadata',
+                                'evm.bytecode.object',
+                                'evm.bytecode.linkReferences',
+                                'evm.deployedBytecode.object',
+                                'evm.deployedBytecode.linkReferences',
+                            ]
+                        },
                     },
                 },
                 'command_line_options': {

@@ -23,7 +23,7 @@ setup(
         "eth-utils>=0.7.1",
         "jsonschema>=2.5.1",
         "py-geth>=1.9.0",
-        "py-solc>=1.2.0",
+        "py-solc>=2.1.0",
         "pylru>=1.0.9",
         "pysha3>=0.3,!=1.0,>1.0.0",
         "pytest>=2.7.2,!=3.3.0",
@@ -51,5 +51,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 )

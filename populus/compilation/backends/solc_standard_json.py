@@ -120,7 +120,10 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
                         '*': [
                             'abi',
                             'metadata',
-                            'evm',
+                            'evm.bytecode.object',
+                            'evm.bytecode.linkReferences',
+                            'evm.deployedBytecode.object',
+                            'evm.deployedBytecode.linkReferences',
                         ]
                     }
                 }

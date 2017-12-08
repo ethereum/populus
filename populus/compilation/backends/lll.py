@@ -1,30 +1,73 @@
+import json
+import os
+import pprint
+import subprocess
+
 from .base import (
     BaseCompilerBackend,
 )
+from populus.utils.filesystem import (
+    is_executable_available
+)
+
+
+# FIXME: move where appropriate - separate package if needed.
+class LLLCompiler(object):
+    """ TODO """
+    def __init__(self):
+        self.lllc_binary = os.environ.get('LLLC_BINARY', 'lllc')
+        if not is_executable_available(self.lllc_binary):
+            raise FileNotFoundError("lllc compiler executable not found!")
+        return
+
+    def compile(self, code):
+        """ Passes an LLL program to the ``lllc`` compiler. """
+        proc = subprocess.Popen([self.lllc_binary, '-x'],
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                universal_newlines=True)
+        stdoutdata, stderrdata = proc.communicate(code)
+        return stdoutdata.rstrip()
+
+    def strip(self, bytecode):
+        """ Strips compiler-given bytecode of parts that will not be present at runtime. """
+
+        # remove deployment code: head up to (and including) ``PUSH1 0x00 RETURN STOP``
+        res = bytecode.split('6000f300', maxsplit=1)
+        nohead = res[-1]
+        if nohead == bytecode:
+            return ''
+
+        # remove deployment data: tail from (but not including) last ``JUMPDEST``
+        res = nohead.rsplit('5b', maxsplit=1)
+        notail = res[0] + '5b'
+        return notail
 
 
 class LLLBackend(BaseCompilerBackend):
     project_source_glob = ('*.lll')
-    test_source_glob = ('test_*.lll.py')
+    test_source_glob = ('test_*.lll')
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
-        try:
-            raise Exception # TODO: check for binary
-        except ImportError:
-            raise ImportError(
-                'lllc needs to be installed to use LLLBackend as compiler backend.'
-            )
+        compiler  = LLLCompiler()
 
         self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
 
         compiled_contracts = []
 
-        # TODO: boilerplate from ViperBackend - move up?
         for contract_path in source_file_paths:
             code = open(contract_path).read()
-            abi = compiler.mk_full_signature(code)
-            bytecode = '0x' + compiler.compile(code).hex()
-            bytecode_runtime = '0x' + compiler.compile(code, bytecode_runtime=True).hex()
+            try:
+                with open(contract_path + '.abi') as jsonabi:
+                    abi = json.load(jsonabi)
+            except FileNotFoundError as e:
+                self.logger.error(".lll files require an accompanying .lll.abi JSON ABI file!")
+                raise e
+
+            bytecode = '0x' + compiler.compile(code)
+            bytecode_runtime = '0x' + compiler.strip(bytecode)
+
             compiled_contracts.append({
                 'name': os.path.basename(contract_path).split('.')[0],
                 'abi': abi,

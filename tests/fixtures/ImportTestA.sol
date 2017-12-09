@@ -1,6 +1,6 @@
 pragma solidity ^0.4.0;
 
 contract ImportTestA {
-  function ImportTestA() {
+  function ImportTestA() public {
   }
 }

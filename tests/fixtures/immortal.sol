@@ -4,7 +4,7 @@ import "./owned.sol";
 
 
 contract immortal is owned { 
-  function kill() returns (bool no) { 
+  function kill() public returns (bool no) { 
     return false;
   }
 }

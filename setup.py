@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 setup(
     name='populus',
     # *IMPORTANT*: Don't manually change the version here. Use the 'bumpversion' utility.
-    version='2.0.2',
+    version='2.1.0',
     description="""Ethereum Development Framework""",
     long_description_markdown_filename='README.md',
     author='Piper Merriam',

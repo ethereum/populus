@@ -73,8 +73,12 @@
 
   (def 'sstore-literal (location literal)
        (seq
-         (mstore *litlen* literal)
-         (mload *litloc*)))
+         (mstore *litlen* literal) ; get literal length out of the way
+         (mload *litloc*)))        ; load string data instead
+
+  ;; indicate "program end"; gets eaten by lllc's optimiser :(
+  (def 'populus-end
+       (seq (stop) (stop) (stop)))
 
   ;; ==========================================================================
   ;; INIT
@@ -107,4 +111,6 @@
                (return (sload *current-greeting*)))
 
      ;; fallback
-     (panic))))
+     (panic)
+
+     populus-end)))

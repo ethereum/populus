@@ -33,15 +33,16 @@ class LLLCompiler(object):
     def strip(self, bytecode):
         """ Strips compiler-given bytecode of parts that will not be present at runtime. """
 
-        # remove deployment code: head up to (and including) ``PUSH1 0x00 RETURN STOP``
-        res = bytecode.split('6000f300', maxsplit=1)
+        # remove deployment code: head up to (and including)
+        # ``PUSH1 0x00 CODECOPY PUSH1 0x00 RETURN STOP``
+        res = bytecode.split('6000396000f300', maxsplit=1)
         nohead = res[-1]
         if nohead == bytecode:
             return ''
 
-        # remove deployment data: tail from (but not including) last ``JUMPDEST``
-        res = nohead.rsplit('5b', maxsplit=1)
-        notail = res[0] + '5b'
+        # remove deployment data: tail from (but not including) NIH-marker ``STOP STOP STOP``
+        res = nohead.rsplit('000000', maxsplit=1)
+        notail = res[0] + '000000'
         return notail
 
 

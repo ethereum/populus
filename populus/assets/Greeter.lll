@@ -1,20 +1,31 @@
-;;; ---------------------------------------------------------------------------
-;;; @title Lovely Little Greeter
-;;; @author Noel Maersk <veox>
-;;; WARNING: untested!
+;;;; ==========================================================================
+;;;; @title Lovely Little Greeter
+;;;; @author Noel Maersk <veox>
+;;;; WARNING: untested!
 
 (seq
-  ;; --------------------------------------------------------------------------
+  ;; ==========================================================================
+  ;; MEMORY LAYOUT
+
+  (def '*function-selector* 0x20)
+  (def '*litlen* 0x40) ; literal length
+  (def '*litloc* 0x60) ; literal location
+
+  ;; ==========================================================================
+  ;; STORAGE LAYOUT
+
+  (def '*current-greeting* 0x1337)
+
+  ;; ==========================================================================
   ;; CONSTANTS
 
-  (def 'initial-greeting (lit 0x40 "Hello, lovely!.. <3"))
-  (def 'current-greeting 0x1337) ; storage location - 0xef690cc0 too confusing
+  (def '*initial-greeting* (lit *litloc* "Hello, lovely!.. <3"))
 
-  (def 'greet        0xcfae3217) ; greet()
-  (def 'greeting     0xef690cc0) ; greeting(): public storage in Solidity
-  (def 'set-greeting 0xa4136862) ; setGreeting(string)
+  (def '*greet*        0xcfae3217) ; greet()
+  (def '*greeting*     0xef690cc0) ; greeting(): public storage in Solidity
+  (def '*set-greeting* 0xa4136862) ; setGreeting(string)
 
-  ;; --------------------------------------------------------------------------
+  ;; ==========================================================================
   ;; STDLIB
 
   ;; --------------------------------------------------------------------------
@@ -28,38 +39,72 @@
        (div input (exp 2 224)))
 
   ;; --------------------------------------------------------------------------
+  ;; @author Ben Edgington <benjaminion>
+  ;; @notice Gets the function ID and stores it in memory for reference.
+  ;; @dev The function ID is stored at a pre-defined location 0x20 and will
+  ;;      be read from memory every time instead of duplicated on stack.
+  ;; TODO: consider lll-docs lll_abi.html#passing-data-to-a-function
+
+  (def 'mstore-function-selector
+       (mstore *function-selector* (shift-right (calldataload 0x00))))
+
+  ;; --------------------------------------------------------------------------
   ;; @author Daniel Ellison <zigguratt>
-  ;; @notice Determines whether the supplied function ID matches a known
-  ;;         function hash and executes <code-body> if so.
-  ;; @dev The function ID is in the leftmost four bytes of the call data.
+  ;; @notice Determines whether the supplied function selector matches a known
+  ;;         one and executes <code-body> if so.
+  ;; @dev The selector is in the leftmost four bytes of the call data:
+  ;;      https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
   ;; @param function-hash The four-byte hash of a known function signature.
   ;; @param code-body The code to run in the case of a match.
 
-  (def 'function (function-hash code-body)
-       (when (= (shift-right (calldataload 0x00)) function-hash)
+  (def 'function (function-selector code-body)
+       (when (= (mload *function-selector*) function-selector)
          code-body))
 
   ;; --------------------------------------------------------------------------
+  ;; @author Daniel Ellison <zigguratt>
+  ;; @notice Modifier macro to prevent unintended payments.
+
+  (def 'unpayable
+       (when (callvalue) (panic)))
+
+  ;; ==========================================================================
+  ;; NIHLIB
+
+  (def 'sstore-literal (location literal)
+       (seq
+         (mstore *litlen* literal)
+         (mload *litloc*)))
+
+  ;; ==========================================================================
   ;; INIT
 
-  (sstore current-greeting initial-greeting)
+  (seq
+    unpayable
+    (sstore-literal *current-greeting* *initial-greeting*))
 
-  ;; --------------------------------------------------------------------------
+  ;; ==========================================================================
   ;; CODE
 
   (returnlll
    (seq
-     ;;
-     (def 'new-greeting (calldataload 0x04))
-     (function set-greeting
-               (sstore current-greeting new-greeting))
+     unpayable
+     mstore-function-selector
 
-     ;;
-     (function greet
-               (return (sload current-greeting)))
-     ;; for compatibility with Greeter.sol
-     (function greeting
-               (return (sload current-greeting)))
-     )
-   )
-  )
+     ;; change greeting value in storage
+     (def 'new-greeting (calldataload 0x04))
+     (function *set-greeting*
+               (seq
+                 (sstore-literal *current-greeting* new-greeting)
+                 (stop)))
+
+     ;; return greeting value from storage
+     (function *greet*
+               (return (sload *current-greeting*)))
+
+     ;; for compatibility with Greeter.sol: "public storage variable"
+     (function *greeting*
+               (return (sload *current-greeting*)))
+
+     ;; fallback
+     (panic))))

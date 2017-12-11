@@ -1,0 +1,100 @@
+;;;; ==========================================================================
+;;;; @title Lovely Little Greeter
+;;;; @author Noel Maersk <veox>
+
+(seq
+  ;; ==========================================================================
+  ;; MEMORY LAYOUT
+
+  (def '*memloc-function-selector* 0x20)
+
+  ;; ==========================================================================
+  ;; STORAGE LAYOUT
+
+  (def '*storloc-greeting* 0x1337)
+
+  ;; ==========================================================================
+  ;; CONSTANTS
+
+  (def '*initial-greeting* 42)
+
+  (def '*greet*        0xcfae3217) ; greet()
+  (def '*greeting*     0xef690cc0) ; greeting(): public storage in Solidity
+  (def '*set-greeting* 0xb2010978) ; setGreeting(string)
+
+  ;; ==========================================================================
+  ;; STDLIB
+
+  ;; --------------------------------------------------------------------------
+  ;; @author Daniel Ellison <zigguratt>
+  ;; @notice Shifts the leftmost 4 bytes of a 32-byte number right by 28 bytes.
+  ;; @dev 0x14ab90388092664827928d90384c73d82c5bf21abb61dd7d4971fc65f4851dfb
+  ;;      0x0000000000000000000000000000000000000000000000000000000014ab9038
+  ;; @param input A 32-byte number.
+
+  (def 'shift-right (input)
+       (div input (exp 2 224)))
+
+  ;; --------------------------------------------------------------------------
+  ;; @author Ben Edgington <benjaminion>
+  ;; @notice Gets the function ID and stores it in memory for reference.
+  ;; @dev The function ID is stored at a pre-defined location 0x20 and will
+  ;;      be read from memory every time instead of duplicated on stack.
+  ;; TODO: consider lll-docs lll_abi.html#passing-data-to-a-function
+
+  (def 'mstore-function-selector
+       (mstore *memloc-function-selector*
+               (shift-right (calldataload 0x00))))
+
+  ;; --------------------------------------------------------------------------
+  ;; @author Daniel Ellison <zigguratt>
+  ;; @notice Determines whether the supplied function selector matches a known
+  ;;         one and executes <code-body> if so.
+  ;; @dev The selector is in the leftmost four bytes of the call data:
+  ;;      https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
+  ;; @param function-hash The four-byte hash of a known function signature.
+  ;; @param code-body The code to run in the case of a match.
+
+  (def 'function (function-selector code-body)
+       (when (= (mload *memloc-function-selector*) function-selector)
+         code-body))
+
+  ;; --------------------------------------------------------------------------
+  ;; @author Daniel Ellison <zigguratt>
+  ;; @notice Modifier macro to prevent unintended payments.
+
+  (def 'unpayable
+       (when (callvalue) (panic)))
+
+  ;; ==========================================================================
+  ;; INIT
+
+  (seq
+    unpayable
+    (sstore *storloc-greeting* *initial-greeting*))
+
+  ;; ==========================================================================
+  ;; CODE
+
+  (returnlll
+   (seq
+     unpayable
+     mstore-function-selector
+
+     ;; change greeting value in storage
+     (def 'new-greeting (calldataload 0x04))
+     (function *set-greeting*
+               (seq
+                 (sstore *storloc-greeting* new-greeting)
+                 (stop)))
+
+     ;; return greeting value from storage
+     (function *greet*
+               (return (sload *storloc-greeting*)))
+
+     ;; for compatibility with Greeter.sol: "public storage variable"
+     (function *greeting*
+               (return (sload *storloc-greeting*)))
+
+     ;; fallback
+     (panic))))

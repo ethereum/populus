@@ -214,9 +214,7 @@
     "contract_source_dirs": [
       "./contracts"
     ],
-    "import_remappings": [
-      "import-path-from-legacy=contracts"
-    ]
+    "import_remappings": []
   },
   "contracts": {
     "backends": {
@@ -239,6 +237,11 @@
         "class": "populus.contracts.backends.testing.TestContractsBackend",
         "priority": 40
       }
+    }
+  },
+  "some": {
+    "nested": {
+      "key": "value"
     }
   },
   "version": "8",

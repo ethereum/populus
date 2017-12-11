@@ -81,7 +81,8 @@ class Project(object):
         if user_config_file_path is not None:
             if not os.path.exists(user_config_file_path):
                 raise FileNotFoundError(
-                    "No populus configuration file found at specified location: `{0}`".format(user_config_file_path)
+                    "No populus configuration file found at specified location: "
+                    "`{0}`".format(user_config_file_path)
                 )
             self.user_config_file_path = user_config_file_path
         else:

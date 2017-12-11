@@ -73,7 +73,7 @@ def test_upgrade_to_user_config(project, from_legacy_version):
     expected_project_config.unref()
 
     assert upgraded_project.legacy_config_path is None
-    assert upgraded_project.config == expected_user_config
+
     assert upgraded_project.user_config == expected_user_config
     assert upgraded_project.project_config == expected_project_config
 

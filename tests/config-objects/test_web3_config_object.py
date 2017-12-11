@@ -45,6 +45,15 @@ def test_provider_property_with_settings():
         ('web3.providers.rpc.RPCProvider', 'web3.providers.rpc.RPCProvider'),
         (IPCProvider, 'web3.providers.ipc.IPCProvider'),
         (HTTPProvider, 'web3.providers.rpc.HTTPProvider'),
+    ),
+    ids=(
+        'ipc-shorthand',
+        'rpc-shorthand',
+        'ipc-pythonpath',
+        'http-pythonpath',
+        'rpc-pythonpath',
+        'ipc-classobj',
+        'http-classobj',
     )
 )
 def test_set_provider_class_api(value, expected):

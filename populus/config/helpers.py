@@ -24,12 +24,18 @@ from populus.utils.module_loading import (
 
 JSON_CONFIG_FILENAME = './project.json'
 LEGACY_JSON_CONFIG_FILENAME = './populus.json'
-USER_JSON_CONFIG_FILENAME = '~/.populus/config.json'
+
+POPULUS_USER_BASE_PATH = '~/.populus'
+USER_JSON_CONFIG_FILENAME = './config.json'
 
 
 def get_user_json_config_file_path():
-
-    return os.path.expanduser(USER_JSON_CONFIG_FILENAME)
+    user_base_path = os.environ.get('POPULUS_USER_BASE_PATH', POPULUS_USER_BASE_PATH)
+    user_config_file_path = os.path.expanduser(os.path.join(
+        user_base_path,
+        USER_JSON_CONFIG_FILENAME,
+    ))
+    return user_config_file_path
 
 
 def check_if_user_json_config_file_exists():

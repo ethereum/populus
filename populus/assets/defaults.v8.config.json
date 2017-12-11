@@ -239,11 +239,6 @@
       }
     }
   },
-  "some": {
-    "nested": {
-      "key": "value"
-    }
-  },
   "version": "8",
   "web3": {
     "GethIPC": {

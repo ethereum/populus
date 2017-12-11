@@ -66,7 +66,34 @@ def test_getting_chain_instance(project):
         (TemporaryGethChain, 'populus.chain.geth.TemporaryGethChain'),
         (MainnetChain, 'populus.chain.geth.MainnetChain'),
         (_TestnetChain, 'populus.chain.geth.TestnetChain'),
-    )
+    ),
+    ids=(
+        # shorthand strings
+        'local-shorthand',
+        'external-shorthand',
+        'tester-shorthand',
+        'testrpc-shorthand',
+        'temp-shorthand',
+        'mainnet-shorthand',
+        'testnet-shorthand',
+        'ropsten-shorthand',
+        # python paths
+        'local-pythonpath',
+        'external-pythonpath',
+        'tester-pythonpath',
+        'testrpc-pythonpath',
+        'temp-pythonpath',
+        'mainnet-pythonpath',
+        'testnet-pythonpath',
+        # classes
+        'local-classobj',
+        'external-classobj',
+        'tester-classobj',
+        'testrpc-classobj',
+        'temp-classobj',
+        'mainnet-classobj',
+        'testnet-classobj',
+    ),
 )
 def test_set_chain_class_api(value, expected):
     chain_config = ChainConfig()

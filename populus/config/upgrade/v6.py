@@ -22,11 +22,11 @@ from populus.config import (
 )
 
 
-def upgrade_v6_to_v7(v6_config):
+def upgrade_v6_to_v7(v6_base_config):
     """
     Upgrade a v6 config file to a v7 config file.
     """
-    errors = get_validation_errors(v6_config, version=V6)
+    errors = get_validation_errors(v6_base_config, version=V6)
     if errors:
         raise ValueError(
             "Cannot upgrade invalid config.  Please ensure that your current "
@@ -34,6 +34,9 @@ def upgrade_v6_to_v7(v6_config):
                 format_errors(errors),
             )
         )
+
+    v6_config = Config(v6_base_config)
+    v6_config.unref()
 
     v6_default = load_default_config(version=V6)
     v7_default = load_default_config(version=V7)

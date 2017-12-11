@@ -59,6 +59,17 @@ from populus.config.versions import (
 POPULUS_SOURCE_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
+@pytest.fixture(autouse=True)
+def user_base_path(tmpdir, monkeypatch):
+    """
+    Prevent tests from running against the config file found at
+    `~/.populus/config`
+    """
+    tmp_user_base_path = str(tmpdir.mkdir('populus-home'))
+    monkeypatch.setenv('POPULUS_USER_BASE_PATH', tmp_user_base_path)
+    return tmp_user_base_path
+
+
 @pytest.fixture()
 def temporary_dir(tmpdir):
     _temporary_dir = str(tmpdir.mkdir("temporary-dir"))

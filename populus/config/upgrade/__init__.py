@@ -115,6 +115,7 @@ def upgrade_config(config, config_context, to_version=LATEST_VERSION):
         UPGRADE_FUNCTIONS[version] for version in upgrade_sequence
     )
     upgraded_config = pipe(config, *upgrade_functions)
+
     return upgraded_config
 
 

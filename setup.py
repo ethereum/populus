@@ -26,7 +26,7 @@ setup(
         "py-solc>=1.2.0",
         "pylru>=1.0.9",
         "pysha3>=0.3,!=1.0,>1.0.0",
-        "pytest>=2.7.2,!=3.3.0",
+        "pytest>=2.7.2,!=3.3.*",
         "semantic_version>=2.6.0",
         "cytoolz>=0.8.2",
         "toposort>=1.4",

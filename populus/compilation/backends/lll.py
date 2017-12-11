@@ -11,9 +11,8 @@ from populus.utils.filesystem import (
 )
 
 
-# FIXME: move where appropriate - separate package if needed.
 class LLLCompiler(object):
-    """ TODO """
+    """ Interface to system-wide `lllc`. """
     def __init__(self):
         self.lllc_binary = os.environ.get('LLLC_BINARY', 'lllc')
         if not is_executable_available(self.lllc_binary):
@@ -47,7 +46,7 @@ class LLLBackend(BaseCompilerBackend):
     test_source_glob = ('test_*.lll')
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
-        compiler  = LLLCompiler()
+        compiler = LLLCompiler()
 
         self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
 

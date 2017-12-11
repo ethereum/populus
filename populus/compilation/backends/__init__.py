@@ -10,6 +10,6 @@ from .solc_auto import (  # noqa: F401
 from .viper import (  # noqa: F401
     ViperBackend,
 )
-from .lll import (  #noqa: F401
+from .lll import (  # noqa: F401
     LLLBackend,
 )

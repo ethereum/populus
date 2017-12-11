@@ -10,6 +10,10 @@ from populus.utils.linking import (
     insert_link_value,
 )
 
+from populus.utils.filesystem import (
+    is_executable_available
+)
+
 
 def load_contract_fixture(fixture_path_or_name, dst_path=None):
     def outer(fn):
@@ -86,9 +90,10 @@ def viper_installed():
     except ImportError:
         return False
 
+
 def lllc_installed():
     lllc_binary = os.environ.get('LLLC_BINARY', 'lllc')
-    if  is_executable_available(lllc_binary):
+    if is_executable_available(lllc_binary):
         return True
     else:
         return False

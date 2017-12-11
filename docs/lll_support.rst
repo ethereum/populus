@@ -3,24 +3,40 @@ LLL Support
 
 Populus provides partial support for LLL, in particular the
 ``lllc`` compiler, which is currently maintained in tandem
-with Solidity in the `ethereum/solidity`_ repository.
+with Solidity and its ``solc`` compiler in the
+`ethereum/solidity`_ repository.
 
 .. _ethereum/solidity: https://github.com/ethereum/solidity
 
 Known limitations
 -----------------
 
-This feature is highly experimental; mixing different languages,
-e.g. Solidity and LLL or Viper and LLL, is not yet possible.
+This feature is highly experimental!
+
+Mixing different languages, e.g. Solidity and LLL or Viper and
+LLL, is not yet possible.
 
 Since LLL is very low-level, not all language constructs are
 currently supported. In particular, string literals, especially
 defined with the ``lit`` keyword, may be impossible to use.
+For example, code using them may compile successfully, but its
+deployment in tests might fail due to Populus' inability to
+determine where in the bytecode the literals have been placed,
+and the ``lllc`` compiler providing no hints to that effect.
 
-Finally, LLL programs have no notion of ``web3`` ABI, as detailed
-in the `Ethereum Contract ABI`_ specification. For that reason,
-all ``.lll`` files must have an accompanying ``.lll.abi`` file,
-specifying in JSON the on-chain contract's interface.
+One-shot contracts that leave the destination account without
+code after running are also not supported, since Populus can't
+differentiate between such use cases and contracts that actually
+failed to deploy.
+
+In fact, the runtime bytecode is extracted from the compiled
+bytecode (as given by ``lllc``) based solely on the signature
+produced by the ``returnlll`` macro.
+
+Finally, LLL programs have no notion of ``web3`` ABI, as it is
+described in the `Ethereum Contract ABI`_ specification. For that
+reason, all ``.lll`` files must have an accompanying ``.lll.abi``
+file, specifying in JSON the contract's interface.
 
 .. _Ethereum Contract ABI: https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
 
@@ -93,7 +109,7 @@ These files should be available in the `Populus repository`_, as
 Place them in the ``contracts`` directory of your project.
 
 .. _Populus repository: https://github.com/ethereum/populus
-.. _Greeter.lll: https://github.com/ethereum/populus/tree/master/populus/assets
+.. _Greeter.lll: https://github.com/ethereum/populus/tree/master/populus/assets/Greeter.lll
 .. _Greeter.lll.abi: https://github.com/ethereum/populus/tree/master/populus/assets/Greeter.lll.abi
 
 Copy LLL-specific test

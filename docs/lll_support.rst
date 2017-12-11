@@ -2,8 +2,8 @@ LLL Support
 ===========
 
 Populus provides partial support for LLL, in particular the
-``lllc`` compiler, currently maintained in tandem
-with Solidity, in the `ethereum/solidity`_ repository.
+``lllc`` compiler, which is currently maintained in tandem
+with Solidity in the `ethereum/solidity`_ repository.
 
 .. _ethereum/solidity: https://github.com/ethereum/solidity
 

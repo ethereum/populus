@@ -4,7 +4,7 @@
         "inputs": [
             {
                 "name": "_greeting",
-                "type": "string"
+                "type": "uint256"
             }
         ],
         "name": "setGreeting",
@@ -20,7 +20,7 @@
         "outputs": [
             {
                 "name": "",
-                "type": "string"
+                "type": "uint256"
             }
         ],
         "payable": false,
@@ -34,7 +34,7 @@
         "outputs": [
             {
                 "name": "",
-                "type": "string"
+                "type": "uint256"
             }
         ],
         "payable": false,

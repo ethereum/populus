@@ -7,23 +7,22 @@
   ;; ==========================================================================
   ;; MEMORY LAYOUT
 
-  (def '*function-selector* 0x20)
-  (def '*litlen* 0x40) ; literal length
-  (def '*litloc* 0x60) ; literal location
+  (def '*memloc-function-selector* 0x20)
 
   ;; ==========================================================================
   ;; STORAGE LAYOUT
 
-  (def '*current-greeting* 0x1337)
+  (def '*storloc-greeting* 0x1337)
 
   ;; ==========================================================================
   ;; CONSTANTS
 
-  (def '*initial-greeting* (lit *litloc* "Hello, lovely!.. <3"))
+  (def '*UNUSED (lit 0x60 "Populus can't handle no-literal contracts yet."))
+  (def '*initial-greeting* 42)
 
   (def '*greet*        0xcfae3217) ; greet()
   (def '*greeting*     0xef690cc0) ; greeting(): public storage in Solidity
-  (def '*set-greeting* 0xa4136862) ; setGreeting(string)
+  (def '*set-greeting* 0xb2010978) ; setGreeting(string)
 
   ;; ==========================================================================
   ;; STDLIB
@@ -46,7 +45,8 @@
   ;; TODO: consider lll-docs lll_abi.html#passing-data-to-a-function
 
   (def 'mstore-function-selector
-       (mstore *function-selector* (shift-right (calldataload 0x00))))
+       (mstore *memloc-function-selector*
+               (shift-right (calldataload 0x00))))
 
   ;; --------------------------------------------------------------------------
   ;; @author Daniel Ellison <zigguratt>
@@ -58,7 +58,7 @@
   ;; @param code-body The code to run in the case of a match.
 
   (def 'function (function-selector code-body)
-       (when (= (mload *function-selector*) function-selector)
+       (when (= (mload *memloc-function-selector*) function-selector)
          code-body))
 
   ;; --------------------------------------------------------------------------
@@ -71,11 +71,6 @@
   ;; ==========================================================================
   ;; NIHLIB
 
-  (def 'sstore-literal (location literal)
-       (seq
-         (mstore *litlen* literal) ; get literal length out of the way
-         (mload *litloc*)))        ; load string data instead
-
   ;; indicate "program end"; gets eaten by lllc's optimiser :(
   (def 'populus-end
        (seq (stop) (stop) (stop)))
@@ -85,7 +80,7 @@
 
   (seq
     unpayable
-    (sstore-literal *current-greeting* *initial-greeting*))
+    (sstore *storloc-greeting* *initial-greeting*))
 
   ;; ==========================================================================
   ;; CODE
@@ -99,16 +94,16 @@
      (def 'new-greeting (calldataload 0x04))
      (function *set-greeting*
                (seq
-                 (sstore-literal *current-greeting* new-greeting)
+                 (sstore *storloc-greeting* new-greeting)
                  (stop)))
 
      ;; return greeting value from storage
      (function *greet*
-               (return (sload *current-greeting*)))
+               (return (sload *storloc-greeting*)))
 
      ;; for compatibility with Greeter.sol: "public storage variable"
      (function *greeting*
-               (return (sload *current-greeting*)))
+               (return (sload *storloc-greeting*)))
 
      ;; fallback
      (panic)

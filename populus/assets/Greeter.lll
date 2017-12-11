@@ -20,7 +20,7 @@
 
   (def '*greet*        0xcfae3217) ; greet()
   (def '*greeting*     0xef690cc0) ; greeting(): public storage in Solidity
-  (def '*set-greeting* 0xb2010978) ; setGreeting(string)
+  (def '*set-greeting* 0xb2010978) ; setGreeting(uint256)
 
   ;; ==========================================================================
   ;; STDLIB

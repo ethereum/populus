@@ -104,6 +104,8 @@ install:
   - if [ -n "$SOLC_VERSION" ]; then python -m solc.install $SOLC_VERSION; fi
   - if [ -n "$SOLC_VERSION" ]; then export SOLC_BINARY="$SOLC_BASE_INSTALL_PATH/solc-$SOLC_VERSION/bin/solc"; fi
   - if [ -n "$SOLC_VERSION" ]; then export LD_LIBRARY_PATH="$SOLC_BASE_INSTALL_PATH/solc-$SOLC_VERSION/bin"; fi
+  # lllc - installed together with solc
+  - if [ -n "$SOLC_VERSION" ]; then export LLLC_BINARY="$SOLC_BASE_INSTALL_PATH/solc-$SOLC_VERSION/bin/lllc"; fi
   # geth
   - if [ -n "$GETH_VERSION" ]; then travis_retry pip install "py-geth>=1.9.0"; fi
   - if [ -n "$GETH_VERSION" ]; then python -m geth.install $GETH_VERSION; fi

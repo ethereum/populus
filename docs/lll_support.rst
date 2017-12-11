@@ -28,8 +28,14 @@ specifying in JSON the on-chain contract's interface.
 Installation
 ------------
 
-On Ubuntu-based systems, ``lllc`` should be available in the same
-package as ``solc``.
+On Ubuntu-based systems, the ``lllc`` compiler seems to no longer
+be available in a package. You might need to `build it from source`_.
+
+For Ubuntu 14.04, one might be shipped together with ``solc``,
+available in ``solidity-ubuntu-trusty.zip`` on the `releases page`_.
+
+
+On Arch Linux, an ``lll`` package is `available in AUR`_.
 
 In general, ``lllc`` should be available in ``PATH``; or an
 ``LLLC_BINARY`` environment variable must be set and pointing to
@@ -42,6 +48,10 @@ To see if it's present:
     $ lllc --version
     LLLC, the Lovely Little Language Compiler
     Version: 0.4.19-develop.2017.12.1+commit.c4cbbb05.Linux.g++
+
+.. _build it from source: https://media.consensys.net/installing-ethereum-compilers-61d701e78f6
+.. _releases page: https://github.com/ethereum/solidity/releases
+.. _available in AUR: https://aur.archlinux.org/packages/lll/
 
 
 Using

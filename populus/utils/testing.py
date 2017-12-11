@@ -85,3 +85,10 @@ def viper_installed():
         return True
     except ImportError:
         return False
+
+def lllc_installed():
+    lllc_binary = os.environ.get('LLLC_BINARY', 'lllc')
+    if  is_executable_available(lllc_binary):
+        return True
+    else:
+        return False

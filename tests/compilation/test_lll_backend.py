@@ -5,9 +5,17 @@ from populus.compilation import (
 )
 
 from populus.utils.testing import (
+    lllc_installed,
     load_contract_fixture,
     update_project_config,
 )
+
+
+pytestmark = pytest.mark.skipif(
+    not lllc_installed(),
+    reason="lllc not installed",
+)
+
 
 @load_contract_fixture('Greeter.lll')
 @load_contract_fixture('Greeter.lll.abi')

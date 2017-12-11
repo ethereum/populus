@@ -39,11 +39,7 @@ class LLLCompiler(object):
         nohead = res[-1]
         if nohead == bytecode:
             return ''
-
-        # remove deployment data: tail from (but not including) NIH-marker ``STOP STOP STOP``
-        res = nohead.rsplit('000000', maxsplit=1)
-        notail = res[0] + '000000'
-        return notail
+        return nohead
 
 
 class LLLBackend(BaseCompilerBackend):

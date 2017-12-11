@@ -16,7 +16,6 @@
   ;; ==========================================================================
   ;; CONSTANTS
 
-  (def '*UNUSED* (lit 0x60 "Hello, lovely!.. ❤"))
   (def '*initial-greeting* 42)
 
   (def '*greet*        0xcfae3217) ; greet()
@@ -81,7 +80,6 @@
    (seq
      unpayable
      mstore-function-selector
-     *UNUSED*
 
      ;; change greeting value in storage
      (def 'new-greeting (calldataload 0x04))

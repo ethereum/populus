@@ -1,7 +1,6 @@
 ;;;; ==========================================================================
 ;;;; @title Lovely Little Greeter
 ;;;; @author Noel Maersk <veox>
-;;;; WARNING: untested!
 
 (seq
   ;; ==========================================================================
@@ -17,7 +16,7 @@
   ;; ==========================================================================
   ;; CONSTANTS
 
-  (def '*UNUSED (lit 0x60 "Populus can't handle no-literal contracts yet."))
+  (def '*UNUSED* (lit 0x60 "Hello, lovely!.. ❤"))
   (def '*initial-greeting* 42)
 
   (def '*greet*        0xcfae3217) ; greet()
@@ -69,13 +68,6 @@
        (when (callvalue) (panic)))
 
   ;; ==========================================================================
-  ;; NIHLIB
-
-  ;; indicate "program end"; gets eaten by lllc's optimiser :(
-  (def 'populus-end
-       (seq (stop) (stop) (stop)))
-
-  ;; ==========================================================================
   ;; INIT
 
   (seq
@@ -89,6 +81,7 @@
    (seq
      unpayable
      mstore-function-selector
+     *UNUSED*
 
      ;; change greeting value in storage
      (def 'new-greeting (calldataload 0x04))
@@ -106,6 +99,4 @@
                (return (sload *storloc-greeting*)))
 
      ;; fallback
-     (panic)
-
-     populus-end)))
+     (panic))))

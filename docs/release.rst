@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-.. _v2.1.0-release-notes:
+.. _v2.2.0-release-notes:
 
 2.2.0
 -----
@@ -17,6 +17,22 @@ Release Notes
 -----
 
 - Support for solidity ``v0.4.18`` and ``v0.4.19``
+
+
+.. _v2.0.2-release-notes:
+
+2.0.2
+-----
+
+- Added experimental Viper support.
+
+
+.. _v2.0.1-release-notes:
+
+2.0.1
+-----
+
+- Fixed deprecation warnings.
 
 
 .. _v2.0.0-release-notes:

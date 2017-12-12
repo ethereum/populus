@@ -1,6 +1,24 @@
 Release Notes
 =============
 
+.. _v2.1.0-release-notes:
+
+2.2.0
+-----
+
+- Refactor to configuration API to stop writing the default config to
+  ``~/.populus/config`` in favor of using the default config file baked into
+  the populus library.
+
+
+.. _v2.1.0-release-notes:
+
+2.1.0
+-----
+
+- Support for solidity ``v0.4.18`` and ``v0.4.19``
+
+
 .. _v2.0.0-release-notes:
 
 2.0.0

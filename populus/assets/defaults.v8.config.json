@@ -1,0 +1,282 @@
+{
+  "chains": {
+    "mainnet": {
+      "chain": {
+        "class": "populus.chain.geth.MainnetChain"
+      },
+      "contracts": {
+        "backends": {
+          "JSONFile": {
+            "class": "populus.contracts.backends.filesystem.JSONFileBackend",
+            "priority": 10,
+            "settings": {
+              "file_path": "./registrar.json"
+            }
+          },
+          "Memory": {
+            "class": "populus.contracts.backends.memory.MemoryBackend",
+            "priority": 50
+          },
+          "ProjectContracts": {
+            "class": "populus.contracts.backends.project.ProjectContractsBackend",
+            "priority": 20
+          },
+          "TestContracts": {
+            "class": "populus.contracts.backends.testing.TestContractsBackend",
+            "priority": 40
+          }
+        }
+      },
+      "web3": {
+        "provider": {
+          "class": "web3.providers.ipc.IPCProvider"
+        }
+      }
+    },
+    "ropsten": {
+      "chain": {
+        "class": "populus.chain.geth.TestnetChain"
+      },
+      "contracts": {
+        "backends": {
+          "JSONFile": {
+            "class": "populus.contracts.backends.filesystem.JSONFileBackend",
+            "priority": 10,
+            "settings": {
+              "file_path": "./registrar.json"
+            }
+          },
+          "Memory": {
+            "class": "populus.contracts.backends.memory.MemoryBackend",
+            "priority": 50
+          },
+          "ProjectContracts": {
+            "class": "populus.contracts.backends.project.ProjectContractsBackend",
+            "priority": 20
+          },
+          "TestContracts": {
+            "class": "populus.contracts.backends.testing.TestContractsBackend",
+            "priority": 40
+          }
+        }
+      },
+      "web3": {
+        "provider": {
+          "class": "web3.providers.ipc.IPCProvider"
+        }
+      }
+    },
+    "temp": {
+      "chain": {
+        "class": "populus.chain.geth.TemporaryGethChain"
+      },
+      "contracts": {
+        "backends": {
+          "Memory": {
+            "class": "populus.contracts.backends.memory.MemoryBackend",
+            "priority": 50
+          },
+          "ProjectContracts": {
+            "class": "populus.contracts.backends.project.ProjectContractsBackend",
+            "priority": 20
+          },
+          "TestContracts": {
+            "class": "populus.contracts.backends.testing.TestContractsBackend",
+            "priority": 40
+          }
+        }
+      },
+      "web3": {
+        "provider": {
+          "class": "web3.providers.ipc.IPCProvider"
+        }
+      }
+    },
+    "tester": {
+      "chain": {
+        "class": "populus.chain.tester.TesterChain"
+      },
+      "contracts": {
+        "backends": {
+          "Memory": {
+            "class": "populus.contracts.backends.memory.MemoryBackend",
+            "priority": 50
+          },
+          "ProjectContracts": {
+            "class": "populus.contracts.backends.project.ProjectContractsBackend",
+            "priority": 20
+          },
+          "TestContracts": {
+            "class": "populus.contracts.backends.testing.TestContractsBackend",
+            "priority": 40
+          }
+        }
+      },
+      "web3": {
+        "provider": {
+          "class": "web3.providers.tester.EthereumTesterProvider"
+        }
+      }
+    },
+    "testrpc": {
+      "chain": {
+        "class": "populus.chain.testrpc.TestRPCChain"
+      },
+      "contracts": {
+        "backends": {
+          "Memory": {
+            "class": "populus.contracts.backends.memory.MemoryBackend",
+            "priority": 50
+          },
+          "ProjectContracts": {
+            "class": "populus.contracts.backends.project.ProjectContractsBackend",
+            "priority": 20
+          },
+          "TestContracts": {
+            "class": "populus.contracts.backends.testing.TestContractsBackend",
+            "priority": 40
+          }
+        }
+      },
+      "web3": {
+        "provider": {
+          "class": "web3.providers.tester.TestRPCProvider"
+        }
+      }
+    }
+  },
+  "compilation": {
+    "backend": {
+      "class": "populus.compilation.backends.SolcCombinedJSONBackend",
+      "settings": {
+        "optimize": true,
+        "output_values": [
+          "abi",
+          "bin",
+          "bin-runtime",
+          "metadata"
+        ]
+      }
+    },
+    "backends": {
+      "SolcAutoBackend": {
+        "class": "populus.compilation.backends.SolcAutoBackend",
+        "settings": {
+          "optimize": true,
+          "output_values": [
+            "abi",
+            "bin",
+            "bin-runtime",
+            "metadata"
+          ]
+        }
+      },
+      "SolcCombinedJSON": {
+        "class": "populus.compilation.backends.SolcCombinedJSONBackend",
+        "settings": {
+          "optimize": true,
+          "output_values": [
+            "abi",
+            "bin",
+            "bin-runtime",
+            "metadata"
+          ]
+        }
+      },
+      "SolcStandardJSON": {
+        "class": "populus.compilation.backends.SolcStandardJSONBackend",
+        "settings": {
+          "optimize": true,
+          "output_values": [
+            "abi",
+            "bin",
+            "bin-runtime",
+            "metadata"
+          ],
+          "stdin": {
+            "optimizer": {
+              "enabled": true,
+              "runs": 500
+            },
+            "outputSelection": {
+              "*": {
+                "*": [
+                  "abi",
+                  "metadata",
+                  "evm"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "contract_source_dirs": [
+      "./contracts"
+    ],
+    "import_remappings": []
+  },
+  "contracts": {
+    "backends": {
+      "JSONFile": {
+        "class": "populus.contracts.backends.filesystem.JSONFileBackend",
+        "priority": 10,
+        "settings": {
+          "file_path": "./registrar.json"
+        }
+      },
+      "Memory": {
+        "class": "populus.contracts.backends.memory.MemoryBackend",
+        "priority": 50
+      },
+      "ProjectContracts": {
+        "class": "populus.contracts.backends.project.ProjectContractsBackend",
+        "priority": 20
+      },
+      "TestContracts": {
+        "class": "populus.contracts.backends.testing.TestContractsBackend",
+        "priority": 40
+      }
+    }
+  },
+  "version": "8",
+  "web3": {
+    "GethIPC": {
+      "provider": {
+        "class": "web3.providers.ipc.IPCProvider"
+      }
+    },
+    "InfuraMainnet": {
+      "eth": {
+        "default_account": "0x0000000000000000000000000000000000000001"
+      },
+      "provider": {
+        "class": "web3.providers.rpc.HTTPProvider",
+        "settings": {
+          "endpoint_uri": "https://mainnet.infura.io"
+        }
+      }
+    },
+    "InfuraRopsten": {
+      "eth": {
+        "default_account": "0x0000000000000000000000000000000000000001"
+      },
+      "provider": {
+        "class": "web3.providers.rpc.HTTPProvider",
+        "settings": {
+          "endpoint_uri": "https://ropsten.infura.io"
+        }
+      }
+    },
+    "TestRPC": {
+      "provider": {
+        "class": "web3.providers.tester.TestRPCProvider"
+      }
+    },
+    "Tester": {
+      "provider": {
+        "class": "web3.providers.tester.EthereumTesterProvider"
+      }
+    }
+  }
+}

@@ -33,7 +33,7 @@ def init_project(project_dir, logger):
             "Found existing `project.json` file.  Not writing default config."
         )
 
-    project = Project(project_dir, create_config_file=True)
+    project = Project(project_dir)
     logger.info(
         "Wrote default populus configuration to `./{0}`.".format(
             os.path.relpath(project.config_file_path),

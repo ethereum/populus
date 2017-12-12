@@ -59,6 +59,17 @@ from populus.config.versions import (
 POPULUS_SOURCE_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
+@pytest.fixture(autouse=True)
+def user_base_path(tmpdir, monkeypatch):
+    """
+    Prevent tests from running against the config file found at
+    `~/.populus/config`
+    """
+    tmp_user_base_path = str(tmpdir.mkdir('populus-home'))
+    monkeypatch.setenv('POPULUS_USER_BASE_PATH', tmp_user_base_path)
+    return tmp_user_base_path
+
+
 @pytest.fixture()
 def temporary_dir(tmpdir):
     _temporary_dir = str(tmpdir.mkdir("temporary-dir"))
@@ -109,7 +120,6 @@ def project(request,
     project = Project(
         project_dir=project_dir,
         user_config_file_path=user_config_path,
-        create_config_file=True
     )
 
     key_value_pairs_from_fn = getattr(request.function, '_populus_config_key_value_pairs', [])
@@ -187,7 +197,6 @@ def write_project_file(project_dir):
 
 @pytest.fixture
 def user_config_defaults():
-
     return Config(load_user_default_config())
 
 

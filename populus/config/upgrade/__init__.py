@@ -18,6 +18,7 @@ from populus.config.versions import (
     V5,
     V6,
     V7,
+    V8,
     KNOWN_LEGACY_VERSIONS,
     KNOWN_USER_VERSIONS,
     LATEST_VERSION,
@@ -27,7 +28,14 @@ from .v2 import upgrade_v2_to_v3
 from .v3 import upgrade_v3_to_v4
 from .v4 import upgrade_v4_to_v5
 from .v5 import upgrade_v5_to_v6
-from .v6 import upgrade_v6_to_v7
+from .v6 import (
+    upgrade_v6_to_v7,
+    upgrade_user_v6_to_v7,
+)
+from .v7 import (
+    upgrade_v7_to_v8,
+    upgrade_user_v7_to_v8,
+)
 
 
 UPGRADE_SEQUENCE = {
@@ -37,6 +45,7 @@ UPGRADE_SEQUENCE = {
     V4: V5,
     V5: V6,
     V6: V7,
+    V7: V8,
 }
 
 UPGRADE_FUNCTIONS = {
@@ -46,6 +55,12 @@ UPGRADE_FUNCTIONS = {
     V4: upgrade_v4_to_v5,
     V5: upgrade_v5_to_v6,
     V6: upgrade_v6_to_v7,
+    V7: upgrade_v7_to_v8,
+}
+
+USER_UPGRADE_FUNCTIONS = {
+    V6: upgrade_user_v6_to_v7,
+    V7: upgrade_user_v7_to_v8,
 }
 
 
@@ -83,7 +98,6 @@ def get_upgrade_sequence(start_version, end_version, known_versions):
 
 
 def upgrade_config(config, config_context, to_version=LATEST_VERSION):
-
     if config_context == ConfigContext.USER:
         known_versions = KNOWN_USER_VERSIONS
     elif config_context == ConfigContext.LEGACY:
@@ -101,4 +115,21 @@ def upgrade_config(config, config_context, to_version=LATEST_VERSION):
         UPGRADE_FUNCTIONS[version] for version in upgrade_sequence
     )
     upgraded_config = pipe(config, *upgrade_functions)
+
     return upgraded_config
+
+
+def upgrade_user_config(user_config, to_version=LATEST_VERSION):
+    try:
+        current_version = user_config['version']
+    except KeyError:
+        raise KeyError("No version key found in user config file:\n\n{0}".format(
+            pprint.pformat(user_config),
+        ))
+
+    upgrade_sequence = get_upgrade_sequence(current_version, to_version, KNOWN_USER_VERSIONS)
+    upgrade_functions = tuple(
+        USER_UPGRADE_FUNCTIONS[version] for version in upgrade_sequence
+    )
+    upgraded_user_config = pipe(user_config, *upgrade_functions)
+    return upgraded_user_config

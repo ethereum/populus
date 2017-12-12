@@ -39,6 +39,17 @@ def test_backend_class_property():
         (ProjectContractsBackend, 'populus.contracts.backends.project.ProjectContractsBackend'),
         (MemoryBackend, 'populus.contracts.backends.memory.MemoryBackend'),
         (JSONFileBackend, 'populus.contracts.backends.filesystem.JSONFileBackend'),
+    ),
+    ids=(
+        'project-shorthand',
+        'memory-shorthand',
+        'json-shorthand',
+        'project-pythonpath',
+        'memory-pythonpath',
+        'json-pythonpath',
+        'project-classobj',
+        'memory-classobj',
+        'json-classobj',
     )
 )
 def test_set_backend_class_api(value, expected):

@@ -27,4 +27,4 @@ def upgrade_cmd(ctx, to_version):
     logger = logging.getLogger('populus.cli.upgrade')
     project_dir = ctx.obj['PROJECT_DIR']
 
-    upgrade_configs(project_dir, logger)
+    upgrade_configs(project_dir, logger, to_version)

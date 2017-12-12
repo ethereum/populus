@@ -1,4 +1,5 @@
 import logging
+import os
 import pytest
 import shutil
 
@@ -45,7 +46,6 @@ from populus.utils.testing import (
 )
 
 
-@pytest.mark.filterwarnings('ignore:Found legacy config file at')
 @pytest.mark.parametrize(
     'from_legacy_version',
     (V1, V2, V3, V4, V5, V6)
@@ -72,13 +72,13 @@ def test_upgrade_to_user_config(project, from_legacy_version):
     expected_project_config = Config(load_default_config(LATEST_VERSION))
     expected_project_config.unref()
 
-    assert upgraded_project.legacy_config_path is None
+    legacy_config_path = get_legacy_json_config_file_path(project.project_dir)
+    assert not os.path.exists(legacy_config_path)
 
     assert upgraded_project.user_config == expected_user_config
     assert upgraded_project.project_config == expected_project_config
 
 
-@pytest.mark.filterwarnings('ignore:Found legacy config file at')
 @user_config_version(V8)
 def test_upgrade_custom_key(project):
     legacy_config_file_path = get_legacy_json_config_file_path(project_dir=project.project_dir)

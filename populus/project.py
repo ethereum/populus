@@ -2,7 +2,6 @@ import copy
 import itertools
 import os
 import sys
-import warnings
 
 from eth_utils import (
     to_tuple,
@@ -10,10 +9,6 @@ from eth_utils import (
 
 from populus.config.defaults import (
     load_default_config,
-)
-
-from populus.exceptions import (
-    PopulusResourceWarning,
 )
 
 from populus.compilation import (
@@ -49,7 +44,6 @@ from populus.utils.filesystem import (
 
 from populus.config.helpers import (
     get_json_config_file_path,
-    get_legacy_json_config_file_path,
 )
 
 from populus.utils.testing import (
@@ -65,7 +59,6 @@ class Project(object):
     project_dir = None
     config_file_path = None
     user_config_file_path = None
-    legacy_config_path = None
 
     def __init__(self,
                  project_dir=None,
@@ -87,17 +80,6 @@ class Project(object):
             self.user_config_file_path = user_config_file_path
         else:
             self.user_config_file_path = get_user_default_config_path()
-
-        # legacy config
-        legacy_path = get_legacy_json_config_file_path(self.project_dir)
-        if os.path.exists(legacy_path):
-            self.legacy_config_path = legacy_path
-            warnings.warn(
-                "Found legacy config file at {legacy_path}".format(
-                    legacy_path=legacy_path
-                ),
-                PopulusResourceWarning
-            )
 
         # project config
         config_file_path = get_json_config_file_path(self.project_dir)

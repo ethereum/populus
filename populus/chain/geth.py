@@ -85,7 +85,7 @@ class BaseGethChain(BaseChain):
     geth = None
 
     def __init__(self, *args, **kwargs):
-
+        warnings.simplefilter('always', DeprecationWarning)
         warn_msg = (
             "Support for this chain will be dropped in the next populus version"
             "Populus will not run the chains, and will use the better and more robust"
@@ -93,6 +93,7 @@ class BaseGethChain(BaseChain):
             "Please configure your chains as ExternalChain."
         )
         warnings.warn(warn_msg, DeprecationWarning)
+        warnings.resetwarnings()
         super(BaseGethChain, self).__init__(*args, **kwargs)
 
     def initialize_chain(self):

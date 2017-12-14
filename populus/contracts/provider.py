@@ -12,6 +12,9 @@ from populus.utils.contracts import (
 from populus.utils.linking import (
     link_bytecode,
 )
+from populus.wait import (
+    Wait,
+)
 
 from .exceptions import (
     BytecodeMismatch,
@@ -50,14 +53,15 @@ class Provider(object):
     """
     provider_backends = None
 
-    def __init__(self, chain, provider_backends):
-        self.chain = chain
+    def __init__(self, web3, registrar, provider_backends):
+        self.web3 = web3
+        self.registrar = registrar
         self.provider_backends = provider_backends
         self._factory_cache = lrucache(128)
 
     def is_contract_available(self, contract_identifier):
         try:
-            contract_addresses = self.chain.registrar.get_contract_addresses(contract_identifier)
+            contract_addresses = self.registrar.get_contract_addresses(contract_identifier)
         except NoKnownAddress:
             return False
 
@@ -66,7 +70,7 @@ class Provider(object):
 
         ContractFactory = self.get_contract_factory(contract_identifier)
         bytecode_matched_addresses = filter_addresses_by_bytecode_match(
-            self.chain.web3,
+            self.web3,
             ContractFactory.bytecode_runtime,
             contract_addresses,
         )
@@ -84,10 +88,10 @@ class Provider(object):
 
     def get_contract(self, contract_identifier):
         ContractFactory = self.get_contract_factory(contract_identifier)
-        contract_addresses = self.chain.registrar.get_contract_addresses(contract_identifier)
+        contract_addresses = self.registrar.get_contract_addresses(contract_identifier)
 
         bytecode_matched_addresses = filter_addresses_by_bytecode_match(
-            self.chain.web3,
+            self.web3,
             ContractFactory.bytecode_runtime,
             contract_addresses,
         )
@@ -120,9 +124,8 @@ class Provider(object):
             args=deploy_args,
             kwargs=deploy_kwargs,
         )
-        contract_address = self.chain.wait.for_contract_address(deploy_transaction_hash)
-        registrar = self.chain.registrar
-        registrar.set_contract_address(contract_identifier, contract_address)
+        contract_address = Wait(self.web3).for_contract_address(deploy_transaction_hash)
+        self.registrar.set_contract_address(contract_identifier, contract_address)
 
         return self.get_contract(contract_identifier), deploy_transaction_hash
 

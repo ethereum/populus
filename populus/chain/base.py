@@ -136,7 +136,7 @@ class BaseChain(object):
                 "Must have at least one provider backend "
                 "configured\n{0}".format(self.contract_backend_configs)
             )
-        return Provider(self, self.provider_backends)
+        return Provider(self.web3, self.registrar, self.provider_backends)
 
     #
     # Registrar
@@ -155,4 +155,4 @@ class BaseChain(object):
                 "Must have at least one registrar backend "
                 "configured\n{0}".format(self.contract_backend_configs)
             )
-        return Registrar(self, self.registrar_backends)
+        return Registrar(self.web3, self.registrar_backends)

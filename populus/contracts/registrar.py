@@ -3,13 +3,13 @@ import itertools
 
 from eth_utils import (
     to_tuple,
+    flatten_return,
 )
 
 from populus.utils.contracts import (
     EMPTY_BYTECODE_VALUES,
     find_deploy_block_number,
 )
-from populus.utils.functional import chain_return
 
 from .exceptions import (
     NoKnownAddress,
@@ -83,7 +83,7 @@ class Registrar(object):
         return known_addresses
 
     @to_tuple
-    @chain_return
+    @flatten_return
     def _get_contract_addresses_from_backends(self, contract_identifier):
         for registrar in self.registrar_backends.values():
             try:

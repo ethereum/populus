@@ -1,6 +1,5 @@
 import collections
 import functools
-import itertools
 
 from .string import (
     normalize_class_name,
@@ -44,20 +43,6 @@ def to_object(class_name, bases=None):
             return type(normalize_class_name(class_name), bases, props)
         return inner
     return outer
-
-
-def apply_to_return_value(callback):
-    def outer(fn):
-        @functools.wraps(fn)
-        def inner(*args, **kwargs):
-            return callback(fn(*args, **kwargs))
-
-        return inner
-    return outer
-
-
-chain_return = apply_to_return_value(itertools.chain.from_iterable)
-to_set = apply_to_return_value(set)
 
 
 def get_duplicates(values):

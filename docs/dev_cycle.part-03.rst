@@ -6,9 +6,9 @@ Part 3: First Test
 Tests and Chains
 ----------------
 
-For testing, we will use the ``tester`` chain again. It's very convinient blockchain for tests,
-because it reset on each run, and the state is saved only in memory and cleared after each run.
-In a way, this is a similar idea to running tests against a DB,
+For testing, we will use the ``tester`` chain again. It's very convenient blockchain for tests,
+because it resets on each run and the state is saved only in memory and cleared after each run.
+In a way, this is an idea similar to running tests against a DB,
 where you create an ad-hoc temporary DB for the tests.
 
 You will run Populus tests with ``py.test``, which was installed when you installed Populus.
@@ -22,14 +22,14 @@ Add a test file:
 .. note::
 
     py.test collects all the tests that follow
-    it's `naming conventions <https://pytest.readthedocs.io/en/reorganize-docs/new-docs/user/naming_conventions.html>`_
+    it's `naming conventions <https://pytest.readthedocs.io/en/reorganize-docs/new-docs/user/naming_conventions.html>`_.
 
 We don't need the Greeter example for this project, so delete it:
 
 .. code-block:: bash
 
   $ rm contracts/Greeter
-  4 rm tests/test_greeter.py
+  $ rm tests/test_greeter.py
 
 Now, before we start writing tests, pause for a moment: What are we actually testing? Obviously a contract, but what *is* a contract?
 

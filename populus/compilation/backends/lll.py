@@ -19,13 +19,14 @@ class LLLCompiler(object):
             raise FileNotFoundError("lllc compiler executable not found!")
         return
 
-    def compile(self, code):
+    def compile(self, code, cwd=None):
         """ Passes an LLL program to the ``lllc`` compiler. """
         proc = subprocess.Popen([self.lllc_binary, '-x'],
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                universal_newlines=True)
+                                universal_newlines=True,
+                                cwd=cwd)
         stdoutdata, stderrdata = proc.communicate(code)
         return stdoutdata.rstrip()
 
@@ -61,7 +62,7 @@ class LLLBackend(BaseCompilerBackend):
                 self.logger.error(".lll files require an accompanying .lll.abi JSON ABI file!")
                 raise e
 
-            bytecode = '0x' + compiler.compile(code)
+            bytecode = '0x' + compiler.compile(code, cwd=os.path.dirname(contract_path))
             bytecode_runtime = '0x' + compiler.strip(bytecode)
 
             compiled_contracts.append({

@@ -10,8 +10,8 @@ Well, time to get out some of the donations, for a good cause!
 Available Balance
 -----------------
 
-First, we will check the balanc. The balance of an Ethereum account
-is saved as a blockchain status for an *address*, wether that address has a contract or not.
+First, we will check the balance. The balance of an Ethereum account
+is saved as a blockchain status for an *address*, whether that address has a contract or not.
 
 In addition to the "official" balance,
 the contract manages a ``total_donations`` state variable that should be the same.
@@ -99,8 +99,8 @@ It's OK. Neither do we.
 
 
 The contract has **no** method to *withdraw* the Ether. If you, as the contract author, don't implement a way to withdraw funds
-or send them to another account, there is **no built in way to release the money**.  The Ether is stucked on the contract
-balance forever. As far as the blockchain is concerned, those 113 Ether will remain in the balance of the ``Donator``
+or send them to another account, there is **no built in way to release the money**.  The Ether is stuck in the contract
+forever. As far as the blockchain is concerned, those 113 Ether will remain in the balance of the ``Donator``
 address, and you will not be able to use them.
 
 Can you fix the code and redeploy the contract? Yes. But it will not release those 113 Ether. The new fixed contract
@@ -129,8 +129,8 @@ Withdraw Funds from a Contract, Take 2
 --------------------------------------
 
 Don't sweat those lost Ether. After all, what are 113 dummy Ethers out of a billion something Ether
-in your local ``horton`` chain. With the ``horton`` chain, you can absolutly afford it. And if it will
-prevent you from loosing real Ether on ``mainent`` in the future, then the cost/utility ratio of this lesson is excellent. Wish we could
+in your local ``horton`` chain. With the ``horton`` chain, you can absolutely afford it. And if it will
+prevent you from losing real Ether on ``mainent`` in the future, then the cost/utility ratio of this lesson is excellent. Wish we could
 pay for more lessons with dummy Ether, if we were asked (but nobody is asking).
 
 Anyway. Let's move on to a fixed contract with an option to withdraw the funds.
@@ -369,7 +369,7 @@ Open a Python shell and create a new account:
 
 To withdraw money, the withdrawing account must send a transaction.
 If successful, this transaction will change the state of the blockchain: the contract's account sends Ether,
-another account recieves it.
+another account receives it.
 
 The ``'from'`` key of the transaction will be this *new_account*, the withdrawer. Type:
 

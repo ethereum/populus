@@ -17,7 +17,7 @@ def test_deep_merge_with_multiple_args():
     assert expected == actual
 
 
-def test_deep_merge_orger_precidence():
+def test_deep_merge_order_precedence():
     assert deep_merge_dicts({'a': 1, 'b': 2}, {'b': 3, 'c': 4}) == {'a': 1, 'b': 3, 'c': 4}
 
 

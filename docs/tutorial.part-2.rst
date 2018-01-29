@@ -15,7 +15,7 @@ to the blockchain.
 
 One of the nice things about Ethereum is the *protocol*, a protocol which specifies how to run a blockchain.
 Theoretically, you can use this exact protocol to run your own blockchain, which is private and totally
-seprated from the mainnet Ethereum blockchain and it's nodes.
+separated from the mainnet Ethereum blockchain and it's nodes.
 
 Although the private Ether you will mint in this private blockchain are not worth a lot in the outside world
 (but who knows?), such private, local blockchain is a great tool for development. It simulates
@@ -115,9 +115,9 @@ Here, populus saved the password in a password file:
 The default password we used, tells. It's designated for development and testing, not when using real Eth.
 
 Why to save the password in a file *at all*? Because you can provide this file path
-to geth with the ``password`` commnad line argument. Otherwise, you will have to manually enter
+to geth with the ``password`` command line argument. Otherwise, you will have to manually enter
 the password each time geth starts. Moreover, sometimes it's hard to spot the password prompt
-with all the info that geth spits. So a password file is more convinient, but obviously should be fully secured,
+with all the info that geth spits. So a password file is more convenient, but obviously should be fully secured,
 with the right permissions.
 
 .. _tutorial_accounts:
@@ -128,11 +128,11 @@ Accounts
 Populus created the account for you, but you can create more accounts with ``$ geth account new``. You can keep
 as many wallets as you want in the keystore. One wallet, which you can set, is the primary default account, called
 "etherbase" or "coinbase". You can use any wallet you save in the keystore, as long as you have the password to unlock it.
-See `geth accounts managment <https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts>`_ .
+See `geth accounts management <https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts>`_ .
 
 .. note::
 
-   The terms "create an account", or "new account", may be missleading. Nobody "creates" an account,
+   The terms "create an account", or "new account", may be misleading. Nobody "creates" an account,
    since all the possible alphanumeric combinations of a valid Ethereum account address are already "out there".
    But any combination is useless, if you don't have the
    private key for this particular combination. "Create" an account means to start with a private key,
@@ -180,7 +180,7 @@ is that you can mint money quite easily! So the genesis block allocates to the d
 Think of it as monopoly money: it looks like real money, it behaves like real money, but it will not get you much in the grocery store.
 However, this local chain Eth is very handy for development and testing.
 
-.. _runing_local_blockchain:
+.. _running_local_blockchain:
 
 Running the Local Blockchain
 ----------------------------

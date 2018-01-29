@@ -7,14 +7,14 @@ Background
 ----------
 
 The purpose of this tutorial is to go one step beyond the common "Hello World" Greeter example,
-to the entire developement cycle of an Ethereum smart contract, using Python. We will try to unpack
-the confusing issues, clear up the mystery, and even have some fun when you dive into blockchain and contracts developemnt.
+to the entire development cycle of an Ethereum smart contract, using Python. We will try to unpack
+the confusing issues, clear up the mystery, and even have some fun when you dive into blockchain and contracts development.
 
 The tools we will use are Populus and Web3.py
 
 .. note::
 
-    Web3 in general is the client side API that let you intreacts with the blockchain. Populus is a
+    Web3 in general is the client side API that let you interacts with the blockchain. Populus is a
     development framework, that is built on top of Web3. If you are into javascript, you can use the
     `Truffle javascript framework <http://truffleframework.com/>`_, and Web3.js which ships with the
     ``geth`` client. If you prefer Python, then Populus and Web3.py are your friends.
@@ -23,7 +23,7 @@ The tools we will use are Populus and Web3.py
 We assume that your read 1-2 intros about Ethereum and the blockchain, and know Python.
 
 You don't need the complex math of the elliptic curves, but to get a grasp of the basic concepts, and the basic idea: A system that prevents bad behaviour not by moral rules, but
-by incentives. Incentinve that make honest behaviour *more* profitable (let this bold concept sink in for a moment).
+by incentives. Incentive that make honest behaviour *more* profitable (let this bold concept sink in for a moment).
 
 Development Steps
 -----------------
@@ -52,7 +52,7 @@ the public key from the private key, but the opposite is impossible.
 
 **Address**: A combination of alphanumeric characters that is derived from the public key.
 
-**Ethereum Account**: An address that is used on the blockchain. There are inifinite potential combinations
+**Ethereum Account**: An address that is used on the blockchain. There are infinite potential combinations
 of alphanumeric characters, but only when someone has the private key that the address was derived from,
 this address can be used as an *account*.
 
@@ -71,7 +71,7 @@ that claims to sent it.
 **Mining**: Bundling a group of transactions into a block
 
 **Why mining is hard?** Because the miner needs to bundle the transactions with an additional input that requires significant
-computational effort to find. Without this addtional input, the block is not valid.
+computational effort to find. Without this additional input, the block is not valid.
 
 **Rewards**: The Ether reward that a miner gets when it finds a valid block
 
@@ -86,7 +86,7 @@ e.g. if two nodes suggest two different block for the next block, the nodes gets
 and *accepted by the majority of nodes on the blockchain*. So miners are incentivised to reject false blocks and false transactions.
 They know that if they work on a false transaction (say a cheat), then there
 is high probability that other nodes will reject it, and their work effort will be lost without rewards.
-They prefer to find valid blocks with valid transacions, and send them as fast as possible to the blockchain.
+They prefer to find valid blocks with valid transactions, and send them as fast as possible to the blockchain.
 
 **Uncles**: Miners get rewards when they find valid blocks, even if those blocks are *not* part
 of the direct line of the blockchain.
@@ -94,7 +94,7 @@ If the blockchain is ``block1`` >> ``block2`` >> ``block3`` >> ``block4``, and a
 but wasn't fast enough to introduce it to the chain, it will still get *partial* rewards.
 The faster miner, of ``block4``, will get the *full* rewards. ``block4`` is included in the direct sequence of the blockchain,
 and ``block4a``  is not used in the sequence but included as an "*uncle*".
-The idea is to spread compenstatations among miners and avoid "the winner takes it all" monopoly.
+The idea is to spread compensations among miners and avoid "the winner takes it all" monopoly.
 
 **Contract**: The word ""contract" is used for three different (albeit related) concepts:
 (1) A compiled runnable bytecode that sits on the blockchain (2) A Solidity source code contract definition
@@ -113,7 +113,7 @@ the EVM needs the ABI in order to know how to call the bytecode.
 
 **Web3**: Client side API that lets you interact with the blockchain. Web3.js is the javascript version, Web3.py is the Python one.
 
-**geth**: The official implemntation of an Ethereum blockchain node, written in Go
+**geth**: The official implementation of an Ethereum blockchain node, written in Go
 
 **gas**: The price that users pay to run computational actions on the blockchain (deploying a new contract, send money, run a contract function, storage, memory)
 
@@ -121,6 +121,6 @@ the EVM needs the ABI in order to know how to call the bytecode.
 
 **testnet**: An Ethereum blockchain for testing. It behaves exactly as mainnet, but you don't use real Ether to send money and pay for the gas
 
-**Local chain**: A blockchain that runs localy, has it's own blocks, and does not sync to any other blockchain. Useful for development
+**Local chain**: A blockchain that runs locally, has it's own blocks, and does not sync to any other blockchain. Useful for development
 and testing
 

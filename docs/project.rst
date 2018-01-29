@@ -20,7 +20,7 @@ Basic Usage
 
 - ``Project(config_file_path=None)``
 
-When instantaited with no arguments, the project will look for a ``populus.json``
+When instantiated with no arguments, the project will look for a ``populus.json``
 file found in the current working directory and load that if found.
 
 

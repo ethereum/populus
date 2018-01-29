@@ -9,18 +9,18 @@ Introduction to Ethereum
 
 * `A 101 Noob Intro to Programming Smart Contracts on Ethereum <https://medium.com/@ConsenSys/a-101-noob-intro-to-programming-smart-contracts-on-ethereum-695d15c1dab4>`_, from Consensys
 
-* `A Gentle Intorduction to Ethereum <https://bitsonblocks.net/2016/10/02/a-gentle-introduction-to-ethereum/>`_, from bitsonblocks
+* `A Gentle Introduction to Ethereum <https://bitsonblocks.net/2016/10/02/a-gentle-introduction-to-ethereum/>`_, from bitsonblocks
 
 How the Platform Works
 ----------------------
 
-* `The Etherum Whitepaper <https://github.com/ethereum/wiki/wiki/White-Paper>`_, by Vitalik Buterin
+* `The Ethereum Whitepaper <https://github.com/ethereum/wiki/wiki/White-Paper>`_, by Vitalik Buterin
 
 * `The Bitcoin Book <https://github.com/bitcoinbook/bitcoinbook>`_ (Some of the Bitcoin concepts are different in Ethereum, but in any case it's useful to understand the difference)
 * `Even more subtleties <https://github.com/ethereum/wiki/wiki/Subtleties>`_
 
 
-Protecting Yout Ether
+Protecting Your Ether
 ---------------------
 * `Protecting yourself and your funds, from MyEtherWallet <https://myetherwallet.github.io/knowledge-base/getting-started/protecting-yourself-and-your-funds.html>`_
 

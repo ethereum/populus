@@ -93,7 +93,7 @@ Interim Summary
     * Working Contract
     * All tests pass
 
-The next step is to deploy the contract to a persisetent chain.
+The next step is to deploy the contract to a persistent chain.
 
 
 

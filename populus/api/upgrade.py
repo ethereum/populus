@@ -47,7 +47,7 @@ def upgrade_configs(project_dir, logger, to_version):
 
         if int(legacy_version) > int(LAST_NO_USER_CONFIG_VERSION):
             raise KeyError(
-                "Unkown legacy version {legacy_version} at {legacy_config}".format(
+                "Unknown legacy version {legacy_version} at {legacy_config}".format(
                     legacy_version=legacy_version,
                     legacy_config=legacy_config
                 )

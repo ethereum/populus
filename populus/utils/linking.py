@@ -25,7 +25,7 @@ DEPENDENCY_RE = (
 
 
 # start and length should be `byte` offsets meaning they represent the
-# start/length in the bytecode in its bytes representation.  To transate to hex
+# start/length in the bytecode in its bytes representation.  To translate to hex
 # representation, these two numbers should be multiplied by two.
 def LinkReference(source_path, name, start, length):
     return {
@@ -77,7 +77,7 @@ def find_placeholder_locations(bytecode):
 
 def expand_placeholder(placeholder, full_names):
     """
-    Link references whos names are longer than their bytecode representations
+    Link references whose names are longer than their bytecode representations
     will get truncated to 4 characters short of their full name because of the
     double underscore prefix and suffix.  This embedded string is referred to
     as the `placeholder`
@@ -153,7 +153,7 @@ def insert_link_value(bytecode, value, offset):
 def link_bytecode(bytecode, link_reference_values):
     """
     Given the bytecode for a contract, and it's dependencies in the form of
-    {contract_name: address} this functino returns the bytecode with all of the
+    {contract_name: address} this function returns the bytecode with all of the
     link references replaced with the dependency addresses.
 
     TODO: validate that the provided values are of the appropriate length

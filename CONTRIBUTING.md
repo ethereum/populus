@@ -31,4 +31,4 @@ Always run the tests before submitting pull requests, and ideally run `tox` in
 order to check that your modifications don't break anything.
 
 Once you've made a pull request take a look at the travis build status in the
-GitHub interface and make sure the tests are runnning as you'd expect.
+GitHub interface and make sure the tests are running as you'd expect.

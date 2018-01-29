@@ -56,9 +56,9 @@ class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
         )
 
 
-class LoggedTestnetGethProccess(LoggingMixin, TestnetGethProcess):
+class LoggedTestnetGethProcess(LoggingMixin, TestnetGethProcess):
     def __init__(self, project_dir, geth_kwargs):
-        super(LoggedTestnetGethProccess, self).__init__(
+        super(LoggedTestnetGethProcess, self).__init__(
             geth_kwargs=geth_kwargs,
         )
 
@@ -166,7 +166,7 @@ class TemporaryGethChain(BaseGethChain):
 
 class TestnetChain(BaseGethChain):
     def get_geth_process_instance(self):
-        return LoggedTestnetGethProccess(
+        return LoggedTestnetGethProcess(
             project_dir=self.project.project_dir,
             geth_kwargs=self.geth_kwargs,
         )

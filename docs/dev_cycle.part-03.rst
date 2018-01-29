@@ -58,9 +58,9 @@ to ``testnet``, then we have another "contract", the code that sits on ``testnet
 which is another blockchain, we now have three contracts: the source file, the bytecode on ``testnet``, and the bytecode on ``mainnet``.
 
 But wait, there is more! To interact with an *existing* contract on say ``mainnet``, we need a Web3 "contract" *object*. This object does
-not need the solidity source, since the bytcode is alreadt compiled and deployed. It does need the ABI: the ABI is the detailed
+not need the solidity source, since the bytecode is already compiled and deployed. It does need the ABI: the ABI is the detailed
 specification of the functions and arguments structure of the *bytecode* contract's interface, and the address of this *bytecode* contract
-on the mainnet. Again, a contract might be the bytecode on the blockchain, a Solidty source, or a web3.py contract object.
+on the mainnet. Again, a contract might be the bytecode on the blockchain, a Solidity source, or a web3.py contract object.
 
 
 Testing a Contract
@@ -81,7 +81,7 @@ Add the first test:
 
 .. code-block:: shell
 
-  $ nano tests/test_donatory.py
+  $ nano tests/test_donator.py
 
 The test file should look as follows:
 
@@ -178,7 +178,7 @@ Run the test:
 
 .. note::
 
-  Usually you don't want to use ```--disable-pytest-warnings```, because the warnings provide important infromation.
+  Usually you don't want to use ```--disable-pytest-warnings```, because the warnings provide important information.
   We use it here to make the output less confusing, for the tutorial only.
 
 

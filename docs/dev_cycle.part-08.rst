@@ -68,8 +68,8 @@ It allows other *local* processes to access the running node. Web3, as another p
 Console Interaction with a Contract Instance
 --------------------------------------------
 
-We can interact with a contract instance via the Python shell as well. We will do things in a bit convuluted manual way here,
-for the sake of demostration. During the regular development process, Populus does all that
+We can interact with a contract instance via the Python shell as well. We will do things in a bit convoluted manual way here,
+for the sake of demonstration. During the regular development process, Populus does all that
 for you.
 
 To get a handle to the ``Donator`` instance on ``horton`` we need (a) it's **address**, where the bytecode sits,
@@ -159,7 +159,7 @@ Solc produced the ABI in JSON. Convert it to Python:
     >>> import json
     >>> abi = json.loads(abi_js)
 
-Ready to instanciate a contract *object*:
+Ready to instantiate a contract *object*:
 
 .. code-block:: python
 
@@ -196,7 +196,7 @@ object and returns it to you (and if the contract is not deployed, it will deplo
 
     Worth to remind again. **Never** call a contract with just an address and an ABI. You never know
     what the code at that address does behind the ABI. The only safe way is either if you
-    absolutly know and trust the author, or to check it yourself.
+    absolutely know and trust the author, or to check it yourself.
     Get the source code from the author, make sure the source is safe, then compile it yourself,
     and verify that the compiled bytecode
     on your side is **exactly the same** as the bytecode at the said address on the blockchain.
@@ -206,11 +206,11 @@ Note that ``donationsTotal`` is *not* the account balance as it is saved in the 
 It's rather a *contract* state. If we made a calculation mistake with ``donationsTotal`` then it won't
 reflect the actual Ether balance of the contract.
 
-So all these doantions are not in the balance? Let's see:
+So all these donations are not in the balance? Let's see:
 
 .. code-block:: python
 
-    >>> w3.eth.getBalacne(donator.address)
+    >>> w3.eth.getBalance(donator.address)
     8000000000000000000
 
 Phew. It's OK. The ``donationsTotal`` is exactly the same as the "official" balance.
@@ -248,7 +248,7 @@ Send the transaction, assume the effective ETH/USD exchange rate is $7 per Ether
 
 The hash is the *transaction's* hash. On local chains
 transactions are picked and mined in seconds, so we can expect to see the changed state almost
-immidiately:
+immediately:
 
 .. code-block:: python
 
@@ -260,7 +260,7 @@ immidiately:
     Decimal('13')
 
 You can also send a transaction *directly* to the chain, instead of via the ``donator`` contract object.
-It's a good opportunity, too, for a little more generousity. Maybe you go through the roof and donate
+It's a good opportunity, too, for a little more generosity. Maybe you go through the roof and donate
 100 Ether!
 
 .. code-block:: python
@@ -288,7 +288,7 @@ at all. How did the donations total and balance increased? Take a look at the tr
 
     >>> transaction = {'value':100*(10**18),'from':w3.eth.coinbase,'to':donator.address}
 
-No mention of the ``donate`` function, yet the 100 Ether were transfered and donated. How?
+No mention of the ``donate`` function, yet the 100 Ether were transferred and donated. How?
 
 If you answered *fallback* you would be correct. The contract has a fallback function:
 
@@ -392,22 +392,22 @@ Unlock this new account:
 Getting Info from the Blockchain
 --------------------------------
 
-The Web3 API has many usefull calls to query and get info from the blockchain. All this information is publicly
+The Web3 API has many useful calls to query and get info from the blockchain. All this information is publicly
 available, and there are many websites that present it with a GUI, like `etherscan.io <https://etherscan.io/>`_.
-The same info is available programmaticaly with Web3.
+The same info is available programmatically with Web3.
 
 Quit the ``horton`` chain and start a new Python shell.
 
 Mainnet with Infura.io
 ''''''''''''''''''''''
 
-As an endpoint we will use ``infura.io``. It's a publicly avaialble blockchain node, by Consensys, which is great
+As an endpoint we will use ``infura.io``. It's a publicly available blockchain node, by Consensys, which is great
 for read-only queries.
 
 Infura is a remote node, so you will use the ``HTTPProvider``.
 
 .. note::
-    Reminder: IPC, by design, allows only *local* processes to hook to the endpoint. Proccesses that
+    Reminder: IPC, by design, allows only *local* processes to hook to the endpoint. Processes that
     run on the same machine. IPC is safer if you have to unlock an account,
     but for *read-only* queries remote HTTP is perfectly OK. Did we asked you already
     to look at :ref:`a_word_of_caution`? We thought so.
@@ -462,7 +462,7 @@ This transaction details:
 .. note::
 
     If you will use block number 4402735, you should get **exactly** the same output as shown above.
-    This is the ``mainent``, which is synced accross all the nodes, and every node will return the same info.
+    This is the ``mainent``, which is synced across all the nodes, and every node will return the same info.
     The local chains ``horton`` or ``morty`` run a private instance, so every machine produces it's own blocks and hashes.
     Not so on the global, real blockchain, where all the nodes are synced
     (which is the crux of the whole blockchain idea).
@@ -508,7 +508,7 @@ You will see another ipc path, and hooking to it will open a Web3 instance to th
 .. note::
 
     When you run geth for the first time, syncing can take time. The best way is to just to let geth run without
-    interuption until it synced.
+    interruption until it synced.
 
 .. note::
 

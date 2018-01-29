@@ -18,7 +18,7 @@ apply to specific project,
 and the user-scope file for the environment configs, which apply to all your projects.
 
 When a configuration key exists in both the user-config and the project-config, the project-config overrides the user-config.
-However, progrmatically you have access to both configs and can decide in runtime to choose otherwise.
+However, programmatically you have access to both configs and can decide in runtime to choose otherwise.
 
 The ``$ populus init`` command writes a minimal ``project.json`` default file to the project directory.
 
@@ -30,12 +30,12 @@ A Note for Django users
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are used to django's ``settings.py`` file, populus is quite different.
-The configuration is saved in JSON files, on purpuse.
-While saving the configuration in a Python module is convinient, and often looks nicer, there is a caveat: a python module is after all
-a programmble, running code. With an Ethereum development platform, that deals directly with money, we think
-it's safer to put the configurations in static, non programmble, and external files.
+The configuration is saved in JSON files, on purpose.
+While saving the configuration in a Python module is convenient, and often looks nicer, there is a caveat: a python module is after all
+a programmable, running code. With an Ethereum development platform, that deals directly with money, we think
+it's safer to put the configurations in static, non programmable, and external files.
 
-The option to change the configuration dynamically is still available in run time, using the ``project.config`` propery.
+The option to change the configuration dynamically is still available in run time, using the ``project.config`` property.
 But otherwise, Populus configuration comes from static JSON files. What you see is what you get, no surprises.
 
 
@@ -151,7 +151,7 @@ the following chains.
 * ``'ropsten'``: Connects to the public ethereum ropsten testnet via ``geth``.
 * ``'tester'``: Uses an ephemeral in-memory chain backed by pyethereum.
 * ``'testrpc'``: Uses an ephemeral in-memory chain backed by pyethereum.
-* ``'temp'``: Local private chain whos data directory is removed when the chain
+* ``'temp'``: Local private chain whose data directory is removed when the chain
   is shutdown.  Runs via ``geth``.
 
 .. code-block:: javascript
@@ -344,10 +344,10 @@ HTTP
     }
 
 
-The important thing to remeber is that Populus will **not** run geth for you. You will
+The important thing to remember is that Populus will **not** run geth for you. You will
 have to run geth, and then Populus will use the chain configuration to connect to this **already running** process via Web3.
 If you created a local chain with the ``$ populus chain new`` command, Populus will create an executable that you
-can use to run the chain, see :ref:`runing_local_blockchain`
+can use to run the chain, see :ref:`running_local_blockchain`
 
 
 In the next Populus version, all the chains will be configured as ``ExternalChain``

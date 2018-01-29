@@ -68,7 +68,7 @@ If you copy-pasted the ``Donator`` contract example, you will get:
 What's that? actually it's not that bad. You can ignore the Python traceback, which is just the Populus call stack until the actual
 call to the compiler.
 
-To undersatnd what went wrong, just look at the compiler's output. The error message is quite clear:
+To understand what went wrong, just look at the compiler's output. The error message is quite clear:
 
 .. code-block:: bash
 
@@ -92,7 +92,7 @@ The fixed line should be:
 .. note::
 
   Try the `online IDE <https://remix.ethereum.org>`_ , which has great interactive compiler and web-form like interface
-  to call the contract and it's funcitons.
+  to call the contract and it's functions.
 
 
 Try to compile again:
@@ -123,7 +123,7 @@ Tester Deployment
 You now have two compiled contracts, ready for deployment.
 
 The first deployment step is to verify that it works on the ``tester`` chain. This is an ephemeral blockchain.
-It runs localy, and resets each time is starts. The state of the chain when it runs is kept only in memory,
+It runs locally, and resets each time is starts. The state of the chain when it runs is kept only in memory,
 and cleared when done. It's a great tool for a testing.
 
 Deploy to the ``tester`` chain:
@@ -158,7 +158,7 @@ Deploy to the ``tester`` chain:
 When you deploy a contract Populus re-compiles *all* the contracts, but deploys only those you asked for.
 
 Well, deployment works. Since the ``tester`` chain is *not* persistent, everything was deleted, but the deployment should work on persistent
-chains: it's the same Ethereum protocol. Check for yourself and run the deploy again, it will re-dploy exactly the same,since
+chains: it's the same Ethereum protocol. Check for yourself and run the deploy again, it will re-deploy exactly the same,since
 each starts from a reset state.
 
 

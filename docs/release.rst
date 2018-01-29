@@ -50,7 +50,7 @@ Release Notes
 1.11.2
 ------
 
-- Bugfix for running tests without explicitely declared project root dir.
+- Bugfix for running tests without explicitly declared project root dir.
 
 
 
@@ -67,11 +67,11 @@ Release Notes
 1.11.0
 ------
 
-- Update to confguration API to support both *project* level configuration files as well as *user* level configuration files.
+- Update to configuration API to support both *project* level configuration files as well as *user* level configuration files.
 - ``--wait-for-sync`` cli argument in ``$ populus deploy`` now defaults to ``False`` (previous defaulted to ``True``)
 - Deprecation of Go-Ethereum based ``Chain`` objects in preparation for upcoming *Environments* API which will replace the *Chain* API.
 - New ``$ populus chain new`` command for initializing local development chains.
-- Removal of ``$ populus config set`` and ``$ populus config delete`` CLI comands.
+- Removal of ``$ populus config set`` and ``$ populus config delete`` CLI commands.
 
 
 .. _v1.10.3-release-notes:
@@ -106,7 +106,7 @@ Release Notes
 - Support for running populus commands from outside of the project directory with ``-p/--project``.
 - Deprecate support for ``solc<0.4.11``.
 - Deprecate ``Project.write_config()`` in preparation for configuration API refactors.
-- Deprecate ``$ populus config set`` and ``populus config delete`` commands in preparatin for configuration API refactors.
+- Deprecate ``$ populus config set`` and ``populus config delete`` commands in preparation for configuration API refactors.
 
 
 
@@ -127,7 +127,7 @@ Release Notes
 - Bugfix for ``SolcStandardJSONBacken`` compilation.  Settings for this
   compiler now appropriately split between standard JSON input and compiler
   command line arguments.
-- Deprecate: ``project.contracts_source_dir`` and releated setting
+- Deprecate: ``project.contracts_source_dir`` and related setting
   ``compilation.contracts_source_dir``.
 - New API: ``project.contracts_source_dirs`` replaces deprecated singular
   ``project.contracts_source_dir``.
@@ -171,7 +171,7 @@ Release Notes
 - Remove deprecated ``project.build_dir`` API
 - Remove deprecated ``project.compiled_contracts`` API
 - Remove deprecated ``project.blockchains_dir`` API
-- Remove deprecated ``project.get_blockahin_data_dir`` API
+- Remove deprecated ``project.get_blockchain_data_dir`` API
 - Remove deprecated ``project.get_blockchain_chaindata_dir`` API
 - Remove deprecated ``project.get_blockchain_dapp_dir`` API
 - Remove deprecated ``project.get_blockchain_ipc_path`` API
@@ -357,7 +357,7 @@ This is the first release of populus that should be considered stable.
 - Switch to ``web3.py`` for all blockchain interactions.
 - Compilation:
   - Remove filtering.  Compilation now always compiles all contracts.
-  - Compilation now runs with optimization turned on by default.  Can be disabled with ``--no-optimizie``.
+  - Compilation now runs with optimization turned on by default.  Can be disabled with ``--no-optimize``.
   - Remove use of  ``./project-dir/libraries`` directory.  All contracts are now expected to reside in the ``./project-dir/contracts`` directory.
 - New ``populus.Project`` API.
 - New Migrations API:
@@ -365,9 +365,9 @@ This is the first release of populus that should be considered stable.
   - ``$ populus makemigration`` for creating migration files.
   - ``$ populus migrate`` for executing migrations.
 - New configuration API:
-  - New commands ``$ populus config``, ``$ populus config:set`` and ``$ populus config:unset`` for managing configuratino.
+  - New commands ``$ populus config``, ``$ populus config:set`` and ``$ populus config:unset`` for managing configuration.
 - New Chain API:
-  - Simple programatic running of project chains.
+  - Simple programmatic running of project chains.
   - Access to ``web3.eth.contract`` objects for all project contracts.
   - Access to pre-linked code based on previously deployed contracts.
 
@@ -422,7 +422,7 @@ This is the first release of populus that should be considered stable.
 -----
 
 - When a contract function call that is supposed to return data returns no data
-  an error was thown.  Now a custom exception is thrown.  This is a breaking
+  an error was thrown.  Now a custom exception is thrown.  This is a breaking
   change as previously for addresses this would return the empty address.
 
 0.6.6

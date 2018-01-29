@@ -16,7 +16,7 @@ E.g., suppose you want to calculate the average donation in a contract that coll
 The contract should only provide the total donations, and the number of donations, then calculate the average in the client code.
 
 [2] Everything the contract **stores** in it's persistent storage costs money, the gas.
-Try to minimise storage only to what absulutly positively is required for the contract to run. Data like derived calculations,
+Try to minimise storage only to what absolutely positively is required for the contract to run. Data like derived calculations,
 caching, aggregates etc, should be handled on the client.
 
 [3] Whenever possible, use **events and logs for persistent data**.
@@ -24,23 +24,23 @@ The logs are not accessible to the contract code, and are static, so you can't u
 But you can read the logs from the client, and they are much cheaper.
 
 [4] The pricing of contract **storage** is **not linear**.
-There is a high initial cost to setting the storage to non zero (touching the storage). Never reset and reintiate the storage.
+There is a high initial cost to setting the storage to non zero (touching the storage). Never reset and reinitiate the storage.
 
 [5] Everything the contracts uses for temporary memory costs money, the gas. The pricing of using **memory**, the part that is cleared once execution done (think RAM), is not linear either,
 and cost per the same unit of usage increases sharply once you used a lot of memory. Try to avoid unreasonable memory usage.
 
-[6] Even when you free storage, the gas you paid for that storage is **partially** refundble if. Don't use storage as a temporary store.
+[6] Even when you free storage, the gas you paid for that storage is **partially** refundable if. Don't use storage as a temporary store.
 
 [7] Each time you **deploy** a contract, it costs money, the gas.
-So the habbit of pushing the whole codebase after every small commit, can cost a lot of money.
-When possible, try to breakdown the functionality to small focused contracts. If you fix one, you don't have to re-deploy the others. Use library contracts (see below). Removing a contrat is partially refundble, but less than deployment.
+So the habit of pushing the whole codebase after every small commit, can cost a lot of money.
+When possible, try to breakdown the functionality to small focused contracts. If you fix one, you don't have to re-deploy the others. Use library contracts (see below). Removing a contract is partially refundable, but less than deployment.
 
-[8] No, sorry. Refunds will never exceed the gas provided in the transaction that initiated the refundble action. In fact,
-**refund is maxed to 50% of the gas** in that tansaction.
+[8] No, sorry. Refunds will never exceed the gas provided in the transaction that initiated the refundable action. In fact,
+**refund is maxed to 50% of the gas** in that transaction.
 
 [9] Whenever you just send money to a contract (a transaction with value > 0), **even without calling any function**,
 you run the contract's code.  The contract gets an opportunity to call other functions.
-Etheruem is different from Bitcoin: even simple money sending runs code
+Ethereum is different from Bitcoin: even simple money sending runs code
 (infact Bitcoin has a simple stack based scripts, but the common case is simple money transfers)
 
 [10] Every contract can have one un-named function, the fallback function,
@@ -67,7 +67,7 @@ to having a compiled executable without the source. When you compile with Populu
 The ABI tells the EVM how to correctly call the compiled bytecode and pad the arguments. Without it, there is no way to do it.
 **Don't loose the ABI**.
 
-[16] There is actually a bit convuluted way to call a contract without the ABI.  With the address ``call`` method
+[16] There is actually a bit convoluted way to call a contract without the ABI.  With the address ``call`` method
 it's possible to call the fallback function, just provide the arguments. It's also an easy way to call
 a contract if the fallback is the main function you work with. If the first argument of the ``call``
 is a ``byte4`` type, **this first argument is assumed to be a function signature**, and then arguments 2..n are given to this function
@@ -76,7 +76,7 @@ is a ``byte4`` type, **this first argument is assumed to be a function signature
 
 [17] When a contract sends money to another contract, **the called contract gets execution control** and can call your caller *before*
 it returns, and before you updated your state variables. This is a *re-entry attack*. Therefore, after this second call,
-your contract runs agian while the state variables do *not* reflect the already sent money.
+your contract runs again while the state variables do *not* reflect the already sent money.
 In other words: the callee can get the money, then call the sender in a state that does not tell that money was sent.
 To avoid it, always
 update the state variables that hold the amount which another account is allowed to get *before* you send money, and revert if the transaction failed.
@@ -131,7 +131,7 @@ Use the very fine grained Eth units instead.
 you will have to run your own fixed point calculations (many times you can retrieve the int variables, and run the decimal
 calculation on the client)
 
-[31] Once you unlock your acount in a running node, typically with geth, the running process has full access to your funds. Keep it
+[31] Once you unlock your account in a running node, typically with geth, the running process has full access to your funds. Keep it
 safe. **Unlock an account only in a local, protected instance**.
 
 [32] If you connect to a remote node with rpc, use it only for actions that do not require unlocking an account, such as reading logs,
@@ -146,7 +146,7 @@ Eth you need** for these actions.
 
 [36] If you use a password file to unlock the account, make sure the file is well protected with the **right permissions**.
 
-[37] If you look at your acount in sites like etherscan.io and there are funds in the account, yet localy the account
+[37] If you look at your account in sites like etherscan.io and there are funds in the account, yet locally the account
 balance is 0 and geth refuses to run actions that require funds for gas - then **your local node is not synced**. You must
 sync until the block with the transactions that sent money to this account.
 
@@ -162,7 +162,7 @@ but visibility is enforced in the bytecode and the exposed interface (this is no
 However, the scope visibility definitions have **no effect** on the
 information that the blockchain exposes to the outside world.
 
-[41] If you don't explicity set a ``payable`` modifier to a function, it will **reject the Eth that was sent in the transaction**.
+[41] If you don't explicitly set a ``payable`` modifier to a function, it will **reject the Eth that was sent in the transaction**.
 If no function has ``payable``, the contract can't accept Ether.
 
 [42] This **is** the answer.
@@ -173,9 +173,9 @@ in Python. You'll have to handle such lists yourself, if required.
 [44] The contract's Constructor runs only once **when the contract is created**, and can't be called again. The constructor is
 optional.
 
-[45] Inheritence in Solidity is different. Usually you have a Class, a Subclass, each is an independent object you can access.
-In Solidity, the inheritance is more syntatic. In the final compilation the compiler **copies the parent class members**,
-to create the bytecode of the derived contract with the *copied* memebers. In this context, ``private`` is just a notion of state variables and functions
+[45] Inheritance in Solidity is different. Usually you have a Class, a Subclass, each is an independent object you can access.
+In Solidity, the inheritance is more syntactic. In the final compilation the compiler **copies the parent class members**,
+to create the bytecode of the derived contract with the *copied* members. In this context, ``private`` is just a notion of state variables and functions
 that the compiler will *not* copy.
 
 [46] Memory reads are limited to a width of 256 bits, while writes can be either 8 bits or 256 bits wide
@@ -191,10 +191,10 @@ If a function type variable is not initialized, calling it will obviously result
 Deleting a local ``var`` variable that points to a state variable will except, since the "deleted" variable (the pointer)
 has no initial value to reset to.
 
-[51] Declared variables are implictly initiated to their **initial default** value at the begining of the function.
+[51] Declared variables are implicitly initiated to their **initial default** value at the beginning of the function.
 
-[52] You can declare a function as ``constant``, or the new term ``view``, which theoretaclly should declare a "safe"
-function that does not alter the state. Yet the compiler **does not enfore it.**
+[52] You can declare a function as ``constant``, or the new term ``view``, which theoretically should declare a "safe"
+function that does not alter the state. Yet the compiler **does not enforce it.**
 
 [53] ``internal`` functions can be called only from the contract itself.
 
@@ -205,20 +205,20 @@ don't need ``this`` (*this* is kinda bonus, no?)
 the compiler does not copy to the derived contracts. Otherwise, from within a contract, ``private`` is the same as ``internal``.
 
 [56] ``external`` is available only for functions. ``public``, ``internal`` and ``private`` are available for both functions
-and state variables. The **contract's interface** is built from it's ``external`` and ``public`` memebers.
+and state variables. The **contract's interface** is built from it's ``external`` and ``public`` members.
 
 [57] The compiler will **automatically** generate an accessor ("get" function) for the ``public`` state variables.
 
 [58] ``now`` is the time stamp of the **current block**
 
-[59] **Ethereum units** ``wei``, ``finney``, ``szabo`` or ``ether`` are reserved words, and can be used in experessions and literals.
+[59] **Ethereum units** ``wei``, ``finney``, ``szabo`` or ``ether`` are reserved words, and can be used in expressions and literals.
 
-[60] **Time units** ``seconds``, ``minutes``, ``hours``, ``days``, ``weeks`` and ``years``, are reserved words, and can be used in experessions and literals.
+[60] **Time units** ``seconds``, ``minutes``, ``hours``, ``days``, ``weeks`` and ``years``, are reserved words, and can be used in expressions and literals.
 
 [61] There is **no type conversion from non-boolean** to boolean types. ``if (1) { ... }`` is not valid Solidity.
 
 [62] The ``msg``, ``block`` and ``tx`` variables always exist in the **global namespace**, and you can use
-them and their members without any prior decleration or assignment
+them and their members without any prior declaration or assignment
 
 
 Nice! You got here.

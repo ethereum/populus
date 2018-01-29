@@ -68,7 +68,7 @@ copy-paste the path from the ``run_chain.sh`` script in the ``chains/horton/`` d
   based configuration see `JSON Schema <http://json-schema.org/>`_.
 
 Note the line ``{"$ref": "contracts.backends.JSONFile"}``. There is a ``$ref``, but the reference
-key does not exist in the file. This is beacuase the ``project.json`` config file is *complementary*
+key does not exist in the file. This is because the ``project.json`` config file is *complementary*
 to the main populus user-scope config file, at ``~/.populus/config.json``. The user config holds
 for all your populus projects, and you can use the ``project.json`` just for the configuration changes
 that you need for a specific project. Thus, you can ``$ref`` the user-config keys in any project configuration file.
@@ -132,5 +132,5 @@ Well done!
   We used here ``--no-wait-for-sync``, since the account has (a lot of) Eth from the get go, allocated
   in the genesis block. However, if you work with testnet or mainnet, you must sync at least until the block
   with the transactions that sent some Eth to the account you are deploying from. Otherwise, your local geth will not know
-  that there is Eth in the account to pay for the gas. Once the chain is synced, you can deploy immidiatly.
+  that there is Eth in the account to pay for the gas. Once the chain is synced, you can deploy immediately.
 

@@ -205,7 +205,7 @@ don't need ``this`` (*this* is kinda bonus, no?)
 the compiler does not copy to the derived contracts. Otherwise, from within a contract, ``private`` is the same as ``internal``.
 
 [56] ``external`` is available only for functions. ``public``, ``internal`` and ``private`` are available for both functions
-and state variables. The **contract's interface** is built from it's ``external`` and ``public`` memebers.
+and state variables. The **contract's interface** is built from it's ``external`` and ``public`` members.
 
 [57] The compiler will **automatically** generate an accessor ("get" function) for the ``public`` state variables.
 

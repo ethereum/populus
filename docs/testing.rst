@@ -150,8 +150,7 @@ Web3
 
 * ``web3``
 
-Convenience fixture for the ``chain.provider`` property.  A Web3.py instance
-configured to connect to ``chain`` fixture.
+A Web3.py instance configured to connect to ``chain`` fixture.
 
 .. code-block:: python
 

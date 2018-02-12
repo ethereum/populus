@@ -24,7 +24,7 @@ Release Notes
 2.0.2
 -----
 
-- Added experimental Viper support.
+- Added experimental Vyper support.
 
 
 .. _v2.0.1-release-notes:

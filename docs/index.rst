@@ -24,7 +24,7 @@ Contents
     resources
     modules
     release
-    viper_support
+    vyper_support
 
 
 Indices and tables

@@ -10,7 +10,7 @@ from populus.utils.filesystem import (
 def test_gets_correct_files_default_dir(project_dir, write_project_file):
     project = Project(project_dir)
     project.config['compilation']['backend'] = {
-        'class': 'populus.compilation.backends.ViperBackend',
+        'class': 'populus.compilation.backends.VyperBackend',
     }
 
     compiler_backend = project.get_compiler_backend()

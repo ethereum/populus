@@ -8,20 +8,20 @@ from populus.compilation import (
 
 from populus.utils.testing import (
     load_contract_fixture,
-    viper_installed,
+    vyper_installed,
 )
 
 
 pytestmark = pytest.mark.skipif(
-    not viper_installed(),
-    reason="Viper compiler not installed",
+    not vyper_installed(),
+    reason="Vyper compiler not installed",
 )
 
 
 @load_contract_fixture('Greeter.vy')
-def test_compiling_viper_project_contracts(project):
+def test_compiling_vyper_project_contracts(project):
     project.config['compilation']['backend'] = {
-        'class': 'populus.compilation.backends.ViperBackend',
+        'class': 'populus.compilation.backends.VyperBackend',
     }
     source_paths, compiled_contracts = compile_project_contracts(project)
 

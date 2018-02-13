@@ -1,4 +1,4 @@
-# Viper Greeter Contract
+# Vyper Greeter Contract
 
 greeting: bytes <= 20
 

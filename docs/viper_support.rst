@@ -1,14 +1,14 @@
-Viper Support
+Vyper Support
 =============
 
-Populus has support for the `viper <https://github.com/ethereum/viper>`_
-compiler. Viper is a python-like experimental programming language.
+Populus has support for the `vyper <https://github.com/ethereum/vyper>`_
+compiler. Vyper is a python-like experimental programming language.
 
 
 Known limitations
 -----------------
 
-Viper requires Python 3.6 or above.
+Vyper requires Python 3.6 or above.
 
 
 Installation
@@ -19,19 +19,19 @@ To install the compiler:
 
 .. code-block:: shell
 
-   pip install https://github.com/ethereum/viper/archive/master.zip
+   pip install https://github.com/ethereum/vyper/archive/master.zip
 
 
-You will see the `viper` binary is now installed.
+You will see the `vyper` binary is now installed.
 
 
 .. code-block:: shell
 
-    $ viper
-    usage: viper [-h] [-f {abi,json,bytecode,bytecode_runtime,ir}]
+    $ vyper
+    usage: vyper [-h] [-f {abi,json,bytecode,bytecode_runtime,ir}]
                  [--show-gas-estimates]
                  input_file
-    viper: error: the following arguments are required: input_file
+    vyper: error: the following arguments are required: input_file
 
 
 Using
@@ -49,15 +49,15 @@ Place a `backend` key in the `compilation` section, as shown below:
             "contracts_source_dirs": ["./contracts"],
             "import_remappings": [],
             "backend": {
-                "class": "populus.compilation.backends.ViperBackend"
+                "class": "populus.compilation.backends.VyperBackend"
             }
         }
     }
 
 
-This will set the Populus framework to only pick up Viper contracts in the
+This will set the Populus framework to only pick up Vyper contracts in the
 configured contracts directories.
-Now that everything is configured you can create a Viper greeter contract:
+Now that everything is configured you can create a Vyper greeter contract:
 
 
 .. code-block:: python

@@ -79,9 +79,9 @@ def link_bytecode_by_name(bytecode, link_references, **link_names_and_values):
     return linked_bytecode
 
 
-def viper_installed():
+def vyper_installed():
     try:
-        import viper  # noqa: F401
+        import vyper  # noqa: F401
         return True
     except ImportError:
         return False

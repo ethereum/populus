@@ -6,16 +6,16 @@ from .base import (
 )
 
 
-class ViperBackend(BaseCompilerBackend):
+class VyperBackend(BaseCompilerBackend):
     project_source_glob = ('*.v.py', '*.vy')
     test_source_glob = ('test_*.v.py', 'test_*.vy')
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
         try:
-            from viper import compiler
+            from vyper import compiler
         except ImportError:
             raise ImportError(
-                'viper needs to be installed to use ViperBackend' +
+                'vyper needs to be installed to use VyperBackend' +
                 ' as compiler backend.'
             )
 

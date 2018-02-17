@@ -20,8 +20,11 @@ Command Line Options
       Populus
 
     Options:
-      -p, --project DIRECTORY  Specify a populus project directory to be used.
-      -h, --help             Show this message and exit.
+      -p, --project PATH  Specify a populus project directory
+      -l, --logging TEXT  Specify the logging level.  Allowed values are
+                          DEBUG/INFO or their numeric equivalents 10/20
+      -v, --version       Show the version and exit.
+      -h, --help          Show this message and exit.
 
     Commands:
       chain          Manage and run ethereum blockchains.

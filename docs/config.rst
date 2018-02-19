@@ -170,8 +170,8 @@ Individual Chain Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each key and value in the ``chains`` portion of the configuration corresponds
-to the name of the chain and the settings for that chain.  Each chain has two
-primary sections, ``web3`` and ``chain`` configuration settings.
+to the name of the chain and the settings for that chain.  Each chain has three
+primary sections, ``web3``, ``chain``, and ``contracts`` configuration settings.
 
 .. code-block:: javascript
 
@@ -184,6 +184,14 @@ primary sections, ``web3`` and ``chain`` configuration settings.
           "web3": {
             "provider": {
               "class": "web3.providers.ipc.IPCProvider"
+            }
+          },
+          "contracts": {
+            "backends": {
+              "JSONFile": {"$ref": "contracts.backends.JSONFile"},
+              "ProjectContracts": {
+                "$ref": "contracts.backends.ProjectContracts"
+              }
             }
           }
         }

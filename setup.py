@@ -20,7 +20,7 @@ setup(
         "click>=6.6",
         "contextlib2>=0.5.4",
         "eth-testrpc>=1.3.0",
-        "eth-utils>=0.7.1",
+        "eth-utils<0.8",
         "jsonschema>=2.5.1",
         "py-geth>=1.9.0",
         "py-solc>=1.2.0",

@@ -1,6 +1,7 @@
 import logging
 import sys
 import warnings
+import pkg_resources
 
 import click
 
@@ -58,6 +59,12 @@ def validate_logging_level(ctx, param, value):
     ),
     default=str(logging.INFO),
     callback=validate_logging_level,
+)
+@click.version_option(
+    pkg_resources.get_distribution("populus").version,
+    '--version',
+    '-v',
+    message='%(version)s',
 )
 @click.pass_context
 def main(ctx, project_dir, logging_level):

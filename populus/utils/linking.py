@@ -153,7 +153,7 @@ def insert_link_value(bytecode, value, offset):
 def link_bytecode(bytecode, link_reference_values):
     """
     Given the bytecode for a contract, and it's dependencies in the form of
-    {contract_name: address} this functino returns the bytecode with all of the
+    {contract_name: address} this function returns the bytecode with all of the
     link references replaced with the dependency addresses.
 
     TODO: validate that the provided values are of the appropriate length

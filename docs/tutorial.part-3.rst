@@ -96,7 +96,7 @@ Finally, deploy the contract:
 
 .. code-block:: bash
 
-  $ deploy --chain horton Greeter --no-wait-for-sync
+  $ populus deploy --chain horton Greeter --no-wait-for-sync
 
   > Found 1 contract source files
     - contracts/Greeter.sol

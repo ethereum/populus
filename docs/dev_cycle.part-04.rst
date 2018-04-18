@@ -55,7 +55,7 @@ object with Python methods. This object is stored in the ``donator`` variable.
 Reminder: we have two options to interact with a contract on the blockchain, *transactions* and *calls*.
 With Populus, you initiate a transaction with ``transact``, and a call with ``call``:
 
-* *Transactions*: Send a transaction, run the contract code, transfer funds, and *change* the state of the contract and it's balance. This change will be permenant, and synced to the entire blockchain.
+* *Transactions*: Send a transaction, run the contract code, transfer funds, and *change* the state of the contract and it's balance. This change will be permanent, and synced to the entire blockchain.
 
 * *Call*: Behaves exactly as a transaction, but once done, everything is revert and no state is changed. A call is kinda "dry-run", and an efficient way to query the current state without expensive gas costs.
 

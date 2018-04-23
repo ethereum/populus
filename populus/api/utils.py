@@ -38,6 +38,8 @@ RUN_COMMAND = (
     "--password {password_path} --nodiscover --mine --minerthreads 1 "
 )
 
+SHEBANG = '#!/bin/sh'
+
 GENESIS_BLOCK = '''
 {
     "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -95,6 +97,8 @@ def new_local_chain(project_dir, chain_name):
     )
     init_geth_path = os.path.join(chain_dir, 'init_chain.sh')
     with open(init_geth_path, 'w+') as f:
+        f.write(SHEBANG)
+        f.write('\n')
         f.write(init)
     chmod_plus_x(init_geth_path)
 
@@ -106,5 +110,7 @@ def new_local_chain(project_dir, chain_name):
     )
     run_geth_path = os.path.join(chain_dir, 'run_chain.sh')
     with open(run_geth_path, 'w+') as f:
+        f.write(SHEBANG)
+        f.write('\n')
         f.write(run)
     chmod_plus_x(run_geth_path)

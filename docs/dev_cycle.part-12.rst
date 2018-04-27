@@ -41,7 +41,7 @@ True, Solidity source files and compiled data are *not* chain related, only the 
 chain are. But when you call a contract from a ``chain``, Populus will either find the instance on that chain, or
 compiles and deploys a new instance. Similar code is used regardless of the contract's state. E.g., the same code
 is used when Populus needs to re-deploy on each test run with the ``tester`` chain, and
-when you interact with a presistent contract isnstance on a local chain or ``mainnet``.
+when you interact with a persistent contract instance on a local chain or ``mainnet``.
 
 So with the ``chain`` object, you have one consistent interface, no matter what the underlying
 contract state is. See :ref:`what is a contract <what_is_a_contract>`
@@ -84,7 +84,7 @@ A subclass of ``web3.contract.Contract``.
 It is a Python object, with Python methods, that lets you interact with a corresponding
 contract instance on a blockchain.
 
-Usually you will not instanciate it directly, but will get it from a contract factory. Populus
+Usually you will not instantiate it directly, but will get it from a contract factory. Populus
 keeps track of deployments, addresses, compiled data, abi, etc, and uses this info to create the
 ``PopulusContract`` for you.
 
@@ -115,7 +115,7 @@ In both files, the chain settings appears under the ``chains`` key.
 .. note::
 
     If the same chain name appears in both the project config and the user config,
-    the project config name will overide the user-scope config
+    the project config name will override the user-scope config
 
 
 Chain Classes
@@ -186,8 +186,8 @@ Perhaps the most powerful line in the Populus API
 **[1]** If the contract's is *already* deployed, same as ``get_contract``
 
 **[2]** If the contract is *not* deployed, Populus will compile it, prepare a deployment transaction,
-calculte the gas estimate, send and wait for the deployment to a new address,
-verify the byte code, saves the deployment details to the reigstrar, and *then* create the Python
+calculate the gas estimate, send and wait for the deployment to a new address,
+verify the byte code, saves the deployment details to the registrar, and *then* create the Python
 contract object that corresponds to this address and return it.
 
 
@@ -282,7 +282,7 @@ Populus Configs Usage
 .. py:attribute:: proj_obj.config
 
     The merged ``project_config`` and ``user_config``: when ``project_config`` and ``user_config``
-    has the *same* key, the ``project_config`` overides ``user_config``, and the key value in the
+    has the *same* key, the ``project_config`` overrides ``user_config``, and the key value in the
     merged ``project.config`` will be that of ``project_config``
 
 
@@ -296,7 +296,7 @@ Populus Configs Usage
 
 .. py:attribute:: proj_obj.reload_config()
 
-    Reloads configuration from ``project.json`` and ``~/.populus/config.json``. You should instanciate the chain
+    Reloads configuration from ``project.json`` and ``~/.populus/config.json``. You should instantiate the chain
     objects after reload.
 
 
@@ -306,7 +306,7 @@ Assignment &  Persistency
 
 Populus initial configuration is loaded from the JSON files.
 
-You can customise the config keys in runtime, but these changes are *not* persisten and will *not* be saved. The next time
+You can customise the config keys in runtime, but these changes are *not* persistent and will *not* be saved. The next time
 Populus run, the configs will reset to ``project.json`` and ``~/.populus/config.json``.
 
 Assignment of simple values works like any dictionary:
@@ -337,13 +337,13 @@ Reset all changes back to the default:
 
     proj_obj.reload_config()
 
-You will have to re-instanciate chains after the reload.
+You will have to re-instantiate chains after the reload.
 
 .. note::
 
     JSON files may seem odd if you are used to
     Python settings files (like django), but we think that for blockchain development, the external,
-    static files are safer than a programmble Python module.
+    static files are safer than a programmable Python module.
 
 
 
@@ -352,7 +352,7 @@ JSON References
 '''''''''''''''
 
 There is a caveat: ``config_obj['foo.baz']`` may not return the same value is ``config_obj.get('foo.baz')``.
-The reasone is that the configuration files are loaded as JSON schema, which allows ``$ref$``.
+The reason is that the configuration files are loaded as JSON schema, which allows ``$ref$``.
 So if the config is:
 
 .. code-block:: javascript
@@ -375,14 +375,14 @@ Then:
    ['Basil','Sybil','Polly','Manual']
 
 To avoid this, if you assign your own config_obj, use ``config_obj.unref()``, which will solve
-all of the refernces.
+all of the references.
 
 
 Backends
 --------
 
-Populus is plugable, using backend. The interface is defined in a base class, and a
-backend can overide or implement part or all this functionality.
+Populus is pluggable, using backend. The interface is defined in a base class, and a
+backend can override or implement part or all this functionality.
 
 E.g., the default backend for the
 ``Registrar`` is the ``JSONFileBackend``, which saves the deployments details to a JSON file.

@@ -93,7 +93,7 @@ look at ``chains/horton/run_chain.sh``).
   }
 
 
-For more on the horton local chain see :ref:`runing_local_blockchain` .
+For more on the horton local chain see :ref:`running_local_blockchain` .
 
 Everything is ready.
 
@@ -109,14 +109,14 @@ Ok, time to add a new contract.
 
 .. note::
 
-    You can work with your favourite IDE. Check for Solidity extention/package. Atom.io
+    You can work with your favourite IDE. Check for Solidity extension/package. Atom.io
     has some nice Solidity packages.
 
 
 In this example we will work with a very simple contract that accepts donations for later use.
 The contract will also handle the donations value in USD.
 
-Since the ETH/USD exchange rate fluctates, typically upward, we want to track not only how much ETH the contract collected,
+Since the ETH/USD exchange rate fluctuates, typically upward, we want to track not only how much ETH the contract collected,
 but also the accumulating USD value of the donations *at the time of the donation*.
 If the ETH rate is rising, then we will probably see smaller donations
 in terms of Ether, but similar donations in terms of USD.
@@ -138,7 +138,7 @@ Quick Solidity Overview
 -----------------------
 
 **Pragma**:
-Every Solidity source should provide the compiler compatability: `pragma solidity ^0.4.11;`
+Every Solidity source should provide the compiler compatibility: `pragma solidity ^0.4.11;`
 
 **Contract definition**:
 The ``contract`` keyword starts a new contract definition, named ``Donator``.
@@ -150,12 +150,12 @@ The ``contract`` keyword starts a new contract definition, named ``Donator``.
 **State variables**:
 The contract has 4 state variables: ``donationsTotal``, ``donationsUsd``, ``donationsCount`` and ``defaultUsdRate``.
 A state variable is defined in the *contract scope*.
-State variables are saved in the contract's persisten *storage*,
+State variables are saved in the contract's persistent *storage*,
 kept after the transaction run ends, and synced to every node on the blockchain.
 
 **Visibility:**
-The ``public`` decleration ensures that all state variables and the ``donate`` function will be available for the callers
-of the contrat, in the contract's interface.
+The ``public`` declaration ensures that all state variables and the ``donate`` function will be available for the callers
+of the contract, in the contract's interface.
 
 .. note::
     For the public state variables, the compiler actually creates an accessor function
@@ -163,7 +163,7 @@ of the contrat, in the contract's interface.
 
 **Data types**:
 Since we are dealing with numbers, the only data type we use here is ``uint``, unsigned integer. The ``int`` and ``uint``
-are declated in steps of 8 bits, ``unint8``, ``uint16`` etc. When the bits indicator is omitted, like ``int`` or ``uint``, the compiler will
+are declared in steps of 8 bits, ``unint8``, ``uint16`` etc. When the bits indicator is omitted, like ``int`` or ``uint``, the compiler will
 assumes ``uint256``.
 
 .. note::
@@ -171,8 +171,8 @@ assumes ``uint256``.
     If you know in advance the the maximum size of a variable, better to limit the type and save the gas of extra
     memory or storage.
 
-As of version 0.4.17 Solidity does *not* support decimal point types. If you need decimal point, you will have to manauly handle
-the fixed point calculations with integers. For the sake of simplicty, the example uses only ints.
+As of version 0.4.17 Solidity does *not* support decimal point types. If you need decimal point, you will have to manually handle
+the fixed point calculations with integers. For the sake of simplicity, the example uses only ints.
 
 
 **Constructor**:
@@ -187,7 +187,7 @@ updates the total donated, both of Ether and USD value. It also updates the defa
 
 **Magic Variables**:
 In every contract you get three magic variables in the global scope: ``msg``, ``block`` and ``tx``. You can use these
-variable without prior decleration or assignment. To find out how much
+variable without prior declaration or assignment. To find out how much
 Ether was sent, use ``msg.value``.
 
 **Modifiers**:
@@ -233,8 +233,8 @@ This Donator example is fairly simple.
 
 If you are following the Ethereum world for a while, you probably noticed that many Ethereum projects are much more complex.
 People and companies try to use contracts to manage distributed activity among very large groups,
-assuming you need special, usually complex, code and strategies that defend against bad actores.
-Some noticeable initiatives are the decentrelized autonomous organizations (DAO),
+assuming you need special, usually complex, code and strategies that defend against bad actors.
+Some noticeable initiatives are the decentralized autonomous organizations (DAO),
 getting groups decisions where the voting rights are proportional to the Ether the voter sent to the contract,
 or crowd funding with Ether, initial coin offerings (ICO),
 feeds that send the contract up-to-date data from the "outside world", etc.

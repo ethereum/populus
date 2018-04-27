@@ -11,7 +11,7 @@ it's status is "pending", and you will have to wait until a miner picks it, incl
 a block, and the block is accepted by the blockchain. This can take a few minutes.
 
 To track when a transaction is accepted, you use an ``event``. An event is a way to to write an indexable
-log entry to the transaction reciept. Once the transaction is accepted, the receipt and the logs are included in the
+log entry to the transaction receipt. Once the transaction is accepted, the receipt and the logs are included in the
 block as well, and you can watch every new block until the log entry you are looking for appears.
 
 

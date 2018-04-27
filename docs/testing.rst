@@ -95,7 +95,7 @@ The precedence order for these different methods of setting the project director
 
 .. note:
 
-    Providing only the propulus project arg (via command line, or pytest.ini, or the environment variable) will not replace
+    Providing only the populus project arg (via command line, or pytest.ini, or the environment variable) will not replace
     py.test own tests finding. So you still need to provide pytest the correct tests directory, or rely on pytest tests
     collecting.
 
@@ -103,7 +103,7 @@ The precedence order for these different methods of setting the project director
     may not work if you run it say from /home/elsewhere. The argument will only tell pytest where to load the project fixture, but
     not where the actual tests are.
 
-    The nice thing is that you can run the same tests suite on diffrent projects, each time apply the same test to another project,
+    The nice thing is that you can run the same tests suite on different projects, each time apply the same test to another project,
     where pytest will load the project fixture from another project.
 
 

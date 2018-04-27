@@ -46,7 +46,7 @@ Calls are useful to query an *existing* contract state, without any changes,
 when a local synced node can just hand you this info. It's also useful as a "dry-run" for transactions: you run a ''call'', make sure
 everything is working, then send the real transaction.
 
-To access a conract function with ``call``, in the same way you have done with the tests,
+To access a contract function with ``call``, in the same way you have done with the tests,
 use ``contract_obj.call().foo(arg1,arg2...)``
 where ``foo`` is the contract function. Then ``call()`` returns an object that exposed the contract instance functions
 in Python.
@@ -85,7 +85,7 @@ And add a few lines, as follows:
     avg_donation = donationsTotal/donationsCount if donationsCount > 0 else 0
     status_msg = (
         "Total of {:,.2f} Ether accepted in {:,} donations, "
-        "an avergage of {:,.2f} Wei per donation."
+        "an average of {:,.2f} Wei per donation."
         )
 
     print (status_msg.format(total_ether, donationsCount, avg_donation))
@@ -98,7 +98,7 @@ and once you have the ``chain`` you can get the contract *instance* on that chai
 Then we get the ``donationsCount`` and the ``donationsTotal`` with ``call``. Populus, via Web3, calls
 the running geth node, and geth grabs and return these two state variables
 from the contract's storage. Even if we had used geth as a node to ``mainnet``, a sync node can get this info
-localy.
+locally.
 
 These are the same public variables that you declared in the ``Donator`` Solidity source:
 
@@ -125,7 +125,7 @@ Run the script:
 
     Donator address on horton is 0xb8d9d2afbe18fd6ac43042164ece9691eb9288ed
     The contract is already deployed on the chain
-    Total of 0.00 Ether accepted in 0 donations, an avergage of 0.00 Wei per donation.
+    Total of 0.00 Ether accepted in 0 donations, an average of 0.00 Wei per donation.
 
 
 Note that we don't need an expensive state variable
@@ -183,7 +183,7 @@ Update the script:
     avg_donation = donationsTotal/donationsCount if donationsCount > 0 else 0
     status_msg = (
         "Total of {:,.2f} Ether accepted in {:,} donations, "
-        "an avergage of {:,.2f} Wei per donation."
+        "an average of {:,.2f} Wei per donation."
         )
 
     print (status_msg.format(total_ether, donationsCount, avg_donation))
@@ -214,7 +214,7 @@ The ``value`` is obviously the amount you send *in Wei*, and the ``from`` is the
 **Coinbase Account**
 
 Until now you didn't provide any account, because in the tests the ``tester`` chain magically creates and unlocks
-ad-hoc accounts. With a *persistent* chain you have to explictly provide the account.
+ad-hoc accounts. With a *persistent* chain you have to explicitly provide the account.
 
 Luckily, when Populus created the local ``horton`` chain it also created a default wallet file, a password file that unlocks the wallet,
 and included the ``--unlock`` and ``--password`` arguments for geth in the run script, ``run_chain.sh``. When you run
@@ -233,7 +233,7 @@ one account, the one that Populus created, and it's automatically assigned as th
 .. note::
 
     The wallet files are saved in the chain's ``keystore`` directory. For more see the tutorial on :ref:`tutorial_wallets` and
-    :ref:`tutorial_accounts`. For a more in-depth discussion see `geth accounts managment <https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts>`_
+    :ref:`tutorial_accounts`. For a more in-depth discussion see `geth accounts management <https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts>`_
 
 
 Finally, the script sends the transaction with ``transact``:
@@ -252,7 +252,7 @@ Ok. Run the script, after you make sure that ``horton`` is running:
 
     Donator address on horton is 0xb8d9d2afbe18fd6ac43042164ece9691eb9288ed
     The contract is already deployed on the chain
-    Total of 0.00 Ether accepted in 0 donations, an avergage of 0.00 Ether per donation.
+    Total of 0.00 Ether accepted in 0 donations, an average of 0.00 Ether per donation.
     Thank you for the donation! Tx hash 0xbe9d182a508ec3a7efc3ada8cfb134647b39feec4a7eb018ef91cc38e216ddbc
 
 Worked. The transaction was sent, yet we still don't see it. Run again:
@@ -263,7 +263,7 @@ Worked. The transaction was sent, yet we still don't see it. Run again:
 
     Donator address on horton is 0xb8d9d2afbe18fd6ac43042164ece9691eb9288ed
     The contract is already deployed on the chain
-    Total of 3.00 Ether accepted in 1 donations, an avergage of 3,000,000,000,000,000,000.00 Wei per donation.
+    Total of 3.00 Ether accepted in 1 donations, an average of 3,000,000,000,000,000,000.00 Wei per donation.
     Thank you for the donation! Tx hash 0xf6d40adfedf1882e7543c4ef96803bd790127afdc67e40a4c7d91d29884ad182
 
 First donation accepted! Run again:
@@ -274,7 +274,7 @@ First donation accepted! Run again:
 
     Donator address on horton is 0xb8d9d2afbe18fd6ac43042164ece9691eb9288ed
     The contract is already deployed on the chain
-    Total of 4.00 Ether accepted in 2 donations, an avergage of 2,000,000,000,000,000,000.00 Wei per donation.
+    Total of 4.00 Ether accepted in 2 donations, an average of 2,000,000,000,000,000,000.00 Wei per donation.
     Thank you for the donation! Tx hash 0x21bd87b9db76b54a48c5a12a4bf7930a0e45480f5af5d0745cb2e8b4a438c5af
 
 And they just keep coming.
@@ -292,7 +292,7 @@ and mine it:
     INFO [10-20|01:49:05] Commit new mining work                   number=3920 txs=1 uncles=0 elapsed=735.282µs
     INFO [10-20|01:49:21] Successfully sealed new block
 
-Check the persistancy of the instance again. Stop the ``horton`` chain, press Ctrl+C in it's terminal window,
+Check the persistency of the instance again. Stop the ``horton`` chain, press Ctrl+C in it's terminal window,
 and then re-run it with ``chains/horton/./run_chain.sh``.
 
 Run the script again:
@@ -303,7 +303,7 @@ Run the script again:
 
     Donator address on horton is 0xb8d9d2afbe18fd6ac43042164ece9691eb9288ed
     The contract is already deployed on the chain
-    Total of 7.00 Ether accepted in 3 donations, an avergage of 2,333,333,333,333,333,504.00 Wei per donation.
+    Total of 7.00 Ether accepted in 3 donations, an average of 2,333,333,333,333,333,504.00 Wei per donation.
     Thank you for the donation! Tx hash 0x8a595949271f17a2a57a8b2f37f409fb1ee809c209bcbcf513706afdee922323
 
 Oh, it's so easy to donate when a genesis block allocates you billion something.
@@ -321,11 +321,11 @@ On ``mainent`` and ``testnet``, to the entire blockchain nodes network.
     from Populus, and let the ``fallback`` do one thing - call this function.
 
 
-Programatically Access to a Contract Instance
+Programmatically Access to a Contract Instance
 ---------------------------------------------
 
 The script is very simple, but it gives a glimpse how to use Populus as bridge between your Python application
-and the Ethereum Blockchain. As an excercise, update the script so it prompts for donation amount, or work with
+and the Ethereum Blockchain. As an exercise, update the script so it prompts for donation amount, or work with
 the ``Donator`` instance on the *morty* local chain.
 
 This is another point that you'll appreciate Populus: not only it helps

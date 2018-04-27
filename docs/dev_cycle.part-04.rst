@@ -39,7 +39,7 @@ After the edit, the file should look as follows:
 You added another test, ``test_donations``. The second test is similar to the first one:
 
 **[1] Get the chain**: The test function accepts the ``chain`` argument, the auto-generated Python object that
-corresponds to a ``tester`` chain. Reminder: the ``tester`` chain is ephimeral, in memory, and reset
+corresponds to a ``tester`` chain. Reminder: the ``tester`` chain is ephemeral, in memory, and reset
 on each test function.
 
 **[2] Get the contract**: With the magic function ``get_or_deploy_contract`` Populus compiles the `Donator` contract,
@@ -88,7 +88,7 @@ Populus gives you a *Python* interface to a bytecode contract. Nice, no?
 **[6] Asserts**: We expect the ``donationsTotal`` to be ``500 + 650 = 1150``, the ``donationsCount`` is 2,
 and the ``defaultUsdRate`` to match the last update, 380.
 
-The test gets the varaibles with ``call``, and should update instanrly because it's a local ``tester`` chain. On a distributed
+The test gets the variables with ``call``, and should update instantly because it's a local ``tester`` chain. On a distributed
 blockchain it will take sometime until the transactions are mined and actually change the state.
 
 Run the test:
@@ -160,10 +160,10 @@ and a total *USD* value of $4
 
     donator.transact({'value':(2 * ONE_ETH_IN_WEI)}).donate(5)
 
-Donate Wei worth of *2* Ether, where the effective ETH/USD rate is $5 (no markets sepculations on the tutorial)
+Donate Wei worth of *2* Ether, where the effective ETH/USD rate is $5 (no markets speculations on the tutorial)
 It's $5 per Ether, and total *USD* value of 2 * $5 = $10
 
-Hence we excpect the total *USD* value of these two donations to be $4 + $10 = $14
+Hence we expect the total *USD* value of these two donations to be $4 + $10 = $14
 
 .. code-block:: python
 

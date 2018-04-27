@@ -10,7 +10,7 @@ Introduction
 ------------
 
 Populus has the ability to run and/or connect to a variety of blockchains for
-you, both programatically and from the command line.
+you, both programmatically and from the command line.
 
 
 Transient Chains
@@ -83,7 +83,7 @@ The ``$ populus chain`` command handles running chains from the command line.
       run    Run the named chain.
 
 
-Running programatically from code
+Running programmatically from code
 ---------------------------------
 
 The ``populus.Project.get_chain(chain_name, chain_config=None)`` method returns

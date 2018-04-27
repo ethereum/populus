@@ -105,7 +105,7 @@ Retrieving contract addresses
 
 You can use the  :meth:`BaseChain.registrar.get_contract_addresses` method to
 retrieve all known addresses for a given contract.  This method will return an
-interable of addresses or throw a
+iterable of addresses or throw a
 `~populus.contracts.exceptions.NoKnownAddress` exception.
 
 
@@ -180,7 +180,7 @@ dependencies are available.  This can be done with the following APIs.
 
 The :meth:`BaseChain.provider.are_contract_dependencies_available` method
 returns ``True`` if all of the necessary dependencies for the provided contract
-are avialable.  This check includes checks that the bytecode for all
+are available.  This check includes checks that the bytecode for all
 dependencies matched the expected compiled bytecode.
 
 The :meth:`BaseChain.provider.is_contract_available` method returns ``True`` if

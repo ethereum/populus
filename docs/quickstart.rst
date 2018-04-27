@@ -1,7 +1,7 @@
 Quickstart
 ==========
 
-Welcom to Populus! Populus has (almost) everything you need for Ethereum blockchain development.
+Welcome to Populus! Populus has (almost) everything you need for Ethereum blockchain development.
 
 .. contents:: :local:
 
@@ -114,7 +114,7 @@ Ethereum developer. We use test blockchains, demo accounts, simple passwords, ev
 
 But once the code is ready for work and deployment with real Eth, you should be careful.
 As there is a clear difference between running your iOS app in the Xcode simulator to the real actions of the app on the iPhone,
-or to take another example, between running a website localy on 127.0.0.1 vs. running it on a real server which is opened to the entire
+or to take another example, between running a website locally on 127.0.0.1 vs. running it on a real server which is opened to the entire
 internet, there **is** a difference between blockchain development environment, and when you deploy and send real Eth.
 
 The core issue, as a developer, is that once you unlock an account, there is a running process with access to your Eth. Any mistake
@@ -130,7 +130,7 @@ the Ether you need it for, from time to time.
 
 [2] Never unlock a real Ether account on a remote node. You can use a remote node, but not for actions
 that require an unlocked account. When you unlock an account on a remote node, anybody with access
-to the node has access to your funds. In other words, the geth instance that unlocked your acount
+to the node has access to your funds. In other words, the geth instance that unlocked your account
 should run on your local protected machine.
 
 [3] Geth allows you to provide a password file, which is handy (more on it later). The password file should be
@@ -177,7 +177,7 @@ that is generated as part of the project initialization.
 
 .. note::
 
-    Check your IDE for Solidity extention/package.
+    Check your IDE for Solidity extension/package.
 
 
 Here is the contract:

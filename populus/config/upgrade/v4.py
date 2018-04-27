@@ -64,7 +64,7 @@ def upgrade_v4_to_v5(v4_config):
 
     upgraded_v4_config = copy.deepcopy(v4_config)
 
-    # new configuration values whos keys were not present in the previous
+    # new configuration values whose keys were not present in the previous
     # configuration.
     for key_path in NEW_V5_PATHS:
         if has_nested_key(upgraded_v4_config, key_path):

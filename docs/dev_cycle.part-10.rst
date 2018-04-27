@@ -27,14 +27,14 @@ If you recall the withdraw function from the contract:
       require(msg.sender.send(this.balance));
         }
 
-The ``withdrawAll`` function just sends the entire balane, ``this.balance``,
+The ``withdrawAll`` function just sends the entire balance, ``this.balance``,
 to whoever request it. Send everything to ``msg.sender``, without any further verification.
 
-A better implemntation would be to allow **only the owner of the contract to withdraw the funds**. An *owne*, in the Ethereum
+A better implementation would be to allow **only the owner of the contract to withdraw the funds**. An *owner*, in the Ethereum
 world, is an *account*. An *address*. The owner is the account that the contract creation transaction was sent from.
 
-Restricting persmission to run some actions only to the owner is a very common design pattern.  There are many
-open-source implemntations of this pattern, and we will work here with the `OpenZeppelin <https://openzeppelin.org/>`_ library.
+Restricting permission to run some actions only to the owner is a very common design pattern.  There are many
+open-source implementations of this pattern, and we will work here with the `OpenZeppelin <https://openzeppelin.org/>`_ library.
 
 .. note::
 
@@ -52,7 +52,7 @@ This is the OpenZeppelin `Ownable.sol <https://github.com/OpenZeppelin/zeppelin-
    :language: solidity
 
 
-Save it to your conatracts directory:
+Save it to your contracts directory:
 
 
 .. code-block:: shell
@@ -60,7 +60,7 @@ Save it to your conatracts directory:
   $ nano contracts Ownable.sol
 
 
-Inheritence & Imports
+Inheritance & Imports
 ---------------------
 
 Create the new improved ``Donator3``:
@@ -91,7 +91,7 @@ is used for an import of a file in the same directory.
         require(msg.sender.send(this.balance));
           }
 
-The ``onlyOwner`` modifier was *not* defined in ``Donator3``, but it is inhereted,
+The ``onlyOwner`` modifier was *not* defined in ``Donator3``, but it is inherited,
 and thus can be used in the subclass.
 
 Your contracts directory should look as follows:
@@ -119,13 +119,13 @@ Compile the project:
   - contracts/Greeter.sol:Greeter
   - contracts/Ownable.sol:Ownable
 
-Compilation works, ``solc`` successfuly found ``Ownable.sol`` and imported it.
+Compilation works, ``solc`` successfully found ``Ownable.sol`` and imported it.
 
 Testing the Subclass Contract
 -----------------------------
 
-The test is similar to a regular contract test. All the parents' memebers are inherited and available for testing
-(if a parent member was overidden, use ``super`` to access the parent member)
+The test is similar to a regular contract test. All the parents' members are inherited and available for testing
+(if a parent member was overridden, use ``super`` to access the parent member)
 
 Add a test:
 
@@ -171,7 +171,7 @@ The test should look as follows:
 
 The test is similar to the previous tests. Py.test and the Populus plugin provide
 a ``chain`` fixture, as an argument to the test function which is a handle to the ``tester`` ephemeral chain.
-``Donator3`` is deployed, and the test function gets a contract object to ``doantor3``.
+``Donator3`` is deployed, and the test function gets a contract object to ``donator3``.
 
 Then the test creates a second account, ``non_owner``, unlocks it, and send to this account 1 Ether to pay for the gas.
 Next, send 42 Ether to the contract.
@@ -291,7 +291,7 @@ The test should fail:
 Yes. ``donator3.call().owner`` is wrong. Confusing. Reminder: ``owner`` should be accessed as a *function*,
 and *not* as a property, The compiler builds these functions for every public state variable.
 
-Fix every occurence of ``call().owner`` to ``call().owner()``. E.g., into:
+Fix every occurrence of ``call().owner`` to ``call().owner()``. E.g., into:
 
 .. code-block:: python
 
@@ -381,12 +381,12 @@ Run the test:
 
 Ok, all the inherited members passed: The ``Ownable`` constructor that sets ``owner`` ran when you deployed
 it's subclass, ``Donator3``. The parent modifier ``onlyOwner`` works as a modifier to a subclass function,
-and the ``transferOwnership`` parent's funcion can be called by clients via the subclass interface.
+and the ``transferOwnership`` parent's function can be called by clients via the subclass interface.
 
 .. note::
 
   If you will deploy ``Donator3`` to a local chain, say ``horton``, and look at the ``registrar.json``, you
-  will not see an entry for ``Ownable``. The reason is that although Solidity has a full complex multiple inheritence
+  will not see an entry for ``Ownable``. The reason is that although Solidity has a full complex multiple inheritance
   model (and ``super``), the final result is once contract. Solidity just copies the inherited code to this contract.
 
 
@@ -396,4 +396,4 @@ Interim Summary
 * You used an open sourced contract
 * You imported one contract to another
 * You added an ownership control to a contract
-* You used inheritence and tested it
+* You used inheritance and tested it

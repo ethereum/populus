@@ -10,8 +10,8 @@ Well, time to get out some of the donations, for a good cause!
 Available Balance
 -----------------
 
-First, we will check the balanc. The balance of an Ethereum account
-is saved as a blockchain status for an *address*, wether that address has a contract or not.
+First, we will check the balance. The balance of an Ethereum account
+is saved as a blockchain status for an *address*, whether that address has a contract or not.
 
 In addition to the "official" balance,
 the contract manages a ``total_donations`` state variable that should be the same.
@@ -99,7 +99,7 @@ It's OK. Neither do we.
 
 
 The contract has **no** method to *withdraw* the Ether. If you, as the contract author, don't implement a way to withdraw funds
-or send them to another account, there is **no built in way to release the money**.  The Ether is stucked on the contract
+or send them to another account, there is **no built in way to release the money**.  The Ether is stuck on the contract
 balance forever. As far as the blockchain is concerned, those 113 Ether will remain in the balance of the ``Donator``
 address, and you will not be able to use them.
 
@@ -116,9 +116,9 @@ the ``Donator`` will just continue to hold these 113 Ether. In other words, they
 .. note::
 
     The blockchain "state" is not a physical property of nature. The state is a consensus
-    among the majority of the nodes on the blockchain. If, theoreticaly, all the nodes decide to wipe out an account
+    among the majority of the nodes on the blockchain. If, theoretically, all the nodes decide to wipe out an account
     balance, they can do it. A single node can't, but the entire network can. It's  unlikely to happen, but it's
-    a theoretical possiblility you should be aware of. It happend once, after the DAO hack, where all the nodes
+    a theoretical possibility you should be aware of. It happened once, after the DAO hack, where all the nodes
     agreed on a *hard fork*, a forced update of the blockchain state, which reverted the hack.
     See `a good discussion of the issue on Quartz <https://qz.com/730004/everything-you-need-to-know-about-the-ethereum-hard-fork/>`_.
 
@@ -129,7 +129,7 @@ Withdraw Funds from a Contract, Take 2
 --------------------------------------
 
 Don't sweat those lost Ether. After all, what are 113 dummy Ethers out of a billion something Ether
-in your local ``horton`` chain. With the ``horton`` chain, you can absolutly afford it. And if it will
+in your local ``horton`` chain. With the ``horton`` chain, you can absolutely afford it. And if it will
 prevent you from loosing real Ether on ``mainent`` in the future, then the cost/utility ratio of this lesson is excellent. Wish we could
 pay for more lessons with dummy Ether, if we were asked (but nobody is asking).
 
@@ -165,7 +165,7 @@ The send is enclosed in a ``require`` clause, so if something failed everything 
 .. warning::
 
     This is a very naive way to handle money, only for the sake of demonstration.
-    In the next chapter we will limit the withdrwal only to the contract owner.
+    In the next chapter we will limit the withdrawal only to the contract owner.
     Usually contracts keep track of beneficiaries and the money they are allowed
     to withdraw.
 
@@ -369,7 +369,7 @@ Open a Python shell and create a new account:
 
 To withdraw money, the withdrawing account must send a transaction.
 If successful, this transaction will change the state of the blockchain: the contract's account sends Ether,
-another account recieves it.
+another account receives it.
 
 The ``'from'`` key of the transaction will be this *new_account*, the withdrawer. Type:
 

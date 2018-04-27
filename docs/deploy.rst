@@ -101,7 +101,7 @@ Example (``deploy_testnet.py``):
     from web3 import Web3
 
 
-    def check_succesful_tx(web3: Web3, txid: str, timeout=180) -> dict:
+    def check_successful_tx(web3: Web3, txid: str, timeout=180) -> dict:
         """See if transaction went through (Solidity code did not throw).
 
         :return: Transaction receipt
@@ -144,14 +144,14 @@ Example (``deploy_testnet.py``):
             # Deploy crowdsale, open since 1970
             txhash = Crowdsale.deploy(transaction={"from": beneficiary}, args=[beneficiary, multisig_address, 1])
             print("Deploying crowdsale, tx hash is", txhash)
-            receipt = check_succesful_tx(web3, txhash)
+            receipt = check_successful_tx(web3, txhash)
             crowdsale_address = receipt["contractAddress"]
             print("Crowdsale contract address is", crowdsale_address)
 
             # Deploy token
             txhash = Token.deploy(transaction={"from": beneficiary}, args=[beneficiary])
             print("Deploying token, tx hash is", txhash)
-            receipt = check_succesful_tx(web3, txhash)
+            receipt = check_successful_tx(web3, txhash)
             token_address = receipt["contractAddress"]
             print("Token contract address is", token_address)
 
@@ -160,7 +160,7 @@ Example (``deploy_testnet.py``):
             crowdsale = Crowdsale(address=crowdsale_address)
             token = Token(address=token_address)
             txhash = crowdsale.transact({"from": beneficiary}).setToken(token_address)
-            check_succesful_tx(web3, txhash)
+            check_successful_tx(web3, txhash)
 
             # Do some contract reads to see everything looks ok
             print("Token total supply is", token.call().totalSupply())

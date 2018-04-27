@@ -23,7 +23,7 @@ def get_observer_for_platform(platform):
         return WindowsAPIObserver
     else:
         raise ValueError(
-            "Unsupported platfom '{0}'.  Must be one of 'win32', 'cgwin', "
+            "Unsupported platform '{0}'.  Must be one of 'win32', 'cgwin', "
             "'linux*', 'darwin'"
         )
 

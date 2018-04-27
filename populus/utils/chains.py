@@ -20,8 +20,8 @@ BASE_BLOCKCHAIN_STORAGE_DIR = "./chains"
 
 @normpath
 def get_base_blockchain_storage_dir(project_dir):
-    base_blochcain_storage_dir = os.path.join(project_dir, BASE_BLOCKCHAIN_STORAGE_DIR)
-    return base_blochcain_storage_dir
+    base_blockchain_storage_dir = os.path.join(project_dir, BASE_BLOCKCHAIN_STORAGE_DIR)
+    return base_blockchain_storage_dir
 
 
 BLOCK_OR_TRANSACTION_HASH_REGEX = "^(?:0x)?[a-zA-Z0-9]{64}$"

@@ -6,12 +6,12 @@ Part 6: Contract Instance on a Local Chain
 Deploy to a Local Chain
 -----------------------
 
-So far we worked with the ``tester`` chain, which is ephimeral: it runs only on memory, reset in each test,
+So far we worked with the ``tester`` chain, which is ephemeral: it runs only on memory, reset in each test,
 and nothing is saved after it's done.
 
-The easiest *persisten* chain to start with, is a private local chain. It runs on your machine, saved to hard drive,
+The easiest *persistent* chain to start with, is a private local chain. It runs on your machine, saved to hard drive,
 for persistency, and fast to respond. Yet it keeps the same Ethereum protocol, so everything that works locally
-should work on ``testnet`` and ``mainnet``. See :ref:`runing_local_blockchain`
+should work on ``testnet`` and ``mainnet``. See :ref:`running_local_blockchain`
 
 You already have ``horton``, a local chain, which you set when you started the project.
 
@@ -81,7 +81,7 @@ run script, ``run_chain.sh``.
 The same account also gets an allocation of (dummy) Ether
 in the first block of the ``horton`` local chain, and this is why we can use ``--no-wait-for-sync``.
 Otherwise, if your account get money from a transaction in a far (far away) block, that
-was not synced yet localy, geth thinks that you don't have the funds for gas, and refuses to
+was not synced yet locally, geth thinks that you don't have the funds for gas, and refuses to
 deploy until you sync.
 
 .. note::
@@ -120,8 +120,8 @@ The script should look as follows:
     else:
         print("Deploy Transaction {tx}".format(tx=deploy_tx_hash))
 
-It starts by initiating a Populus ``Project``. The Project is the enrty point
-to the Populus API, where you can get all the relevant resources programatically.
+It starts by initiating a Populus ``Project``. The Project is the entry point
+to the Populus API, where you can get all the relevant resources programmatically.
 
 .. note::
 
@@ -137,7 +137,7 @@ The next line gets the ``horton`` chain object:
 Using ``get_chain``, the Populus Project object has access to any chain that is defined in the project's configuration file,
 ``project.json``, and the user-scope configuration file, ``~/.popuplus/config.json``. Go ahead
 and take a look at the ``chains`` key in those files. Populus' config files are in JSON: not so pretty to the Pythonic
-developer habbits, but for blockchain development it safer to use non programmble, static, external files (and hey, you got
+developer habits, but for blockchain development it safer to use non programmable, static, external files (and hey, you got
 to admit that Populus saves you form quite a lot javascript).
 
 
@@ -283,7 +283,7 @@ missed it too.
 
 .. code-block:: shell
 
-    $ nano contracts/Greete.sol
+    $ nano contracts/Greeter.sol
 
 Edit the contract file:
 
@@ -298,7 +298,7 @@ Deploy to ``horton``, after you make sure the chain runs:
     $ populus deploy --chain horton Greeter --no-wait-for-sync
 
 
-You should see the usuall deployment log, and in a few seconds the contract creation transaction is picked and mined:
+You should see the usual deployment log, and in a few seconds the contract creation transaction is picked and mined:
 
 .. code-block:: shell
 
@@ -528,5 +528,5 @@ Interim Summary
 
 * You deployed a persistent contract instance to a local chain
 * You interacted with the ``Project`` object, which is the entry point to the Populus API
-* You deployed the same Solidity source file on two seprated local chains, ``horton`` and ``morty``
+* You deployed the same Solidity source file on two separated local chains, ``horton`` and ``morty``
 * Deployments are saved in the the ``registrar``

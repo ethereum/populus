@@ -82,7 +82,7 @@ def test_compiling_with_abstract_contract(project):
 
 @load_contract_fixture('Abstract.sol')
 @load_contract_fixture('UsesAbstract.sol')
-def test_compiling_with_abstract_contract_inhereted(project):
+def test_compiling_with_abstract_contract_inherited(project):
     _, compiled_contracts = compile_project_contracts(project)
 
     assert 'Abstract' in compiled_contracts

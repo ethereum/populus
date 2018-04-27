@@ -214,7 +214,7 @@ with  ``address.call``, and (b) when just send just Ether, in a transaction that
 .. note::
 
     If a contract has a fallback function,
-    any transaction or sending of ether to an address with code will result in it's code being invoked.
+    any transaction or sending of ether to an address with code will result in its code being invoked.
 
 **Payable**:
 ``function donate(uint usd_rate) public payable nonZeroValue {...}`` and ``function () payable {...}`` use the *payable*

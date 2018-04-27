@@ -15,7 +15,7 @@ to the blockchain.
 
 One of the nice things about Ethereum is the *protocol*, a protocol which specifies how to run a blockchain.
 Theoretically, you can use this exact protocol to run your own blockchain, which is private and totally
-seprated from the mainnet Ethereum blockchain and it's nodes.
+seprated from the mainnet Ethereum blockchain and its nodes.
 
 Although the private Ether you will mint in this private blockchain are not worth a lot in the outside world
 (but who knows?), such private, local blockchain is a great tool for development. It simulates

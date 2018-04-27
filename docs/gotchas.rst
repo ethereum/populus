@@ -15,7 +15,7 @@ There is a price for each action the EVM takes on behalf of your contract. Try t
 E.g., suppose you want to calculate the average donation in a contract that collects money and counts donations.
 The contract should only provide the total donations, and the number of donations, then calculate the average in the client code.
 
-[2] Everything the contract **stores** in it's persistent storage costs money, the gas.
+[2] Everything the contract **stores** in its persistent storage costs money, the gas.
 Try to minimise storage only to what absulutly positively is required for the contract to run. Data like derived calculations,
 caching, aggregates etc, should be handled on the client.
 
@@ -56,10 +56,10 @@ The only option to verify is to get the Solidity source that the author of the c
 recompile the Source *with the same compiler version the contract on the blockchain was compiled*, and verify that this compilation
 matches the bytecode on the blockchain.
 
-[13] Never **send Eth** to a contract unless you absolutely positively trust it's author, or you verified the bytecode against a source compilation
+[13] Never **send Eth** to a contract unless you absolutely positively trust its author, or you verified the bytecode against a source compilation
 yourself.
 
-[14] Never **call** a contract, never call a function of a contract, unless you absolutely positively trust it's author, or you verified the bytecode against a source compilation
+[14] Never **call** a contract, never call a function of a contract, unless you absolutely positively trust its author, or you verified the bytecode against a source compilation
 yourself.
 
 [15] If you loose the ABI, you will not be able to call the contract other than the fallback function. The situation is very similar
@@ -89,7 +89,7 @@ and you will not have to transfer execution control to another account.
 
 [20] Contracts are **stateful**. Once you send money to a contract, it's there. You can't reinstall, or redeploy
 (or restart, or patch, or fix a bug, or git pull... you get the idea).
-If you didn't provide a mechanism to withdraw the funds in the first place, it's lost. If you want to update the source
+If you didn't provide a mechanism to withdraw the funds in the first place, they're lost. If you want to update the source
 of a deployed contract, you can't.
 If you want to deploy a new version and didn't provide a mechanism to send the money to the new version,
 you are stuck with the old one.
@@ -142,7 +142,7 @@ Eth you need** for these actions.
 
 [34] Anybody who has the **private key** can drain the account funds, no questions asked.
 
-[35] Anybody who has the **wallet encrypted file and it's password** can drain the account funds, no questions asked.
+[35] Anybody who has the **wallet encrypted file and its password** can drain the account funds, no questions asked.
 
 [36] If you use a password file to unlock the account, make sure the file is well protected with the **right permissions**.
 
@@ -205,20 +205,21 @@ don't need ``this`` (*this* is kinda bonus, no?)
 the compiler does not copy to the derived contracts. Otherwise, from within a contract, ``private`` is the same as ``internal``.
 
 [56] ``external`` is available only for functions. ``public``, ``internal`` and ``private`` are available for both functions
-and state variables. The **contract's interface** is built from it's ``external`` and ``public`` memebers.
+and state variables. The **contract's interface** is built from its ``external`` and ``public``
+members.
 
 [57] The compiler will **automatically** generate an accessor ("get" function) for the ``public`` state variables.
 
 [58] ``now`` is the time stamp of the **current block**
 
-[59] **Ethereum units** ``wei``, ``finney``, ``szabo`` or ``ether`` are reserved words, and can be used in experessions and literals.
+[59] **Ethereum units** ``wei``, ``finney``, ``szabo`` or ``ether`` are reserved words, and can be used in expressions and literals.
 
-[60] **Time units** ``seconds``, ``minutes``, ``hours``, ``days``, ``weeks`` and ``years``, are reserved words, and can be used in experessions and literals.
+[60] **Time units** ``seconds``, ``minutes``, ``hours``, ``days``, ``weeks`` and ``years``, are reserved words, and can be used in expressions and literals.
 
 [61] There is **no type conversion from non-boolean** to boolean types. ``if (1) { ... }`` is not valid Solidity.
 
 [62] The ``msg``, ``block`` and ``tx`` variables always exist in the **global namespace**, and you can use
-them and their members without any prior decleration or assignment
+them and their members without any prior declaration or assignment
 
 
 Nice! You got here.

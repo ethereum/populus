@@ -72,7 +72,7 @@ We can interact with a contract instance via the Python shell as well. We will d
 for the sake of demostration. During the regular development process, Populus does all that
 for you.
 
-To get a handle to the ``Donator`` instance on ``horton`` we need (a) it's **address**, where the bytecode sits,
+To get a handle to the ``Donator`` instance on ``horton`` we need (a) its **address**, where the bytecode sits,
 and (b) the **ABI** ,application binary interface, the detailed description of the functions and arguments
 of the contract interface. With the ABI the EVM knows how to call the compiled
 bytecode.
@@ -107,7 +107,7 @@ The :ref:`populus_registrar` is where Populus holds the deployment details:
     }
 
 It's hard to tell which blockchain is ``horton``. Populus encodes a blockchain signature
-by the *hash* of it's block 0.  We only see that ``Donator`` is deployed on two blockchains.
+by the *hash* of its block 0.  We only see that ``Donator`` is deployed on two blockchains.
 
 But since ``Greeter`` was deployed only on ``horton``,
 the blockchain with two deployments is ``horton``, and the other one is ``morty``.
@@ -401,7 +401,7 @@ Quit the ``horton`` chain and start a new Python shell.
 Mainnet with Infura.io
 ''''''''''''''''''''''
 
-As an endpoint we will use ``infura.io``. It's a publicly avaialble blockchain node, by Consensys, which is great
+As an endpoint we will use ``infura.io``. It's a publicly available blockchain node, by Consensys, which is great
 for read-only queries.
 
 Infura is a remote node, so you will use the ``HTTPProvider``.
@@ -463,7 +463,7 @@ This transaction details:
 
     If you will use block number 4402735, you should get **exactly** the same output as shown above.
     This is the ``mainent``, which is synced accross all the nodes, and every node will return the same info.
-    The local chains ``horton`` or ``morty`` run a private instance, so every machine produces it's own blocks and hashes.
+    The local chains ``horton`` or ``morty`` run a private instance, so every machine produces its own blocks and hashes.
     Not so on the global, real blockchain, where all the nodes are synced
     (which is the crux of the whole blockchain idea).
 
@@ -526,7 +526,7 @@ Interim Summary
 * Query the blockchain info on local geth nodes.
 
 Although Populus does a lot of work behind the scenes, it's recommended to have a good grasp of Web3.
-See the the `Web3.py documentation <https://web3py.readthedocs.io/en/latest/>`_ and
+See the `Web3.py documentation <https://web3py.readthedocs.io/en/latest/>`_ and
 the `full list of `web3.js JavaScript API <https://web3js.readthedocs.io/en/1.0/>`_. Most of the javascript
 API have a Python equivalent.
 

@@ -533,7 +533,7 @@ This is the first release of populus that should be considered stable.
 - Significant refactor to the ``Contract`` and related ``Function`` and ``Event``
   objects used to interact with contracts.
 - Major improvements to robustness of ``geth_node`` fixture.
-- ``deployed_contracts`` testing fixture no longer provides it's own rpc server.
+- ``deployed_contracts`` testing fixture no longer provides its own rpc server.
   Now you must either provide you own, or use the ``geth_node`` or ``rpc_server``
   alongside it in tests.
 - ``geth_node`` fixture now writes to a logfile located in

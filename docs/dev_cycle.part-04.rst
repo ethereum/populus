@@ -55,7 +55,7 @@ object with Python methods. This object is stored in the ``donator`` variable.
 Reminder: we have two options to interact with a contract on the blockchain, *transactions* and *calls*.
 With Populus, you initiate a transaction with ``transact``, and a call with ``call``:
 
-* *Transactions*: Send a transaction, run the contract code, transfer funds, and *change* the state of the contract and it's balance. This change will be permanent, and synced to the entire blockchain.
+* *Transactions*: Send a transaction, run the contract code, transfer funds, and *change* the state of the contract and its balance. This change will be permanent, and synced to the entire blockchain.
 
 * *Call*: Behaves exactly as a transaction, but once done, everything is revert and no state is changed. A call is kinda "dry-run", and an efficient way to query the current state without expensive gas costs.
 
@@ -88,7 +88,7 @@ Populus gives you a *Python* interface to a bytecode contract. Nice, no?
 **[6] Asserts**: We expect the ``donationsTotal`` to be ``500 + 650 = 1150``, the ``donationsCount`` is 2,
 and the ``defaultUsdRate`` to match the last update, 380.
 
-The test gets the varaibles with ``call``, and should update instanrly because it's a local ``tester`` chain. On a distributed
+The test gets the variables with ``call``, and should update instantly because it's a local ``tester`` chain. On a distributed
 blockchain it will take sometime until the transactions are mined and actually change the state.
 
 Run the test:

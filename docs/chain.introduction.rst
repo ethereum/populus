@@ -32,7 +32,7 @@ Populus can run two types of transient chains.
 * ``temp``
 
     Runs a blockchain backed by the go-ethereum ``geth`` client.  This chain
-    will use a temporary directory for it's chain data which will be cleaned up
+    will use a temporary directory for its chain data which will be cleaned up
     and removed when the chain shuts down.
 
 
@@ -41,7 +41,7 @@ Local Chains
 
 Local chains can be setup within your ``populus.json`` file.  Each local chain
 stores its chain data in the ``populus.Project.blockchains_dir``
-and persists it's data between runs.
+and persists its data between runs.
 
 Local chains are backed by the go-ethereum ``geth`` client.
 

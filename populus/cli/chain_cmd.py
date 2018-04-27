@@ -44,7 +44,7 @@ def chain_new(ctx, chain_name):
 @click.pass_context
 def chain_reset(ctx, chain_name, confirm):
     """
-    Reset a chain removing all chain data and resetting it to it's genesis
+    Reset a chain removing all chain data and resetting it to its genesis
     state..
     """
     project = ctx.obj['PROJECT']

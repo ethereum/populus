@@ -199,7 +199,7 @@ primary sections, ``web3``, ``chain``, and ``contracts`` configuration settings.
     }
 
 The above chain configuration sets up a new local private chain within your
-project.  The chain above would set it's data directory to
+project.  The chain above would set its data directory to
 ``<project-dir>/chains/my-chain/``.
 
 To simplify configuration of chains you can use the ``ChainConfig`` object.
@@ -263,7 +263,7 @@ Available options are:
 
 * ``populus.chain.LocalGethChain``
 
-    A geth backed chain which will setup it's own data directory in the
+    A geth backed chain which will setup its own data directory in the
     ``./chains`` directory in the root of your project.
 
 * ``populus.chain.TemporaryGethChain``

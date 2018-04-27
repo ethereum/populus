@@ -15,7 +15,7 @@ and the *ABI* (application binary interface).
 
 Reminder: the contract instance is compiled, a bytecode, so the EVM
 (ethereum virtual machine) needs the ABI in order to call this bytecode. The ABI (application binary interface)
-is essentially a JSON file with detailed description of the functions and their arguments, which tells how to call them. It's part of the
+is essentially a JSON file with a detailed description of the functions and their arguments, which says how to call them. It's part of the
 compiler output.
 
 Populus does not ask you for the address and the ABI of the projects' contracts:  it already
@@ -292,7 +292,7 @@ and mine it:
     INFO [10-20|01:49:05] Commit new mining work                   number=3920 txs=1 uncles=0 elapsed=735.282µs
     INFO [10-20|01:49:21] Successfully sealed new block
 
-Check the persistancy of the instance again. Stop the ``horton`` chain, press Ctrl+C in it's terminal window,
+Check the persistancy of the instance again. Stop the ``horton`` chain, press Ctrl+C in its terminal window,
 and then re-run it with ``chains/horton/./run_chain.sh``.
 
 Run the script again:
@@ -306,7 +306,7 @@ Run the script again:
     Total of 7.00 Ether accepted in 3 donations, an avergage of 2,333,333,333,333,333,504.00 Wei per donation.
     Thank you for the donation! Tx hash 0x8a595949271f17a2a57a8b2f37f409fb1ee809c209bcbcf513706afdee922323
 
-Oh, it's so easy to donate when a genesis block allocates you billion something.
+Oh, it's so easy to donate when a genesis block allocates you billions of something.
 
 The contract instance *is* persistent, and the state is saved. With ``horton``, a local chain, it's saved to your hard-drive.
 On ``mainent`` and ``testnet``, to the entire blockchain nodes network.

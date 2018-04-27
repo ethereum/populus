@@ -6,10 +6,9 @@ Part 3: First Test
 Tests and Chains
 ----------------
 
-For testing, we will use the ``tester`` chain again. It's very convenient blockchain for tests,
-because it resets on each run and the state is saved only in memory and cleared after each run.
-In a way, this is an idea similar to running tests against a DB,
-where you create an ad-hoc temporary DB for the tests.
+For testing, we will use the ``tester`` chain again. It's a very convenient blockchain for tests,
+because the state is saved only in memory and cleared after each run.  In a way, this is an idea
+similar to running tests against a DB, where you create an ad-hoc temporary DB for the tests.
 
 You will run Populus tests with ``py.test``, which was installed when you installed Populus.
 
@@ -22,7 +21,7 @@ Add a test file:
 .. note::
 
     py.test collects all the tests that follow
-    it's `naming conventions <https://pytest.readthedocs.io/en/reorganize-docs/new-docs/user/naming_conventions.html>`_.
+    its `naming conventions <https://pytest.readthedocs.io/en/reorganize-docs/new-docs/user/naming_conventions.html>`_.
 
 We don't need the Greeter example for this project, so delete it:
 
@@ -39,7 +38,7 @@ What is a Contract?
 -------------------
 
 The simplest definition of a contract is a compiled program that runs on the Ethereum blockchain.
-It's a bytecode of instructions, saved on the blockchain, that a blockchain node can run.
+It's a set of bytecode instructions, saved on the blockchain, that a blockchain node can run.
 The node gives this program a sandbox, a closed environment, to execute.
 
 In a way, if the blockchain is the OS, then a contract is an executable that runs by the OS.
@@ -112,8 +111,8 @@ Another bonus is the ``chain`` object, provided as an argument at ``def test_def
 that corresponds to a running blockchain, the ``tester`` blockchain.
 Reminder: The ``tester`` chain is ephemeral, saved only in memory, and will reset on every test run.
 
-The ``chain`` argument is a py.test *fixture*: in py.test world it's a special argument that the test function can accept.
-You don't have to declare or assign it, it's just ready and available for your test.
+The ``chain`` argument is a py.test *fixture*: in py.test world, it's a special argument that the test function can accept.
+You don't have to declare or assign it. It's just ready and available for your test.
 
 The Populus testing fixtures comes from the Populus py.test plug-in, which prepares for you several useful fixtures: ``project``,
 ``chain``, ``provider``, ``registrar`` and ``web3``. All these fixtures are part of the Populus API. See :ref:`populus_testing`

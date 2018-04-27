@@ -235,7 +235,7 @@ For compiling outside the project directory use:
 
 The build/contracts.json file contains a lot of information that the Solidity compiler produced.
 This is required to deploy and work with the contract. Some important info is the
-application binary interface (ABI) of the contract, which will allow to call it's functions after it's compiled,
+application binary interface (ABI) of the contract, which will allow to call its functions after it's compiled,
 and the bytecode required to deploy the contract, and the bytecode that will run once the contract sits on the blockchain.
 
 Testing your contract

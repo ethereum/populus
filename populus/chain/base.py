@@ -91,7 +91,7 @@ class BaseChain(object):
 
     @property
     def wait(self):
-        return Wait(self.web3)
+        return Wait(self.web3, **self.config.wait_settings)
 
     #
     # +--------------+

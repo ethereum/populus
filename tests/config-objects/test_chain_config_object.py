@@ -1,5 +1,7 @@
-import pytest
+import random
+import sys
 
+import pytest
 from web3.providers.ipc import IPCProvider
 
 from populus.chain import (
@@ -107,3 +109,28 @@ def test_is_external_property():
     assert chain_config.is_external is False
     chain_config.set_chain_class('external')
     assert chain_config.is_external is True
+
+
+def test_chain_wait_settings(project):
+    timeout = random.randint(0, sys.maxsize)
+    poll_interval = random.randint(0, sys.maxsize)
+    chain_config = ChainConfig({
+        'chain': {
+            'class': 'populus.chain.external.ExternalChain',
+            'wait': {
+                'settings': {
+                    'timeout': timeout,
+                    'poll_interval': poll_interval
+                }
+            }
+        },
+        'web3': {
+            'provider': {
+                'class': 'web3.providers.ipc.IPCProvider'
+            }
+        },
+    })
+    chain = chain_config.get_chain(project, 'test-chain')
+    with chain as running_chain:
+        assert running_chain.wait.timeout == timeout
+        assert running_chain.wait.poll_interval == poll_interval

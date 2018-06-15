@@ -53,6 +53,10 @@ class ChainConfig(Config):
         else:
             raise ValueError(UNSUPPORTED_CHAIN_IDENTIFIER_MSG.format(chain_identifier))
 
+    @property
+    def wait_settings(self):
+        return self.get('chain.wait.settings', {})
+
     def get_web3_config(self):
         return self.get_config('web3', config_class=Web3Config)
 

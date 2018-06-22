@@ -1,3 +1,3 @@
-import Queue as queue  # noqa: #401
-import ConfigParser as configparser # noqa: #401
-import urlparse as parse  # noqa: F401
+import queue as queue  # noqa: #401
+import configparser as configparser # noqa: #401
+import urllib.parse as parse  # noqa: F401

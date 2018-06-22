@@ -141,7 +141,7 @@ class Config(object):
     def __bool__(self):
         return bool(self._wrapped)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.__bool__()
 
     def __len__(self):

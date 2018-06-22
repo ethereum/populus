@@ -9,7 +9,7 @@ ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 
 if sys.version_info.major == 2:
-    iseq = lambda s: map(ord, s)  # noqa: E731
+    iseq = lambda s: list(map(ord, s))  # noqa: E731
     bseq = lambda s: ''.join(map(chr, s))  # noqa: E731
     buffer = lambda s: s  # noqa: E731
 else:

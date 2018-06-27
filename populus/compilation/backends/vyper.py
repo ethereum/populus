@@ -12,7 +12,7 @@ class VyperBackend(BaseCompilerBackend):
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
         try:
-            from .vyper import compiler
+            from vyper import compiler
         except ImportError:
             raise ImportError(
                 'vyper needs to be installed to use VyperBackend' +

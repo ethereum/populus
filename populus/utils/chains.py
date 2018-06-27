@@ -1,5 +1,6 @@
 import os
 import re
+from urllib import parse
 
 from eth_utils import (
     add_0x_prefix,
@@ -9,9 +10,6 @@ from eth_utils import (
 
 from .filesystem import (
     normpath,
-)
-from .six import (
-    parse,
 )
 
 

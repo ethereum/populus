@@ -15,6 +15,7 @@ setup(
     include_package_data=True,
     py_modules=['populus'],
     setup_requires=['setuptools-markdown'],
+    python_requires='>=3.4,<4',
     install_requires=[
         "anyconfig>=0.7.0",
         "click>=6.6",

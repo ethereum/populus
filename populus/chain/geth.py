@@ -47,7 +47,7 @@ class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
             chain_name,
             'stderr',
         )
-        super(LoggedDevGethProcess, self).__init__(
+        super().__init__(
             overrides=overrides,
             chain_name=chain_name,
             base_dir=blockchains_dir,
@@ -58,14 +58,14 @@ class LoggedDevGethProcess(LoggingMixin, DevGethProcess):
 
 class LoggedTestnetGethProccess(LoggingMixin, TestnetGethProcess):
     def __init__(self, project_dir, geth_kwargs):
-        super(LoggedTestnetGethProccess, self).__init__(
+        super().__init__(
             geth_kwargs=geth_kwargs,
         )
 
 
 class LoggedMainnetGethProcess(LoggingMixin, LiveGethProcess):
     def __init__(self, project_dir, geth_kwargs):
-        super(LoggedMainnetGethProcess, self).__init__(
+        super().__init__(
             geth_kwargs=geth_kwargs,
             stdout_logfile_path=get_geth_logfile_path(
                 project_dir,
@@ -94,7 +94,7 @@ class BaseGethChain(BaseChain):
         )
         warnings.warn(warn_msg, DeprecationWarning)
         warnings.resetwarnings()
-        super(BaseGethChain, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def initialize_chain(self):
         # context manager shenanigans
@@ -102,7 +102,7 @@ class BaseGethChain(BaseChain):
         self.geth = self.get_geth_process_instance()
 
     def get_web3_config(self):
-        base_config = super(BaseGethChain, self).get_web3_config()
+        base_config = super().get_web3_config()
         config = copy.deepcopy(base_config)
         if not config.get('provider.settings'):
             if issubclass(base_config.provider_class, IPCProvider):

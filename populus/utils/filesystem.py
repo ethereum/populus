@@ -4,7 +4,6 @@ import fnmatch
 import functools
 import os
 import shutil
-import sys
 import tempfile as _tempfile
 
 from eth_utils import (
@@ -12,10 +11,6 @@ from eth_utils import (
     is_string,
     is_list_like,
 )
-
-
-if sys.version_info.major == 2:
-    FileNotFoundError = OSError
 
 
 def ensure_path_exists(dir_path):

@@ -1,10 +1,8 @@
 import os
+import queue
 
 from populus.utils.filesystem import (
     ensure_file_exists,
-)
-from populus.utils.six import (
-    queue,
 )
 from populus.utils.observers import DirWatcher
 

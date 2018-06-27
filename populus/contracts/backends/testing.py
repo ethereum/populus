@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from populus.utils.contracts import (
     is_test_contract,

@@ -116,7 +116,7 @@ class SolcStandardJSONBackend(BaseCompilerBackend):
                 "versions >=0.4.11.  The SolcCombinedJSONBackend should be used "
                 "for all versions <=0.4.8"
             )
-        super(SolcStandardJSONBackend, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
         self.logger.debug("Import remappings: %s", import_remappings)

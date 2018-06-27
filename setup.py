@@ -15,6 +15,7 @@ setup(
     include_package_data=True,
     py_modules=['populus'],
     setup_requires=['setuptools-markdown'],
+    python_requires='>=3.4,<4',
     install_requires=[
         "anyconfig>=0.7.0",
         "click>=6.6",
@@ -46,10 +47,9 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 )

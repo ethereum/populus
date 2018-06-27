@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import pprint
 import warnings
@@ -143,7 +143,7 @@ class SolcCombinedJSONBackend(BaseCompilerBackend):
         warn_msg = 'Support for solc <0.4.11 will be dropped in the next populus release'
         warnings.warn(warn_msg, DeprecationWarning)
 
-        super(SolcCombinedJSONBackend, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
         self.logger.debug("Import remappings: %s", import_remappings)

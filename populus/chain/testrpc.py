@@ -14,7 +14,7 @@ class TestRPCChain(BaseChain):
     rpc_port = None
 
     def get_web3_config(self):
-        base_config = super(TestRPCChain, self).get_web3_config()
+        base_config = super().get_web3_config()
         config = copy.deepcopy(base_config)
         config['provider.settings.port'] = self.rpc_port
         return config

@@ -7,6 +7,7 @@ import os
 from populus.utils.compile import (
     validate_compiled_contracts,
     post_process_compiled_contracts,
+    process_import_remappings,
 )
 from populus.utils.functional import (
     get_duplicates,
@@ -49,7 +50,9 @@ def compile_project_contracts(project):
 
     base_compiled_contracts = compiler_backend.get_compiled_contracts(
         source_file_paths=all_source_paths,
-        import_remappings=project.config.get('compilation.import_remappings'),
+        import_remappings=process_import_remappings(
+            project.config.get('compilation.import_remappings')
+        ),
     )
     compiled_contracts = post_process_compiled_contracts(base_compiled_contracts)
     validate_compiled_contracts(compiled_contracts)

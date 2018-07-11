@@ -71,6 +71,20 @@ def get_compiled_contracts_asset_path(build_asset_dir):
     )
     return compiled_contracts_asset_path
 
+def normalize_import_remapping(import_remapping):
+    source_path, _, rest = import_remapping.rpartition(':')
+    import_path, _, remapped_path = rest.partition('=')
+    abs_remapped_path = os.path.abspath(remapped_path)
+    if import_remapping.endswith(os.path.sep):
+        abs_remapped_path += os.path.sep
+    if source_path:
+        return '{0}:{1}={2}'.format(source_path, import_path, abs_remapped_path)
+    else:
+        return '{0}={1}'.format(import_path, abs_remapped_path)
+
+def process_import_remappings(import_remappings):
+    return [normalize_import_remapping(remapping) for remapping in import_remappings]
+
 
 def write_compiled_sources(compiled_contracts_asset_path, compiled_sources):
     logger = logging.getLogger('populus.compilation.write_compiled_sources')

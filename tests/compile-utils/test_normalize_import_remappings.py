@@ -20,14 +20,4 @@ expected_paths = {
 
 final_paths = process_import_remappings(beginning_paths)
 
-def print_paths(list, name):
-    print(name)
-    for path in list:
-        print('\t ' + path)
-
-print_paths(beginning_paths, 'beginning_paths')
-print_paths(expected_paths, 'expected_paths')
-print_paths(final_paths, 'final_paths')
-
-
 assert set(final_paths) == set(expected_paths)

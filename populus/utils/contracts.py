@@ -1,6 +1,10 @@
 import itertools
 import re
 
+from cytoolz import (
+    compose,
+    curry,
+)
 from eth_utils import (
     remove_0x_prefix,
     to_dict,
@@ -150,7 +154,7 @@ EQ_OPCODE = "14"
 EMBEDDED_ADDRESS_REGEX = (
     '^' +
     PUSH20_OPCODE +
-    "[0-9a-z]{40}" +
+    "[0-9a-f]{40}" +
     ADDRESS_OPCODE +
     EQ_OPCODE
 )
@@ -171,13 +175,13 @@ def compare_bytecode(left, right):
     unprefixed_left = remove_0x_prefix(left)
     unprefixed_right = remove_0x_prefix(right)
 
-    norm_left, norm_right = unprefixed_left, unprefixed_right
-    for regex, replacement in [
-        (EMBEDDED_SWARM_HASH_REGEX, SWARM_HASH_REPLACEMENT),
-        (EMBEDDED_ADDRESS_REGEX, ADDRESS_REPLACEMENT)
-    ]:
-        norm_left = re.sub(regex, replacement, norm_left)
-        norm_right = re.sub(regex, replacement, norm_right)
+    sub = curry(re.sub)
+    norm_pipeline = compose(
+        sub(EMBEDDED_SWARM_HASH_REGEX, SWARM_HASH_REPLACEMENT),
+        sub(EMBEDDED_ADDRESS_REGEX, ADDRESS_REPLACEMENT)
+    )
+    norm_left = norm_pipeline(unprefixed_left)
+    norm_right = norm_pipeline(unprefixed_right)
 
     if len(norm_left) != len(unprefixed_left) or len(norm_right) != len(unprefixed_right):
         raise ValueError(

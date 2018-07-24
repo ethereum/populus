@@ -9,7 +9,7 @@ from populus.utils.testing import load_contract_fixture
 
 @load_contract_fixture('Math.sol')
 def test_deploying_contract_with_successful_deploy(project):
-    chain = project.get_chain('testrpc')
+    chain = project.get_chain('tester')
 
     exports = []
 
@@ -41,7 +41,7 @@ def test_deploying_contract_with_successful_deploy(project):
 
 @load_contract_fixture('Math.sol')
 def test_with_successful_deploy_sans_runtime_bytecode(project):
-    chain = project.get_chain('testrpc')
+    chain = project.get_chain('tester')
 
     exports = []
 
@@ -75,7 +75,7 @@ def test_with_successful_deploy_sans_runtime_bytecode(project):
 
 @load_contract_fixture('ThrowsInConstructor.sol')
 def test_deploying_contract_with_error_during_deploy(project):
-    chain = project.get_chain('testrpc')
+    chain = project.get_chain('tester')
 
     exports = []
 
@@ -106,7 +106,7 @@ def test_deploying_contract_with_error_during_deploy_sanity_check(project):
     Just a sanity check that the `Thrower` contract can be successfully
     deployed.
     """
-    chain = project.get_chain('testrpc')
+    chain = project.get_chain('tester')
 
     exports = []
 

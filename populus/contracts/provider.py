@@ -119,11 +119,9 @@ class Provider(object):
             self.get_or_deploy_contract(dependency_name, deploy_transaction=deploy_transaction)
 
         ContractFactory = self.get_contract_factory(contract_identifier)
-        deploy_transaction_hash = ContractFactory.deploy(
-            transaction=deploy_transaction,
-            args=deploy_args,
-            kwargs=deploy_kwargs,
-        )
+        deploy_transaction_hash = ContractFactory.constructor(
+            *deploy_args or tuple(), **deploy_kwargs or dict()
+        ).transact(deploy_transaction)
         contract_address = Wait(self.web3).for_contract_address(deploy_transaction_hash)
         self.registrar.set_contract_address(contract_identifier, contract_address)
 

@@ -6,7 +6,10 @@ from cytoolz.functoolz import (
 )
 
 from eth_utils import (
-    coerce_args_to_text,
+    to_text,
+    is_string,
+    is_dict,
+    is_list_like,
     remove_0x_prefix,
     add_0x_prefix,
     to_tuple,
@@ -15,6 +18,30 @@ from eth_utils import (
 from .formatting import (
     remove_dunderscore_prefix,
 )
+
+import  functools
+
+
+def force_obj_to_text(obj):
+    if is_string(obj):
+        return to_text(obj)
+    elif is_dict(obj):
+        return {
+            k: force_obj_to_text(v) for k, v in obj.items()
+        }
+    elif is_list_like(obj):
+        return type(obj)(force_obj_to_text(v) for v in obj)
+    else:
+        return obj
+
+
+def coerce_args_to_text(fn):
+    @functools.wraps(fn)
+    def inner(*args, **kwargs):
+        text_args = force_obj_to_text(args)
+        text_kwargs = force_obj_to_text(kwargs)
+        return fn(*text_args, **text_kwargs)
+    return inner
 
 
 DEPENDENCY_RE = (

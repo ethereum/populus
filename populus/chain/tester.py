@@ -10,12 +10,11 @@ class TesterChain(BaseChain):
 
         self._running = True
 
-        self.rpc_methods = self.web3.providers[0].rpc_methods
-
-        self.rpc_methods.full_reset()
-        self.rpc_methods.rpc_configure('eth_mining', False)
-        self.rpc_methods.rpc_configure('eth_protocolVersion', '0x3f')
-        self.rpc_methods.rpc_configure('net_version', 1)
-        self.rpc_methods.evm_mine()
+        self.eth_tester = self.web3.providers[0].ethereum_tester
+        self.eth_tester.reset_to_genesis()
+        # self.eth_tester.disable_auto_mine_transactions()
+        # self.rpc_methods.rpc_configure('eth_protocolVersion', '0x3f')
+        # self.rpc_methods.rpc_configure('net_version', 1)
+        # self.eth_tester.mine_blocks()
 
         return self

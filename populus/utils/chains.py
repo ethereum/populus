@@ -65,7 +65,7 @@ def create_transaction_uri(chain_id, transaction_hash):
 
 
 def get_chain_id(web3):
-    return web3.eth.getBlock(0)['hash']
+    return web3.eth.getBlock(0)['hash'].hex()
 
 
 def get_chain_definition(web3, min_block_number=0, num_confirmations=0):
@@ -81,7 +81,7 @@ def get_chain_definition(web3, min_block_number=0, num_confirmations=0):
         raise ValueError("Cannot generate chain definition matching given constraints")
 
     block_for_definition = web3.eth.getBlock(target_block_number)
-    block_hash_for_definition = block_for_definition['hash']
+    block_hash_for_definition = block_for_definition['hash'].hex()
 
     return create_block_uri(chain_id, block_hash_for_definition)
 
@@ -131,7 +131,7 @@ def is_BIP122_transaction_uri(value):
 def check_if_chain_matches_chain_uri(web3, blockchain_uri):
     chain_id, resource_type, resource_hash = parse_BIP122_uri(blockchain_uri)
     genesis_block = web3.eth.getBlock('earliest')
-    if genesis_block['hash'] != chain_id:
+    if genesis_block['hash'].hex() != chain_id:
         return False
 
     if resource_type == BLOCK:
@@ -141,7 +141,7 @@ def check_if_chain_matches_chain_uri(web3, blockchain_uri):
     else:
         raise ValueError("Unsupported resource type: {0}".format(resource_type))
 
-    if resource['hash'] == resource_hash:
+    if resource['hash'].hex() == resource_hash:
         return True
     else:
         return False

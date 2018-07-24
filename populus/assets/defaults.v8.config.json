@@ -114,7 +114,7 @@
       },
       "web3": {
         "provider": {
-          "class": "web3.providers.tester.EthereumTesterProvider"
+          "class": "web3.providers.eth_tester.EthereumTesterProvider"
         }
       }
     },
@@ -251,7 +251,7 @@
         "default_account": "0x0000000000000000000000000000000000000001"
       },
       "provider": {
-        "class": "web3.providers.rpc.HTTPProvider",
+        "class": "web3.providers.HTTPProvider",
         "settings": {
           "endpoint_uri": "https://mainnet.infura.io"
         }
@@ -262,7 +262,7 @@
         "default_account": "0x0000000000000000000000000000000000000001"
       },
       "provider": {
-        "class": "web3.providers.rpc.HTTPProvider",
+        "class": "web3.providers.HTTPProvider",
         "settings": {
           "endpoint_uri": "https://ropsten.infura.io"
         }
@@ -275,7 +275,7 @@
     },
     "Tester": {
       "provider": {
-        "class": "web3.providers.tester.EthereumTesterProvider"
+        "class": "web3.providers.eth_tester.EthereumTesterProvider"
       }
     }
   }

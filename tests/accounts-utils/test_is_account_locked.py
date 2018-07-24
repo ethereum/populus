@@ -1,7 +1,7 @@
 import pytest
 
 from eth_utils import (
-    force_text,
+    to_text,
 )
 
 from geth.accounts import create_new_account
@@ -15,7 +15,7 @@ from populus.utils.accounts import (
 def test_with_locked_account(project):
     temp_chain = project.get_chain('temp')
 
-    account = force_text(
+    account = to_text(
         create_new_account(temp_chain.geth.data_dir, b'a-test-password')
     )
 

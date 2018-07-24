@@ -6,7 +6,7 @@ from cytoolz import (
 )
 
 from eth_utils import (
-    force_text,
+    to_text,
     is_dict,
     sort_return,
     to_dict,
@@ -51,7 +51,7 @@ def get_nested_key(config, key):
         raise KeyError(
             "Error getting nested key {0} from {1}: {2}".format(
                 key,
-                force_text(repr(config)),
+                to_text(repr(config)),
                 str(err),
             )
         )

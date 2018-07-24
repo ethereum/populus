@@ -1,13 +1,13 @@
 from eth_utils import (
-    force_bytes,
-    force_text,
+    to_bytes,
+    to_text,
     is_bytes,
 )
 
 
 def is_prefixed(value, prefix):
     return value.startswith(
-        force_bytes(prefix) if is_bytes(value) else force_text(prefix)
+        to_bytes(prefix) if is_bytes(value) else to_text(prefix)
     )
 
 

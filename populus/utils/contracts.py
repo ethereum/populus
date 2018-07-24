@@ -6,8 +6,12 @@ from eth_utils import (
     to_dict,
 )
 
+
 from .filesystem import (
     is_under_path,
+)
+from .hexadecimal import (
+    hexbytes_to_hexstr,
 )
 from .string import (
     normalize_class_name,
@@ -174,6 +178,8 @@ def verify_contract_bytecode(web3, expected_bytecode, address):
     """
     from populus.contracts.exceptions import BytecodeMismatch
 
+    expected_bytecode = hexbytes_to_hexstr(expected_bytecode)
+
     # Check that the contract has bytecode
     if expected_bytecode in EMPTY_BYTECODE_VALUES:
         raise ValueError(
@@ -181,7 +187,7 @@ def verify_contract_bytecode(web3, expected_bytecode, address):
             "runtime bytecode"
         )
 
-    chain_bytecode = web3.eth.getCode(address)
+    chain_bytecode = hexbytes_to_hexstr(web3.eth.getCode(address))
 
     if chain_bytecode in EMPTY_BYTECODE_VALUES:
         raise BytecodeMismatch(
@@ -197,3 +203,4 @@ def verify_contract_bytecode(web3, expected_bytecode, address):
                 expected_bytecode,
             )
         )
+

@@ -37,7 +37,9 @@ class Registrar(object):
         """
         Retrieve a contract address from the registrar
         """
-        found_contract_address_meta = self._get_contract_addresses_from_backends(contract_identifier)
+        found_contract_address_meta = self._get_contract_addresses_from_backends(
+            contract_identifier
+        )
         if not found_contract_address_meta:
             raise NoKnownAddress("No known address for contract")
         if len(found_contract_address_meta) == 1:

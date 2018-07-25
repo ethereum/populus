@@ -92,7 +92,10 @@ class JSONFileBackend(BaseContractBackend):
         for chain_definition in matching_chain_definitions:
             chain_deployments = registrar_data['deployments'][chain_definition]
             if instance_identifier in chain_deployments:
-                data = valmap(lambda x: x['timestamp'], chain_deployments[instance_identifier]).items()
+                data = valmap(
+                    lambda x: x['timestamp'],
+                    chain_deployments[instance_identifier]
+                ).items()
                 yield tuple(map(lambda args: ContractMeta(*args), data))
 
     #

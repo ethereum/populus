@@ -8,6 +8,7 @@ from eth_utils import (
     is_integer,
 )
 
+from populus.utils.hexadecimal import hexbytes_to_hexstr
 from .filesystem import (
     normpath,
 )
@@ -65,7 +66,7 @@ def create_transaction_uri(chain_id, transaction_hash):
 
 
 def get_chain_id(web3):
-    return web3.eth.getBlock(0)['hash'].hex()
+    return hexbytes_to_hexstr(web3.eth.getBlock(0)['hash'])
 
 
 def get_chain_definition(web3, min_block_number=0, num_confirmations=0):
@@ -81,7 +82,7 @@ def get_chain_definition(web3, min_block_number=0, num_confirmations=0):
         raise ValueError("Cannot generate chain definition matching given constraints")
 
     block_for_definition = web3.eth.getBlock(target_block_number)
-    block_hash_for_definition = block_for_definition['hash'].hex()
+    block_hash_for_definition = hexbytes_to_hexstr(block_for_definition['hash'])
 
     return create_block_uri(chain_id, block_hash_for_definition)
 
@@ -131,7 +132,7 @@ def is_BIP122_transaction_uri(value):
 def check_if_chain_matches_chain_uri(web3, blockchain_uri):
     chain_id, resource_type, resource_hash = parse_BIP122_uri(blockchain_uri)
     genesis_block = web3.eth.getBlock('earliest')
-    if genesis_block['hash'].hex() != chain_id:
+    if hexbytes_to_hexstr(genesis_block['hash']) != chain_id:
         return False
 
     if resource_type == BLOCK:
@@ -141,7 +142,7 @@ def check_if_chain_matches_chain_uri(web3, blockchain_uri):
     else:
         raise ValueError("Unsupported resource type: {0}".format(resource_type))
 
-    if resource['hash'].hex() == resource_hash:
+    if hexbytes_to_hexstr(resource['hash']) == resource_hash:
         return True
     else:
         return False

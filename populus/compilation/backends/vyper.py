@@ -1,6 +1,7 @@
 import pprint
 import os
 
+from populus.utils.hexadecimal import hexbytes_to_hexstr
 from .base import (
     BaseCompilerBackend,
 )
@@ -26,8 +27,10 @@ class VyperBackend(BaseCompilerBackend):
         for contract_path in source_file_paths:
             code = open(contract_path).read()
             abi = compiler.mk_full_signature(code)
-            bytecode = '0x' + compiler.compile(code).hex()
-            bytecode_runtime = '0x' + compiler.compile(code, bytecode_runtime=True).hex()
+            bytecode = '0x' + hexbytes_to_hexstr(compiler.compile(code))
+            bytecode_runtime = '0x' + hexbytes_to_hexstr(
+                compiler.compile(code, bytecode_runtime=True)
+            )
             compiled_contracts.append({
                 'name': os.path.basename(contract_path).split('.')[0],
                 'abi': abi,

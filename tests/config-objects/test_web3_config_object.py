@@ -42,7 +42,10 @@ def test_provider_property_with_settings():
         ('rpc', 'web3.providers.rpc.HTTPProvider'),
         ('web3.providers.ipc.IPCProvider', 'web3.providers.ipc.IPCProvider'),
         ('web3.providers.rpc.HTTPProvider', 'web3.providers.rpc.HTTPProvider'),
-        ('web3.providers.websocket.WebsocketProvider', 'web3.providers.websocket.WebsocketProvider'),
+        (
+            'web3.providers.websocket.WebsocketProvider',
+            'web3.providers.websocket.WebsocketProvider'
+        ),
         (IPCProvider, 'web3.providers.ipc.IPCProvider'),
         (HTTPProvider, 'web3.providers.rpc.HTTPProvider'),
     ),

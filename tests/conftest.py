@@ -310,7 +310,7 @@ def _loaded_test_contract_fixtures(project_dir, request):
 def math(chain):
     Math = chain.provider.get_contract_factory('Math')
 
-    math_address = chain.wait.for_contract_address(Math.deploy())
+    math_address = chain.wait.for_contract_address(Math.constructor().transact())
 
     return Math(address=math_address)
 
@@ -319,7 +319,7 @@ def math(chain):
 def library_13(chain):
     Library13 = chain.provider.get_contract_factory('Library13')
 
-    library_13_address = chain.wait.for_contract_address(Library13.deploy())
+    library_13_address = chain.wait.for_contract_address(Library13.constructor().transact())
 
     return Library13(address=library_13_address)
 
@@ -339,6 +339,6 @@ def multiply_13(chain, library_13):
         bytecode=bytecode,
     )
 
-    multiply_13_address = chain.wait.for_contract_address(LinkedMultiply13.deploy())
+    multiply_13_address = chain.wait.for_contract_address(LinkedMultiply13.constructor().transact())
 
     return LinkedMultiply13(address=multiply_13_address)

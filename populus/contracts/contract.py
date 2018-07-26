@@ -40,8 +40,6 @@ CONTRACT_FACTORY_FIELDS = {
     'abi',
     'asm',
     'ast',
-    'bytecode',
-    'bytecode_runtime',
     'clone_bin',
     'dev_doc',
     'interface',

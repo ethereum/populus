@@ -17,13 +17,9 @@ from .external import (  # noqa: F401
 from .tester import (  # noqa: F401
     TesterChain,
 )
-from .testrpc import (  # noqa: F401
-    TestRPCChain,
-)
 
 
 __all__ = (
-    "TestRPCChain",
     "TesterChain",
     "BaseGethChain",
     "TemporaryGethChain",

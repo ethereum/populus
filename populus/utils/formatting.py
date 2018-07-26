@@ -7,7 +7,7 @@ from eth_utils import (
 
 def is_prefixed(value, prefix):
     return value.startswith(
-        to_bytes(prefix) if is_bytes(value) else to_text(prefix)
+        to_bytes(prefix) if is_bytes(value) else to_text(text=prefix)
     )
 
 

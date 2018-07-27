@@ -1,5 +1,6 @@
 from collections import (
     defaultdict,
+    namedtuple,
 )
 
 from cytoolz import (
@@ -11,10 +12,7 @@ from populus.utils.epoch import (
 )
 
 
-class ContractMeta:
-    def __init__(self, address, timestmap):
-        self.address = address
-        self.timestamp = timestmap
+ContractMeta = namedtuple('ContractMeta', ['address', 'timestamp'])
 
 
 class TimeStampedRegistrar:
@@ -33,5 +31,5 @@ class TimeStampedRegistrar:
 
     def __getitem__(self, name):
         val = self.data.__getitem__(name)
-        data = valmap(lambda x: x['timestamp'], val).items()
-        return map(lambda args: self.output_cls(*args), data)
+        data = valmap(lambda x: x['timestamp'], val)
+        return map(lambda args: self.output_cls(*args), data.items())

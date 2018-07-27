@@ -203,4 +203,3 @@ def verify_contract_bytecode(web3, expected_bytecode, address):
                 expected_bytecode,
             )
         )
-

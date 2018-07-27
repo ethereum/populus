@@ -11,38 +11,36 @@ env:
 matrix:
   include:
     # Solc 0.4.13
-    - python: "3.4"
-      env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
     - python: "3.5"
       env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    - python: "3.6"
+      env: SOLC_VERSION=v0.4.13 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py36"
     # Solc 0.4.14
-    - python: "3.4"
-      env: SOLC_VERSION=v0.4.14 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
     - python: "3.5"
       env: SOLC_VERSION=v0.4.14 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    - python: "3.6"
+      env: SOLC_VERSION=v0.4.14 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py36"
     # Solc 0.4.15
-    - python: "3.4"
-      env: SOLC_VERSION=v0.4.15 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
+    - python: "3.5"
+      env: SOLC_VERSION=v0.4.15 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
     - python: "3.5"
       env: SOLC_VERSION=v0.4.15 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
     # Solc 0.4.16
-    - python: "3.4"
-      env: SOLC_VERSION=v0.4.16 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
     - python: "3.5"
       env: SOLC_VERSION=v0.4.16 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    - python: "3.6"
+      env: SOLC_VERSION=v0.4.16 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py36"
     # Solc 0.4.17
-    - python: "3.4"
-      env: SOLC_VERSION=v0.4.17 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
     - python: "3.5"
       env: SOLC_VERSION=v0.4.17 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    - python: "3.6"
+      env: SOLC_VERSION=v0.4.17 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py36"
     # Solc 0.4.18
-    - python: "3.4"
-      env: SOLC_VERSION=v0.4.18 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
     - python: "3.5"
       env: SOLC_VERSION=v0.4.18 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
+    - python: "3.6"
+      env: SOLC_VERSION=v0.4.17 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py36"
     # Solc 0.4.19
-    - python: "3.4"
-      env: SOLC_VERSION=v0.4.19 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py34"
     - python: "3.5"
       env: SOLC_VERSION=v0.4.19 GETH_VERSION=v1.6.6 TOX_POSARGS="-e py35"
     - python: "3.6"

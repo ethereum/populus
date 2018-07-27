@@ -39,8 +39,12 @@ def upgrade_v7_to_v8(v7_config):
 
     v7_default_config = Config(v7_default)
 
+    v8_default = load_default_config(version=V8)
+    v8_default_config = Config(v8_default)
+    v8_default_config.unref()
+
     if v7_config == v7_default_config:
-        return {}
+        return v8_default_config
 
     # V8 just removes all of the `$ref` values from the config.
     upgraded_v7_config = Config(copy.deepcopy(v7_config))

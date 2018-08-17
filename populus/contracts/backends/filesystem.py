@@ -3,12 +3,22 @@
 import json
 import os
 
+from cytoolz import (
+    valmap,
+)
 from eth_utils import (
+    flatten_return,
     to_tuple,
 )
 
 from populus.contracts.exceptions import (
     NoKnownAddress,
+)
+from populus.utils.datastructures import (
+    ContractMeta,
+)
+from populus.utils.epoch import (
+    epoc_time_now,
 )
 
 from populus.utils.mappings import (
@@ -52,7 +62,7 @@ class JSONFileBackend(BaseContractBackend):
         set_nested_key(
             registrar_data,
             'deployments.{0}.{1}'.format(chain_definition, instance_identifier),
-            address,
+            {address: {'timestamp': epoc_time_now()}},
         )
 
         with open(self.registrar_path, 'w') as registrar_file:
@@ -64,7 +74,7 @@ class JSONFileBackend(BaseContractBackend):
                 separators=(',', ': '),
             )
 
-    @to_tuple
+    @flatten_return
     def get_contract_addresses(self, instance_identifier):
         registrar_data = self.registrar_data
         matching_chain_definitions = get_matching_chain_definitions(
@@ -79,11 +89,14 @@ class JSONFileBackend(BaseContractBackend):
         )
         if not identifier_exists:
             raise NoKnownAddress("No known address for '{0}'".format(instance_identifier))
-
         for chain_definition in matching_chain_definitions:
             chain_deployments = registrar_data['deployments'][chain_definition]
             if instance_identifier in chain_deployments:
-                yield chain_deployments[instance_identifier]
+                data = valmap(
+                    lambda x: x['timestamp'],
+                    chain_deployments[instance_identifier]
+                )
+                yield tuple(map(lambda args: ContractMeta(*args), data.items()))
 
     #
     # Private API

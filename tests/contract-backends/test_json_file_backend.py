@@ -50,7 +50,9 @@ def test_setting_an_address(project_dir, backend, web3):
 
     contract_addresses = chain_definitions[chain_definition]
     assert 'some-key' in contract_addresses
-    assert contract_addresses['some-key'] == '0xd3cda913deb6f67967b99d67acdfa1712c293601'
+    assert list(
+        contract_addresses['some-key'].keys()
+    )[0] == '0xd3cda913deb6f67967b99d67acdfa1712c293601'
 
 
 def test_getting_an_address(project_dir, backend, web3):
@@ -58,7 +60,7 @@ def test_getting_an_address(project_dir, backend, web3):
 
     addresses = backend.get_contract_addresses('some-key')
     assert len(addresses) == 1
-    address = addresses[0]
+    address = addresses[0].address
     assert address == '0xd3cda913deb6f67967b99d67acdfa1712c293601'
 
 

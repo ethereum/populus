@@ -1,4 +1,3 @@
-import functools
 import itertools
 
 from eth_utils import (
@@ -8,19 +7,11 @@ from eth_utils import (
 
 from populus.utils.contracts import (
     EMPTY_BYTECODE_VALUES,
-    find_deploy_block_number,
 )
 
 from .exceptions import (
     NoKnownAddress,
 )
-
-
-def address_sort_fn(web3, address):
-    try:
-        return find_deploy_block_number(web3, address)
-    except ValueError:
-        return -1
 
 
 class Registrar(object):
@@ -46,32 +37,34 @@ class Registrar(object):
         """
         Retrieve a contract address from the registrar
         """
-        found_addresses = self._get_contract_addresses_from_backends(contract_identifier)
-        if not found_addresses:
+        found_contract_address_meta = self._get_contract_addresses_from_backends(
+            contract_identifier
+        )
+        if not found_contract_address_meta:
             raise NoKnownAddress("No known address for contract")
-
-        if len(found_addresses) == 1:
-            return found_addresses
+        if len(found_contract_address_meta) == 1:
+            return found_contract_address_meta[0].address,
 
         addresses_with_code = tuple(set(
-            address
-            for address
-            in found_addresses
-            if self.web3.eth.getCode(address) not in EMPTY_BYTECODE_VALUES
+            contract_address_meta.address
+            for contract_address_meta
+            in found_contract_address_meta
+            if self.web3.eth.getCode(contract_address_meta.address) not in EMPTY_BYTECODE_VALUES
         ))
         empty_addresses = tuple(set(
-            address
-            for address
-            in found_addresses
-            if self.web3.eth.getCode(address) in EMPTY_BYTECODE_VALUES
+            contract_address_meta.address
+            for contract_address_meta
+            in found_contract_address_meta
+            if self.web3.eth.getCode(contract_address_meta.address) in EMPTY_BYTECODE_VALUES
         ))
 
         if len(addresses_with_code) > 1:
-            sorted_addresses = tuple(sorted(
-                addresses_with_code,
-                key=functools.partial(address_sort_fn, self.web3),
+            sorted_addresses_meta = sorted(
+                found_contract_address_meta,
+                key=lambda x: getattr(x, 'timestamp'),
                 reverse=True,
-            ))
+            )
+            sorted_addresses = map(lambda x: x.address, sorted_addresses_meta)
         else:
             sorted_addresses = addresses_with_code
 

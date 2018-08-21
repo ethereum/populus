@@ -1,6 +1,6 @@
 # Vyper Greeter Contract
 
-greeting: bytes <= 20
+greeting: bytes[20]
 
 
 @public
@@ -9,10 +9,10 @@ def __init__():
 
 
 @public
-def setGreeting(x: bytes <= 20):
+def setGreeting(x: bytes[20]):
     self.greeting = x
 
 
 @public
-def greet() -> bytes <= 40:
+def greet() -> bytes[40]:
     return self.greeting

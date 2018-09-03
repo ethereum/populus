@@ -6,6 +6,7 @@
 # Packages
 *.egg
 *.egg-info
+.eggs/
 dist
 build
 eggs
@@ -74,3 +75,7 @@ genesis.json
 
 # pytest
 .cache/
+.pytest_cache
+
+# Editors
+.idea/

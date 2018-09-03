@@ -19,6 +19,7 @@ from populus.config.versions import (
     V6,
     V7,
     V8,
+    V9,
     KNOWN_LEGACY_VERSIONS,
     KNOWN_USER_VERSIONS,
     LATEST_VERSION,
@@ -36,6 +37,10 @@ from .v7 import (
     upgrade_v7_to_v8,
     upgrade_user_v7_to_v8,
 )
+from .v8 import (
+    upgrade_v8_to_v9,
+    upgrade_user_v8_to_v9,
+)
 
 
 UPGRADE_SEQUENCE = {
@@ -46,6 +51,7 @@ UPGRADE_SEQUENCE = {
     V5: V6,
     V6: V7,
     V7: V8,
+    V8: V9,
 }
 
 UPGRADE_FUNCTIONS = {
@@ -56,11 +62,13 @@ UPGRADE_FUNCTIONS = {
     V5: upgrade_v5_to_v6,
     V6: upgrade_v6_to_v7,
     V7: upgrade_v7_to_v8,
+    V8: upgrade_v8_to_v9,
 }
 
 USER_UPGRADE_FUNCTIONS = {
     V6: upgrade_user_v6_to_v7,
     V7: upgrade_user_v7_to_v8,
+    V8: upgrade_user_v8_to_v9,
 }
 
 
@@ -114,6 +122,7 @@ def upgrade_config(config, config_context, to_version=LATEST_VERSION):
     upgrade_functions = tuple(
         UPGRADE_FUNCTIONS[version] for version in upgrade_sequence
     )
+
     upgraded_config = pipe(config, *upgrade_functions)
 
     return upgraded_config

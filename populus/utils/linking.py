@@ -6,7 +6,6 @@ from cytoolz.functoolz import (
 )
 
 from eth_utils import (
-    coerce_args_to_text,
     remove_0x_prefix,
     add_0x_prefix,
     to_tuple,
@@ -60,7 +59,6 @@ def remove_dunderscore_wrapper(value):
 
 
 @to_tuple
-@coerce_args_to_text
 def find_placeholder_locations(bytecode):
     """
     Given bytecode, this will return all of the linked references from within

@@ -76,7 +76,7 @@ def link_bytecode_by_name(bytecode, link_references, **link_names_and_values):
         in link_references
     ))
     linked_bytecode = link_fn(bytecode)
-    return linked_bytecode
+    return linked_bytecode.lower()
 
 
 def vyper_installed():

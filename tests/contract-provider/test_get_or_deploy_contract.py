@@ -3,6 +3,7 @@ import pytest
 from populus.contracts.exceptions import (
     UnknownContract,
 )
+from populus.utils.hexadecimal import hexbytes_to_hexstr
 
 
 def test_unknown_contract(chain):
@@ -53,4 +54,4 @@ def test_it_uses_existing_library_dependencies(chain, library_13):
     assert deploy_txn is not None
 
     chain_bytecode = chain.web3.eth.getCode(multiply_13.address)
-    assert library_13.address[2:] in chain_bytecode
+    assert library_13.address[2:].lower() in hexbytes_to_hexstr(chain_bytecode)

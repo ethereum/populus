@@ -3,7 +3,7 @@ import click
 from click.testing import CliRunner
 
 from eth_utils import (
-    force_text,
+    to_text,
 )
 
 from geth.accounts import create_new_account
@@ -23,7 +23,7 @@ def test_request_account_unlock_with_correct_password(project_dir):
     chain = project.get_chain('temp')
 
     # create 3 new accounts
-    account = force_text(
+    account = to_text(
         create_new_account(chain.geth.data_dir, b'a-test-password')
     )
 
@@ -47,7 +47,7 @@ def test_request_account_unlock_with_bad_password(project_dir):
     chain = project.get_chain('temp')
 
     # create 3 new accounts
-    account = force_text(
+    account = to_text(
         create_new_account(chain.geth.data_dir, b'a-test-password')
     )
 

@@ -23,7 +23,6 @@ from populus.utils.cli import (
         ('4\n', '~~ropsten~~'),
         ('5\n', '~~temp~~'),
         ('6\n', '~~tester~~'),
-        ('7\n', '~~testrpc~~'),
         ('local_a\n', '~~local_a~~'),
         ('local_b\n', '~~local_b~~'),
         ('local_c\n', '~~local_c~~'),
@@ -31,7 +30,6 @@ from populus.utils.cli import (
         ('ropsten\n', '~~ropsten~~'),
         ('temp\n', '~~temp~~'),
         ('tester\n', '~~tester~~'),
-        ('testrpc\n', '~~testrpc~~'),
     ),
 )
 def test_cli_select_chain_helper(project_dir, write_project_file, stdin, expected):

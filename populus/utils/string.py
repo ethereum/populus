@@ -1,5 +1,5 @@
 from eth_utils import (
-    force_text,
+    to_text,
 )
 
 
@@ -9,4 +9,4 @@ def normalize_class_name(value):
     * Python 3.4 wants `str`
     * Python 3.5 doesn't care.
     """
-    return force_text(value)
+    return to_text(text=value)

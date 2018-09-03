@@ -95,8 +95,8 @@ class JSONFileBackend(BaseContractBackend):
                 data = valmap(
                     lambda x: x['timestamp'],
                     chain_deployments[instance_identifier]
-                )
-                yield tuple(map(lambda args: ContractMeta(*args), data.items()))
+                ).items()
+                yield tuple(map(lambda args: ContractMeta(*args), data))
 
     #
     # Private API

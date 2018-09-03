@@ -158,11 +158,9 @@ def deploy_contract_and_verify(chain,
     if ContractFactory is None:
         ContractFactory = chain.provider.get_contract_factory(contract_name)
 
-    deploy_txn_hash = ContractFactory.deploy(
-        transaction=deploy_transaction,
-        args=deploy_args,
-        kwargs=deploy_kwargs,
-    )
+    deploy_txn_hash = ContractFactory.constructor(
+        *deploy_args or tuple(), **deploy_kwargs or dict()
+    ).transact(deploy_transaction)
     deploy_txn = web3.eth.getTransaction(deploy_txn_hash)
 
     logger.info("Deploy Transaction Sent: {0}".format(deploy_txn_hash))
@@ -193,7 +191,7 @@ def deploy_contract_and_verify(chain,
     deployed_bytecode = web3.eth.getCode(contract_address)
 
     if ContractFactory.bytecode_runtime:
-        verify_contract_bytecode(web3, ContractFactory.bytecode_runtime, contract_address)
+        verify_contract_bytecode(web3, ContractFactory.bytecode_runtime.hex(), contract_address)
         logger.info("Verified contract bytecode @ {0}".format(contract_address))
     else:
         logger.info(

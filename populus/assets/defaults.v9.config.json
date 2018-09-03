@@ -213,7 +213,7 @@
       }
     }
   },
-  "version": "8",
+  "version": "9",
   "web3": {
     "GethIPC": {
       "provider": {

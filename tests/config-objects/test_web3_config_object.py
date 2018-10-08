@@ -1,3 +1,10 @@
+from pathlib import (
+    Path
+)
+from tempfile import (
+    gettempdir,
+)
+
 import pytest
 
 from web3.providers.ipc import (
@@ -23,16 +30,17 @@ def test_provider_property_without_settings():
 
 
 def test_provider_property_with_settings():
+    tmp_path = Path(gettempdir()).resolve()
     web3_config = Web3Config({
         'provider': {
             'class': 'web3.providers.ipc.IPCProvider',
             'settings': {
-                'ipc_path': '/not/a/real-path'
+                'ipc_path': tmp_path
             },
         },
     })
     assert isinstance(web3_config.provider, IPCProvider)
-    assert web3_config.provider.ipc_path == '/not/a/real-path'
+    assert web3_config.provider.ipc_path == str(tmp_path)
 
 
 @pytest.mark.parametrize(

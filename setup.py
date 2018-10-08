@@ -2,6 +2,21 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
 
+extras_require = {
+    "vyper": ["vyper==0.1.0b1"],
+    "dev": [
+        "tox>=1.8.0",
+        "hypothesis>=3.31.2",
+        "pytest>=3.5.0,<4",
+        "flake8==3.5.0",
+        "bumpversion",
+    ]
+}
+
+extras_require['dev'] = (
+    extras_require['vyper'] +
+    extras_require['dev']
+)
 
 setup(
     name='populus',
@@ -34,6 +49,7 @@ setup(
         "watchdog>=0.8.3",
         "web3>=4.4.0,<5",
     ],
+    extras_require=extras_require,
     license="MIT",
     zip_safe=False,
     entry_points={

@@ -202,6 +202,27 @@ The above chain configuration sets up a new local private chain within your
 project.  The chain above would set it's data directory to
 ``<project-dir>/chains/my-chain/``.
 
+You can pass chain settings in ``settings`` in subkey. In the case
+of geth processes, these are directly mapped to command line arguments.
+
+Below is an example how to make the temporary chain to listen to JSON-RPC.
+
+.. code-block:: javascript
+
+    "temp": {
+      "chain": {
+        "class": "populus.chain.geth.TemporaryGethChain",
+        "settings": {
+          "rpc_port": "8548"
+        }
+        # ...
+      }
+    }
+
+For more information about possible arguments to pass geth see
+`py-geth project <https://github.com/ethereum/py-geth/blob/6584152225da1539c0d378b8284774da40024cc6/geth/wrapper.py#L104>`_
+function ``construct_popen_command()``.
+
 To simplify configuration of chains you can use the ``ChainConfig`` object.
 
 .. code-block:: python

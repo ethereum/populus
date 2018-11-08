@@ -117,7 +117,7 @@ the ``Donator`` will just continue to hold these 113 Ether. In other words, they
 
     The blockchain "state" is not a physical property of nature. The state is a consensus
     among the majority of the nodes on the blockchain. If, theoreticaly, all the nodes decide to wipe out an account
-    balance, they can do it. A single node can't, but the entire network can. It's  unlikely to happen, but it's
+    balance, they can do it. A single node can't, but the entire network can. It's unlikely to happen, but it's
     a theoretical possiblility you should be aware of. It happend once, after the DAO hack, where all the nodes
     agreed on a *hard fork*, a forced update of the blockchain state, which reverted the hack.
     See `a good discussion of the issue on Quartz <https://qz.com/730004/everything-you-need-to-know-about-the-ethereum-hard-fork/>`_.
@@ -157,7 +157,7 @@ Withdraw is handled in one simple function:
             }
 
 Anyone that calls this function will get the entire Ether in the contract to his or her own
-account. The contract sends it's remaining balance, ``this.balance``, to the account address
+account. The contract sends its remaining balance, ``this.balance``, to the account address
 that sent the transaction, ``msg.sender``.
 
 The send is enclosed in a ``require`` clause, so if something failed everything is reverted.
@@ -173,7 +173,7 @@ Re-entry attack
 ''''''''''''''''
 
 When ``Donator2`` will run ``send(this.balance)``, the beneficiary
-contract gets an opportunity to run it's ``fallback`` and get the execution control.
+contract gets an opportunity to run its ``fallback`` and get the execution control.
 In the fallback, it can call ``Donator2`` again before the ``send`` was line was completed, but the money already *sent*.
 This is a *re-entry* attack. To avoid it, any state changes should occur *before* the send.
 
@@ -449,7 +449,7 @@ Unlock the account:
     Again, extremely naive and unsafe way to unlock and use passwords. Use only for development and testing,
     with dummy Ether
 
-The new account should be ready, it's unlocked, and has the funds for the gas.
+The new account should be ready. It's unlocked and has the funds for the gas.
 
 Send the withdraw transaction yet *again*:
 

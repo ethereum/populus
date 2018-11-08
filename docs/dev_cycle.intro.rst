@@ -82,7 +82,7 @@ all the transactions in this blocks are accepted and carried out by all the node
 **Node**: A running instance of the blockchain. The nodes sync to one another. When there are conflicts,
 e.g. if two nodes suggest two different block for the next block, the nodes gets a decision by consensus.
 
-**Consensus**: Miners get rewards when they find a valid block, and a valid block is valid only if it's built on a valid parent block,
+**Consensus**: Miners get rewards when they find a valid block, and a block is valid only if it's built on a valid parent block,
 and *accepted by the majority of nodes on the blockchain*. So miners are incentivised to reject false blocks and false transactions.
 They know that if they work on a false transaction (say a cheat), then there
 is high probability that other nodes will reject it, and their work effort will be lost without rewards.
@@ -121,6 +121,6 @@ the EVM needs the ABI in order to know how to call the bytecode.
 
 **testnet**: An Ethereum blockchain for testing. It behaves exactly as mainnet, but you don't use real Ether to send money and pay for the gas
 
-**Local chain**: A blockchain that runs localy, has it's own blocks, and does not sync to any other blockchain. Useful for development
+**Local chain**: A blockchain that runs localy, has its own blocks, and does not sync to any other blockchain. Useful for development
 and testing
 

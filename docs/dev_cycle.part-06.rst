@@ -21,7 +21,7 @@ Run this chain:
 
     $ chains/horton/./run_chain.sh
 
-And you will see that geth starts to do it's thing:
+And you will see that geth starts to do its thing:
 
 .. code-block:: shell
 
@@ -152,7 +152,7 @@ The next line should be familiar to you by now:
      donator, deploy_tx_hash = chain.provider.get_or_deploy_contract('Donator')
 
 
-Populus does it's magic:
+Populus does its magic:
 
 **New**: If the contract was *never* deployed to a blockchain, compile the source,
 deploy to the chain, create a Web3 contract Python object instance, which points to the blockchain bytecode, and returns this Python object.
@@ -255,7 +255,7 @@ This is how you project directory should look:
 
 
 The *registrar* is loaded with ``get_or_deploy_contract``, and if Populus finds an entry for a contract, it knows
-that the contract already deployed, and it's address on this chain.
+that the contract already deployed, and its address on this chain.
 
 Take a look at the registrar:
 
@@ -276,7 +276,7 @@ The registrar saves a deployment reference with unique "signature" of the blockc
 The signature is the first block hash, which is obviously unique. It appears after the ``blockchain://`` part. Then the hash
 of the latest block at the time of deployment after, ``block``.
 The registrar uses a special URI structure designed for blockchains, which is built from a resource name (blockchain, block, etc)
-and it's hash. See `BIP122 URI <https://github.com/bitcoin/bips/blob/master/bip-0122.mediawiki>`_
+and its hash. See `BIP122 URI <https://github.com/bitcoin/bips/blob/master/bip-0122.mediawiki>`_
 
 To have *another* contract deployed to the *same* chain, we will greet our good ol' friend, the Greeter. Yes, you probably
 missed it too.

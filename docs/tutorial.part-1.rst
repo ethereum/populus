@@ -111,7 +111,7 @@ installed when you installed populus.
 You should see something akin to the output above with three passing tests.
 
 Behind the scenes, populus uses a pytest plugin that creates a populus project object, and then provide this object,
-(and it's derived objects), to the test functions via a pytest fixture.
+(and its derived objects), to the test functions via a pytest fixture.
 
 Thus, tests run for a specific project.
 

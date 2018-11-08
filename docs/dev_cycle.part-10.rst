@@ -11,7 +11,7 @@ from other contracts, which is especially useful when you a more generic functio
 a basic core contract, a functionality you want to inherit and re-use in another, more specific use case.
 
 
-A Contract that is Controlled by it's Owner
+A Contract that is Controlled by its Owner
 -------------------------------------------
 
 
@@ -380,7 +380,7 @@ Run the test:
 
 
 Ok, all the inherited members passed: The ``Ownable`` constructor that sets ``owner`` ran when you deployed
-it's subclass, ``Donator3``. The parent modifier ``onlyOwner`` works as a modifier to a subclass function,
+its subclass, ``Donator3``. The parent modifier ``onlyOwner`` works as a modifier to a subclass function,
 and the ``transferOwnership`` parent's funcion can be called by clients via the subclass interface.
 
 .. note::

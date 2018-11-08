@@ -80,7 +80,7 @@ def expand_placeholder(placeholder, full_names):
     double underscore prefix and suffix.  This embedded string is referred to
     as the `placeholder`
 
-    This expands `placeholder` to it's full reference name or raise a value
+    This expands `placeholder` to its full reference name or raise a value
     error if it is unable to find an appropriate expansion.
     """
     if placeholder in full_names:
@@ -150,7 +150,7 @@ def insert_link_value(bytecode, value, offset):
 
 def link_bytecode(bytecode, link_reference_values):
     """
-    Given the bytecode for a contract, and it's dependencies in the form of
+    Given the bytecode for a contract, and its dependencies in the form of
     {contract_name: address} this function returns the bytecode with all of the
     link references replaced with the dependency addresses.
 

@@ -4,6 +4,7 @@ import os
 from .base import (
     BaseCompilerBackend,
 )
+from collections import OrderedDict
 
 
 class VyperBackend(BaseCompilerBackend):
@@ -12,30 +13,28 @@ class VyperBackend(BaseCompilerBackend):
 
     def get_compiled_contracts(self, source_file_paths, import_remappings):
         try:
-            from vyper import compiler
+            from vyper import compile_codes
         except ImportError:
             raise ImportError(
-                'vyper needs to be installed to use VyperBackend' +
+                'vyper > 0.1.0b5 needs to be installed to use VyperBackend' +
                 ' as compiler backend.'
             )
 
         self.logger.debug("Compiler Settings: %s", pprint.pformat(self.compiler_settings))
 
-        compiled_contracts = []
-
+        codes = OrderedDict()
         for contract_path in source_file_paths:
-            code = open(contract_path).read()
-            abi = compiler.mk_full_signature(code)
-            bytecode = '0x' + compiler.compile(code).hex()
-            bytecode_runtime = '0x' + compiler.compile(code, bytecode_runtime=True).hex()
-            compiled_contracts.append({
+            codes[contract_path] = open(contract_path).read()
+
+        compiled_contracts = []
+        formats = ['abi', 'bytecode', 'bytecode_runtime']
+        for contract_path, c_info in compile_codes(codes, formats, 'dict').items():
+            c_info.update({
                 'name': os.path.basename(contract_path).split('.')[0],
-                'abi': abi,
-                'bytecode': bytecode,
-                'bytecode_runtime': bytecode_runtime,
                 'linkrefs': [],
                 'linkrefs_runtime': [],
                 'source_path': contract_path
             })
+            compiled_contracts.append(c_info)
 
         return compiled_contracts

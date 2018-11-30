@@ -14,15 +14,21 @@ Vyper requires Python 3.6 or above.
 Installation
 ------------
 
-To install the compiler:
 
+For vyper relase version use:
+
+.. code-block:: shell
+
+   pip install vyper
+
+For latest vyper development version use:
 
 .. code-block:: shell
 
    pip install https://github.com/ethereum/vyper/archive/master.zip
 
 
-You will see the `vyper` binary is now installed.
+You will see the `vyper` binary is now avialable to use.
 
 
 .. code-block:: shell
